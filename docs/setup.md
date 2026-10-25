@@ -2,18 +2,20 @@
 
 Assumptions are marked **Assume:**. If one is false, fix it before continuing.
 
-## 1. Laptop
+## 1. Host
 
-**Assume:** Linux or macOS, `git`, `make`, **Python ≥ 3.11** on `PATH` as `python3`, internet access to pypi.org and registry.platformio.org.
+**Assume:** Linux (Raspberry Pi 5 / Ubuntu 24.04 or a laptop) with `git`, `make`, **Docker Engine + compose plugin** (and buildx), and **Python ≥ 3.11** as `python3` (still needed for the host tools in this phase). Internet access to pypi.org, Docker Hub and registry.platformio.org.
 
 ```sh
-git clone https://github.com/gvo27/microcontroller && cd microcontroller
-make setup      # creates .venv/ in the repo root, installs platformio, pyserial, esptool
+sudo usermod -aG docker,dialout $USER   # then log out and back in
+git clone https://github.com/gvo27/racecar && cd racecar
+make setup      # checks git/make/docker, creates .venv/, installs deps, builds the firmware image
 make check      # every line must say OK
+make fw-image   # (re)build the firmware toolchain image; setup already ran it once
 ```
 
-**Assume:** all Python runs from `.venv/` (gitignored). The Makefile uses it automatically, so there is no need to activate it.
-Linux only: if `make check` flags serial permission, run `sudo usermod -aG dialout $USER`, then log out and back in.
+**Assume:** host tools run from `.venv/` (gitignored); the Makefile uses it automatically, no need to activate it. Firmware build, flash and monitor run in the `rccar-fw` Docker image; the first `make build` seeds the `rccar-platformio` volume (toolchain cache) from the image. After `make fw-image` changes the toolchain, run `docker volume rm rccar-platformio`.
+If `make check` flags serial permission, re-check the `dialout` group membership above.
 
 ## 2. Wiring (power off)
 
@@ -38,7 +40,7 @@ If it says "move the cable to 'COM'", you are in the left port.
 ## 4. Flash
 
 ```sh
-make flash      # deletes firmware/.pio, builds, uploads over COM
+make flash      # deletes firmware/esp32/.pio, builds and uploads over COM inside Docker (--device PORT)
 ```
 
 If the upload can't connect: hold **BOOT**, tap **RST**, release **BOOT**, then re-run.
@@ -46,7 +48,7 @@ If the upload can't connect: hold **BOOT**, tap **RST**, release **BOOT**, then 
 
 ```sh
 make ping       # firmware answers
-make sync-time  # ESP32 clock = laptop clock (repeat after every reset)
+make sync-time  # ESP32 clock = host clock (repeat after every reset)
 ```
 
 ## 5. Arm the ESC
@@ -74,3 +76,13 @@ make test-throttle   # short forward/reverse; type `yes` (wheels off the ground!
 ## Shutdown
 
 ESC off → unplug USB.
+
+## Optional
+
+```sh
+make monitor    # raw serial monitor in Docker (Ctrl+C to exit)
+make config     # checks .env (cp .env.example .env); rendering arrives in phase 2
+make models     # validates models/manifest.yaml; download not implemented yet
+```
+
+Roadmap: [docker_ros_plan.md](docker_ros_plan.md).

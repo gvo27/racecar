@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Laptop-side CLI for the ESP32-S3 RC car actuator bridge.
 
-Talks the line protocol in firmware/src/main.cpp over the board's "COM"
+Talks the line protocol in firmware/esp32/src/main.cpp over the board's "COM"
 USB-C port (right-hand port, CH343 USB-UART bridge). Tuning comes from tuning.toml at the
 repo root; every session is logged to logs/*.jsonl. Every subcommand is
 wrapped by a Makefile target; run `python tools/rccar.py -h` for the list.

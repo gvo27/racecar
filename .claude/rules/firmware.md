@@ -1,6 +1,6 @@
 ---
 paths:
-  - "firmware/**"
+  - "firmware/esp32/**"
 ---
 
 # Firmware implementation rules (ESP32-S3-N16R8)
@@ -10,7 +10,9 @@ paths:
 - Memory: `board_build.arduino.memory_type = qio_opi` (quad flash, octal PSRAM). Wrong type = boot loop.
 - Compiler is `-std=gnu++11`: no `std::clamp`, no C++14 aggregate init with default member initializers, no `if constexpr`.
 - `ARDUINO_USB_CDC_ON_BOOT=0`: `Serial` = UART0 = CH343 = right-hand USB-C port "COM". Flashing and the host link (laptop now, Pi later) use COM. The left port "USB" (native, GPIO19/20) is reserved as a regulated power input; never use it for comms.
-- Build/flash only via `make build` / `make flash` (both delete `firmware/.pio` first).
+- Build/flash only via `make build` / `make flash` / `make monitor`: they run in docker image `rccar-fw` (`docker/firmware.Dockerfile`, build with `make fw-image`); `build` and `flash` delete `firmware/esp32/.pio` first.
+- No host `pio` needed. Toolchain cache = named volume `rccar-platformio` on `/opt/platformio`. Serial: `--device $(PORT)` + `--group-add <dialout gid>`.
+- CI: `.github/workflows/firmware.yml` runs `make build`, uploads `firmware.bin`.
 
 ## Architecture invariants
 - `controlTask()` (100 Hz default, core 1, high prio) is the ONLY writer of PWM outputs.
@@ -29,7 +31,7 @@ paths:
 - `SAVE` refuses unless center lies between left and right.
 
 ## Pins
-- Single source of truth: `firmware/include/pins.h`; keep the README table identical.
+- Single source of truth: `firmware/esp32/include/pins.h`; keep the README table identical.
 - Left header P1 only. Never use GPIO3/46 (strapping), 35-37 (PSRAM), 19/20 (native USB), 43/44 (COM UART), 0/45 (strapping).
 - Reserved (declared, not configured): BATT_LOW 6, IMU_INT 7, ENC_A/B 15/16, I2C SDA/SCL 8/9, DIST_TRIG/ECHO 10/11. Spare: 12, 13, 14, 17, 18.
 - ESP32 supplies no power to peripherals; sensors use a separate rail with common ground and <=3.3 V signals.
@@ -39,7 +41,7 @@ paths:
 - Reply prefixes: `OK`, `ERR`, `CFG`, `PONG`, `INFO`, `TEL`, `EVT`, `READY`, `SENS`. Host code matches on these prefixes.
 - `D` is never acknowledged (streamed at `send_hz`).
 - Adding or renaming a command or `SET` key requires matching changes in `tools/rccar.py` (`FIRMWARE_KEYS`), `tuning.toml`, and `docs/`.
-- `tuning.toml` layout: `[device]` hand-tuned knobs, `[device.calibration]` measured values (written by `make calibrate`, later auto-calibration warm-up), `[warmup.device]` routine settings. Never add unconfirmed parameters.
+- `tuning.toml` layout per device: `[<dev>]` hand-tuned knobs, `[<dev>.calibration]` measured values (e.g. `[steering.calibration]`, `[throttle.calibration]`; written by `make calibrate`, later auto-calibration warm-up), `[warmup.<dev>]` routine settings. Never add unconfirmed parameters.
 
 ## Config persistence
 - `Config` struct is stored as one NVS blob (`Preferences`, namespace `rccar`, key `cfg`).

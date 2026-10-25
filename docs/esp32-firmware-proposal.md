@@ -100,7 +100,7 @@ We use two tasks: the comms loop (`loop()`) and a high-priority 100 Hz control t
 **PlatformIO.** A Python-based build system for microcontrollers (`pip install platformio`).
 `platformio.ini` declares the chip, board and framework. `pio run -t upload` downloads the
 compiler toolchain, compiles, and flashes the board over USB through `esptool`. Build
-output and cache go in `firmware/.pio/`.
+output and cache go in `firmware/esp32/.pio/`.
 
 **NVS (non-volatile storage).** NVS is a small key-value store in the ESP32's flash.
 Think of it as an on-chip `shelve`. Calibration values are saved there, so they survive
@@ -133,7 +133,7 @@ guide also says to use it. With the native port the USB device disappears on eve
 or crash, which is bad for a tuning loop. The firmware builds with
 `ARDUINO_USB_CDC_ON_BOOT=0`, so `Serial` is UART0, which is the COM port.
 
-### 4.2 Firmware layers (`firmware/src/main.cpp`)
+### 4.2 Firmware layers (`firmware/esp32/src/main.cpp`)
 
 | Layer | Runs in | Responsibility | Changes for ROS 2? |
 | --- | --- | --- | --- |
@@ -287,7 +287,7 @@ The implementation PR adds a root `README.md` with:
 ```
 
 3. The power rules from 4.3 and the power-up sequence from 7.
-4. `firmware/include/pins.h` as the single source of truth. The README table and
+4. `firmware/esp32/include/pins.h` as the single source of truth. The README table and
    `pins.h` must change together.
 5. A breadboard wire-color convention: signal = yellow/white, power = red, ground =
    black. Put a tape flag on the two active signal wires.
@@ -420,7 +420,7 @@ CLAUDE.md                    # tiny machine-readable project map (9.7)
 Makefile                     # bring-up commands (9.2)
 README.md                    # pin map, wiring, power-up sequence
 tuning.toml                  # all runtime tuning, source of truth (9.4)
-.gitignore                   # + firmware/.pio/, __pycache__/, logs/*.jsonl
+.gitignore                   # + firmware/esp32/.pio/, __pycache__/, logs/*.jsonl
 .claude/
   rules/firmware.md          # firmware rules, loaded only for firmware/** (9.7)
 docs/
@@ -456,12 +456,12 @@ tools/
 
 | Target | Does |
 | --- | --- |
-| `make setup` | create `.venv` (already gitignored), install `tools/requirements.txt` |
+| `make setup` | create `.venv` (already gitignored), install `requirements.txt` |
 | `make check` | check Python ≥ 3.11 (for `tomllib`), that `tuning.toml` parses, `pyserial`, `esptool`, `pio`, and (Linux) membership of the `dialout`/`uucp` group needed to open serial ports |
 | `make detect` | list USB serial ports and mark the CH343 (`1a86:55d3`). If the cable is in the native port (`303a:*`), say so. Run `esptool chip_id` (should print `ESP32-S3 (QFN56) (revision v0.2)`) and query firmware `INFO` |
 | `make sync-time` | set the ESP32 clock (section 8) |
 | `make tune` | push `tuning.toml` to the ESP32 **and save it to flash**, so the car boots tuned without a laptop (and later under ROS 2) |
-| `make clean` | `rm -rf firmware/.pio` |
+| `make clean` | `rm -rf firmware/esp32/.pio` |
 | `make build` | `clean` → `pio run` |
 | `make flash` | `clean` → `pio run -t upload` over the COM port |
 | `make monitor` | `pio device monitor` (raw protocol console, with exception decoder) |
@@ -693,7 +693,7 @@ phase: actuator_bringup  # laptop -usb-> esp32 -pwm-> servo+esc
 next: ros2_on_rpi5 + micro_ros_on_esp32
 stack:
   mcu: {chip: esp32-s3-n16r8, build: platformio, platform: espressif32@6.9.0, framework: arduino-esp32-2.0.17, lang: c++gnu11}
-  host: {lang: python>=3.11, deps: tools/requirements.txt, venv: .venv}
+  host: {lang: python>=3.11, deps: requirements.txt, venv: .venv}
   future: [ros2, micro_ros, raspberry_pi_5]
 hw: {steer: ds3225mg@gpio4, throttle: thw1060_esc@gpio5, battery: 2s_lipo}
 layout:
@@ -727,7 +727,7 @@ paths:
 - Memory: `board_build.arduino.memory_type = qio_opi` (quad flash, octal PSRAM). Wrong type = boot loop.
 - Compiler is `-std=gnu++11`: no `std::clamp`, no C++14 aggregate init with default member initializers, no `if constexpr`.
 - `ARDUINO_USB_CDC_ON_BOOT=0`: `Serial` = UART0 = CH343 "COM" port. Do not use the native USB port for comms.
-- Build/flash only via `make build` / `make flash` (both delete `firmware/.pio` first).
+- Build/flash only via `make build` / `make flash` (both delete `firmware/esp32/.pio` first).
 
 ## Architecture invariants
 - `controlTask()` (100 Hz default, core 1, high prio) is the ONLY writer of PWM outputs.
@@ -746,7 +746,7 @@ paths:
 - `SAVE` refuses unless center lies between left and right.
 
 ## Pins
-- Single source of truth: `firmware/include/pins.h`; keep the README table identical.
+- Single source of truth: `firmware/esp32/include/pins.h`; keep the README table identical.
 - Left header P1 only. Never use GPIO3/46 (strapping), 35-37 (PSRAM), 19/20 (native USB), 43/44 (COM UART), 0/45 (strapping).
 - Reserved (declared, not configured): BATT_LOW 6, IMU_INT 7, ENC_A/B 15/16, I2C SDA/SCL 8/9, DIST_TRIG/ECHO 10/11. Spare: 12, 13, 14, 17, 18.
 - ESP32 supplies no power to peripherals; sensors use a separate rail with common ground and <=3.3 V signals.
@@ -842,7 +842,7 @@ log_heartbeats = true       # false = log D commands only when heading/speed cha
 # gear_ratio = 0.0
 ```
 
-### `firmware/platformio.ini`
+### `firmware/esp32/platformio.ini`
 
 ```ini
 ; ESP32-S3-N16R8 (YD-ESP32-S3 / Micro Robotics clone of ESP32-S3-DevKitC-1)
@@ -868,7 +868,7 @@ monitor_speed = 115200
 monitor_filters = esp32_exception_decoder, time
 ```
 
-### `firmware/include/pins.h`
+### `firmware/esp32/include/pins.h`
 
 ```cpp
 #pragma once
@@ -900,7 +900,7 @@ constexpr int PIN_DIST_ECHO    = 11;  // P1-17 ultrasonic ECHO (via divider) / L
 // GPIO19/20: native USB D-/D+ (right header); GPIO43/44: UART0 -> CH343 "COM" port
 ```
 
-### `firmware/src/main.cpp`
+### `firmware/esp32/src/main.cpp`
 
 ```cpp
 // RC car actuator bridge: USB serial commands -> hardware PWM for
@@ -1341,7 +1341,7 @@ void loop() {
 #!/usr/bin/env python3
 """Laptop-side CLI for the ESP32-S3 RC car actuator bridge.
 
-Talks the line protocol in firmware/src/main.cpp over the board's "COM"
+Talks the line protocol in firmware/esp32/src/main.cpp over the board's "COM"
 USB-C port (CH343 USB-UART bridge). Tuning comes from tuning.toml at the
 repo root; every session is logged to logs/*.jsonl. Every subcommand is
 wrapped by a Makefile target; run `python tools/rccar.py -h` for the list.
@@ -1876,7 +1876,7 @@ if __name__ == "__main__":
     sys.exit(main())
 ```
 
-### `tools/requirements.txt`
+### `requirements.txt`
 
 ```text
 platformio>=6.1,<7
@@ -2071,7 +2071,7 @@ VENV     := .venv
 VENV_BIN ?= $(VENV)/bin
 PY       := $(VENV_BIN)/python
 PIO      := $(VENV_BIN)/pio
-FW_DIR   := firmware
+FW_DIR   := firmware/esp32
 CLI      := $(PY) tools/rccar.py
 ifeq ($(origin PORT),undefined)       # auto-detect once per make run
 PORT     := $(shell $(CLI) find-port 2>/dev/null)
@@ -2090,7 +2090,7 @@ $(PY):
 
 setup: $(PY)     ## create .venv and install platformio, pyserial, esptool
 	$(PY) -m pip install -q --upgrade pip
-	$(PY) -m pip install -q -r tools/requirements.txt
+	$(PY) -m pip install -q -r requirements.txt
 
 check: $(PY)     ## verify python packages, pio, serial permissions
 	$(CLI) check-env
@@ -2104,7 +2104,7 @@ sync-time: $(PY) ## set the ESP32 clock from this laptop
 tune: $(PY)      ## push tuning.toml to the ESP32 and save it to flash
 	$(CLI) $(PORT_ARG) tune
 
-clean:           ## delete firmware/.pio build cache
+clean:           ## delete firmware/esp32/.pio build cache
 	rm -rf $(FW_DIR)/.pio
 
 build: clean     ## clean + compile firmware
@@ -2139,7 +2139,7 @@ Empty file, so git tracks the folder.
 ### `.gitignore` (additions)
 
 ```text
-firmware/.pio/
+firmware/esp32/.pio/
 __pycache__/
 logs/*.jsonl
 ```
