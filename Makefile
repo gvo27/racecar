@@ -25,7 +25,7 @@ $(PY):
 
 setup: $(PY)     ## create .venv and install platformio, pyserial, esptool
 	$(PY) -m pip install -q --upgrade pip
-	$(PY) -m pip install -q -r tools/requirements.txt
+	$(PY) -m pip install -q -r requirements.txt
 
 check: $(PY)     ## verify python packages, pio, serial permissions
 	$(CLI) check-env
