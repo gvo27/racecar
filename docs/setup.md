@@ -17,7 +17,24 @@ make fw-image   # (re)build the firmware toolchain image; setup already ran it o
 **Assume:** host tools run from `.venv/` (gitignored); the Makefile uses it automatically, no need to activate it. Firmware build, flash and monitor run in the `rccar-fw` Docker image; the first `make build` seeds the `rccar-platformio` volume (toolchain cache) from the image. After `make fw-image` changes the toolchain, run `docker volume rm rccar-platformio`.
 If `make check` flags serial permission, re-check the `dialout` group membership above.
 
-**Claude Code (optional):** opening the repo in Claude Code and trusting the folder prompts you to install the project plugins listed in `.claude/settings.json`: `embedded-skills` (firmware, RTOS, ISR design) and `ros2-engineering` (micro-ROS, ros2_control, Nav2, perception). `ros2-engineering` runs advisory validation hooks on edits; set `ROS2_SKILL_DISABLE_HOOKS=all` to turn them off.
+**Claude Code (optional):** open the repo in Claude Code and trust the folder. It then asks you to install the plugins in `.claude/settings.json` and to approve the Context7 MCP server in `.mcp.json`.
+
+| Plugin / server | Use |
+| --- | --- |
+| `superpowers` | brainstorm → plan → TDD → review workflow |
+| Context7 (MCP) | current library docs (ROS 2, ESP-IDF, arduino-esp32, PlatformIO) |
+| `pyright-lsp` | Python diagnostics, needs `pyright-langserver` on PATH |
+| `clangd-lsp` | firmware C/C++ diagnostics, needs `clangd` on PATH + `make compiledb` |
+| `embedded-skills` | firmware architecture, RTOS, ISR design |
+| `ros2-engineering` | micro-ROS, ros2_control, Nav2, perception; advisory hooks (`ROS2_SKILL_DISABLE_HOOKS=all` turns them off) |
+
+```sh
+sudo apt install clangd         # firmware LSP
+pipx install pyright            # Python LSP (or: npm install -g pyright)
+make check-dev                  # both must say OK
+make compiledb                  # firmware/esp32/compile_commands.json for clangd
+make unit                       # host Python unit tests, no hardware
+```
 
 ## 2. Wiring (power off)
 

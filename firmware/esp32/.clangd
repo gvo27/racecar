@@ -1,0 +1,19 @@
+# clangd for xtensa-esp32s3 builds. compile_commands.json comes from `make compiledb`.
+# Drop gcc/xtensa-only flags clang rejects; silence warnings about unknown gcc options.
+CompileFlags:
+  CompilationDatabase: .
+  Remove:
+    - -mlongcalls
+    - -mtext-section-literals
+    - -mdisable-hardware-atomics
+    - -fstrict-volatile-bitfields
+    - -fno-tree-switch-conversion
+    - -fno-shrink-wrap
+    - -fipa-pta
+    - -freorder-blocks
+    - -std=gnu++2b
+  Add:
+    - -Wno-unknown-warning-option
+    - -Wno-unknown-attributes
+Diagnostics:
+  UnusedIncludes: None

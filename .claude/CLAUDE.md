@@ -13,8 +13,8 @@ hw: {steer: ds3225mg@gpio4, throttle: thw1060_esc@gpio5, battery: 2s_lipo}
 usb_ports: {left_USB: native, planned regulated power input; right_COM: ch343 uart0, flashing + host link}
 layout: .claude/layout.yaml
 cmd: make help
-plugins: .claude/settings.json  # embedded-skills (firmware/rtos/isr), ros2-engineering (micro-ros, ros2_control, nav2, perception)
-rules: .claude/rules/{firmware,dependencies,deploy,models,repos}.md  # path-scoped, see paths: frontmatter
+plugins: .claude/settings.json  # superpowers, pyright-lsp, clangd-lsp, embedded-skills, ros2-engineering; mcp: .mcp.json (context7)
+rules: .claude/rules/{firmware,dependencies,deploy,models,repos,claude-tooling}.md  # path-scoped, see paths: frontmatter
 invariants:
   - esp32 role: actuator pwm + host comms only; powers nothing
   - sensors on separate power rail, common ground, <=3.3v signals
@@ -24,3 +24,9 @@ invariants:
   - no unconfirmed parameters in tuning.toml
   - new deps => package.xml (rosdep) or a Dockerfile, never host; pin versions, no :latest
   - firmware paths: firmware/esp32/**
+workflow:  # details: .claude/rules/claude-tooling.md
+  - library/framework API => fetch current docs with context7 before writing code; match stack versions (arduino-esp32 2.x, esp-idf 4.4, ros2 jazzy)
+  - non-trivial change => superpowers brainstorming -> writing-plans (docs/plans/) -> test-driven-development -> requesting-code-review
+  - bug => superpowers systematic-debugging first
+  - tests: host python => make unit; firmware => make build (compile) + bench make test (hardware, user-run; never claim without output)
+  - after code edits => check lsp diagnostics (pyright, clangd; make compiledb for firmware)

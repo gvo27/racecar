@@ -23,7 +23,7 @@ paths:
 - Keep image pins consistent with `requirements.txt` ranges and `platformio.ini` platform pin.
 
 ## Python host env (transitional)
-- `.venv` + `requirements.txt` (repo root) retained until phase 2 bench parity, then removed together with `tools/`.
+- `.venv` + `requirements.txt` (repo root; includes pytest for `make unit`) retained until phase 2 bench parity, then removed together with `tools/`.
 - `make setup` = check prereqs, create `.venv`, pip install, `make fw-image`.
 
 ## Rules
@@ -31,7 +31,9 @@ paths:
 - Pin versions everywhere: exact pip pins, base images by tag (by digest for ros), no `:latest`.
 - Third-party ROS sources without apt binary: `repos/rccar.repos` (see `.claude/rules/repos.md`).
 
-## Claude plugins (.claude/settings.json)
+## Claude plugins (.claude/settings.json; usage: .claude/rules/claude-tooling.md)
+- claude-plugins-official (anthropics/claude-plugins-official): superpowers, pyright-lsp, clangd-lsp. LSP binaries (pyright-langserver, clangd) = optional host dev tools, the one allowed host install (not runtime deps); `make check-dev`.
+- context7 = .mcp.json http server, no install.
 - embedded-skills@embedded-skills: github rovinax/embedded-skills, ref master (no tags upstream); firmware arch, driver layering, rtos, isr.
 - ros2-engineering@ros2-engineering-skills: github dbwls99706/ros2-engineering-skills, ref v1.7.2; micro-ros, ros2_control, nav2, perception.
 - ros2-engineering ships advisory hooks (PreToolUse edit/bash validator, Stop advisory; never blocks). opt out: ROS2_SKILL_DISABLE_HOOKS=all.

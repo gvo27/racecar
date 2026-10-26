@@ -23,7 +23,13 @@ paths:
   docs/datasheets/: {role: archived datasheets + components_list.xlsx (ground truth inventory)}
   .github/workflows/firmware.yml: {role: ci firmware build in container + firmware.bin artifact, phase: 1}
   .claude/: {role: CLAUDE.md, layout.yaml, rules/*.md, settings.json}
-  .claude/settings.json: {role: project claude plugins (embedded-skills, ros2-engineering), rules: .claude/rules/dependencies.md, phase: 1}
+  .claude/settings.json: {role: project claude plugins + mcp enablement, rules: [.claude/rules/dependencies.md, .claude/rules/claude-tooling.md], phase: 1}
+  .mcp.json: {role: project mcp servers (context7), rules: .claude/rules/claude-tooling.md, phase: 1}
+  pyrightconfig.json: {role: pyright-lsp config (tools/, .venv), rules: .claude/rules/claude-tooling.md, phase: 1}
+  firmware/esp32/.clangd: {role: clangd flags for xtensa; db from make compiledb (gitignored compile_commands.json, .pio-core/), rules: .claude/rules/claude-tooling.md, phase: 1}
+  tools/tests/: {role: pytest host unit tests (make unit, ci python.yml); moves into ros packages in phase 2, rules: .claude/rules/claude-tooling.md, phase: 1}
+  .github/workflows/python.yml: {role: ci host-python unit tests, phase: 1}
+  docs/plans/: {role: superpowers writing-plans output, rules: .claude/rules/claude-tooling.md}
   deploy/car/: {role: compose.yaml, systemd unit, udev rules, colcon_ignore: true, rules: .claude/rules/deploy.md, phase: 2}
   rccar_msgs/: {role: msgs/srvs/actions contract, phase: 2, invariants: [msg/srv change => rccar_msgs + firmware + docs]}
   rccar_mcu_bridge/: {role: micro-ros agent launch, FIRMWARE_KEYS, tuning push, phase: 2}

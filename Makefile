@@ -22,7 +22,8 @@ PORT_ARG := $(if $(PORT),--port $(PORT),)
 
 .DEFAULT_GOAL := help
 .PHONY: help setup check detect ping sync-time tune clean build flash monitor \
-        fw-image config models test test-throttle calibrate teleop session
+        fw-image config models compiledb unit check-dev test test-throttle calibrate \
+        teleop session
 
 help:            ## list targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-14s %s\n", $$1, $$2}'
@@ -78,6 +79,18 @@ flash: clean     ## clean + compile + upload over the COM port (docker)
 monitor:         ## raw serial monitor (Ctrl+C to exit, docker)
 	@test -n "$(PORT)" || { echo "no serial port found: plug the COM port in or pass PORT=/dev/ttyUSB0"; exit 1; }
 	$(FW_RUN) -it --device $(PORT) $(FW_IMAGE) pio device monitor --port $(PORT)
+
+compiledb:       ## firmware compile_commands.json for clangd (docker, host paths)
+	@test -d .pio-core || { mkdir -p .pio-core && docker run --rm --user $(shell id -u):$(shell id -g) -v "$(CURDIR)/.pio-core":/seed $(FW_IMAGE) \
+	  sh -c 'cp -a /opt/platformio/. /seed/'; }
+	docker run --rm --user $(shell id -u):$(shell id -g) -v "$(CURDIR)":"$(CURDIR)" -w "$(CURDIR)/$(FW_DIR)" \
+	  -e PLATFORMIO_CORE_DIR="$(CURDIR)/.pio-core" $(FW_IMAGE) pio run -t compiledb
+
+unit: $(PY)      ## host-python unit tests, no hardware (pytest tools/tests)
+	$(PY) -m pytest -q tools/tests
+
+check-dev:       ## check optional Claude Code dev tools (LSP binaries) on PATH
+	@for c in pyright-langserver clangd; do command -v $$c >/dev/null && echo "OK   $$c" || echo "MISSING $$c (see docs/setup.md, Claude Code)"; done
 
 test: $(PY)      ## steering sweep + failsafe check (motor stays off)
 	$(CLI) $(PORT_ARG) test

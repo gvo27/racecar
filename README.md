@@ -101,6 +101,9 @@ Run `make help` for the live list. Setup: [docs/setup.md](docs/setup.md).
 | `flash` | clean + compile + upload over COM (Docker) |
 | `monitor` | raw serial monitor (Docker) |
 | `clean` | delete `firmware/esp32/.pio` |
+| `compiledb` | firmware `compile_commands.json` for clangd (Docker) |
+| `unit` | host Python unit tests, no hardware |
+| `check-dev` | check optional LSP binaries for Claude Code |
 | `tune` | push `tuning.toml` to the ESP32 and save it to flash |
 | `test` | steering sweep + failsafe check (motor stays off) |
 | `test-throttle` | test + short motor run, wheels off the ground |
