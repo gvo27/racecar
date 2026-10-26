@@ -1,0 +1,14 @@
+{
+  "extraKnownMarketplaces": {
+    "embedded-skills": {
+      "source": { "source": "github", "repo": "rovinax/embedded-skills", "ref": "master" }
+    },
+    "ros2-engineering-skills": {
+      "source": { "source": "github", "repo": "dbwls99706/ros2-engineering-skills", "ref": "v1.7.2" }
+    }
+  },
+  "enabledPlugins": {
+    "embedded-skills@embedded-skills": true,
+    "ros2-engineering@ros2-engineering-skills": true
+  }
+}

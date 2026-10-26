@@ -17,6 +17,8 @@ make fw-image   # (re)build the firmware toolchain image; setup already ran it o
 **Assume:** host tools run from `.venv/` (gitignored); the Makefile uses it automatically, no need to activate it. Firmware build, flash and monitor run in the `rccar-fw` Docker image; the first `make build` seeds the `rccar-platformio` volume (toolchain cache) from the image. After `make fw-image` changes the toolchain, run `docker volume rm rccar-platformio`.
 If `make check` flags serial permission, re-check the `dialout` group membership above.
 
+**Claude Code (optional):** opening the repo in Claude Code and trusting the folder prompts you to install the project plugins listed in `.claude/settings.json`: `embedded-skills` (firmware, RTOS, ISR design) and `ros2-engineering` (micro-ROS, ros2_control, Nav2, perception). `ros2-engineering` runs advisory validation hooks on edits; set `ROS2_SKILL_DISABLE_HOOKS=all` to turn them off.
+
 ## 2. Wiring (power off)
 
 **Assume:** ESC switch **off**, battery connected to the ESC, car on a stand with the wheels off the ground.

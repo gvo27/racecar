@@ -22,7 +22,8 @@ paths:
   docs/: {role: setup.md, docker_ros_plan.md, esp32-firmware-proposal.md, tuning-notes.txt, colcon_ignore: true}
   docs/datasheets/: {role: archived datasheets + components_list.xlsx (ground truth inventory)}
   .github/workflows/firmware.yml: {role: ci firmware build in container + firmware.bin artifact, phase: 1}
-  .claude/: {role: CLAUDE.md, layout.yaml, rules/*.md}
+  .claude/: {role: CLAUDE.md, layout.yaml, rules/*.md, settings.json}
+  .claude/settings.json: {role: project claude plugins (embedded-skills, ros2-engineering), rules: .claude/rules/dependencies.md, phase: 1}
   deploy/car/: {role: compose.yaml, systemd unit, udev rules, colcon_ignore: true, rules: .claude/rules/deploy.md, phase: 2}
   rccar_msgs/: {role: msgs/srvs/actions contract, phase: 2, invariants: [msg/srv change => rccar_msgs + firmware + docs]}
   rccar_mcu_bridge/: {role: micro-ros agent launch, FIRMWARE_KEYS, tuning push, phase: 2}

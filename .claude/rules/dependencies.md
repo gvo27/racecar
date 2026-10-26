@@ -7,6 +7,7 @@ paths:
   - "**/package.xml"
   - "firmware/esp32/platformio.ini"
   - "requirements.txt"
+  - ".claude/settings.json"
 ---
 
 # Dependencies
@@ -29,3 +30,9 @@ paths:
 - New deps go in `package.xml` (rosdep) or a Dockerfile. Never install on the host.
 - Pin versions everywhere: exact pip pins, base images by tag (by digest for ros), no `:latest`.
 - Third-party ROS sources without apt binary: `repos/rccar.repos` (see `.claude/rules/repos.md`).
+
+## Claude plugins (.claude/settings.json)
+- embedded-skills@embedded-skills: github rovinax/embedded-skills, ref master (no tags upstream); firmware arch, driver layering, rtos, isr.
+- ros2-engineering@ros2-engineering-skills: github dbwls99706/ros2-engineering-skills, ref v1.7.2; micro-ros, ros2_control, nav2, perception.
+- ros2-engineering ships advisory hooks (PreToolUse edit/bash validator, Stop advisory; never blocks). opt out: ROS2_SKILL_DISABLE_HOOKS=all.
+- bump plugin = change ref to a tag; never track a moving branch when a tag exists.
