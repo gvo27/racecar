@@ -340,7 +340,7 @@ A **symbol** is the logical drawing; a **footprint** is the copper pads and hole
 | Q1 | `SOT-23` |  |
 | J3, J4 servo/ESC | `PinHeader_1x03_P2.54mm` | Standard servo spacing |
 | J5 signals to ESP32 | `PinHeader_1x05_P2.54mm` |  |
-| J6, J7 USB-C pigtails | `TerminalBlock` 5.08 mm, 2 pin | Clamps 24 AWG; ≥ 5 A per pin |
+| J6, J7 USB-C pigtails | `TerminalBlock` 5.08 mm, 2 pin | Clamps 20 AWG; ≥ 5 A per pin |
 | J8 to J14 sensor outputs | `JST_XH` 2 pin, or pin headers | About 3 A per pin |
 | C, R, LED | `C_0805`, `R_0805`, `LED_0805` (surface-mount, hand-solderable) | Capacitor voltage rating |
 | Mounting holes | `MountingHole_3.2mm_M3` (add with **A**, symbol `Mechanical:MountingHole`) | Match the chassis mount |
@@ -405,7 +405,7 @@ Put these in your hand-off message, numbered, so the reviewer can answer by numb
 11. **Layout:** where the ground star point should sit, and how to keep motor return current away from the sensor ground.
 12. **Connectors and wire:** the battery and ESC use T-plug pigtails with 12 AWG bare ends soldered to J1/J2 pads. What pad size and strain relief? Wire gauge for each output?
 13. **U1 enable control:** EN has a 100 kΩ pull-up to VIN (up to 8.4 V), so a direct ESP32 connection is ruled out, and U1 powers the ESP32, so it must start by itself. The schematic proposes a FET (Q1 2N7002 + R4 100k), but it can only power-cycle U1, because U1 restarts once the ESP32 loses power. Alternatives: an enable on the sensor buck instead (needs a buck with an EN pin), a hardware undervoltage cutoff (a VIN divider on EN, no GPIO), or a latching power switch (more parts). Which one?
-14. **USB-C pigtail cable:** the pigtails are 24 AWG. At 5 A, about 0.25 V is lost over a 30 cm cable, enough to trigger the Pi's undervoltage warning on a 5.0 V rail. Keep them under about 15 cm, or use 20 AWG pigtails?
+14. **USB-C pigtail cable:** the pigtails are 20 AWG, 30 cm (1 ft), and can be trimmed. 20 AWG is about 33 mΩ/m, so a 30 cm cable (60 cm of copper, there and back) loses about 0.10 V at 5 A; trimmed to 15 cm, about 0.05 V. USB-C contact resistance adds a little more. With U1 at 5.0 V ± 4 % (4.8 V worst case), trimming to 10–15 cm keeps the Pi 5 comfortably above its undervoltage warning (about 4.63 V, approx.). Is that margin enough?
 
 ### Verification record
 
