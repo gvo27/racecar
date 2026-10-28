@@ -96,7 +96,7 @@ rccar/                            ← repo root; colcon finds packages directly
 - **`rccar_calibration`** provides interactive tools (`ros2 run`) that call those services.
   - Physical adjustments stay manual. The tool prompts for the step (servo horn, ESC neutral trim, sensor mount), jogs or measures the value, and writes it to the bind-mounted `tuning.toml [steering.calibration]` / `[throttle.calibration]`.
   - Later it also covers camera intrinsics, camera↔lidar extrinsics and IMU bias.
-- **Make targets keep their names** (`calibrate`, `teleop`, `test`, `tune`, `session`, `flash`) and wrap `docker compose run --rm …`.
+- **Make targets keep their names** (`calibrate`, `teleop`, `test`, `tune`, `flash`) and wrap `docker compose run --rm …`; the ASCII-path commands live on as `legacy-*` (`legacy-detect`, `legacy-ping`, `legacy-sync-time`, `legacy-tune`, `legacy-test`, `legacy-test-throttle`, `legacy-calibrate`, `legacy-teleop`, `legacy-session`) until the bench parity test.
 
 ### Admin teleop over SSH (supervisor layer)
 - **Flow:** laptop → `ssh pi` → `make teleop` runs `rccar_teleop` on the Pi, inside the SSH terminal. ROS traffic stays local; it never runs on the laptop.
@@ -133,11 +133,13 @@ rccar/                            ← repo root; colcon finds packages directly
 
 | Container | Contents | Notes |
 |---|---|---|
-| `mcu-agent` | `micro-ros-agent` + tuning push node | `/dev/rccar-esp32` (udev symlink), `group_add: [dialout]` |
-| `supervisor` | rccar_supervisor | `depends_on: mcu-agent (service_healthy)` |
-| `tools` (on demand) | rccar_calibration, rccar_teleop, firmware flash | `docker compose run --rm tools …` |
+| `mcu-agent` | `microros/micro-ros-agent:jazzy` (digest-pinned), `serial --dev /dev/rccar-esp32 -b 115200` | `devices:` + `group_add: [dialout gid]`, host uid/gid, `cap_drop: ALL`; healthcheck = process alive (no heartbeat file in this image) |
+| `core` | `ros2 launch rccar_bringup car.launch.py`: supervisor + lifecycle `mcu_bridge` (tuning push) | `depends_on: mcu-agent (service_started)`; `tuning.toml` bind-mounted read-write, repo read-only; heartbeat healthcheck |
+| `tools` (on demand, profile `tools`) | rccar_calibration, rccar_teleop; `docker compose run --rm tools ...` | firmware flash stays in the `rccar-fw` image (`make flash`) |
 | `recorder`, `backup` | phase 3 | data on bind-mounted `/data` (SSD, not microSD) |
 | `drivers`, `perception`, `captain` | later | perception + inference as composable nodes in one process |
+
+Implemented in `deploy/car/compose.yaml`; host files `99-rccar.rules` (udev) and `rccar.service` (systemd) are installed by `make install-host`; `make config` renders `deploy/car/.env.generated`.
 
 **Every service gets:**
 - `network_mode: host` + `ipc: host` (ROS 2 discovery)
@@ -212,20 +214,20 @@ captain / perception / planning / supervisor      ← identical in sim and on th
 
 ## Phases
 
-1. **Foundation: Docker toolchain + restructure + CI** (one PR)
+1. **Foundation: Docker toolchain + restructure + CI** (one PR). **Status: done** (PR #2 on `docker`, assumed bench-tested).
    - **Toolchains:** `docker/firmware.Dockerfile`, with `make build/flash/monitor` running through it.
    - **CI:** a GitHub Actions firmware build.
    - **Restructure:** move `firmware/` to `firmware/esp32/` and add the `COLCON_IGNORE` markers. Add `repos/` (empty manifest + README), `.env.example`, `models/` (manifest + README), and `make config` / `make models` skeletons.
    - **Context files:** add `.claude/layout.yaml`, `dependencies.md`, `deploy.md`, `models.md` and `repos.md`, and update `firmware.md`, CLAUDE.md, the README setup (git, make, docker) and the Makefile.
    - **Scope limit:** `tools/` and `.venv` stay, so bench host control is unchanged.
-2. **ROS 2 + micro-ROS actuator path** (one phase; it may land as an ASCII-bridge commit followed by a micro-ROS commit if that makes the cutover easier to debug)
+2. **ROS 2 + micro-ROS actuator path.** **Status: implemented, pending bench** (PR `ros2`, stacked on `docker`; the checklist in `docs/setup.md` is user-run; the firmware has only been compile-checked in CI) (one phase; it may land as an ASCII-bridge commit followed by a micro-ROS commit if that makes the cutover easier to debug)
    - **Images and packages:** `docker/ros.Dockerfile` (multi-stage), then `rccar_msgs` (`DriveCmd` heading_rad/throttle/source, `McuCommand`, `Reset`, calibration srvs), `rccar_mcu_bridge`, `rccar_bringup`, `rccar_supervisor` (arbitration + latched e-stop), `rccar_teleop` and `rccar_calibration`.
    - **Firmware:** the comms layer becomes micro-ROS via `micro_ros_platformio` (jazzy, serial on UART0, pinned by commit), with `rccar_msgs` copied into `firmware/esp32/extra_packages/`. Env `esp32s3` = micro-ROS (default), `esp32s3_ascii` = legacy protocol. `make build` keeps `.pio/libdeps` (the micro-ROS lib build is slow) and cleans only `.pio/build`.
    - **CI:** ROS image build + `colcon build/test` (pytest, launch_testing, ament_lint), ros2-engineering static validators, an `extra_packages` sync check, and a firmware matrix over both envs.
    - **Not in phase 2:** ros2_control (the ESP32 owns PWM and there is no odometry); revisit with `ackermann_steering_controller` for the captain/Nav2 phase.
    - **Deployment:** `deploy/car/` (compose, systemd, udev) and `[platform.pi5]`.
    - **Cleanup (follow-up PR):** delete `tools/`, `.venv` and the `esp32s3_ascii` env after the user's bench parity test.
-   - **New invariant:** "msg/srv change => rccar_msgs + firmware/esp32/extra_packages + docs".
+   - **New invariant:** "protocol/interface change => rccar_msgs + firmware/esp32/extra_packages + main.cpp + rccar_mcu_bridge (+ tools/rccar.py while legacy) + docs"; the supervisor is the sole publisher of `/rccar/mcu/drive`; agents never run hardware fault-injection tests.
    - **Conventions:** add `.claude/rules/ros2.md`. Make the supervisor output the hardware boundary, and have every launch file accept `use_sim_time` (see "Sim/real parity").
 3. **Recorder + backup.** MCAP bags to `/data`; upload only when disarmed and idle, to the destination set in `.env`.
 4. **Sensors.** `rccar_drivers`, `rccar_description` TF, sensor calibration, time sync (chrony). `rccar_description` is the single URDF for car and sim; sensor topics/frames are defined once so the sim adapter can publish the same ones.

@@ -4,6 +4,9 @@ on:
   push:
     paths:
       - "tools/**"
+      - "deploy/render_env.py"
+      - "deploy/tests/**"
+      - "Makefile"
       - "tuning.toml"
       - "requirements.txt"
       - "pyrightconfig.json"
@@ -11,6 +14,9 @@ on:
   pull_request:
     paths:
       - "tools/**"
+      - "deploy/render_env.py"
+      - "deploy/tests/**"
+      - "Makefile"
       - "tuning.toml"
       - "requirements.txt"
       - "pyrightconfig.json"
@@ -30,5 +36,5 @@ jobs:
           python-version: "3.12"
       - name: Install deps into .venv
         run: python -m venv .venv && .venv/bin/pip install -q -r requirements.txt
-      - name: Unit tests (no hardware)
+      - name: Unit tests (tools + deploy/render_env, no hardware)
         run: make unit PORT=

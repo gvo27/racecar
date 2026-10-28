@@ -2,25 +2,30 @@ project: autonomous_rc_car_platform
 scope: infrastructure + comms layer (actuation, safety, host link, logging); ML models/sims live in separate repos deployed to the rpi5
 chassis: tamiya_tt02_1:10
 goals: [sensor_fusion, object_detection, semantic_slam, racing_trajectory_optimization]
-compute: {high_level: raspberry_pi_5 (ros2, future), real_time: esp32-s3-n16r8}
-phase: docker_foundation  # host -usb-> esp32 -pwm-> servo+esc; firmware toolchain in docker
-next: phase 2 = ros2 (docker) + micro_ros_on_esp32 on rpi5
+compute: {high_level: raspberry_pi_5 (ros2 jazzy in docker, deploy/car), real_time: esp32-s3-n16r8 (micro-ros client)}
+phase: ros2_actuator_path (implemented, pending user bench)  # pi: mcu-agent+core(supervisor,mcu_bridge) -usb/micro-ros-> esp32 -pwm-> servo+esc; legacy ascii path kept as fallback
+next: bench parity -> delete tools/ + .venv + esp32s3_ascii; then phase 3 recorder/backup, phase 4 sensors
 plan: docs/docker_ros_plan.md
 stack:
-  mcu: {build: platformio in docker (docker/firmware.Dockerfile, image rccar-fw, make build/flash/monitor), platform: espressif32@6.9.0, framework: arduino-esp32-2.0.17, lang: c++gnu11}
-  host: {prereqs: [git, make, docker+compose+buildx], groups: [docker, dialout], lang: python>=3.12 (tools/ only, until phase 2), deps: requirements.txt, venv: .venv}
+  mcu: {build: platformio in docker (docker/firmware.Dockerfile, image rccar-fw, make build/flash/monitor, FW_ENV=esp32s3|esp32s3_ascii), platform: espressif32@6.9.0, framework: arduino-esp32-2.0.17, comms: micro_ros_platformio jazzy serial uart0 (libdeps cached in .pio/libdeps), lang: c++gnu11}
+  ros: {distro: jazzy, image: docker/ros.Dockerfile (ros:jazzy-ros-base by digest, rosdep+colcon, target test/runtime), stack: deploy/car/compose.yaml (mcu-agent, core, tools), pkgs: [rccar_msgs, rccar_supervisor, rccar_mcu_bridge, rccar_teleop, rccar_calibration, rccar_bringup], make: [config, ros-image, car-up, car-down, ros-test, teleop, calibrate, tune, test]}
+  host: {prereqs: [git, make, docker+compose+buildx], groups: [docker, dialout], lang: python>=3.12 (make config/unit; legacy tools/ until parity), deps: requirements.txt, venv: .venv}
 hw: {steer: ds3225mg@gpio4, throttle: thw1060_esc@gpio5, battery: 2s_lipo}
 usb_ports: {left_USB: native, planned regulated power input; right_COM: ch343 uart0, flashing + host link}
 layout: .claude/layout.yaml
 cmd: make help
 plugins: .claude/settings.json  # superpowers, pyright-lsp, clangd-lsp, embedded-skills, ros2-engineering; mcp: .mcp.json (context7)
-rules: .claude/rules/{firmware,dependencies,deploy,models,repos,claude-tooling}.md  # path-scoped, see paths: frontmatter
+rules: .claude/rules/{firmware,dependencies,deploy,models,repos,claude-tooling,ros2,msgs,mcu_bridge,supervisor,calibration,tuning}.md  # path-scoped, see paths: frontmatter
+agents: .claude/agents/ros2-reviewer.md  # review diffs vs rules + ros2-engineering refs + stop-path checklist
 invariants:
   - esp32 role: actuator pwm + host comms only; powers nothing
   - sensors on separate power rail, common ground, <=3.3v signals
   - pins: left header P1 only; pins.h == README table
-  - protocol change => main.cpp + rccar.py + docs
-  - tuning key change => tuning.toml + rccar.FIRMWARE_KEYS + main.cpp setKey
+  - protocol/interface change => rccar_msgs + firmware/esp32/extra_packages (diff -r clean) + main.cpp + rccar_mcu_bridge (+ tools/rccar.py while legacy) + docs
+  - tuning key change => tuning.toml + rccar_mcu_bridge.tuning.FIRMWARE_KEYS (+ tools/rccar.py FIRMWARE_KEYS while legacy) + main.cpp setKey
+  - supervisor = sole publisher of /rccar/mcu/drive; brake/disarm latch, arm = Reset(incident) -> armed but stationary
+  - agents never run hardware fault-injection tests (kill core, unplug usb, motor runs); bench checklist is user-run (docs/setup.md)
+  - software stop is not safety-rated; esc power switch = hardware stop
   - no unconfirmed parameters in tuning.toml
   - new deps => package.xml (rosdep) or a Dockerfile, never host; pin versions, no :latest
   - firmware paths: firmware/esp32/**
@@ -28,5 +33,5 @@ workflow:  # details: .claude/rules/claude-tooling.md
   - library/framework API => fetch current docs with context7 before writing code; match stack versions (arduino-esp32 2.x, esp-idf 4.4, ros2 jazzy)
   - non-trivial change => superpowers brainstorming -> writing-plans (docs/plans/) -> test-driven-development -> requesting-code-review
   - bug => superpowers systematic-debugging first
-  - tests: host python => make unit; firmware => make build (compile) + bench make test (hardware, user-run; never claim without output)
+  - tests: host python => make unit; ros => make ros-test (colcon test in docker); firmware => make build FW_ENV=<env> (compile, CI matrix) + bench make test (hardware, user-run; never claim without output)
   - after code edits => check lsp diagnostics (pyright, clangd; make compiledb for firmware)

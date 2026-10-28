@@ -39,7 +39,7 @@ class McuBridge(Node):
         self._tuning = {}
         self._tuning_path = None
         self._client = None
-        self._services, self._sub, self._hb = [], None, None
+        self._srvs, self._sub, self._hb = [], None, None
         self._pushing = False
 
     # -- lifecycle ----------------------------------------------------------
@@ -70,7 +70,7 @@ class McuBridge(Node):
                                 callback_group=g),
         ]
         hb = self.create_timer(0.5, self._beat, callback_group=g)
-        self._sub, self._hb, self._services = sub, hb, srvs
+        self._sub, self._hb, self._srvs = sub, hb, srvs
         return super().on_activate(state)
 
     def on_deactivate(self, state):
@@ -89,12 +89,12 @@ class McuBridge(Node):
     def _destroy_entities(self):
         if self._client is None:
             return
-        for srv in self._services:
+        for srv in self._srvs:
             self.destroy_service(srv)
         self.destroy_subscription(self._sub)
         self.destroy_timer(self._hb)
         self.destroy_client(self._client)
-        self._services, self._sub, self._hb, self._client = [], None, None, None
+        self._srvs, self._sub, self._hb, self._client = [], None, None, None
 
     def _beat(self):
         touch(self.get_parameter('heartbeat_file').value)

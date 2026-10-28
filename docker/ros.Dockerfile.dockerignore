@@ -1,0 +1,19 @@
+# build context = repo root; keep only what docker/ros.Dockerfile COPYs
+.git
+.github
+.venv
+.pio-core
+.cache
+.pytest_cache
+**/__pycache__
+**/.pio
+firmware
+logs
+models/cache
+docs
+deploy
+.env
+deploy/car/.env.generated
+build
+install
+log

@@ -1,0 +1,4 @@
+# rccar — udev: stable name for the ESP32-S3 right-hand COM port (CH343 USB-UART, 1a86:55d3)
+# Notes: .claude/rules/deploy.md
+# Install: make install-host  (-> /etc/udev/rules.d/99-rccar.rules, then udevadm control --reload)
+SUBSYSTEM=="tty", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="55d3", SYMLINK+="rccar-esp32", GROUP="dialout", MODE="0660"

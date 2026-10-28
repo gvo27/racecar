@@ -1,0 +1,28 @@
+# rccar — systemd: bring the car stack up at boot (docker compose up -d), down at stop
+# Notes: .claude/rules/deploy.md
+# Template: make install-host replaces @REPO_DIR@ and @USER@, installs to /etc/systemd/system/rccar.service.
+# Needs deploy/car/.env.generated (make config, run by ExecStartPre) and the rccar-ros image (make ros-image).
+# Deploys stay explicit (make car-pull && make car-up); this unit only starts what is already built.
+[Unit]
+Description=RC car ROS 2 stack (docker compose)
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+User=@USER@
+SupplementaryGroups=docker dialout
+WorkingDirectory=@REPO_DIR@
+ExecStartPre=/usr/bin/make config
+ExecStart=/usr/bin/docker compose -f deploy/car/compose.yaml --env-file deploy/car/.env.generated up -d
+ExecStop=/usr/bin/docker compose -f deploy/car/compose.yaml --env-file deploy/car/.env.generated down
+Restart=on-failure
+RestartSec=15
+TimeoutStartSec=180
+
+[Install]
+WantedBy=multi-user.target

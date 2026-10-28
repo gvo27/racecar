@@ -54,6 +54,12 @@ enabled = true
 dir = "logs"
 log_heartbeats = true       # false = log D commands only when heading/speed change
 
+# Host/platform settings, read by `make config` (deploy/render_env.py) -> deploy/car/.env.generated.
+# Selected by PLATFORM in .env. Only confirmed facts here (no mem limits, cpuset, backend yet).
+[platform.pi5]
+esp32_device = "/dev/rccar-esp32"   # symlink created by deploy/car/99-rccar.rules (CH343 1a86:55d3)
+arch = "arm64"                      # Raspberry Pi 5 / Ubuntu 24.04
+
 # ---------------------------------------------------------------------------
 # Reserved sections: intentionally empty until the hardware/routine exists and
 # its parameters are confirmed. Read by nothing yet.

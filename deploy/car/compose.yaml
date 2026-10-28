@@ -1,0 +1,111 @@
+# car stack: micro-ROS agent + ROS 2 core (supervisor + mcu_bridge) + on-demand tools.
+# Notes: .claude/rules/deploy.md
+# Env: deploy/car/.env.generated (make config; compose --env-file). Run: make car-up
+# Images: base by digest, ours as rccar-ros:local (make ros-image) or ${RCCAR_ROS_IMAGE} (git SHA from GHCR). Never :latest.
+name: rccar
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+# values every ROS container shares
+x-ros-env: &ros-env
+  ROS_DOMAIN_ID: ${ROS_DOMAIN_ID:-0}
+  ROS_AUTOMATIC_DISCOVERY_RANGE: LOCALHOST
+  ROS_LOG_DIR: /tmp/roslog
+  RCCAR_TUNING: /ws/src/racecar/tuning.toml
+  TZ: ${TZ:-UTC}
+  HOME: /tmp
+
+x-ros-mounts: &ros-mounts
+  - ${REPO_DIR:?run make config}:/ws/src/racecar:ro
+  - ${REPO_DIR:?run make config}/tuning.toml:/ws/src/racecar/tuning.toml:rw
+  - ${REPO_DIR:?run make config}/logs:/ws/src/racecar/logs:rw
+
+services:
+  # mcu-agent — micro-ROS agent: XRCE serial bridge ESP32 <-> ROS 2 graph
+  # Notes: .claude/rules/deploy.md
+  mcu-agent:
+    image: microros/micro-ros-agent:jazzy@sha256:76b7a4382ea1d34f65027449c518335dea5641154bcaa62bfe84b1691eb33c53
+    command: ["serial", "--dev", "${ESP32_DEVICE:?run make config}", "-b", "115200"]
+    user: "${HOST_UID:?run make config}:${HOST_GID:?run make config}"
+    group_add: ["${DIALOUT_GID:?run make config}"]
+    devices:
+      - ${ESP32_DEVICE:?run make config}
+    network_mode: host
+    ipc: host
+    restart: unless-stopped
+    environment:
+      <<: *ros-env
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    mem_limit: ${AGENT_MEM_LIMIT:-256m}
+    # agent image has no heartbeat file: liveness = process alive (the ESP32 side reconnects itself)
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -x micro_ros_agent >/dev/null"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    logging: *logging
+
+  # core — ROS 2 bringup: supervisor (sole /rccar/mcu/drive publisher) + lifecycle mcu_bridge
+  # Notes: .claude/rules/deploy.md
+  core:
+    image: ${RCCAR_ROS_IMAGE:-rccar-ros:local}
+    command: ["ros2", "launch", "rccar_bringup", "car.launch.py",
+              "heartbeat_dir:=/run/hb", "tuning_file:=/ws/src/racecar/tuning.toml"]
+    user: "${HOST_UID:?run make config}:${HOST_GID:?run make config}"
+    network_mode: host
+    ipc: host
+    restart: unless-stopped
+    depends_on:
+      mcu-agent:
+        condition: service_started
+    environment:
+      <<: *ros-env
+    volumes: *ros-mounts
+    tmpfs:
+      - /run/hb:size=1m,mode=1777
+      - /tmp:size=128m,mode=1777
+    mem_limit: ${CORE_MEM_LIMIT:-512m}
+    cap_drop: [ALL]
+    cap_add: [SYS_NICE]
+    security_opt: ["no-new-privileges:true"]
+    read_only: true
+    # healthy = both heartbeat files (supervisor, mcu_bridge) exist and were touched in the last 6 s
+    healthcheck:
+      test: ["CMD-SHELL", "n=$$(find /run/hb -type f | wc -l); f=$$(find /run/hb -type f -mmin -0.1 | wc -l); [ \"$$n\" -ge 2 ] && [ \"$$n\" = \"$$f\" ]"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+      start_period: 20s
+    logging: *logging
+
+  # tools — on-demand ROS shell: teleop, calibrate, tune, bench_test (docker compose run --rm tools ...)
+  # Notes: .claude/rules/deploy.md
+  tools:
+    profiles: [tools]
+    image: ${RCCAR_ROS_IMAGE:-rccar-ros:local}
+    entrypoint: ["/entrypoint.sh"]
+    command: ["bash"]
+    user: "${HOST_UID:?run make config}:${HOST_GID:?run make config}"
+    stdin_open: true
+    tty: true
+    network_mode: host
+    ipc: host
+    environment:
+      <<: *ros-env
+    volumes: *ros-mounts
+    tmpfs:
+      - /tmp:size=128m,mode=1777
+    mem_limit: ${CORE_MEM_LIMIT:-512m}
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    read_only: true
+    logging: *logging
