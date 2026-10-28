@@ -13,15 +13,16 @@ Draft KiCad project for the car's power board: 2S LiPo in, four rails out (`VBAT
 
 ## KiCad version
 
-Project version: **KiCad 10.0**. The baseline file was generated in KiCad 7 format (the newest available where it was built); KiCad 10 opens it and upgrades it on save. After the first save in KiCad 10, commit the upgraded files; from then on, everyone working on this board uses 10.0. KiCad 9 and older cannot open a file saved by 10, so confirm the reviewer's version before sending the project (the PDF works for anyone).
+Project version: **KiCad 10.0**. The baseline was generated in KiCad 7 format, opened, upgraded and saved in KiCad 10.0 by the owner (commit f0df86b), so the files are now KiCad 10 format: everyone working on this board uses 10.0, and KiCad 9 or older cannot open them. Confirm the reviewer's version before sending the project (the PDF works for anyone). From here on, edit the KiCad 10 files; the KiCad 7 generator used for the baseline is retired.
 
-## First open in KiCad 10 (checklist)
+## KiCad 10 checks (done by the owner)
 
-1. Open `rc_power_board.kicad_pro`. Accept the format-upgrade prompt, then **File > Save**.
-2. **Inspect > Electrical Rules Checker > Run ERC.** Never run on this baseline in any KiCad version (KiCad 7's command-line tool has no ERC), so treat its output as the first real check and fix or explain every error. Intentional no-connects: U1 VRP (2 pins), U2 EN; U3's NC pin is hidden and already no-connect type. Expect "symbol doesn't match library" warnings for the embedded stock symbols where KiCad 10's libraries changed; they're harmless (update from library or exclude). (The kicad-happy analyzer separately flags U1 EN/PG as missing pull-ups: EN's is inside the module, PG uses the ESP32's internal pull-up.)
-3. Click one wire on each rail and read the net name in the message panel: `VBAT`, `+5V_CPU`, `+5V_SENS`, `+3V3_SENS`, `GND` must all be distinct.
-4. **Tools > Assign Footprints**: confirm none show as missing in the KiCad 10 libraries. U2 is intentionally blank (module TBD). J1/J2 use the 2.5 mm2 wire-pad placeholder, too small for 12 AWG (3.3 mm2).
-5. **File > Schematic Setup > Net Classes**: check the four classes and the assignment patterns loaded from the `.kicad_pro`.
+- Opened, format-upgraded and saved in KiCad 10.0.
+- Tools > Update Symbols from Library for D2-D4 (LED) and Q1 (2N7002): the KiCad 7 library copies differed from KiCad 10's.
+- **ERC: 0 errors, 0 warnings** after the symbol update, with "Four connection points are joined together" switched from Ignore to Warning to check U1's joined pins.
+- Checks left on Ignore (severities are saved in `rc_power_board.kicad_pro`): "Global label only appears once" (the board has no global labels), "SPICE model issue" (simulation runs through kicad-happy/ngspice), "Assigned footprint doesn't match footprint filters" (J6/J7 terminal blocks on a generic connector symbol, deliberate).
+- Still to check before layout: footprint assignments against the KiCad 10 libraries, net classes in Schematic Setup, and the D36V50F5 pin numbering against Pololu's dimension drawing.
+- `rc_power_board.pdf` is a KiCad 7 plot of the baseline (pre-symbol-update, older pigtail note); re-plot it from KiCad 10 (File > Plot > PDF) before sending it out.
 
 ## How the baseline differs from the step-by-step guide
 
@@ -33,7 +34,7 @@ The schematic follows `power_board_plan.md` part for part (same references, nets
 - **U1 EN / PG (region F, proposal):** EN goes to Q1 (2N7002), whose gate is `ESP_SHDN` with R4 (100k) holding it low, so U1 is on by default. Driving `ESP_SHDN` high power-cycles U1 (the ESP32 loses power, Q1 turns off, U1 restarts and the Pi 5 reboots); it is not a latching shutdown. Use non-strapping GPIOs with no reset pull-up for both signals. PG goes to J5. The EN approach is open question 13 (also at the top of the PR).
 - **J5** has 5 pins: THROTTLE_PWM, STEER_PWM, U1_PG, ESP_SHDN, GND. GPIOs for the two new signals are TBD until firmware adds them (pins.h and the README pin table together).
 - **J1/J2** are wire pads for T-plug pigtails (12 AWG bare ends), not board connectors.
-- **J6/J7** are 2-wire USB-C pigtails into the Pi 5 and the ESP32's left USB-C port, so each board's own USB-C input protection is used. The pigtails are 24 AWG; keep them short (open question 14).
+- **J6/J7** are 2-wire USB-C pigtails into the Pi 5 and the ESP32's left USB-C port, so each board's own USB-C input protection is used. The pigtails are 20 AWG, 30 cm: about 0.10 V drop at 5 A; trim to 10-15 cm (open question 14).
 - **LED resistors** connect pin-to-pin to their LEDs, so those three nets carry KiCad's auto names (`Net-(D2-A)`, `Net-(D3-A)`, `Net-(D4-A)`) instead of `LED_*` labels.
 - **J3, J4** are drawn rotated so pin 1 (GND) sits at the bottom; pin numbering is unchanged.
 - **Mounting holes** H1 to H4 (M3) are included from the plan's footprint table.
@@ -51,7 +52,9 @@ Built and checked with KiCad 7.0.11 `kicad-cli` and the kicad-happy analyzer (v2
 - All 7 PWR_FLAGs confirmed attached to their nets; all assigned footprints exist in the KiCad 7 libraries; embedded symbols match the KiCad 7 library pin for pin.
 - Net classes: every net resolves to the intended class (checked with KiCad 7's pcbnew API in the review, and with a wildcard emulation after the `*+6V_BEC` fix).
 - Analyzer: U1/U2 switching, U3 3.3 V LDO, D2-D4 resistor-limited. Remaining findings are expected for a draft: no datasheets / MPNs (all TBD), "missing pull-up" on U1 EN (inside the module), U1 PG (ESP32 internal pull-up) and U3 EN (tied to VIN per AP2112 datasheet), and `VBAT_ESC` "no declared source" (analyzer heuristic; the net has only passive pins, so KiCad's ERC should not flag it).
-- Not yet done: ERC in any KiCad version, KiCad 10 file upgrade, footprint check against KiCad 10 libraries, SPICE, any PCB layout.
+- ERC in KiCad 10: 0 errors, 0 warnings (owner-run, see above).
+- kicad-happy analyzer on the KiCad 10 file (f0df86b + note edit): 46 parts, 23 nets, same findings as the KiCad 7 baseline, so the upgrade and symbol update changed no connections.
+- Not yet done: footprint check against KiCad 10 libraries, SPICE, any PCB layout.
 
 ## Working on this folder with Claude Code
 
