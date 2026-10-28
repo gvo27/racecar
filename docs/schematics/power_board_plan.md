@@ -60,7 +60,7 @@ Takeaways for this board:
 - **20 A does not fit in a normal trace.** Use a **copper zone** (a filled polygon) on both layers, joined by many vias, with 2 oz copper. Some designers also leave the solder mask off the strip and add solder to thicken it.
 - **Or keep 20 A off the board.** A common RC approach wires the battery straight to the ESC with 12 to 14 AWG silicone wire and taps a short, fused lead to the PDB for the electronics. Ask your reviewer which they prefer (open question 1).
 - **Vias** (plated holes joining layers) carry roughly 1 A each for a standard 0.3 mm drill. A 20 A layer change needs 20 or more vias, or a larger drill.
-- **Connectors and wire** must match the copper: XT60 for the battery (a common RC connector, about 30 A continuous), screw terminals or XT30 for 5 A outputs, and check every terminal's datasheet current rating.
+- **Connectors and wire** must match the copper: the battery's T-plug (about 50 A, approx., check its datasheet) arrives on a 12 AWG pigtail soldered to board pads, screw terminals or XT30 for 5 A outputs, and check every terminal's datasheet current rating.
 
 **Cross-check with IPC-2152.** The table above uses the 1950s-based IPC-2221 formula. Its successor, IPC-2152, is more accurate from 5 to 25 A and usually asks for more copper on a lone trace:
 
@@ -89,7 +89,7 @@ Both turn a higher voltage into a lower one. A **linear regulator** (LDO) burns 
 - **Fuse:** a sacrificial link that opens on overcurrent so a short burns the fuse, not the wiring or the battery. Size it above normal peak current and below what the copper and wire can carry. Placeholders here are `TBD`.
 - **Bulk and decoupling capacitors:** a big electrolytic capacitor on `VBAT` absorbs the ESC's current spikes; small ceramic capacitors at each regulator's input and output keep it stable. Values come from each regulator's datasheet. Ceramic capacitors lose much of their capacitance under DC voltage ("DC bias"): a 22 µF 10 V part on a 5 V rail may act like 10 µF or less, so check its bias curve or choose a higher voltage rating.
 - **TVS diode** (transient-voltage suppressor): clamps voltage spikes on `VBAT` caused by the motor. Its standoff voltage must be above 8.4 V.
-- **Reverse-polarity protection:** the XT60 is keyed, but a hand-soldered pigtail can still be wired backwards. A P-channel MOSFET or ideal-diode controller on the regulator branch is cheap insurance.
+- **Reverse-polarity protection:** the T-plug is keyed, but a hand-soldered pigtail can still be wired backwards. A P-channel MOSFET or ideal-diode controller on the regulator branch is cheap insurance.
 - **Power LEDs and test points** on each rail let you see and probe what's alive during bring-up.
 
 ### Why the extra capacitors, LEDs and test points
@@ -97,7 +97,7 @@ Both turn a higher voltage into a lower one. A **linear regulator** (LDO) burns 
 They're standard practice, and most can't live inside the module:
 
 - **C1 (bulk, on `VBAT`):** the ESC draws current in bursts, and the battery wires' inductance makes `VBAT` dip and spike. C1 is a local reservoir on the shared bus, so no single regulator can carry it.
-- **C2/C3, C4/C5 (around the modules):** the modules already carry their own ceramics, so these are optional. They counter the wiring between battery and module and help the output when the load jumps. Keep or drop them on the reviewer's advice.
+- **C2/C3, C4/C5 (around the modules):** these are decoupling (bypass) caps, not low-pass filters. A cap from a rail to GND is a shunt: it gives fast current a short path to ground, and it only becomes a filter when something in series (a ferrite, an inductor) sits ahead of it. The input cap (C2, C4) supplies the buck's own pulsed input current at its \~500 kHz switching frequency, so that current doesn't run back up the battery wires, and it shunts some fast ESC spikes. It can't stop the ESC's slower (kHz) ripple; the regulator's own regulation rejects most of that, with C1 as the bulk reservoir. The output cap (C3, C5) lowers output ripple and holds the rail up when the load jumps. The modules carry their own ceramics, so these are optional: keep or drop them on the reviewer's advice. The real low-pass filter on this board is FB1 + C6 in front of the LDO; the same LC filter in front of a buck is the fix if ESC noise proves to be a problem.
 - **C7/C8 (LDO):** required. The AP2112 is a bare chip with no capacitors of its own; its datasheet specifies them, and many LDOs oscillate without them.
 - **R + LED pairs:** "rail is on" indicators for bring-up. The resistor limits the LED to about 2 mA; without it the LED would burn out. Mark them DNP (do not populate) if unwanted.
 - **Test points:** pads for a multimeter probe on each rail.
@@ -181,7 +181,7 @@ All of these also exist in the **Place** menu and the right-hand toolbar, so you
 
 ## Draw the schematic, step by step
 
-You will build one A3 sheet split into five labelled regions, with power flowing left to right. Work in this order and save after each step.
+You will build one A3 sheet split into six labelled regions (A to E for the rails, F for U1's EN/PG control), with power flowing left to right. Work in this order and save after each step.
 
 ### Step 1: page settings
 
@@ -256,7 +256,7 @@ Press **A**, type the symbol name in the search box, pick it, click to place. Th
 2. **U1** is the Pololu D36V50F5, soldered to the PCB on its 2 × 6, 0.1 in pin grid. Make a symbol `rc_power:D36V50F5` showing all 12 module pins, numbered to match the `PinHeader_2x06_P2.54mm` footprint: 1 `PG` (open collector), 2 `EN` (input), 3–4 `VRP`, 5–6 `VIN` (power input), 7–10 `GND` (power input), 11–12 `VOUT` (one power output, one passive, so ERC doesn't see two outputs fighting). Value `Pololu D36V50F5 buck (req 5.1V ≥6A TBD)`.
 3. Join both `VIN` pins to `VIN_CPU`, all four `GND` pins to `GND` and both `VOUT` pins to a `+5V_CPU` power symbol. Each header pin is rated 3 A, which is why every power connection uses its pin pair.
 4. Mark both `VRP` pins no-connect (**Q**). VRP is the input after the module's reverse protection; the sensor buck stays fed from `VBAT` through F4, so VRP is unused.
-5. **EN** (net `U1_EN`): the module turns off below 1.2 V and on above 1.35 V, and has a 100 kΩ pull-up to VIN inside it, so EN floats up to battery voltage (8.4 V). Never wire EN straight to an ESP32 GPIO. Proposed: **Q1** `Transistor_FET:2N7002` with drain on `U1_EN`, source on `GND`, gate on `ESP_SHDN`, plus **R4** `100k` from `ESP_SHDN` to `GND` so Q1 stays off (U1 on) while the ESP32 boots. ESP32 drives `ESP_SHDN` high → U1 off, which also powers off the Pi 5 and the ESP32 itself. The control approach is still open (question 13).
+5. **EN** (net `U1_EN`): the module turns off below 1.2 V and on above 1.35 V, and has a 100 kΩ pull-up to VIN inside it, so EN floats up to battery voltage (8.4 V). Never wire EN straight to an ESP32 GPIO. Proposed: **Q1** `Transistor_FET:2N7002` with drain on `U1_EN`, source on `GND`, gate on `ESP_SHDN`, plus **R4** `100k` from `ESP_SHDN` to `GND` so Q1 stays off (U1 on) while the ESP32 boots. Draw Q1 and R4 in region F. ESP32 drives `ESP_SHDN` high → U1 off. **This is a power cycle, not a shutdown:** the ESP32 loses power, its pin drops, R4 turns Q1 off and U1 restarts, rebooting the Pi 5 (a hard cut, with SD-card corruption risk) and the ESP32. A real low-battery cutoff needs a latch or a VIN divider on EN. Use a non-strapping ESP32-S3 GPIO with no pull-up at reset for `ESP_SHDN` (a reset pull-up against R4 could switch U1 off during boot), and a non-strapping GPIO for `U1_PG` (PG is low while VOUT ramps). The control approach is still open (question 13).
 6. **PG** (net `U1_PG`) to J5 pin 3. PG is open-drain and goes low when VOUT is more than 20 % high or 10 % low; the ESP32 reads it with its internal pull-up (3.3 V).
 7. The module has input reverse protection to 40 V, so this branch needs no extra reverse-polarity part (question 6 covers the rest of the board).
 8. **C2** `Device:C`, value `TBD µF, ≥ 16 V` on `VIN_CPU`; **C3** `Device:C`, value `TBD µF, ≥ 10 V` on `+5V_CPU`.
@@ -289,7 +289,7 @@ The 3.3 V rail is a **linear regulator (LDO)** fed from `+5V_SENS`, not a buck f
 
 In the Notes region, press **T** and add numbered assumptions, for example:
 
-1. Battery: 2S LiPo, 6.0 to 8.4 V, XT60.
+1. Battery: 2S LiPo, 6.0 to 8.4 V, T-plug pigtail (12 AWG) on pads.
 2. All fuses and protection values TBD; positions are proposals.
 3. Single common `GND`; star point at J1 in layout.
 4. `+6V_BEC` is ESC-supplied and isolated from the 5 V rails.
@@ -332,7 +332,7 @@ A **symbol** is the logical drawing; a **footprint** is the copper pads and hole
 
 | Part | Search term in the footprint list | Check |
 | --- | --- | --- |
-| J1 battery, J2 ESC (T-plug pigtails) | `SolderWire` (wire pads) | 12 AWG is 3.3 mm²; KiCad's largest stock pad is the 2.5 mm² one (2.4 mm hole), so the final pad is TBD |
+| J1 battery, J2 ESC (T-plug pigtails) | `SolderWire` (wire pads) | 12 AWG is 3.3 mm²; KiCad's largest stock pad is the 2.5 mm² one (3.0 mm hole, 4.4 mm pad, for 2.4 mm conductors); 12 AWG's conductor likely fits, but its current rating and thin copper ring need checking, so the final pad is TBD |
 | F1 to F4 | `Fuseholder` (blade/ATO) or an inline holder off-board | Holder current rating (F1 about 27 to 30 A) |
 | U1 D36V50F5 | `PinHeader_2x06_P2.54mm` (pin numbering in Step 7) | Check against Pololu's dimension drawing; header pins are 3 A each |
 | U2 module | Matches the chosen module | Pin order and spacing from the module drawing |
@@ -404,7 +404,7 @@ Put these in your hand-off message, numbered, so the reviewer can answer by numb
 10. **ESC and servo:** the repo's ESC manual confirms a 6 V / 3 A switch-mode BEC, and the servo datasheet gives 2.3 A stall at 6.8 V, so it fits with about 0.7 A to spare. Is that enough margin, or should the servo get its own buck?
 11. **Layout:** where the ground star point should sit, and how to keep motor return current away from the sensor ground.
 12. **Connectors and wire:** the battery and ESC use T-plug pigtails with 12 AWG bare ends soldered to J1/J2 pads. What pad size and strain relief? Wire gauge for each output?
-13. **U1 enable control:** EN has a 100 kΩ pull-up to VIN (up to 8.4 V), so a direct ESP32 connection is ruled out, and U1 powers the ESP32, so it must start by itself. The schematic proposes a shutdown FET (Q1 2N7002 + R4 100k). Alternatives: an enable on the sensor buck instead (needs a buck with an EN pin), a hardware undervoltage cutoff (a VIN divider on EN, no GPIO), or a latching power switch (more parts). Which one?
+13. **U1 enable control:** EN has a 100 kΩ pull-up to VIN (up to 8.4 V), so a direct ESP32 connection is ruled out, and U1 powers the ESP32, so it must start by itself. The schematic proposes a FET (Q1 2N7002 + R4 100k), but it can only power-cycle U1, because U1 restarts once the ESP32 loses power. Alternatives: an enable on the sensor buck instead (needs a buck with an EN pin), a hardware undervoltage cutoff (a VIN divider on EN, no GPIO), or a latching power switch (more parts). Which one?
 14. **USB-C pigtail cable:** the pigtails are 24 AWG. At 5 A, about 0.25 V is lost over a 30 cm cable, enough to trigger the Pi's undervoltage warning on a 5.0 V rail. Keep them under about 15 cm, or use 20 AWG pigtails?
 
 ### Verification record

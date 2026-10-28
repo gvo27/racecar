@@ -18,7 +18,7 @@ Project version: **KiCad 10.0**. The baseline file was generated in KiCad 7 form
 ## First open in KiCad 10 (checklist)
 
 1. Open `rc_power_board.kicad_pro`. Accept the format-upgrade prompt, then **File > Save**.
-2. **Inspect > Electrical Rules Checker > Run ERC.** Never run on this baseline in any KiCad version (KiCad 7's command-line tool has no ERC), so treat its output as the first real check and fix or explain every error. Intentional no-connects: U1 VRP (2 pins), U2 EN; U3's NC pin is hidden and already no-connect type. Expect warnings that U1 EN has no pull-up and U1 PG has no pull-up: EN's pull-up is inside the module, and PG uses the ESP32's internal pull-up.
+2. **Inspect > Electrical Rules Checker > Run ERC.** Never run on this baseline in any KiCad version (KiCad 7's command-line tool has no ERC), so treat its output as the first real check and fix or explain every error. Intentional no-connects: U1 VRP (2 pins), U2 EN; U3's NC pin is hidden and already no-connect type. Expect "symbol doesn't match library" warnings for the embedded stock symbols where KiCad 10's libraries changed; they're harmless (update from library or exclude). (The kicad-happy analyzer separately flags U1 EN/PG as missing pull-ups: EN's is inside the module, PG uses the ESP32's internal pull-up.)
 3. Click one wire on each rail and read the net name in the message panel: `VBAT`, `+5V_CPU`, `+5V_SENS`, `+3V3_SENS`, `GND` must all be distinct.
 4. **Tools > Assign Footprints**: confirm none show as missing in the KiCad 10 libraries. U2 is intentionally blank (module TBD). J1/J2 use the 2.5 mm2 wire-pad placeholder, too small for 12 AWG (3.3 mm2).
 5. **File > Schematic Setup > Net Classes**: check the four classes and the assignment patterns loaded from the `.kicad_pro`.
@@ -30,7 +30,7 @@ The schematic follows `power_board_plan.md` part for part (same references, nets
 - **Rail symbols:** each rail is a project power symbol whose hidden pin name and Value both equal the rail name, instead of a renamed `power:VCC`. This keeps nets correct in KiCad 7 (pin name) and 8+ (Value) alike.
 - **`+6V_BEC`** uses net labels (two connectors only), not a power symbol.
 - **U1** is the inventory part, Pololu D36V50F5, drawn with all 12 pins and soldered to the board on its 2x6 0.1 in grid (footprint `PinHeader_2x06_P2.54mm_Vertical`). Pin numbers: 1 PG, 2 EN, 3-4 VRP, 5-6 VIN, 7-10 GND, 11-12 VOUT (module column k = pins 2k+1 top row, 2k+2 bottom row). Check this against Pololu's dimension drawing before layout. Each header pin is rated 3 A, so VIN, VOUT and GND use their pin pairs. Its 5.0 V / 5.5 A rating differs from the plan's 5.1 V / >= 6 A target (open question 4). VRP is unused: the sensor buck stays on `VBAT` through F4.
-- **U1 EN / PG (region F, proposal):** EN goes to Q1 (2N7002), whose gate is `ESP_SHDN` with R4 (100k) holding it low, so U1 is on by default and the ESP32 can shut it down. PG goes to J5. The EN approach is open question 13 (also at the top of the PR).
+- **U1 EN / PG (region F, proposal):** EN goes to Q1 (2N7002), whose gate is `ESP_SHDN` with R4 (100k) holding it low, so U1 is on by default. Driving `ESP_SHDN` high power-cycles U1 (the ESP32 loses power, Q1 turns off, U1 restarts and the Pi 5 reboots); it is not a latching shutdown. Use non-strapping GPIOs with no reset pull-up for both signals. PG goes to J5. The EN approach is open question 13 (also at the top of the PR).
 - **J5** has 5 pins: THROTTLE_PWM, STEER_PWM, U1_PG, ESP_SHDN, GND. GPIOs for the two new signals are TBD until firmware adds them (pins.h and the README pin table together).
 - **J1/J2** are wire pads for T-plug pigtails (12 AWG bare ends), not board connectors.
 - **J6/J7** are 2-wire USB-C pigtails into the Pi 5 and the ESP32's left USB-C port, so each board's own USB-C input protection is used. The pigtails are 24 AWG; keep them short (open question 14).
@@ -40,7 +40,7 @@ The schematic follows `power_board_plan.md` part for part (same references, nets
 - **Net names the plan leaves open:** the F2-to-J2 net is named `VBAT_ESC`.
 - **Net-class patterns** are `*VBAT*`, `*VIN_CPU`, `*VIN_SENS`, `*+6V_BEC` (plan: `VBAT*`, `VIN_CPU`, ...). KiCad prefixes local-label nets with `/` (`/VBAT_RAW`, `/+6V_BEC`), which the plan's patterns would miss.
 - **D1** uses `Device:D_Zener` as a unidirectional TVS, cathode to `VBAT` (the plan now says the same).
-- **Shortened values** to fit the sheet: J3 "ESC Rx lead (BEC in)", J6/J7 "USB-C pigtail > Pi 5 / ESP32", C1/C2-C5 drop "uF"/"low-ESR", C7/C8 "1uF 10V TBD", U1 "Pololu D36V50F5 buck (req 5.1V >=6A TBD)".
+- **Shortened values** to fit the sheet: J3 "ESC Rx lead (BEC in)", J6/J7 "USB-C > Pi 5 / ESP32", D1 "TVS unidir. >=9V TBD", C1/C2-C5 drop "uF"/"low-ESR", C7/C8 "1uF 10V TBD", U1 "Pololu D36V50F5 buck (req 5.1V >=6A TBD)".
 - **Placeholder footprints the plan doesn't fix** (all ratings TBD, pick real parts before layout): F1/F2 ATO blade holder (`Fuseholder_Blade_ATO_Littelfuse_Pudenz_2_Pin`; F1 must carry about 27-30 A), F3/F4 mini-blade holder (`Fuseholder_Blade_Mini_Keystone_3568`), C1 10 mm radial electrolytic, D1 SMB, FB1 0805, TP1-TP3 1.5 mm pads. J1/J2 use `SolderWire-2.5sqmm_1x02_P8.8mm_D2.4mm_OD4.4mm`, KiCad's largest stock wire pad; 12 AWG needs a bigger hole, so the pad is TBD.
 
 ## Verification so far
