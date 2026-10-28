@@ -86,11 +86,12 @@ rccar/                            ← repo root; colcon finds packages directly
 
 ## Actuator access, calibration and admin control under ROS 2
 
-- **Today `tools/rccar.py` is the official interface.** After phase 2, every actuator interaction goes through ROS 2 via micro-ROS, and `tools/` is deleted once parity is verified.
-- **Firmware commands become micro-ROS interfaces:**
-  - topic: `DriveCmd`
-  - services: arm, disarm, raw_pwm, set_param, cal_point, save, info
-  - telemetry: published topic
+- **Today `tools/rccar.py` is the official interface.** After phase 2, every actuator interaction goes through ROS 2 via micro-ROS. The ASCII path (`esp32s3_ascii` firmware env, `tools/`, `.venv`) stays as a `legacy-*` fallback until the user's bench parity test, and is then deleted in a follow-up.
+- **Firmware micro-ROS interfaces** (contract: `rccar_msgs`; bounded strings only):
+  - subscription `/rccar/mcu/drive` (`DriveCmd`: `heading_rad`, dimensionless `throttle` [-1, 1], `source`; REP-103 SI units). The supervisor is the only publisher.
+  - publishers `/rccar/mcu/telemetry` (best effort) and `/rccar/mcu/event` (reliable).
+  - one service `/rccar/mcu/command` (`McuCommand`) that reuses the firmware's ASCII parser, so every clamp and safety check stays in one place and the entity count fits micro-ROS defaults. Typed services (`set_param`, `cal_point`, `raw_pwm`, `save`, `get`, `info`) wrap it on the Pi in `rccar_mcu_bridge`.
+  - `rmw_uros_sync_session` replaces `TIME`; a reconnect state machine handles agent loss.
   - The failsafe timeout and the emergency brake stay in firmware.
 - **`rccar_calibration`** provides interactive tools (`ros2 run`) that call those services.
   - Physical adjustments stay manual. The tool prompts for the step (servo horn, ESC neutral trim, sensor mount), jogs or measures the value, and writes it to the bind-mounted `tuning.toml [steering.calibration]` / `[throttle.calibration]`.
@@ -99,8 +100,9 @@ rccar/                            ← repo root; colcon finds packages directly
 
 ### Admin teleop over SSH (supervisor layer)
 - **Flow:** laptop → `ssh pi` → `make teleop` runs `rccar_teleop` on the Pi, inside the SSH terminal. ROS traffic stays local; it never runs on the laptop.
-- **Admin commands:** `DriveCmd` with `source=admin` at the highest priority.
-- **Emergency services** live on the supervisor, bypass arbitration, and forward disarm to the ESP32 immediately: brake, disarm, and reverse (as a drive command).
+- **Admin commands:** `DriveCmd` on `/rccar/cmd/admin`, the highest-priority input in the supervisor config.
+- **Emergency services** live on the supervisor, bypass arbitration, and forward disarm to the ESP32 immediately: brake and disarm (`std_srvs/Trigger`); reverse is a normal drive command. Brake/disarm **latch** an incident; `arm` is `Reset(incident)` and leads to *armed but stationary*, and teleop must return to neutral before motion. Fail-safe by silence: the supervisor streams drive commands only while a permit is valid, and the ESP32 timeout disarms when they stop.
+- **Software stop is not safety-rated.** The ESC power switch is the independent hardware stop.
 - **Admin input goes straight to the supervisor**, never through the captain.
 - **Full shutdown:** the teleop key disarms through the supervisor and exits, then `make car-shutdown` runs in the SSH shell (`compose down` + `sudo poweroff`). Containers stay unprivileged.
 
@@ -122,7 +124,7 @@ rccar/                            ← repo root; colcon finds packages directly
 **Authority chain:** `[future: cloud nav API, natural-language agent] → captain → supervisor ← admin teleop`, then `supervisor → micro-ROS → ESP32 failsafe`.
 
 - Higher layers send **goals**, not motor commands, as ROS 2 actions on `rccar_msgs/action/Mission`.
-- Every `DriveCmd` carries `source` + `priority`. The supervisor arbitrates (twist_mux pattern) and keeps final veto.
+- Each source publishes `DriveCmd` on its own input topic (`/rccar/cmd/<source>`). Priority and timeout per input come from supervisor config, never from the message (a sender could fake it); `DriveCmd.source` is for logging. The supervisor arbitrates (twist_mux pattern), is the only publisher on `/rccar/mcu/drive`, and keeps final veto.
 - Adding a layer means a new action client or a new `DriveCmd` source, with no changes to the supervisor or firmware.
 
 ---
@@ -217,11 +219,13 @@ captain / perception / planning / supervisor      ← identical in sim and on th
    - **Context files:** add `.claude/layout.yaml`, `dependencies.md`, `deploy.md`, `models.md` and `repos.md`, and update `firmware.md`, CLAUDE.md, the README setup (git, make, docker) and the Makefile.
    - **Scope limit:** `tools/` and `.venv` stay, so bench host control is unchanged.
 2. **ROS 2 + micro-ROS actuator path** (one phase; it may land as an ASCII-bridge commit followed by a micro-ROS commit if that makes the cutover easier to debug)
-   - **Images and packages:** `docker/ros.Dockerfile`, then `rccar_msgs` (`DriveCmd` with source/priority, calibration srvs), `rccar_mcu_bridge`, `rccar_bringup`, `rccar_supervisor` (arbitration + e-stop services), `rccar_teleop` and `rccar_calibration`.
-   - **Firmware:** the comms layer becomes micro-ROS via `micro_ros_platformio`, with `rccar_msgs` built into the micro-ROS lib (`docs/esp32-firmware-proposal.md` §10).
+   - **Images and packages:** `docker/ros.Dockerfile` (multi-stage), then `rccar_msgs` (`DriveCmd` heading_rad/throttle/source, `McuCommand`, `Reset`, calibration srvs), `rccar_mcu_bridge`, `rccar_bringup`, `rccar_supervisor` (arbitration + latched e-stop), `rccar_teleop` and `rccar_calibration`.
+   - **Firmware:** the comms layer becomes micro-ROS via `micro_ros_platformio` (jazzy, serial on UART0, pinned by commit), with `rccar_msgs` copied into `firmware/esp32/extra_packages/`. Env `esp32s3` = micro-ROS (default), `esp32s3_ascii` = legacy protocol. `make build` keeps `.pio/libdeps` (the micro-ROS lib build is slow) and cleans only `.pio/build`.
+   - **CI:** ROS image build + `colcon build/test` (pytest, launch_testing, ament_lint), ros2-engineering static validators, an `extra_packages` sync check, and a firmware matrix over both envs.
+   - **Not in phase 2:** ros2_control (the ESP32 owns PWM and there is no odometry); revisit with `ackermann_steering_controller` for the captain/Nav2 phase.
    - **Deployment:** `deploy/car/` (compose, systemd, udev) and `[platform.pi5]`.
-   - **Cleanup:** delete `tools/` and `.venv` once bench parity is shown.
-   - **New invariant:** "msg/srv change => rccar_msgs + firmware + docs".
+   - **Cleanup (follow-up PR):** delete `tools/`, `.venv` and the `esp32s3_ascii` env after the user's bench parity test.
+   - **New invariant:** "msg/srv change => rccar_msgs + firmware/esp32/extra_packages + docs".
    - **Conventions:** add `.claude/rules/ros2.md`. Make the supervisor output the hardware boundary, and have every launch file accept `use_sim_time` (see "Sim/real parity").
 3. **Recorder + backup.** MCAP bags to `/data`; upload only when disarmed and idle, to the destination set in `.env`.
 4. **Sensors.** `rccar_drivers`, `rccar_description` TF, sensor calibration, time sync (chrony). `rccar_description` is the single URDF for car and sim; sensor topics/frames are defined once so the sim adapter can publish the same ones.
