@@ -1,0 +1,10 @@
+# KiCad local caches and backups
+*-backups/
+*.lck
+_autosave-*
+fp-info-cache
+*.kicad_prl
+# kicad-happy: keep analysis/manifest.json, ignore per-run JSON (track_in_git: false)
+analysis/*/
+datasheets/*.pdf
+spice/
