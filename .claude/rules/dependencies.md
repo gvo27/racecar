@@ -14,7 +14,7 @@ paths:
 
 ## Host prerequisites
 - git, make, docker engine + compose plugin + buildx. User in groups `docker` and `dialout`.
-- Python >=3.11 + `.venv` only for host tools (`tools/`) until phase 2 parity.
+- Python >=3.12 + `.venv` only for host tools (`tools/`) until phase 2 parity.
 
 ## Toolchain images
 - `docker/firmware.Dockerfile` -> image `rccar-fw`: python:3.12-slim-bookworm, platformio==6.1.16, esptool==4.8.1, pyserial==3.5, project packages (espressif32@6.9.0, board toolchain, framework, scons) preinstalled via project-context `pio pkg install` into `/opt/platformio` (`PLATFORMIO_CORE_DIR`, a+rwX for `--user <host uid>`). Context filtered by `docker/firmware.Dockerfile.dockerignore`.

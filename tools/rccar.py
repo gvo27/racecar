@@ -268,8 +268,8 @@ def open_link(args, label: str, apply: bool = True) -> Link:
 # Subcommands
 # ---------------------------------------------------------------------------
 def cmd_check_env(args) -> int:
-    ok = sys.version_info >= (3, 11)       # tomllib
-    print(f"python   {sys.version.split()[0]}", "OK" if ok else "NEED >= 3.11")
+    ok = sys.version_info >= (3, 12)       # tomllib
+    print(f"python   {sys.version.split()[0]}", "OK" if ok else "NEED >= 3.12")
     for mod, pkg in (("serial", "pyserial"), ("esptool", "esptool")):
         found = importlib.util.find_spec(mod) is not None
         print(f"{pkg:<8} {'OK' if found else 'MISSING (make setup)'}")

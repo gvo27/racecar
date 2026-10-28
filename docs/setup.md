@@ -4,7 +4,7 @@ Assumptions are marked **Assume:**. If one is false, fix it before continuing.
 
 ## 1. Host
 
-**Assume:** Linux (Raspberry Pi 5 / Ubuntu 24.04 or a laptop) with `git`, `make`, **Docker Engine + compose plugin** (and buildx), and **Python ≥ 3.11** as `python3` (still needed for the host tools in this phase). Internet access to pypi.org, Docker Hub and registry.platformio.org.
+**Assume:** Linux (Raspberry Pi 5 / Ubuntu 24.04 or a laptop) with `git`, `make`, **Docker Engine + compose plugin** (and buildx), and **Python ≥ 3.12** as `python3` (still needed for the host tools in this phase). Internet access to pypi.org, Docker Hub and registry.platformio.org.
 
 ```sh
 sudo usermod -aG docker,dialout $USER   # then log out and back in

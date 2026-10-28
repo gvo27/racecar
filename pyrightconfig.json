@@ -3,6 +3,6 @@
   "exclude": ["**/__pycache__", "firmware/esp32/.pio", ".pio-core", "logs", "models/cache"],
   "venvPath": ".",
   "venv": ".venv",
-  "pythonVersion": "3.11",
+  "pythonVersion": "3.12",
   "typeCheckingMode": "basic"
 }
