@@ -8,4 +8,4 @@ firmware/esp32/compile_commands.json
 .pio-core/
 .cache/
 .pytest_cache/
-docs/schematics/.history
+docs/schematics/.history/
