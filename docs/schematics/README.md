@@ -21,8 +21,10 @@ Project version: **KiCad 10.0**. The baseline was generated in KiCad 7 format, o
 - Tools > Update Symbols from Library for D2-D4 (LED) and Q1 (2N7002): the KiCad 7 library copies differed from KiCad 10's.
 - **ERC: 0 errors, 0 warnings** after the symbol update, with "Four connection points are joined together" switched from Ignore to Warning to check U1's joined pins.
 - Checks left on Ignore (severities are saved in `rc_power_board.kicad_pro`): "Global label only appears once" (the board has no global labels), "SPICE model issue" (simulation runs through kicad-happy/ngspice), "Assigned footprint doesn't match footprint filters" (J6/J7 terminal blocks on a generic connector symbol, deliberate).
-- Still to check before layout: footprint assignments against the KiCad 10 libraries, net classes in Schematic Setup, and the D36V50F5 pin numbering against Pololu's dimension drawing.
-- `rc_power_board.pdf` is a KiCad 7 plot of the baseline (pre-symbol-update, older pigtail note); re-plot it from KiCad 10 (File > Plot > PDF) before sending it out.
+- Each rail's wire resolves to its intended net class (owner-checked by clicking the wires): `VBAT` HighCurrent, `+5V_CPU` Power5A, `+5V_SENS` Power3A, `+3V3_SENS` Default.
+- Tools > Assign Footprints: every part has a footprint except U2 (module TBD), and ERC's "Footprint link issue" check (set to Warning) reported nothing, so all assigned footprints exist in the KiCad 10 libraries.
+- Still to check before layout: the D36V50F5 pin numbering against Pololu's dimension drawing, and real footprints for the placeholders (J1/J2 pads, fuse holders, U2).
+- `rc_power_board.pdf` is plotted from KiCad 10.0.7 (commit 8a6cfae). Re-plot it after every schematic change (File > Plot > PDF).
 
 ## How the baseline differs from the step-by-step guide
 
@@ -54,7 +56,7 @@ Built and checked with KiCad 7.0.11 `kicad-cli` and the kicad-happy analyzer (v2
 - Analyzer: U1/U2 switching, U3 3.3 V LDO, D2-D4 resistor-limited. Remaining findings are expected for a draft: no datasheets / MPNs (all TBD), "missing pull-up" on U1 EN (inside the module), U1 PG (ESP32 internal pull-up) and U3 EN (tied to VIN per AP2112 datasheet), and `VBAT_ESC` "no declared source" (analyzer heuristic; the net has only passive pins, so KiCad's ERC should not flag it).
 - ERC in KiCad 10: 0 errors, 0 warnings (owner-run, see above).
 - kicad-happy analyzer on the KiCad 10 file (f0df86b + note edit): 46 parts, 23 nets, same findings as the KiCad 7 baseline, so the upgrade and symbol update changed no connections.
-- Not yet done: footprint check against KiCad 10 libraries, SPICE, any PCB layout.
+- Not yet done: SPICE, any PCB layout.
 
 ## Working on this folder with Claude Code
 
