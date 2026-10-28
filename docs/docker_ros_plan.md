@@ -177,7 +177,34 @@ A systemd unit runs `compose up -d` at boot. Deploys are explicit: `make car-pul
 | `mcu_bridge.md` | `rccar_mcu_bridge/**` |
 | `calibration.md` | `rccar_calibration/**` |
 | `supervisor.md` | `rccar_supervisor/**`, `rccar_teleop/**` |
+| `ros2.md` | `rccar_*/**` (phase 2; see "Sim/real parity + ROS 2 conventions") |
 | `captain.md` | `rccar_captain/**` (later) |
+
+---
+
+## Sim/real parity + ROS 2 conventions
+
+**Sim is a swap, not a separate codebase.** Sim and car share `rccar_description` (URDF), `rccar_msgs`, the supervisor and everything above it. Only the layer below the supervisor changes:
+
+```
+captain / perception / planning / supervisor      ← identical in sim and on the car
+                     │ arbitrated DriveCmd, telemetry, sensor topics
+        ┌────────────┴────────────┐
+   sim:=true                  sim:=false (default)
+ Gazebo + ros_gz_bridge      mcu-agent → micro-ROS → ESP32
+```
+
+- **Hardware boundary = the supervisor's output topic + telemetry/sensor topics.** Nothing above it may import or assume ESP32, serial or Gazebo specifics.
+- **Every launch file accepts `use_sim_time`**, and `rccar_bringup` passes it through, so no node needs edits to run in sim.
+- **The sim repo** (worlds, gz bridge config, the sim adapter) stays separate per CLAUDE.md. It pulls this repo through its own `.repos`, and adds nothing to this repo except the `sim:=` launch arg.
+- If autonomy code needs a sim-only branch, treat that as a boundary leak and fix the interface.
+
+**`.claude/rules/ros2.md`** (paths: `rccar_*/**`, in the same compact style as `firmware.md`). Content to borrow from [ros2-claude-code-template](https://github.com/harunkurtdev/ros2-claude-code-template) `.claude/rules/` + skills, trimmed to what we use:
+- **Communication** (`ros2_communication.md`): topic/service naming, a QoS profile per stream (sensor data = best-effort, commands/e-stop = reliable), standard msgs before custom ones.
+- **Testing** (`testing.md`): algorithms in plain Python/C++ libraries tested with pytest/gtest without ROS ("thin node, fat library"), plus `launch_testing` for node wiring.
+- **Lifecycle nodes** for resource owners (mcu_bridge, drivers, recorder). Declare every parameter with `declare_parameter`.
+- **Launch:** composable launch files, params loaded from `tuning.toml` through `rccar_bringup`, and no hardcoded values.
+- **Skip:** VDA 5050, Nav2 BT plugin scaffolding, gz-sim ECS/plugin tooling, and the mandatory 4-layer clean-architecture split per package.
 
 ---
 
@@ -195,9 +222,11 @@ A systemd unit runs `compose up -d` at boot. Deploys are explicit: `make car-pul
    - **Deployment:** `deploy/car/` (compose, systemd, udev) and `[platform.pi5]`.
    - **Cleanup:** delete `tools/` and `.venv` once bench parity is shown.
    - **New invariant:** "msg/srv change => rccar_msgs + firmware + docs".
+   - **Conventions:** add `.claude/rules/ros2.md`. Make the supervisor output the hardware boundary, and have every launch file accept `use_sim_time` (see "Sim/real parity").
 3. **Recorder + backup.** MCAP bags to `/data`; upload only when disarmed and idle, to the destination set in `.env`.
-4. **Sensors.** `rccar_drivers`, `rccar_description` TF, sensor calibration, time sync (chrony).
+4. **Sensors.** `rccar_drivers`, `rccar_description` TF, sensor calibration, time sync (chrony). `rccar_description` is the single URDF for car and sim; sensor topics/frames are defined once so the sim adapter can publish the same ones.
 5. **Captain, perception, inference, admin-link failsafe.** Per the notes above.
+6. **Sim adapter (sim repo).** Gazebo world + `ros_gz_bridge` below the supervisor, and a `sim:=true` arg in `rccar_bringup`. Verify the captain/perception stack runs unchanged in sim and on the car.
 
 ---
 
