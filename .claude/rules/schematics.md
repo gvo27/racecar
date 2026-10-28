@@ -15,6 +15,9 @@ paths:
 - Rails are project power symbols from `rc_power.kicad_sym` (pin name == Value == net name). Never rename a stock `power:` symbol's Value to make a rail.
 - ESP32 powers nothing; sensors never take power from ESP32 pins; signals <= 3.3 V.
 - Every net feeding a power_in pin through a fuse or ferrite has a PWR_FLAG.
+- U1 (Pololu D36V50F5) EN never connects directly to an ESP32 GPIO: EN has a 100k pull-up to VIN (up to 8.4 V), and U1 powers the ESP32, so U1 must start on its own. Any ESP32 control goes through a transistor (current proposal: Q1 2N7002 shutdown FET).
+- U1 VRP is unused; the sensor buck is fed from VBAT through F4 (VRP would overload U1's 6 A VIN pin pair).
+- Power to the Pi 5 and ESP32 leaves through 2-wire USB-C pigtails (J6/J7) so their own USB-C input protection stays in the path.
 - Net classes live in `rc_power_board.kicad_pro` and must match the plan's net-class table (VIN_CPU/VIN_SENS included).
 
 ## Tooling (kicad-happy@kicad-happy)

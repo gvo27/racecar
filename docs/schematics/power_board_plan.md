@@ -92,6 +92,16 @@ Both turn a higher voltage into a lower one. A **linear regulator** (LDO) burns 
 - **Reverse-polarity protection:** the XT60 is keyed, but a hand-soldered pigtail can still be wired backwards. A P-channel MOSFET or ideal-diode controller on the regulator branch is cheap insurance.
 - **Power LEDs and test points** on each rail let you see and probe what's alive during bring-up.
 
+### Why the extra capacitors, LEDs and test points
+
+They're standard practice, and most can't live inside the module:
+
+- **C1 (bulk, on `VBAT`):** the ESC draws current in bursts, and the battery wires' inductance makes `VBAT` dip and spike. C1 is a local reservoir on the shared bus, so no single regulator can carry it.
+- **C2/C3, C4/C5 (around the modules):** the modules already carry their own ceramics, so these are optional. They counter the wiring between battery and module and help the output when the load jumps. Keep or drop them on the reviewer's advice.
+- **C7/C8 (LDO):** required. The AP2112 is a bare chip with no capacitors of its own; its datasheet specifies them, and many LDOs oscillate without them.
+- **R + LED pairs:** "rail is on" indicators for bring-up. The resistor limits the LED to about 2 mA; without it the LED would burn out. Mark them DNP (do not populate) if unwanted.
+- **Test points:** pads for a multimeter probe on each rail.
+
 ## Power budget
 
 Worst case, the battery supplies about **27 A**: 20 A to the ESC plus about 7.3 A into the two switching regulators when the battery is nearly empty. That total, not just the ESC's 20 A, sets the main fuse, the battery connector and the `VBAT` copper. The 3.3 V rail is now a low-noise **LDO** fed from `+5V_SENS`, so its current is counted inside the sensor buck's load. Per-device figures marked "approx." are from memory and must be checked against each datasheet before the review.
@@ -224,7 +234,7 @@ Either way, use the standard `power:GND` for ground everywhere, and never `GNDA`
 
 Press **A**, type the symbol name in the search box, pick it, click to place. Then press **E** on each part to set its **Value** and later its **Footprint**.
 
-1. Place `Connector_Generic:Conn_01x02` as **J1**, value `XT60 battery`. Pin 1 is +, pin 2 is −.
+1. Place `Connector_Generic:Conn_01x02` as **J1**, value `Battery T-plug pigtail 12AWG`. The battery has a T-plug (Deans) lead; a matching T-plug pigtail with bare 12 AWG ends is soldered into two wire pads on the board. Pin 1 is +, pin 2 is −.
 2. Place `Device:Fuse` as **F1**, value `TBD (main, about 30 A)`. Wire J1 pin 1 to one end of F1 with **W**.
 3. Press **L** on the wire between J1 and F1 and name it `VBAT_RAW` (the unfused side). Put a `VBAT` power symbol on the other side of F1.
 4. Place `Device:D_Zener` as **D1** (KiCad's stock `D_TVS` symbol is bidirectional; a unidirectional TVS is drawn with the Zener symbol), value `TVS unidir. TBD, standoff ≥ 9 V`, from `VBAT` to `GND`, cathode (the bar, pin 1) toward `VBAT`.
@@ -234,22 +244,25 @@ Press **A**, type the symbol name in the search box, pick it, click to place. Th
 
 ### Step 6: region B, ESC and servo
 
-1. **J2** `Connector_Generic:Conn_01x02`, value `ESC power`, pin 1 to `VBAT` through **F2** (`Device:Fuse`, value `TBD, ESC branch`), pin 2 to `GND`. If the reviewer prefers the 20 A path off-board, J2 and F2 are deleted later.
+1. **J2** `Connector_Generic:Conn_01x02`, value `ESC T-plug pigtail 12AWG`, pin 1 to `VBAT` through **F2** (`Device:Fuse`, value `TBD, ESC branch`), pin 2 to `GND`. The ESC's T-plug connects to a T-plug pigtail whose bare ends solder to J2's pads. If the reviewer prefers the 20 A path off-board, J2 and F2 are deleted later.
 2. **J3** `Connector_Generic:Conn_01x03`, value `ESC receiver lead (BEC in)`. The ESC's 3-wire lead carries the throttle signal *into* the ESC and the 6 V BEC power *out*. Pin 1 `GND`, pin 2 net label `+6V_BEC`, pin 3 net label `THROTTLE_PWM`.
 3. **J4** `Connector_Generic:Conn_01x03`, value `Servo DS3225MG`. Pin 1 `GND`, pin 2 `+6V_BEC`, pin 3 `STEER_PWM`.
-4. **J5** `Connector_Generic:Conn_01x03`, value `Actuator signals to ESP32`. Pin 1 `THROTTLE_PWM` (GPIO5), pin 2 `STEER_PWM` (GPIO4), pin 3 `GND`. The signals themselves are handled by the firmware; this header just gives them a home.
+4. **J5** `Connector_Generic:Conn_01x05`, value `Signals to ESP32`. Pin 1 `THROTTLE_PWM` (GPIO5), pin 2 `STEER_PWM` (GPIO4), pin 3 `U1_PG`, pin 4 `ESP_SHDN`, pin 5 `GND`. The GPIOs for `U1_PG` and `ESP_SHDN` are TBD until the firmware adds them (`pins.h` and the README pin table change together).
 5. Add a text note: `+6V_BEC comes only from the ESC. Never connect to any 5 V rail.`
 
 ### Step 7: region C, compute 5 V
 
-1. **F3** `Device:Fuse`, value `TBD`, from `VBAT` to the regulator input.
-2. Optional: **Q1** reverse-polarity protection. Leave a text placeholder `Reverse polarity protection TBD (P-FET or ideal diode)` if you aren't sure.
-3. **U1** `rc_power:REG_MODULE`, value `5.1 V buck rated ≥ 6 A, TBD (Vin min ≤ 6.0 V at 5 A)`. VIN from F3, GND to `GND`, VOUT to a `+5V_CPU` power symbol.
-4. EN pin: wire it the way the module's datasheet says (often tied to VIN or left open). Until you know, press **Q** on it to mark it unconnected and add a note `EN per datasheet, TBD`.
-5. **C2** `Device:C`, value `TBD µF, ≥ 16 V` at VIN to `GND`; **C3** `Device:C`, value `TBD µF, ≥ 10 V` at VOUT to `GND`.
-6. Power LED: **R1** `Device:R`, value `1k5` (about 2 mA), in series with **D2** `Device:LED`, from `+5V_CPU` to `GND`, LED cathode toward `GND`.
-7. **TP1** `Connector:TestPoint` on `+5V_CPU`.
-8. **J6** `Connector_Generic:Conn_01x02`, value `Raspberry Pi 5 power`, and **J7** `Connector_Generic:Conn_01x02`, value `ESP32-S3 5 V`. Pin 1 `+5V_CPU`, pin 2 `GND` on each.
+1. **F3** `Device:Fuse`, value `TBD`, from `VBAT` to a net labelled `VIN_CPU`.
+2. **U1** is the Pololu D36V50F5, soldered to the PCB on its 2 × 6, 0.1 in pin grid. Make a symbol `rc_power:D36V50F5` showing all 12 module pins, numbered to match the `PinHeader_2x06_P2.54mm` footprint: 1 `PG` (open collector), 2 `EN` (input), 3–4 `VRP`, 5–6 `VIN` (power input), 7–10 `GND` (power input), 11–12 `VOUT` (one power output, one passive, so ERC doesn't see two outputs fighting). Value `Pololu D36V50F5 buck (req 5.1V ≥6A TBD)`.
+3. Join both `VIN` pins to `VIN_CPU`, all four `GND` pins to `GND` and both `VOUT` pins to a `+5V_CPU` power symbol. Each header pin is rated 3 A, which is why every power connection uses its pin pair.
+4. Mark both `VRP` pins no-connect (**Q**). VRP is the input after the module's reverse protection; the sensor buck stays fed from `VBAT` through F4, so VRP is unused.
+5. **EN** (net `U1_EN`): the module turns off below 1.2 V and on above 1.35 V, and has a 100 kΩ pull-up to VIN inside it, so EN floats up to battery voltage (8.4 V). Never wire EN straight to an ESP32 GPIO. Proposed: **Q1** `Transistor_FET:2N7002` with drain on `U1_EN`, source on `GND`, gate on `ESP_SHDN`, plus **R4** `100k` from `ESP_SHDN` to `GND` so Q1 stays off (U1 on) while the ESP32 boots. ESP32 drives `ESP_SHDN` high → U1 off, which also powers off the Pi 5 and the ESP32 itself. The control approach is still open (question 13).
+6. **PG** (net `U1_PG`) to J5 pin 3. PG is open-drain and goes low when VOUT is more than 20 % high or 10 % low; the ESP32 reads it with its internal pull-up (3.3 V).
+7. The module has input reverse protection to 40 V, so this branch needs no extra reverse-polarity part (question 6 covers the rest of the board).
+8. **C2** `Device:C`, value `TBD µF, ≥ 16 V` on `VIN_CPU`; **C3** `Device:C`, value `TBD µF, ≥ 10 V` on `+5V_CPU`.
+9. Power LED: **R1** `Device:R`, value `1k5` (about 2 mA), in series with **D2** `Device:LED`, from `+5V_CPU` to `GND`, LED cathode toward `GND`.
+10. **TP1** `Connector:TestPoint` on `+5V_CPU`.
+11. **J6** and **J7** `Connector_Generic:Conn_01x02`, values `USB-C pigtail > Pi 5` and `USB-C pigtail > ESP32`. Each is a 2-wire USB-C cable with bare ends: the Pi 5 and the ESP32 (left, native USB port) take power through their own USB-C inputs and keep that input protection. Pin 1 `+5V_CPU`, pin 2 `GND`.
 
 ### Step 8: region D, sensor 5 V
 
@@ -319,12 +332,15 @@ A **symbol** is the logical drawing; a **footprint** is the copper pads and hole
 
 | Part | Search term in the footprint list | Check |
 | --- | --- | --- |
-| J1 battery | `XT60` | Board-mount version rated for your 27 A peak; pick the gender (XT60-M or XT60-F) that mates with your battery's plug |
-| J2 ESC power | `XT60` or a large screw terminal | Same current as J1 |
-| F1 to F4 | `Fuseholder` (blade/ATO) or an inline holder off-board | Holder current rating |
-| U1, U2 modules (U3 LDO uses the footprint its symbol suggests, e.g. SOT-23-5) | `PinHeader_1x04_P2.54mm`, or a custom footprint matching the module | Pin order and spacing from the module drawing |
-| J3, J4, J5 servo/ESC/signals | `PinHeader_1x03_P2.54mm` | Standard servo spacing |
-| J6, J7 compute outputs | `TerminalBlock` 5.08 mm, 2 pin | ≥ 5 A per pin |
+| J1 battery, J2 ESC (T-plug pigtails) | `SolderWire` (wire pads) | 12 AWG is 3.3 mm²; KiCad's largest stock pad is the 2.5 mm² one (2.4 mm hole), so the final pad is TBD |
+| F1 to F4 | `Fuseholder` (blade/ATO) or an inline holder off-board | Holder current rating (F1 about 27 to 30 A) |
+| U1 D36V50F5 | `PinHeader_2x06_P2.54mm` (pin numbering in Step 7) | Check against Pololu's dimension drawing; header pins are 3 A each |
+| U2 module | Matches the chosen module | Pin order and spacing from the module drawing |
+| U3 LDO | The footprint its symbol suggests (SOT-23-5) |  |
+| Q1 | `SOT-23` |  |
+| J3, J4 servo/ESC | `PinHeader_1x03_P2.54mm` | Standard servo spacing |
+| J5 signals to ESP32 | `PinHeader_1x05_P2.54mm` |  |
+| J6, J7 USB-C pigtails | `TerminalBlock` 5.08 mm, 2 pin | Clamps 24 AWG; ≥ 5 A per pin |
 | J8 to J14 sensor outputs | `JST_XH` 2 pin, or pin headers | About 3 A per pin |
 | C, R, LED | `C_0805`, `R_0805`, `LED_0805` (surface-mount, hand-solderable) | Capacitor voltage rating |
 | Mounting holes | `MountingHole_3.2mm_M3` (add with **A**, symbol `Mechanical:MountingHole`) | Match the chassis mount |
@@ -378,16 +394,18 @@ Put these in your hand-off message, numbered, so the reviewer can answer by numb
 
 1. **20 A path:** route battery to ESC through the board (2 oz copper, zones on both layers, J2 and F2), or keep it on wire off-board and feed the board through a fused tap?
 2. **Fuses:** main fuse rating and type (blade vs inline), and whether each regulator branch needs its own fuse (F3, F4) or only the main one.
-3. **Compute rail margin:** the Pi 5 and ESP32 need about 5.5 A. Is a 6 A rating enough headroom, and is keeping the ESP32 here (rather than on 3.3 V) the right call? Feeding the Pi through its GPIO 5 V pins skips its USB-C power negotiation, which limits its USB ports to about 0.6 A total unless set in `config.txt`, and skips its input protection. Is that acceptable, or should the Pi be fed another way?
-4. **Regulator choice:** modules or chip-level designs? The compute regulator must hold 5.1 V at 5 A with the battery at 6.0 V. The parts inventory already lists a Pololu D36V50F5 for U1: 5.0 V ± 4 % (not 5.1 V), 5.5 A typical, and each of its header pins is rated only 3 A, so every power connection needs two pins. Is it suitable, and what is its dropout at 5.5 A?
+3. **Compute rail and the Pi:** the Pi 5 and ESP32 need about 5.5 A. The Pi takes power through a 2-wire USB-C pigtail, so it keeps its USB-C input protection but gets no USB-PD 5 A offer: it limits its USB ports to about 0.6 A total unless set in `config.txt`. Is that acceptable?
+4. **Regulator U1:** the D36V50F5 outputs 5.0 V ± 4 % (not the Pi's preferred 5.1 V) and is rated 5.5 A typical. What is its dropout at 5.5 A with the battery near 6.0 V? Its VRP output is deliberately unused (the sensor buck stays on `VBAT`, because VRP would push about 7.3 A through U1's 6 A-rated VIN pin pair).
 5. **IMU noise:** is the LDO's noise rejection enough at the sensor buck's switching frequency, or should the ferrite-bead filter in front of it stay?
-6. **Protection:** reverse-polarity method (P-FET or ideal diode, on the regulator branch only?) and TVS part and rating.
+6. **Protection:** U1 has its own reverse protection to 40 V. Does the rest of the board (sensor buck, ESC branch) need a board-level P-FET or ideal diode? TVS part and rating?
 7. **Low battery:** the ESC's low-voltage cutoff stops the motor, but the regulators keep draining the pack. Add a resistor divider from `VBAT` to an ESP32 ADC pin so firmware can warn or shut down? A 100k / 33k divider gives about 2.1 V at 8.4 V.
-8. **ESP32 back-feed:** if the ESP32 gets 5 V from J7 and also from a USB cable (host link or the Pi), two supplies meet on its 5 V pin. Does the dev board have a diode on USB power, or is a diode or cut trace needed?
+8. **ESP32 back-feed:** the ESP32 gets 5 V on its left USB-C port (J7) and may also be connected by USB on its right COM port (to the laptop now, the Pi later). Does the dev board keep the two USB power inputs apart, or is a diode or a data-only cable needed?
 9. **Cameras:** cameras plugged into the Pi draw from `+5V_CPU`. Move them to a powered USB hub on `+5V_SENS` (J9)?
 10. **ESC and servo:** the repo's ESC manual confirms a 6 V / 3 A switch-mode BEC, and the servo datasheet gives 2.3 A stall at 6.8 V, so it fits with about 0.7 A to spare. Is that enough margin, or should the servo get its own buck?
 11. **Layout:** where the ground star point should sit, and how to keep motor return current away from the sensor ground.
-12. **Connectors and wire:** confirm XT60 for battery and ESC, and the wire gauge for each output (12 to 14 AWG is usual for 20 A).
+12. **Connectors and wire:** the battery and ESC use T-plug pigtails with 12 AWG bare ends soldered to J1/J2 pads. What pad size and strain relief? Wire gauge for each output?
+13. **U1 enable control:** EN has a 100 kΩ pull-up to VIN (up to 8.4 V), so a direct ESP32 connection is ruled out, and U1 powers the ESP32, so it must start by itself. The schematic proposes a shutdown FET (Q1 2N7002 + R4 100k). Alternatives: an enable on the sensor buck instead (needs a buck with an EN pin), a hardware undervoltage cutoff (a VIN divider on EN, no GPIO), or a latching power switch (more parts). Which one?
+14. **USB-C pigtail cable:** the pigtails are 24 AWG. At 5 A, about 0.25 V is lost over a 30 cm cable, enough to trigger the Pi's undervoltage warning on a 5.0 V rail. Keep them under about 15 cm, or use 20 AWG pigtails?
 
 ### Verification record
 
