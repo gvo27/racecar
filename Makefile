@@ -11,7 +11,8 @@ PY       := $(VENV_BIN)/python
 FW_DIR   := firmware/esp32
 FW_ENV   ?= esp32s3
 FW_IMAGE ?= rccar-fw
-FW_VOL   ?= rccar-platformio
+# bump FW_VOL suffix when the image core-dir layout changes (v2: penv) so the volume reseeds
+FW_VOL   ?= rccar-platformio-v2
 DIALOUT_GID := $(shell getent group dialout 2>/dev/null | cut -d: -f3)
 FW_RUN   := docker run --rm --user $(shell id -u):$(shell id -g) \
             $(if $(DIALOUT_GID),--group-add $(DIALOUT_GID),) \

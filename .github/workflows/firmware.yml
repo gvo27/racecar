@@ -41,7 +41,7 @@ jobs:
           key: libdeps-${{ matrix.env }}-${{ hashFiles('firmware/esp32/platformio.ini', 'firmware/esp32/rccar.meta', 'firmware/esp32/extra_packages/**') }}
 
       # image pre-installs the PlatformIO packages; the default named volume
-      # (rccar-platformio) is seeded from it, so the build needs no extra download
+      # (rccar-platformio-v2) is seeded from it, so the build needs no extra download
       - name: Build firmware image
         run: make fw-image
 

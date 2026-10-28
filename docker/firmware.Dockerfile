@@ -10,7 +10,8 @@ ENV PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
     PLATFORMIO_CORE_DIR=/opt/platformio \
     PLATFORMIO_SETTING_ENABLE_TELEMETRY=no \
-    HOME=/tmp
+    HOME=/tmp \
+    PATH=/opt/platformio/penv/bin:$PATH
 
 # micro_ros_platformio build-time tools (README: git, cmake, pip3). python:3.12 already ships
 # pip and venv; build-essential gives make/gcc for the colcon host tools and python sdists.
@@ -18,8 +19,12 @@ RUN apt-get update \
  && apt-get install -y --no-install-recommends git cmake build-essential \
  && rm -rf /var/lib/apt/lists/*
 
+# PlatformIO lives in its standard virtualenv $PLATFORMIO_CORE_DIR/penv (the layout the
+# official installer creates). micro_ros_platformio sources penv/bin/activate and pip-installs
+# its build tools (colcon, catkin-pkg, empy) into the env pio runs from, so pio must run from it.
 # versions match requirements.txt ranges (platformio>=6.1,<7 ; esptool>=4.8,<5 ; pyserial>=3.5)
-RUN pip install platformio==6.1.16 esptool==4.8.1 pyserial==3.5
+RUN python -m venv /opt/platformio/penv \
+ && /opt/platformio/penv/bin/pip install platformio==6.1.16 esptool==4.8.1 pyserial==3.5
 
 # Pre-install the project's packages (espressif32@6.9.0 platform, board toolchain,
 # arduino-esp32 2.0.17 framework, scons) into the core dir. A project-context install

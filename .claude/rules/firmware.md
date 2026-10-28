@@ -12,7 +12,7 @@ paths:
 - Compiler is `-std=gnu++11`: no `std::clamp`, no C++14 aggregate init with default member initializers, no `if constexpr`.
 - `ARDUINO_USB_CDC_ON_BOOT=0`: `Serial` = UART0 = CH343 = right-hand USB-C port "COM". Flashing and the host link (laptop now, Pi later) use COM. The left port "USB" (native, GPIO19/20) is reserved as a regulated power input; never use it for comms.
 - Build/flash only via `make build` / `make flash` / `make monitor`: they run in docker image `rccar-fw` (`docker/firmware.Dockerfile`, build with `make fw-image`); `build` and `flash` delete only `firmware/esp32/.pio/build` (keep `.pio/libdeps`, the micro-ROS library cache); `make clean` deletes all of `.pio`. `flash`/`monitor` refuse while the car stack (mcu-agent) holds the serial port.
-- No host `pio` needed. Toolchain cache = named volume `rccar-platformio` on `/opt/platformio`. Serial: `--device $(PORT)` + `--group-add <dialout gid>`.
+- No host `pio` needed. Toolchain cache = named volume `rccar-platformio-v2` on `/opt/platformio`. Serial: `--device $(PORT)` + `--group-add <dialout gid>`.
 - CI: `.github/workflows/firmware.yml` matrix over both envs runs `make build FW_ENV=<env>`, caches `.pio/libdeps` (key: platformio.ini, rccar.meta, extra_packages), uploads `firmware.bin` per env. The micro-ROS env has only been compile-checked in CI; behavior is user bench.
 
 ## Architecture invariants
