@@ -1,9 +1,11 @@
 """
 Lifecycle node: typed wrappers + tuning push over ``/rccar/mcu/command``.
 
-Never sends ARM (the supervisor owns arming). On MCU READY it pushes every
-FIRMWARE_KEYS command from tuning.toml, sequentially, stopping at the first
-error; SAVE only when ``save_after_push`` is set.
+Never sends ARM (the supervisor owns arming). On activation (as soon as the
+MCU service is reachable: its READY event may predate this node) and on every
+MCU READY it pushes every FIRMWARE_KEYS command from tuning.toml,
+sequentially, stopping at the first error; SAVE only when ``save_after_push``
+is set.
 
 One ReentrantCallbackGroup + SingleThreadedExecutor: coroutine callbacks await
 the MCU without blocking the executor.
@@ -41,6 +43,8 @@ class McuBridge(Node):
         self._client = None
         self._srvs, self._sub, self._hb = [], None, None
         self._pushing = False
+        self._startup_timer = None
+        self._startup_pending = False
 
     # -- lifecycle ----------------------------------------------------------
     def on_configure(self, state):
@@ -71,6 +75,8 @@ class McuBridge(Node):
         ]
         hb = self.create_timer(0.5, self._beat, callback_group=g)
         self._sub, self._hb, self._srvs = sub, hb, srvs
+        self._startup_pending = True
+        self._startup_timer = self.create_timer(0.5, self._startup_push, callback_group=g)
         return super().on_activate(state)
 
     def on_deactivate(self, state):
@@ -93,6 +99,9 @@ class McuBridge(Node):
             self.destroy_service(srv)
         self.destroy_subscription(self._sub)
         self.destroy_timer(self._hb)
+        if self._startup_timer is not None:
+            self.destroy_timer(self._startup_timer)
+        self._startup_timer, self._startup_pending = None, False
         self.destroy_client(self._client)
         self._srvs, self._sub, self._hb, self._client = [], None, None, None
 
@@ -166,6 +175,16 @@ class McuBridge(Node):
     async def _push_tuning(self, request, response):
         response.success, response.message = await self._push()
         return response
+
+    async def _startup_push(self):
+        """One push after activation, once the MCU service is reachable."""
+        if not self._startup_pending or self._client is None \
+                or not self._client.service_is_ready():
+            return
+        self._startup_pending = False
+        self._startup_timer.cancel()
+        self.get_logger().info('MCU reachable after activation: pushing tuning')
+        await self._push()
 
     async def _on_event(self, msg):
         if msg.code == McuEvent.READY:

@@ -4,7 +4,7 @@ paths:
   firmware/esp32/extra_packages/rccar_msgs/: {role: synced copy of rccar_msgs for the micro-ros lib build; never edit here (ci diff -r), rules: .claude/rules/msgs.md, phase: 2}
   firmware/esp32/rccar.meta: {role: micro-ros entity limits (rmw_microxrcedds), rules: .claude/rules/firmware.md, phase: 2}
   firmware/esp32/include/pins.h: {role: pin ssot, rules: .claude/rules/firmware.md}
-  firmware/esp32/src/main.cpp: {role: "firmware main: control task, ascii protocol, setKey"}
+  firmware/esp32/src/main.cpp: {role: "firmware main: control task, ascii protocol (handleLine), setKey, micro-ros comms layer (RCCAR_COMMS_MICROROS)"}
   docker/firmware.Dockerfile: {role: firmware toolchain image rccar-fw (platformio+esptool pinned), rules: .claude/rules/dependencies.md, phase: 1}
   docker/ros.Dockerfile: {role: "ros jazzy image, stages builder/test/runtime; base ros:jazzy-ros-base by digest; rosdep+colcon --merge-install; ROSDEP_INSTALL=0 only for offline builds", rules: .claude/rules/dependencies.md, phase: 2}
   docker/ros.Dockerfile.dockerignore: {role: build-context filter for ros.Dockerfile, phase: 2}
@@ -47,7 +47,7 @@ paths:
   deploy/car/.env.generated: {role: rendered by make config from .env + tuning.toml platform.$PLATFORM table; gitignored, phase: 2}
   deploy/render_env.py: {role: stdlib renderer for .env.generated; tests in deploy/tests (make unit), phase: 2}
   rccar_msgs/: {role: msgs/srvs contract (DriveCmd Telemetry McuEvent SupervisorState; McuCommand Reset SetParam CalPoint RawPwm); bounded strings, rules: .claude/rules/msgs.md, phase: 2, invariants: ["change => firmware extra_packages copy + main.cpp + rccar_mcu_bridge + docs"]}
-  rccar_mcu_bridge/: {role: "lifecycle node /mcu_bridge: typed services over /rccar/mcu/command, tuning push on READY, FIRMWARE_KEYS", rules: [.claude/rules/mcu_bridge.md, .claude/rules/ros2.md], phase: 2}
+  rccar_mcu_bridge/: {role: "lifecycle node /mcu_bridge: typed services over /rccar/mcu/command, tuning push on activation + READY, FIRMWARE_KEYS", rules: [.claude/rules/mcu_bridge.md, .claude/rules/ros2.md], phase: 2}
   rccar_bringup/: {role: car.launch.py (use_sim_time, sim, tuning_file, heartbeat_dir); tuning.toml -> params, rules: [.claude/rules/tuning.md, .claude/rules/ros2.md], phase: 2}
   rccar_supervisor/: {role: "safety authority: arbiter, latched stop, arm/disarm/brake services; sole publisher of /rccar/mcu/drive", rules: [.claude/rules/supervisor.md, .claude/rules/ros2.md], phase: 2}
   rccar_teleop/: {role: admin keyboard teleop (ssh), rules: [.claude/rules/calibration.md, .claude/rules/ros2.md], phase: 2}

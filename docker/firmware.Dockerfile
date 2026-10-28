@@ -3,7 +3,7 @@
 # The default env (esp32s3) pulls micro_ros_platformio, which colcon-builds the micro-ROS
 # library during the first `pio run` (git clone of ROS repos + pip into the PlatformIO penv:
 # needs network). That build is NOT baked into the image; with the named volume
-# `rccar-platformio` and `.pio/libdeps` kept by `make build` it only happens once.
+# `rccar-platformio-v2` and `.pio/libdeps` kept by `make build` it only happens once.
 FROM python:3.12-slim-bookworm
 
 ENV PIP_NO_CACHE_DIR=1 \

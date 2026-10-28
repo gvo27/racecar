@@ -509,6 +509,10 @@ static rclc_executor_t    g_exec;
 enum { ST_NONE = 0, ST_SUPPORT, ST_NODE, ST_TELPUB, ST_EVTPUB, ST_DRIVESUB, ST_CMDSRV, ST_EXEC };
 static int g_stage = ST_NONE;
 
+// rcl calls are warn_unused_result and gcc ignores a (void) cast; the link state is
+// tracked by the ping instead.
+static inline void ignoreRet(rcl_ret_t) {}
+
 #define RCCAR_STEP(call, stage) \
   do { if ((call) != RCL_RET_OK) return false; g_stage = (stage); } while (0)
 
@@ -537,7 +541,12 @@ static void commandCb(const void *reqin, void *resout) {
   line[n] = '\0';
 
   g_reply.reset();
-  handleLine(line, g_reply);
+  // Driving is the /rccar/mcu/drive subscription only (supervisor = sole publisher); a "D"
+  // over the service would be a second drive path that bypasses the supervisor gate.
+  char first[4] = {0};
+  sscanf(line, " %3s", first);
+  if (!strcasecmp(first, "D")) g_reply.println("ERR D is /rccar/mcu/drive in micro-ROS mode");
+  else handleLine(line, g_reply);
 
   size_t rl = g_reply.length();
   while (rl && (g_reply.c_str()[rl - 1] == '\n' || g_reply.c_str()[rl - 1] == '\r')) --rl;
@@ -578,13 +587,13 @@ static void destroyEntities() {
     rmw_context_t *rmw = rcl_context_get_rmw_context(&g_support.context);
     (void)rmw_uros_set_context_entity_destroy_session_timeout(rmw, 0);
   }
-  if (g_stage >= ST_EXEC)     (void)rclc_executor_fini(&g_exec);
-  if (g_stage >= ST_CMDSRV)   (void)rcl_service_fini(&g_cmdSrv, &g_node);
-  if (g_stage >= ST_DRIVESUB) (void)rcl_subscription_fini(&g_driveSub, &g_node);
-  if (g_stage >= ST_EVTPUB)   (void)rcl_publisher_fini(&g_evtPub, &g_node);
-  if (g_stage >= ST_TELPUB)   (void)rcl_publisher_fini(&g_telPub, &g_node);
-  if (g_stage >= ST_NODE)     (void)rcl_node_fini(&g_node);
-  if (g_stage >= ST_SUPPORT)  (void)rclc_support_fini(&g_support);
+  if (g_stage >= ST_EXEC)     ignoreRet(rclc_executor_fini(&g_exec));
+  if (g_stage >= ST_CMDSRV)   ignoreRet(rcl_service_fini(&g_cmdSrv, &g_node));
+  if (g_stage >= ST_DRIVESUB) ignoreRet(rcl_subscription_fini(&g_driveSub, &g_node));
+  if (g_stage >= ST_EVTPUB)   ignoreRet(rcl_publisher_fini(&g_evtPub, &g_node));
+  if (g_stage >= ST_TELPUB)   ignoreRet(rcl_publisher_fini(&g_telPub, &g_node));
+  if (g_stage >= ST_NODE)     ignoreRet(rcl_node_fini(&g_node));
+  if (g_stage >= ST_SUPPORT)  ignoreRet(rclc_support_fini(&g_support));
   g_stage = ST_NONE;
 }
 
@@ -606,7 +615,7 @@ static void publishEvent(uint8_t code, const char *text) {
   memcpy(g_evtBuf, text, n);
   g_evtBuf[n] = '\0';
   g_evtMsg.text.size = n;
-  (void)rcl_publish(&g_evtPub, &g_evtMsg, NULL);  // a dead link is caught by the ping
+  ignoreRet(rcl_publish(&g_evtPub, &g_evtMsg, NULL));  // a dead link is caught by the ping
 }
 
 static void publishTelemetry() {
@@ -621,7 +630,7 @@ static void publishTelemetry() {
   g_telMsg.throttle_us  = o.throttleUs;
   g_telMsg.armed        = armed;
   g_telMsg.time_synced  = g_timeSynced;
-  (void)rcl_publish(&g_telPub, &g_telMsg, NULL);
+  ignoreRet(rcl_publish(&g_telPub, &g_telMsg, NULL));
 }
 
 // ---- reconnection state machine (agent may appear, vanish and return at any time) ------

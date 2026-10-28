@@ -8,7 +8,7 @@ from rccar_msgs.msg import DriveCmd
 from rccar_msgs.srv import McuCommand
 import rclpy
 from rclpy.node import Node
-from rclpy.qos import QoSProfile, ReliabilityPolicy
+from rclpy.qos import DurabilityPolicy, QoSProfile, ReliabilityPolicy
 from std_msgs.msg import String
 
 
@@ -22,7 +22,11 @@ class FakeMcu(Node):
         self.create_subscription(
             DriveCmd, '/rccar/mcu/drive', self._on_drive,
             QoSProfile(depth=1, reliability=ReliabilityPolicy.BEST_EFFORT))
-        self._log = self.create_publisher(String, '/fake_mcu/log', 10)
+        # transient_local: a test that subscribes late still sees every command
+        self._log = self.create_publisher(
+            String, '/fake_mcu/log',
+            QoSProfile(depth=200, reliability=ReliabilityPolicy.RELIABLE,
+                       durability=DurabilityPolicy.TRANSIENT_LOCAL))
 
     def _on_drive(self, msg):
         self.drive_count += 1

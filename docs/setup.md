@@ -100,7 +100,7 @@ Teleop runs in the SSH terminal and talks to the supervisor locally (`/rccar/cmd
 | `q` | disarm and quit |
 | `x` | disarm, quit and print the shutdown hint |
 
-After a brake or disarm the supervisor refuses motion until you press `a` (with throttle at neutral). The ESP32 failsafe disarms on its own if drive commands stop. **The software stop is not safety-rated: the ESC power switch is the independent hardware stop.**
+After a brake or disarm the supervisor refuses motion until you press `a` (with throttle at neutral). After arming, the supervisor forwards throttle only once teleop has sent a neutral command (teleop does that automatically). The ESP32 failsafe disarms on its own if drive commands stop. **The software stop is not safety-rated: the ESC power switch is the independent hardware stop.**
 
 ## 7. Test, calibrate, tune (ROS)
 
@@ -113,7 +113,7 @@ git diff tuning.toml # calibrate wrote the [steering.calibration] values into yo
 make tune            # push tuning.toml to the ESP32 and save it to flash
 ```
 
-`mcu_bridge` also pushes `tuning.toml` to the ESP32 RAM every time the firmware reports READY. There is no ROS equivalent of the legacy throttle test (`legacy-test-throttle`).
+`mcu_bridge` also pushes `tuning.toml` to the ESP32 RAM when it starts (once the ESP32 is reachable) and every time the firmware reports READY. There is no ROS equivalent of the legacy throttle test (`legacy-test-throttle`).
 
 ### Tuning loop
 
@@ -154,9 +154,9 @@ Hardware fault injection. **Never run by an agent.** Wheels off the ground, ESC 
 1. `make config ros-image fw-image`, `make flash`, `make car-up`; `make car-ps` shows `mcu-agent` and `core` healthy.
 2. `ros2 topic echo /rccar/mcu/telemetry` (from `make ros-shell`) shows telemetry with `armed: false`.
 3. `make test` passes (steering sweep + failsafe, motor off).
-4. `make teleop`: arrow keys drive; space brakes; `d` disarms; after either, motion is refused until `a`; `a` with throttle not at 0 is refused.
+4. `make teleop`: arrow keys drive; space brakes; `d` disarms; after either, motion is refused until `a`; `a` with throttle not at 0 is refused. `make car-logs` shows `mcu_bridge` pushing tuning at startup (`MCU reachable after activation`).
 5. Kill `core` (`docker compose -f deploy/car/compose.yaml --env-file deploy/car/.env.generated kill core`) while driving slowly: the ESP32 failsafe stops the car within `cmd_timeout_ms`.
-6. Unplug the USB cable while driving slowly: the ESP32 failsafe stops the car; after replugging, `mcu-agent` reconnects and `core` stays healthy.
+6. Unplug the USB cable while driving slowly: the ESP32 failsafe stops the car; after replugging, `mcu-agent` reconnects and `core` stays healthy, and the supervisor shows a latched incident (`mcu rebooted`/failsafe) that needs `a`. If `mcu-agent` does not reconnect (the device node passed to the container can go stale on replug), note it in the PR; `make car-down car-up` recovers.
 7. Kill teleop (close the terminal) while driving slowly: the supervisor stops the car.
 8. `make car-shutdown` disarms, stops the stack and powers off after confirmation.
 9. Fallback: `make flash FW_ENV=esp32s3_ascii`, then `make legacy-detect legacy-test` work; reflash the default env afterwards.

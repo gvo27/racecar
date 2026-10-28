@@ -124,7 +124,14 @@ class TestSupervisorWiring(unittest.TestCase):
         self.assertIn('ARM', self.log)
         self.assertTrue(self.wait_for(lambda: self.state.armed))
 
+        # deadman: motion only after the admin input re-asserts neutral post-reset
+        self.drive.clear()
+        self.spin(0.3, throttle=0.2)
+        self.assertTrue(self.drive and all(m.throttle == 0.0 for m in self.drive),
+                        'non-neutral first command after reset must be held at 0')
+
         # drive is forwarded
+        self.spin(0.2, throttle=0.0)
         self.drive.clear()
         self.spin(0.8, throttle=0.2)
         fwd = [m for m in self.drive if m.source == 'admin' and abs(m.throttle - 0.2) < 1e-3]

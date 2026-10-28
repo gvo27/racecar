@@ -80,12 +80,18 @@ def _setup(context):
 
 def generate_launch_description():
     return LaunchDescription([
-        DeclareLaunchArgument('use_sim_time', default_value='false'),
-        DeclareLaunchArgument('sim', default_value='false'),
+        DeclareLaunchArgument('use_sim_time', default_value='false',
+                              description='use /clock (simulation) for every node'),
+        DeclareLaunchArgument('sim', default_value='false',
+                              description='true: skip MCU-facing nodes (sim adapter replaces '
+                                          'them, lives in the sim repo)'),
         DeclareLaunchArgument(
             'tuning_file',
             default_value=EnvironmentVariable(
-                'RCCAR_TUNING', default_value='/ws/src/racecar/tuning.toml')),
-        DeclareLaunchArgument('heartbeat_dir', default_value=''),
+                'RCCAR_TUNING', default_value='/ws/src/racecar/tuning.toml'),
+            description='tuning.toml loaded into node parameters and pushed to the MCU'),
+        DeclareLaunchArgument('heartbeat_dir', default_value='',
+                              description='directory for docker healthcheck heartbeat '
+                                          'files (empty = disabled)'),
         OpaqueFunction(function=_setup),
     ])

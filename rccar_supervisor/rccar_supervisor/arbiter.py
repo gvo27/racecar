@@ -10,6 +10,9 @@ Semantics follow safety-estop.md section 5:
   top-priority (admin) input is neutral or stale, and yields *armed but stationary*: commands
   received before the reset are discarded (generation fence), so neutral is
   streamed until a command arrives after the reset;
+* deadman re-assertion: after a reset each input's throttle is forwarded as 0
+  until that input has sent a neutral command (a producer that was already
+  streaming motion cannot resume it without returning to neutral first);
 * silence is the stop: when disarmed ``output`` returns None.
 
 All times are seconds on whatever clock the caller uses (node clock).
@@ -75,13 +78,17 @@ class Arbiter:
         self.incident = 0
         self.reason = 'boot: reset required'
         self._last = {}
+        self._enabled = set()       # inputs that sent a neutral command since reset
 
     # -- inputs ---------------------------------------------------------
     def receive(self, topic: str, heading: float, throttle: float, now: float) -> None:
         """Record a command. Stored even when disarmed (reset checks neutral)."""
         if topic not in self.inputs:
             return
-        self._last[topic] = Cmd(_clean(heading, math.pi), _clean(throttle, 1.0), now)
+        cmd = Cmd(_clean(heading, math.pi), _clean(throttle, 1.0), now)
+        self._last[topic] = cmd
+        if self.armed and abs(cmd.throttle) < self.neutral_threshold:
+            self._enabled.add(topic)
 
     def _selected(self, now: float):
         best = None
@@ -106,6 +113,7 @@ class Arbiter:
         self.incident += 1
         self.reason = reason[:REASON_MAX]
         self._last.clear()
+        self._enabled.clear()
         return True
 
     def brake(self, reason: str = 'brake') -> bool:
@@ -139,6 +147,7 @@ class Arbiter:
         self.latched = False
         self.reason = ''
         self._last.clear()           # fence: nothing received before reset survives
+        self._enabled.clear()        # deadman: each input must show neutral again
         return True, 'armed'
 
     # -- outputs --------------------------------------------------------
@@ -150,7 +159,8 @@ class Arbiter:
         if sel is None:
             return Output(0.0, 0.0, '')
         topic, cmd = sel
-        return Output(cmd.heading, cmd.throttle, source_name(topic))
+        throttle = cmd.throttle if topic in self._enabled else 0.0
+        return Output(cmd.heading, throttle, source_name(topic))
 
     def state(self, now: float) -> State:
         out = self.output(now)

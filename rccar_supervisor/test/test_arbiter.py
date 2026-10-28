@@ -41,8 +41,15 @@ def test_reset_arms_and_streams_neutral_without_input(arb):
     assert arb.state(0.1).active_source == ''
 
 
+def enable(arb, *topics, now=0.5):
+    """Deadman: each input sends one neutral command after the reset."""
+    for t in topics:
+        arb.receive(t, 0.0, 0.0, now)
+
+
 def test_priority_selection_prefers_admin(arb):
     armed(arb)
+    enable(arb, ADMIN, CAPT)
     arb.receive(CAPT, 0.0, 0.4, 1.0)
     arb.receive(ADMIN, 0.2, 0.1, 1.0)
     out = arb.output(1.05)
@@ -51,6 +58,7 @@ def test_priority_selection_prefers_admin(arb):
 
 def test_captain_used_when_admin_absent(arb):
     armed(arb)
+    enable(arb, CAPT)
     arb.receive(CAPT, 0.0, 0.4, 1.0)
     out = arb.output(1.1)
     assert (out.source, out.throttle) == ('captain', pytest.approx(0.4))
@@ -58,6 +66,7 @@ def test_captain_used_when_admin_absent(arb):
 
 def test_per_input_timeout_falls_through_to_lower_priority(arb):
     armed(arb)
+    enable(arb, ADMIN, CAPT)
     arb.receive(CAPT, 0.0, 0.4, 1.0)
     arb.receive(ADMIN, 0.0, 0.1, 1.0)
     assert arb.output(1.2).source == 'admin'
@@ -76,6 +85,7 @@ def test_unknown_input_is_ignored(arb):
 
 def test_throttle_and_heading_sanitised(arb):
     armed(arb)
+    enable(arb, ADMIN)
     arb.receive(ADMIN, float('nan'), 5.0, 1.0)
     out = arb.output(1.0)
     assert out.throttle == 1.0 and out.heading == 0.0
@@ -149,8 +159,30 @@ def test_fence_ignores_pre_reset_commands(arb):
     assert ok
     out = arb.output(2.11)
     assert (out.source, out.throttle) == ('', 0.0)
+    arb.receive(CAPT, 0.0, 0.0, 2.15)         # new generation starts at neutral
     arb.receive(CAPT, 0.0, 0.4, 2.2)          # new command after reset is accepted
     assert arb.output(2.21).throttle == pytest.approx(0.4)
+
+
+def test_deadman_nonneutral_after_reset_forwarded_as_zero_until_neutral(arb):
+    armed(arb)
+    arb.receive(ADMIN, 0.1, 0.4, 1.0)         # producer already pushing throttle
+    out = arb.output(1.01)
+    assert (out.source, out.throttle, out.heading) == ('admin', 0.0, 0.1)
+    arb.receive(ADMIN, 0.1, 0.0, 1.1)         # back to neutral
+    arb.receive(ADMIN, 0.1, 0.4, 1.2)
+    assert arb.output(1.21).throttle == pytest.approx(0.4)
+
+
+def test_deadman_rearmed_by_latch(arb):
+    armed(arb)
+    enable(arb, ADMIN)
+    arb.brake('x')
+    arb.receive(ADMIN, 0.0, 0.0, 2.0)         # neutral while latched does not enable
+    ok, _ = arb.reset(arb.incident, 2.1)
+    assert ok
+    arb.receive(ADMIN, 0.0, 0.3, 2.2)
+    assert arb.output(2.21).throttle == 0.0
 
 
 def test_latch_during_armed_clears_forwarding_and_reset_clears_latch_state(arb):
