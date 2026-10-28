@@ -457,7 +457,7 @@ tools/
 | Target | Does |
 | --- | --- |
 | `make setup` | create `.venv` (already gitignored), install `requirements.txt` |
-| `make check` | check Python ≥ 3.11 (for `tomllib`), that `tuning.toml` parses, `pyserial`, `esptool`, `pio`, and (Linux) membership of the `dialout`/`uucp` group needed to open serial ports |
+| `make check` | check Python ≥ 3.12 (for `tomllib`), that `tuning.toml` parses, `pyserial`, `esptool`, `pio`, and (Linux) membership of the `dialout`/`uucp` group needed to open serial ports |
 | `make detect` | list USB serial ports and mark the CH343 (`1a86:55d3`). If the cable is in the native port (`303a:*`), say so. Run `esptool chip_id` (should print `ESP32-S3 (QFN56) (revision v0.2)`) and query firmware `INFO` |
 | `make sync-time` | set the ESP32 clock (section 8) |
 | `make tune` | push `tuning.toml` to the ESP32 **and save it to flash**, so the car boots tuned without a laptop (and later under ROS 2) |
@@ -501,7 +501,7 @@ Linux shows the CH343 as `/dev/ttyACM*`, macOS as `/dev/cu.usbmodem*`, Windows a
 One root file holds every adjustable number. You can tune the car without reading C++.
 
 **Why TOML.** It allows comments next to each value, Python reads it with the standard
-library (`tomllib`, Python ≥ 3.11), and the sections map naturally onto subsystems.
+library (`tomllib`, Python ≥ 3.12), and the sections map naturally onto subsystems.
 Future sensor sections are already sketched in it as comments.
 
 **How values reach the car.** Nothing is compiled in:
@@ -693,7 +693,7 @@ phase: actuator_bringup  # laptop -usb-> esp32 -pwm-> servo+esc
 next: ros2_on_rpi5 + micro_ros_on_esp32
 stack:
   mcu: {chip: esp32-s3-n16r8, build: platformio, platform: espressif32@6.9.0, framework: arduino-esp32-2.0.17, lang: c++gnu11}
-  host: {lang: python>=3.11, deps: requirements.txt, venv: .venv}
+  host: {lang: python>=3.12, deps: requirements.txt, venv: .venv}
   future: [ros2, micro_ros, raspberry_pi_5]
 hw: {steer: ds3225mg@gpio4, throttle: thw1060_esc@gpio5, battery: 2s_lipo}
 layout:
@@ -1600,8 +1600,8 @@ def open_link(args, label: str, apply: bool = True) -> Link:
 # Subcommands
 # ---------------------------------------------------------------------------
 def cmd_check_env(args) -> int:
-    ok = sys.version_info >= (3, 11)       # tomllib
-    print(f"python   {sys.version.split()[0]}", "OK" if ok else "NEED >= 3.11")
+    ok = sys.version_info >= (3, 12)       # tomllib
+    print(f"python   {sys.version.split()[0]}", "OK" if ok else "NEED >= 3.12")
     for mod, pkg in (("serial", "pyserial"), ("esptool", "esptool")):
         found = importlib.util.find_spec(mod) is not None
         print(f"{pkg:<8} {'OK' if found else 'MISSING (make setup)'}")

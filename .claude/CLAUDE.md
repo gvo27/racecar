@@ -8,7 +8,7 @@ next: phase 2 = ros2 (docker) + micro_ros_on_esp32 on rpi5
 plan: docs/docker_ros_plan.md
 stack:
   mcu: {build: platformio in docker (docker/firmware.Dockerfile, image rccar-fw, make build/flash/monitor), platform: espressif32@6.9.0, framework: arduino-esp32-2.0.17, lang: c++gnu11}
-  host: {prereqs: [git, make, docker+compose+buildx], groups: [docker, dialout], lang: python>=3.11 (tools/ only, until phase 2), deps: requirements.txt, venv: .venv}
+  host: {prereqs: [git, make, docker+compose+buildx], groups: [docker, dialout], lang: python>=3.12 (tools/ only, until phase 2), deps: requirements.txt, venv: .venv}
 hw: {steer: ds3225mg@gpio4, throttle: thw1060_esc@gpio5, battery: 2s_lipo}
 usb_ports: {left_USB: native, planned regulated power input; right_COM: ch343 uart0, flashing + host link}
 layout: .claude/layout.yaml

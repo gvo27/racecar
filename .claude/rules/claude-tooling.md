@@ -14,7 +14,8 @@ paths:
 - .claude/settings.json: marketplaces + enabledPlugins + enabledMcpjsonServers. .mcp.json: project MCP servers.
 - superpowers@claude-plugins-official: workflow skills (brainstorming, writing-plans, executing-plans, test-driven-development, systematic-debugging, requesting-code-review, verification-before-completion). Official marketplace pins upstream obra/superpowers by sha.
 - context7 (.mcp.json, http https://mcp.context7.com/mcp, no key; optional CONTEXT7_API_KEY in user scope for rate limits): tools resolve-library-id -> get-library-docs.
-- pyright-lsp@claude-plugins-official: needs `pyright-langserver` on PATH. Config: pyrightconfig.json (include tools/, venv .venv, py3.11, basic).
+- location: .mcp.json + pyrightconfig.json must stay at repo root (claude code reads project mcp only from root .mcp.json; pyright discovers config only at workspace root); never move into .claude/
+- pyright-lsp@claude-plugins-official: needs `pyright-langserver` on PATH. Config: pyrightconfig.json (include tools/, venv .venv, py3.12, basic).
 - clangd-lsp@claude-plugins-official: needs `clangd` on PATH + firmware/esp32/compile_commands.json (`make compiledb`). firmware/esp32/.clangd strips xtensa-only gcc flags. Known gap: no --query-driver, so xtensa libstdc++ system headers may show false errors; trust `make build` over clangd for std headers.
 - embedded-skills@embedded-skills, ros2-engineering@ros2-engineering-skills: domain skills (see dependencies.md).
 - `make check-dev` reports missing LSP binaries.
