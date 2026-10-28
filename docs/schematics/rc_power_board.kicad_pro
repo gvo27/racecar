@@ -104,7 +104,7 @@
       },
       {
         "netclass": "Power3A",
-        "pattern": "+6V_BEC"
+        "pattern": "*+6V_BEC"
       }
     ]
   },

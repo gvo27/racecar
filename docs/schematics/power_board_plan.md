@@ -227,7 +227,7 @@ Press **A**, type the symbol name in the search box, pick it, click to place. Th
 1. Place `Connector_Generic:Conn_01x02` as **J1**, value `XT60 battery`. Pin 1 is +, pin 2 is −.
 2. Place `Device:Fuse` as **F1**, value `TBD (main, about 30 A)`. Wire J1 pin 1 to one end of F1 with **W**.
 3. Press **L** on the wire between J1 and F1 and name it `VBAT_RAW` (the unfused side). Put a `VBAT` power symbol on the other side of F1.
-4. Place `Device:D_TVS` as **D1**, value `TVS TBD, standoff ≥ 9 V`, from `VBAT` to `GND`, cathode (the bar) toward `VBAT`.
+4. Place `Device:D_Zener` as **D1** (KiCad's stock `D_TVS` symbol is bidirectional; a unidirectional TVS is drawn with the Zener symbol), value `TVS unidir. TBD, standoff ≥ 9 V`, from `VBAT` to `GND`, cathode (the bar, pin 1) toward `VBAT`.
 5. Place `Device:C_Polarized` as **C1**, value `TBD µF, ≥ 16 V, low ESR`, from `VBAT` to `GND`, + toward `VBAT`. This is the bulk capacitor.
 6. Put `power:GND` on J1 pin 2.
 7. Press **P**, choose `power:PWR_FLAG`, and put one on the `VBAT_RAW` wire and one on the `GND` wire near J1. A **PWR\_FLAG** tells the checker "power enters here", because a connector pin can't prove that on its own. A flag does not pass through a fuse or ferrite bead, so after the later steps also add one on `VIN_CPU`, `VIN_SENS` and `LDO_IN` (each feeds a regulator's power input), and on `VBAT` and `+6V_BEC`. Without them the checker reports "input power pin not driven" on U1, U2 and U3.
