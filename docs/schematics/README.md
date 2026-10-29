@@ -16,15 +16,7 @@ Draft KiCad project for the car's power board. A 2S LiPo comes in; the board put
 
 The project version is **KiCad 10.0**; KiCad 9 or older cannot open a KiCad 10 save.
 
-The meeting-cleanup revision was regenerated, and that wrote the schematic in KiCad 7 format. KiCad 10 opens it and upgrades it. Before the meeting, the owner:
-1. Closes KiCad, pulls, and opens the project.
-2. Runs Tools > Update Symbols from Library (D2–D4 LED).
-3. Saves the file in KiCad 10.
-4. Re-runs ERC.
-5. Re-plots `rc_power_board.pdf` (File > Plot > PDF).
-6. Pushes.
-
-`rc_power_board.kicad_pro`, including the net classes and ERC severities, is the owner's KiCad 10 file and was not changed.
+The meeting-cleanup revision was generated in KiCad 7 format, then opened, symbol-updated (D2–D4) and saved in KiCad 10.0 by the owner (94ccd72), with label positions tidied in dd946f3. Edit the KiCad 10 files from here on; close KiCad before pulling. `rc_power_board.kicad_pro` (net classes, ERC severities) is the owner's KiCad 10 file.
 
 ## Meeting-cleanup revision (what changed)
 
@@ -61,7 +53,7 @@ The meeting-cleanup revision was regenerated, and that wrote the schematic in Ki
 
 ## Verification so far
 
-This revision was checked with KiCad 7.0.11 `kicad-cli` and the kicad-happy analyzer:
+This revision was checked with KiCad 7.0.11 `kicad-cli`, the kicad-happy analyzer and the owner's KiCad 10 ERC:
 
 - **Netlist: 41 parts, 21 nets.** The only single-pin nets are U1 EN, U1 VRP ×2, U2 EN and U3 NC. All of them are intentionally unconnected and carry no-connect flags.
 - **Analyzer:** finds the same 41 parts and 21 nets. U1 and U2 are classified as switching regulators, U3 as a 3.3 V LDO, and D2–D4 as resistor-limited LEDs. The remaining findings are expected for a draft:
@@ -70,7 +62,8 @@ This revision was checked with KiCad 7.0.11 `kicad-cli` and the kicad-happy anal
   - "missing pull-up" on U1 PG (the ESP32's internal pull-up handles it);
   - "missing pull-up" on U3 EN (it is tied to VIN, per the AP2112 datasheet).
 - **PDF:** rendered and visually checked: no wire crossings in any region, and no text overlaps.
-- **ERC:** the previous revision passed in KiCad 10 with 0 errors and 0 warnings, owner-run. **This revision needs the owner's KiCad 10 ERC run** (steps above). Do not count ERC as passed until that output exists.
+- **ERC in KiCad 10 (owner-run, 94ccd72): clean**, after Update Symbols from Library. `rc_power_board.pdf` re-plotted from KiCad 10 (dd946f3).
+- **Analyzer on the KiCad 10 save (dd946f3):** still 41 parts, 21 nets, 4 no-connects, so the upgrade and label tidy changed no connections.
 - **Not yet done:** SPICE, PCB layout.
 
 ## Working on this folder with Claude Code
