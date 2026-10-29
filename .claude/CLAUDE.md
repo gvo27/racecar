@@ -9,7 +9,7 @@ plan: docs/docker_ros_plan.md
 stack:
   mcu: {build: platformio in docker (docker/firmware.Dockerfile, image rccar-fw, make build/flash/monitor, FW_ENV=esp32s3), platform: espressif32@6.9.0, framework: arduino-esp32-2.0.17, comms: micro_ros_platformio jazzy serial uart0 (libdeps cached in .pio/libdeps), lang: c++gnu11}
   ros: {distro: jazzy, image: docker/ros.Dockerfile (ros:jazzy-ros-base by digest, rosdep+colcon, target test/runtime), stack: deploy/car/compose.yaml (mcu-agent, core, tools), pkgs: [rccar_msgs, rccar_supervisor, rccar_mcu_bridge, rccar_teleop, rccar_calibration, rccar_bringup], make: [config, ros-image, car-up, car-down, ros-test, unit, teleop, calibrate, tune, test, mcu]}
-  host: {prereqs: [git, make, docker+compose+buildx], groups: [docker, dialout], python: none (make config runs in rccar-fw image, make unit in ros test image)}
+  host: {prereqs: [git, make, docker+compose+buildx], groups: [docker, dialout], python: none (make config runs in ros image, make unit in ros test image)}
 hw: {steer: ds3225mg@gpio4, throttle: thw1060_esc@gpio5, battery: 2s_lipo}
 usb_ports: {left_USB: native, planned regulated power input; right_COM: ch343 uart0, flashing + host link}
 layout: .claude/layout.yaml
