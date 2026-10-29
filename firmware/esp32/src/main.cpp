@@ -1,24 +1,19 @@
-// RC car actuator bridge: USB serial commands -> hardware PWM for
+// RC car actuator bridge: micro-ROS commands -> hardware PWM for
 // DS3225 steering servo + THW-1060 brushed ESC.
 //
 // Architecture
-//   loop()        : USB serial parser + telemetry (comms only)
+//   loop()        : micro-ROS comms over Serial/UART0 (comms only)
 //   controlTask() : 100 Hz, owns the actuators: failsafe, slew, reverse logic
 //   LEDC hardware : generates the 50 Hz pulse trains with zero CPU load
-// The comms layer is selected at build time; controlTask() and the PWM layer
-// are shared by both:
-//   RCCAR_COMMS_ASCII   : ASCII lines on Serial (legacy, tools/rccar.py)
-//   RCCAR_COMMS_MICROROS: micro-ROS node over Serial (UART0), see the section before setup()
+// Comms = micro-ROS node over Serial (UART0), see the section before setup().
 
 #include <Arduino.h>
 #include <Preferences.h>
 #include <driver/ledc.h>
 #include <esp_task_wdt.h>
 #include <esp_timer.h>
-#include <sys/time.h>
 #include <cmath>
 
-#ifdef RCCAR_COMMS_MICROROS
 #include <micro_ros_platformio.h>
 #include <rcl/rcl.h>
 #include <rcl/error_handling.h>
@@ -29,13 +24,8 @@
 #include <rccar_msgs/msg/telemetry.h>
 #include <rccar_msgs/msg/mcu_event.h>
 #include <rccar_msgs/srv/mcu_command.h>
-#endif
 
 #include "pins.h"
-
-#if defined(RCCAR_COMMS_MICROROS) == defined(RCCAR_COMMS_ASCII)
-#error "define exactly one of RCCAR_COMMS_MICROROS / RCCAR_COMMS_ASCII (see platformio.ini)"
-#endif
 
 static const char *FW_VERSION = "0.2.0";
 
@@ -107,11 +97,7 @@ static Output  g_out;
 static bool    g_armed       = false;
 static int     g_rawSteerUs  = -1;     // >0: calibration override
 static bool    g_failsafeEvt = false;  // set by control task, reported by loop
-#ifdef RCCAR_COMMS_MICROROS
 static uint32_t g_telemetryHz = 10;   // /rccar/mcu/telemetry rate; "TEL 0" turns it off
-#else
-static uint32_t g_telemetryHz = 0;    // ASCII: streamed only after "TEL <hz>"
-#endif
 static bool    g_timeSynced  = false;
 
 static Preferences g_prefs;
@@ -284,7 +270,7 @@ static bool saveConfig() {
 }
 
 // ---------------------------------------------------------------------------
-// Serial protocol (one ASCII command per line, see docs)
+// Command grammar (McuCommand service /rccar/mcu/command; one ASCII command per request)
 // ---------------------------------------------------------------------------
 static void printConfig(Print &out) {
   Config c;
@@ -298,18 +284,6 @@ static void printConfig(Print &out) {
                 c.timeoutMs, c.doubleTapRev, c.brakeMs, c.gapMs, c.brakeLevel,
                 c.escMinUs, c.escNeutralUs, c.escMaxUs, c.servoHz, c.escHz, c.controlHz);
 }
-
-#ifdef RCCAR_COMMS_ASCII
-static void printTelemetry(Print &out) {
-  Command cmd; Output o; bool armed;
-  portENTER_CRITICAL(&g_mux); cmd = g_cmd; o = g_out; armed = g_armed; portEXIT_CRITICAL(&g_mux);
-  struct timeval tv; gettimeofday(&tv, nullptr);
-  uint64_t unixMs = g_timeSynced ? (uint64_t)tv.tv_sec * 1000ULL + tv.tv_usec / 1000 : 0;
-  out.printf("TEL t=%llu unix=%llu hdg=%.1f spd=%.2f steer_deg=%.1f steer_us=%u thr_us=%u armed=%d\n",
-                nowMs(), unixMs, cmd.headingDeg, cmd.speed, o.steerDeg,
-                o.steerUs, o.throttleUs, armed);
-}
-#endif
 
 static bool setKey(Config &c, const char *key, float v) {
   if      (!strcasecmp(key, "maxdeg"))   c.maxSteerDeg = clampv(v, 1.0f, 60.0f);
@@ -357,17 +331,8 @@ static void handleLine(char *line, Print &out) {
   } else if (!strcasecmp(tok, "PING")) {
     out.printf("PONG %s %llu\n", a1 ? a1 : "0", nowMs());
   } else if (!strcasecmp(tok, "TIME")) {  // TIME <unix_ms>
-#ifdef RCCAR_COMMS_MICROROS
     // settimeofday() would shift CLOCK_REALTIME, which the XRCE client uses as its clock.
     out.println("ERR TIME unsupported: micro-ROS syncs the clock with the agent");
-#else
-    if (!a1) { out.println("ERR usage: TIME <unix_ms>"); return; }
-    uint64_t ms = strtoull(a1, nullptr, 10);
-    struct timeval tv = { (time_t)(ms / 1000), (suseconds_t)((ms % 1000) * 1000) };
-    settimeofday(&tv, nullptr);
-    g_timeSynced = true;
-    out.printf("OK TIME %llu\n", ms);
-#endif
   } else if (!strcasecmp(tok, "RAW")) {  // RAW <steer_us> | RAW OFF
     if (!a1) { out.println("ERR usage: RAW <us>|OFF"); return; }
     int us = strcasecmp(a1, "OFF") ? clampv<int>(atoi(a1), SERVO_ABS_MIN_US, SERVO_ABS_MAX_US) : -1;
@@ -422,9 +387,8 @@ static void handleLine(char *line, Print &out) {
 }
 
 // ---------------------------------------------------------------------------
-#ifdef RCCAR_COMMS_MICROROS
-// micro-ROS comms layer (jazzy, XRCE-DDS framed over Serial/UART0). Same rules as the
-// ASCII layer: runs in loop() only, shared state only inside g_mux, never writes PWM.
+// micro-ROS comms layer (jazzy, XRCE-DDS framed over Serial/UART0). Runs in loop() only,
+// shared state only inside g_mux, never writes PWM.
 // UART0 carries the XRCE stream, so nothing else may print to Serial after setup.
 //
 // Safety is unchanged and lives in controlTask(): if /rccar/mcu/drive stops (agent lost,
@@ -708,7 +672,6 @@ static void microrosLoop() {
   }
   delay(1);  // let lower-priority tasks run
 }
-#endif  // RCCAR_COMMS_MICROROS
 
 // ---------------------------------------------------------------------------
 void setup() {
@@ -719,43 +682,14 @@ void setup() {
   pwmInit(PIN_STEER_PWM, STEER_TIMER, STEER_CH, 50, BOOT_NEUTRAL_US);
   pwmInit(PIN_THROTTLE_PWM, THROTTLE_TIMER, THROTTLE_CH, 50, BOOT_NEUTRAL_US);
 
-#ifdef RCCAR_COMMS_MICROROS
   Serial.setRxBufferSize(1024);  // before begin(); NVS writes can stall loop() for a while
-#endif
   Serial.begin(115200);
   loadConfig();
   xTaskCreatePinnedToCore(controlTask, "control", 4096, nullptr,
                           configMAX_PRIORITIES - 2, nullptr, 1);
-#ifdef RCCAR_COMMS_MICROROS
   microrosSetup();  // no Serial prints from here on: UART0 carries the XRCE stream
-#else
-  Serial.printf("READY fw=%s\n", FW_VERSION);
-#endif
 }
 
 void loop() {
-#ifdef RCCAR_COMMS_MICROROS
   microrosLoop();
-#else
-  static char buf[96];
-  static size_t len = 0;
-  static uint64_t lastTel = 0;
-
-  while (Serial.available()) {
-    char ch = (char)Serial.read();
-    if (ch == '\n') { buf[len] = '\0'; handleLine(buf, Serial); len = 0; }
-    else if (len < sizeof(buf) - 1) buf[len++] = ch;
-    else len = 0;  // overlong line: drop it
-  }
-
-  bool fs;
-  portENTER_CRITICAL(&g_mux); fs = g_failsafeEvt; g_failsafeEvt = false; portEXIT_CRITICAL(&g_mux);
-  if (fs) Serial.println("EVT FAILSAFE command timeout -> disarmed");
-
-  if (g_telemetryHz && nowMs() - lastTel >= 1000 / g_telemetryHz) {
-    lastTel = nowMs();
-    printTelemetry(Serial);
-  }
-  delay(1);
-#endif
 }

@@ -6,8 +6,8 @@ A 1:10 Tamiya TT-02 built into a self-driving research platform on a two-layer c
 
 | Layer | Hardware | Role | Status |
 | --- | --- | --- | --- |
-| High level | Raspberry Pi 5 | autonomy stack: ROS 2 Jazzy in Docker (`deploy/car/`), supervisor + micro-ROS agent, sends `DriveCmd` (heading, throttle) | phase 2 implemented, pending bench |
-| Real time | ESP32-S3-N16R8 | hardware PWM to servo/ESC, failsafe, telemetry; micro-ROS client over UART0 | this repo, `firmware/esp32/` (env `esp32s3`; legacy ASCII env `esp32s3_ascii`) |
+| High level | Raspberry Pi 5 | autonomy stack: ROS 2 Jazzy in Docker (`deploy/car/`), supervisor + micro-ROS agent, sends `DriveCmd` (heading, throttle) | phase 2 complete (bench-verified) |
+| Real time | ESP32-S3-N16R8 | hardware PWM to servo/ESC, failsafe, telemetry; micro-ROS client over UART0 | this repo, `firmware/esp32/` (env `esp32s3`, micro-ROS) |
 
 ## Current inventory
 
@@ -85,16 +85,16 @@ Wire colours: signal = yellow/white, power = red, ground = black. Put a tape fla
 
 ## Make commands
 
-Run `make help` for the live list. Setup: [docs/setup.md](docs/setup.md). ROS tools (`teleop`, `calibrate`, `tune`, `test`) need the stack running (`make car-up`).
+Run `make help` for the live list. Setup: [docs/setup.md](docs/setup.md). ROS tools (`teleop`, `calibrate`, `tune`, `test`, `mcu`) need the stack running (`make car-up`).
 
 **Car stack (ROS 2 + micro-ROS in Docker)**
 
 | Target | What it does |
 | --- | --- |
-| `config` | render `deploy/car/.env.generated` from `.env` + `tuning.toml [platform.$PLATFORM]` |
+| `config` | render `deploy/car/.env.generated` from `.env` + `tuning.toml [platform.$PLATFORM]` (runs in the firmware image; needs `make fw-image` first) |
 | `install-host` | sudo: install the udev rule (`/dev/rccar-esp32`) and the `rccar.service` systemd unit |
 | `ros-image` | build the ROS 2 image (`docker/ros.Dockerfile` → `rccar-ros:local`) |
-| `ros-test` | build the test image, `colcon test` + `test-result` (no hardware); `ros-test-image` / `ros-test-run` are its two halves |
+| `ros-test` | build the test image, `colcon test` + `test-result` (no hardware); `ros-test-image` / `ros-test-run` are its two halves (`unit-run` runs `deploy/tests` in the same image) |
 | `car-up` / `car-down` | start / stop `mcu-agent` + `core` (docker compose) |
 | `car-ps` / `car-logs` | health / follow logs |
 | `car-pull` | pull the pinned third-party images |
@@ -109,8 +109,9 @@ Run `make help` for the live list. Setup: [docs/setup.md](docs/setup.md). ROS to
 | `calibrate` | interactive servo center/left/right calibration, writes `tuning.toml` |
 | `tune` | push `tuning.toml` to the ESP32 and save it to flash |
 | `test` | steering sweep + failsafe check (motor stays off, never arms) |
+| `mcu CMD="GET"` | send one `McuCommand` to the ESP32 (`GET`, `INFO`, `PING`, `SET key val`, ...) and print the reply |
 
-**Firmware (Docker; `FW_ENV=esp32s3` default, or `esp32s3_ascii`)**
+**Firmware (Docker; `FW_ENV=esp32s3`)**
 
 | Target | What it does |
 | --- | --- |
@@ -125,20 +126,10 @@ Run `make help` for the live list. Setup: [docs/setup.md](docs/setup.md). ROS to
 
 | Target | What it does |
 | --- | --- |
-| `setup` | check host prerequisites, create `.venv`, install deps, build the firmware image |
-| `check` | verify python packages, pio, serial permissions |
-| `unit` | host Python unit tests (`tools/tests`, `deploy/tests`), no hardware |
+| `setup` | check host prerequisites (git, make, docker), build the firmware and ROS images |
+| `unit` | `deploy/tests` (pytest) in the ROS test image, no hardware |
 | `check-dev` | check optional LSP binaries for Claude Code |
-| `models` | validate `models/manifest.yaml` (download not implemented yet) |
-
-**Legacy ASCII path** (flash `FW_ENV=esp32s3_ascii` first, stack down; removed after the bench parity test; these replace the old `detect`, `ping`, ... names)
-
-| Target | What it does |
-| --- | --- |
-| `legacy-detect` / `legacy-ping` / `legacy-sync-time` | find the board / round-trip check / set the ESP32 clock |
-| `legacy-tune` / `legacy-calibrate` | push tuning / interactive calibration |
-| `legacy-test` / `legacy-test-throttle` | bench test (motor off) / with a short motor run, wheels off the ground |
-| `legacy-teleop` / `legacy-session` | keyboard driving / interactive session |
+| `models` | print `models/manifest.yaml` (download not implemented yet) |
 
 ## Power rules
 
@@ -165,7 +156,6 @@ rccar_bringup/     launch (car.launch.py), tuning.toml -> ROS parameters
 firmware/esp32/    ESP32 firmware (PlatformIO): src/main.cpp, include/pins.h, extra_packages/rccar_msgs (synced copy), rccar.meta
 deploy/car/        compose.yaml, 99-rccar.rules (udev), rccar.service (systemd); deploy/render_env.py (make config)
 docker/            firmware.Dockerfile, ros.Dockerfile (+ entrypoint.sh, ros-test.sh)
-tools/             legacy ASCII host CLI: rccar.py, esp32_session.py (removed after bench parity)
 models/            manifest.yaml (weights are not in git), cache/ gitignored
 repos/             rccar.repos (third-party ROS sources, vcstool)
 tuning.toml        all runtime tuning + [platform.*]; pushed to the ESP32 by mcu_bridge
@@ -173,8 +163,8 @@ tuning.toml        all runtime tuning + [platform.*]; pushed to the ESP32 by mcu
 logs/              session history (*.jsonl, gitignored)
 docs/              setup.md, docker_ros_plan.md, proposal, datasheets/
 .claude/           CLAUDE.md, layout.yaml, rules/, agents/
-.github/           workflows/{firmware,ros,python}.yml
+.github/           workflows/{firmware,ros}.yml
 Makefile           every command (make help)
 ```
 
-Bench checklist for phase 2: [docs/setup.md](docs/setup.md#phase-2-bench-checklist-user-run). Roadmap: [docs/docker_ros_plan.md](docs/docker_ros_plan.md). Firmware design: [docs/esp32-firmware-proposal.md](docs/esp32-firmware-proposal.md).
+Bench checklist (the procedure used to verify phase 2): [docs/setup.md](docs/setup.md#phase-2-bench-checklist-user-run). Roadmap: [docs/docker_ros_plan.md](docs/docker_ros_plan.md). Firmware design: [docs/esp32-firmware-proposal.md](docs/esp32-firmware-proposal.md).

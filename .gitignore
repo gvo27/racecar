@@ -1,4 +1,3 @@
-.venv/
 firmware/esp32/.pio/
 __pycache__/
 logs/*.jsonl

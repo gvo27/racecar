@@ -1,6 +1,6 @@
 name: ros
 
-# ROS 2 packages (rccar_*): image build + colcon test, advisory static checks, msg sync check.
+# ROS 2 packages (rccar_*) + deploy/: image build + colcon test + deploy unit tests, advisory static checks, msg sync check.
 on:
   push:
     paths:
@@ -11,7 +11,8 @@ on:
       - "docker/ros-test.sh"
       - "repos/**"
       - "tuning.toml"
-      - "tools/rccar.py"
+      - "deploy/**"
+      - "firmware/esp32/src/main.cpp"
       - "Makefile"
       - ".github/workflows/ros.yml"
       - "firmware/esp32/extra_packages/**"
@@ -24,7 +25,8 @@ on:
       - "docker/ros-test.sh"
       - "repos/**"
       - "tuning.toml"
-      - "tools/rccar.py"
+      - "deploy/**"
+      - "firmware/esp32/src/main.cpp"
       - "Makefile"
       - ".github/workflows/ros.yml"
       - "firmware/esp32/extra_packages/**"
@@ -68,6 +70,10 @@ jobs:
       # then colcon test-result --verbose; the step fails if any test fails.
       - name: colcon test
         run: make ros-test-run
+
+      # deploy/tests (render_env.py) in the same test image, repo mounted read-only
+      - name: deploy unit tests
+        run: make unit-run
 
       - name: Upload log/ and test results
         if: always()

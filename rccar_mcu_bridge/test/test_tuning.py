@@ -1,6 +1,6 @@
 """Pure tuning core (no rclpy)."""
-import importlib.util
 from pathlib import Path
+import re
 
 import pytest
 
@@ -8,16 +8,7 @@ from rccar_mcu_bridge import tuning as t
 
 REPO = Path(__file__).resolve().parents[2]
 TUNING = REPO / 'tuning.toml'
-RCCAR_PY = REPO / 'tools' / 'rccar.py'
-
-
-def test_firmware_keys_identical_to_tools_rccar():
-    if not RCCAR_PY.exists():
-        pytest.skip('tools/rccar.py not present (deleted after bench parity)')
-    spec = importlib.util.spec_from_file_location('legacy_rccar', RCCAR_PY)
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    assert t.FIRMWARE_KEYS == mod.FIRMWARE_KEYS
+MAIN_CPP = REPO / 'firmware' / 'esp32' / 'src' / 'main.cpp'
 
 
 def test_every_key_resolves_in_repo_tuning():
@@ -26,6 +17,36 @@ def test_every_key_resolves_in_repo_tuning():
     tun = t.load_tuning(TUNING)
     for (table, key), _cmd in t.FIRMWARE_KEYS:
         t.tuning_value(tun, table, key)
+
+
+def _firmware_source():
+    if not MAIN_CPP.exists():
+        pytest.skip('firmware/esp32/src/main.cpp not found (installed-only tree)')
+    return MAIN_CPP.read_text()
+
+
+def test_set_names_exist_in_firmware_setkey():
+    src = _firmware_source()
+    start = src.index('static bool setKey(')
+    body = src[start:src.index('\n}\n', start)]
+    fw_keys = set(re.findall(r'strcasecmp\(key,\s*"([^"]+)"\)', body))
+    assert fw_keys, 'no strcasecmp(key, "...") found in setKey: pattern out of date?'
+    wanted = {cmd.split()[1] for _k, cmd in t.FIRMWARE_KEYS if cmd.startswith('SET ')}
+    assert wanted - fw_keys == set(), 'FIRMWARE_KEYS SET names missing in main.cpp setKey'
+
+
+def test_cal_points_handled_in_firmware_handleline():
+    src = _firmware_source()
+    start = src.index('static void handleLine(')
+    body = src[start:]
+    fw_points = set(re.findall(r'strcasecmp\(a1,\s*"([A-Z]+)"\)', body))
+    wanted = {cmd.split()[1] for _k, cmd in t.FIRMWARE_KEYS if cmd.startswith('CAL ')}
+    assert wanted == {'LEFT', 'CENTER', 'RIGHT'}
+    assert wanted <= fw_points, 'CAL point missing in main.cpp handleLine'
+
+
+def test_all_commands_are_set_or_cal():
+    assert all(cmd.split()[0] in ('SET', 'CAL') for _k, cmd in t.FIRMWARE_KEYS)
 
 
 def test_firmware_commands_formatting_and_order():

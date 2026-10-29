@@ -1,26 +1,24 @@
-# path -> role/owner/rules/invariants. phase: 1,2=exist now (2 = pending user bench), 3+=planned. COLCON_IGNORE marks non-ros dirs.
+# path -> role/owner/rules/invariants. phase: 1,2=exist now (2 = bench-verified), 3+=planned. COLCON_IGNORE marks non-ros dirs.
 paths:
-  firmware/esp32/: {role: esp32 platformio project; envs esp32s3 (micro-ros, default) + esp32s3_ascii (legacy), owner: firmware, rules: [.claude/rules/firmware.md, .claude/rules/msgs.md], colcon_ignore: true, phase: 1, invariants: [pins.h == README table, "protocol/interface change => rccar_msgs + extra_packages + main.cpp + rccar_mcu_bridge (+ rccar.py while legacy) + docs"]}
+  firmware/esp32/: {role: esp32 platformio project; single env esp32s3 (micro-ros), owner: firmware, rules: [.claude/rules/firmware.md, .claude/rules/msgs.md], colcon_ignore: true, phase: 1, invariants: [pins.h == README table, "protocol/interface change => rccar_msgs + extra_packages + main.cpp + rccar_mcu_bridge + docs"]}
   firmware/esp32/extra_packages/rccar_msgs/: {role: synced copy of rccar_msgs for the micro-ros lib build; never edit here (ci diff -r), rules: .claude/rules/msgs.md, phase: 2}
   firmware/esp32/rccar.meta: {role: micro-ros entity limits (rmw_microxrcedds), rules: .claude/rules/firmware.md, phase: 2}
   firmware/esp32/include/pins.h: {role: pin ssot, rules: .claude/rules/firmware.md}
-  firmware/esp32/src/main.cpp: {role: "firmware main: control task, ascii protocol (handleLine), setKey, micro-ros comms layer (RCCAR_COMMS_MICROROS)"}
+  firmware/esp32/src/main.cpp: {role: "firmware main: control task, McuCommand grammar (handleLine, setKey), micro-ros comms layer"}
   docker/firmware.Dockerfile: {role: firmware toolchain image rccar-fw (platformio+esptool pinned), rules: .claude/rules/dependencies.md, phase: 1}
   docker/ros.Dockerfile: {role: "ros jazzy image, stages builder/test/runtime; base ros:jazzy-ros-base by digest; rosdep+colcon --merge-install; ROSDEP_INSTALL=0 only for offline builds", rules: .claude/rules/dependencies.md, phase: 2}
   docker/ros.Dockerfile.dockerignore: {role: build-context filter for ros.Dockerfile, phase: 2}
   docker/entrypoint.sh: {role: sources /opt/ros/jazzy + /ws/install then exec, phase: 2}
   docker/ros-test.sh: {role: colcon test + test-result in the test stage; copies log/xml to /out, phase: 2}
   docker/: {role: toolchain dockerfiles, rules: [.claude/rules/dependencies.md, .claude/rules/deploy.md], colcon_ignore: true, phase: 1}
-  tools/: {role: host cli (rccar.py, esp32_session.py); deleted after phase 2 parity, colcon_ignore: true, phase: 1, rules: .claude/rules/firmware.md}
   tuning.toml:
     role: "runtime tuning ssot"
     sections: [link, control, safety, steering, steering.calibration, throttle, throttle.calibration, logging, warmup, battery, imu, distance, encoder]
     confirmed_platform: ["platform.pi5: esp32_device, arch"]
     planned_sections: [models, supervisor, more platform keys]
     rules: .claude/rules/tuning.md
-    invariants: [no unconfirmed parameters, "key change => tuning.toml + rccar_mcu_bridge.tuning.FIRMWARE_KEYS (+ tools/rccar.py while legacy) + main.cpp setKey"]
-  requirements.txt: {role: host python deps for .venv; removed after phase 2 parity, rules: .claude/rules/dependencies.md}
-  Makefile: {role: entry point; car-*/ros-*/config via compose+docker, fw targets via docker (FW_ENV), legacy-* via .venv, rules: .claude/rules/dependencies.md}
+    invariants: [no unconfirmed parameters, "key change => tuning.toml + rccar_mcu_bridge.tuning.FIRMWARE_KEYS + main.cpp setKey (test-enforced by rccar_mcu_bridge/test/test_tuning.py)"]
+  Makefile: {role: entry point; no host python: car-*/ros-*/mcu/teleop via compose+docker, config via rccar-fw image, unit via ros test image, fw targets via docker (FW_ENV), rules: .claude/rules/dependencies.md}
   .env.example: {role: template for gitignored .env (TZ ROS_DOMAIN_ID PLATFORM TS_DOMAIN ADMIN_TS_HOST BACKUP_DEST), rules: .claude/rules/deploy.md}
   .env: {role: secrets + private names, gitignored}
   models/: {role: manifest.yaml + README committed; cache/ gitignored, rules: .claude/rules/models.md, colcon_ignore: true, phase: 1}
@@ -29,23 +27,22 @@ paths:
   build/: {role: make ros-test output (log + xml), gitignored}
   docs/: {role: setup.md, docker_ros_plan.md, esp32-firmware-proposal.md, tuning-notes.txt, colcon_ignore: true}
   docs/datasheets/: {role: archived datasheets + components_list.xlsx (ground truth inventory)}
-  .github/workflows/firmware.yml: {role: ci firmware build matrix esp32s3 + esp32s3_ascii in container, libdeps cache, firmware.bin artifact per env, phase: 1}
+  .github/workflows/firmware.yml: {role: ci firmware build env esp32s3 in container, libdeps cache, firmware.bin artifact, phase: 1}
   .claude/: {role: CLAUDE.md, layout.yaml, rules/*.md, agents/*.md, settings.json}
   .claude/agents/ros2-reviewer.md: {role: project subagent; reviews diffs vs rules + ros2-engineering refs + stop-path checklist, phase: 2}
   .claude/settings.json: {role: project claude plugins + mcp enablement, rules: [.claude/rules/dependencies.md, .claude/rules/claude-tooling.md], phase: 1}
   .mcp.json: {role: project mcp servers (context7), location: repo root (required), rules: .claude/rules/claude-tooling.md, phase: 1}
-  pyrightconfig.json: {role: pyright-lsp config (tools/, .venv), location: repo root (required), rules: .claude/rules/claude-tooling.md, phase: 1}
+  pyrightconfig.json: {role: pyright-lsp config (include rccar_* + deploy; missing imports = warning since rclpy/rccar_msgs only exist in the ROS image), location: repo root (required), rules: .claude/rules/claude-tooling.md, phase: 1}
   firmware/esp32/.clangd: {role: clangd flags for xtensa; db from make compiledb (gitignored compile_commands.json, .pio-core/), rules: .claude/rules/claude-tooling.md, phase: 1}
-  tools/tests/: {role: pytest host unit tests for the legacy cli (make unit, ci python.yml), rules: .claude/rules/claude-tooling.md, phase: 1}
-  .github/workflows/python.yml: {role: ci host-python unit tests (tools/tests + deploy/tests), phase: 1}
-  .github/workflows/ros.yml: {role: ci ros image build + colcon test (build-test), advisory ros2-engineering validators (ros2-static), rccar_msgs sync check (interfaces-sync), rules: .claude/rules/ros2.md, phase: 2}
+  deploy/tests/: {role: pytest for deploy/render_env.py (make unit: ros test image; ci ros.yml), rules: .claude/rules/claude-tooling.md, phase: 2}
+  .github/workflows/ros.yml: {role: ci ros image build + colcon test + deploy/tests (build-test), advisory ros2-engineering validators (ros2-static), rccar_msgs sync check (interfaces-sync), rules: .claude/rules/ros2.md, phase: 2}
   docs/plans/: {role: superpowers writing-plans output, rules: .claude/rules/claude-tooling.md}
-  deploy/: {role: deploy files + render_env.py (make config) + tests/, colcon_ignore: true, rules: .claude/rules/deploy.md, phase: 2}
+  deploy/: {role: deploy files + render_env.py (make config, runs in rccar-fw image) + tests/, colcon_ignore: true, rules: .claude/rules/deploy.md, phase: 2}
   deploy/car/compose.yaml: {role: services mcu-agent (digest-pinned micro-ros-agent), core (bringup), tools (profile); x-logging, hardening, heartbeat healthcheck, rules: .claude/rules/deploy.md, phase: 2}
   deploy/car/99-rccar.rules: {role: "udev ch343 1a86:55d3 -> /dev/rccar-esp32 group dialout, installed by make install-host", phase: 2}
   deploy/car/rccar.service: {role: systemd template (@REPO_DIR@ @USER@); compose up -d at boot, phase: 2}
   deploy/car/.env.generated: {role: rendered by make config from .env + tuning.toml platform.$PLATFORM table; gitignored, phase: 2}
-  deploy/render_env.py: {role: stdlib renderer for .env.generated; tests in deploy/tests (make unit), phase: 2}
+  deploy/render_env.py: {role: stdlib renderer for .env.generated (args --repo-dir --dialout-gid from make); tests in deploy/tests (make unit), phase: 2}
   rccar_msgs/: {role: msgs/srvs contract (DriveCmd Telemetry McuEvent SupervisorState; McuCommand Reset SetParam CalPoint RawPwm); bounded strings, rules: .claude/rules/msgs.md, phase: 2, invariants: ["change => firmware extra_packages copy + main.cpp + rccar_mcu_bridge + docs"]}
   rccar_mcu_bridge/: {role: "lifecycle node /mcu_bridge: typed services over /rccar/mcu/command, tuning push on activation + READY, FIRMWARE_KEYS", rules: [.claude/rules/mcu_bridge.md, .claude/rules/ros2.md], phase: 2}
   rccar_bringup/: {role: car.launch.py (use_sim_time, sim, tuning_file, heartbeat_dir); tuning.toml -> params, rules: [.claude/rules/tuning.md, .claude/rules/ros2.md], phase: 2}

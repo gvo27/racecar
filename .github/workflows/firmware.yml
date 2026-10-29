@@ -25,10 +25,6 @@ jobs:
   build:
     runs-on: ubuntu-24.04
     timeout-minutes: 45
-    strategy:
-      fail-fast: false
-      matrix:
-        env: [esp32s3, esp32s3_ascii]   # micro-ROS (default) and legacy ASCII
     steps:
       - uses: actions/checkout@v4
 
@@ -38,7 +34,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: firmware/esp32/.pio/libdeps
-          key: libdeps-${{ matrix.env }}-${{ hashFiles('firmware/esp32/platformio.ini', 'firmware/esp32/rccar.meta', 'firmware/esp32/extra_packages/**') }}
+          key: libdeps-esp32s3-${{ hashFiles('firmware/esp32/platformio.ini', 'firmware/esp32/rccar.meta', 'firmware/esp32/extra_packages/**') }}
 
       # image pre-installs the PlatformIO packages; the default named volume
       # (rccar-platformio-v2) is seeded from it, so the build needs no extra download
@@ -46,11 +42,11 @@ jobs:
         run: make fw-image
 
       - name: Build firmware in container
-        run: make build FW_ENV=${{ matrix.env }}
+        run: make build FW_ENV=esp32s3
 
       - name: Upload firmware.bin
         uses: actions/upload-artifact@v4
         with:
-          name: firmware-${{ matrix.env }}
-          path: firmware/esp32/.pio/build/${{ matrix.env }}/firmware.bin
+          name: firmware-esp32s3
+          path: firmware/esp32/.pio/build/esp32s3/firmware.bin
           if-no-files-found: error

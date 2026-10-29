@@ -88,3 +88,14 @@ def test_main_writes_file(tmp_path, monkeypatch):
     assert r.main(['--env', str(env), '--out', str(out), '--repo-dir', '/r']) == 0
     text = out.read_text()
     assert 'ROS_DOMAIN_ID=7\n' in text and 'REPO_DIR=/r\n' in text and 'DIALOUT_GID=20\n' in text
+
+
+def test_main_dialout_gid_arg(tmp_path, monkeypatch):
+    def boom():
+        raise AssertionError('group lookup must not run when --dialout-gid is given')
+    monkeypatch.setattr(r, 'dialout_gid', boom)
+    env = tmp_path / '.env'
+    env.write_text('PLATFORM=pi5\n')
+    out = tmp_path / '.env.generated'
+    assert r.main(['--env', str(env), '--out', str(out), '--repo-dir', '/r', '--dialout-gid', '994']) == 0
+    assert 'DIALOUT_GID=994\n' in out.read_text()

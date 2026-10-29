@@ -1,9 +1,9 @@
 """
 tuning.toml -> firmware ASCII commands (pure, no rclpy).
 
-FIRMWARE_KEYS is a verbatim copy of ``tools/rccar.py`` (a test keeps them
-identical until the legacy tool is deleted). It now lives here per the plan.
-Invariant: tuning key change => tuning.toml + FIRMWARE_KEYS + firmware setKey.
+FIRMWARE_KEYS is the single source of truth for (table, key) -> firmware command.
+Invariant: tuning key change => tuning.toml + FIRMWARE_KEYS + firmware setKey
+(test_tuning.py checks both the tuning.toml keys and the main.cpp setKey names).
 """
 import os
 from pathlib import Path

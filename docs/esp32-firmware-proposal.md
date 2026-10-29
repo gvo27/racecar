@@ -1,3 +1,5 @@
+> **Historical:** describes the phase-1 ASCII serial protocol and `tools/rccar.py`, superseded by micro-ROS in phase 2 (see [docker_ros_plan.md](docker_ros_plan.md)).
+
 # Proposal: ESP32-S3 actuator firmware + laptop test pipeline
 
 Status: **proposal, nothing implemented yet**. This PR only adds this document.

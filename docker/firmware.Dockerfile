@@ -22,20 +22,19 @@ RUN apt-get update \
 # PlatformIO lives in its standard virtualenv $PLATFORMIO_CORE_DIR/penv (the layout the
 # official installer creates). micro_ros_platformio sources penv/bin/activate and pip-installs
 # its build tools (colcon, catkin-pkg, empy) into the env pio runs from, so pio must run from it.
-# versions match requirements.txt ranges (platformio>=6.1,<7 ; esptool>=4.8,<5 ; pyserial>=3.5)
 RUN python -m venv /opt/platformio/penv \
  && /opt/platformio/penv/bin/pip install platformio==6.1.16 esptool==4.8.1 pyserial==3.5
 
 # Pre-install the project's packages (espressif32@6.9.0 platform, board toolchain,
 # arduino-esp32 2.0.17 framework, scons) into the core dir. A project-context install
 # is needed: a global `pio pkg install -p` skips the board-specific optional packages.
-# The esp32s3_ascii env is seeded because it has the same platform/board/framework as the
-# default micro-ROS env but no lib_deps (the micro-ROS library is fetched at `pio run`).
+# `-e esp32s3` also clones micro_ros_platformio into the throwaway seed dir; the micro-ROS
+# library itself is only built at the first `pio run` (not baked into the image).
 # A named volume mounted on PLATFORMIO_CORE_DIR is seeded from this layer on first use;
 # a bind mount is not (packages are then downloaded on the first build).
 # a+rwX: the Makefile runs as the host uid (--user), which differs from root/rccar.
 COPY firmware/esp32/platformio.ini /tmp/seed/platformio.ini
-RUN pio pkg install -d /tmp/seed -e esp32s3_ascii \
+RUN pio pkg install -d /tmp/seed -e esp32s3 \
  && rm -rf /tmp/seed \
  && chmod -R a+rwX /opt/platformio
 

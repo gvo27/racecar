@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Render deploy/car/.env.generated from .env + tuning.toml [platform.$PLATFORM].
 
-Host python (stdlib only, tomllib => python>=3.11). Run via `make config`.
+Stdlib only (tomllib => python>=3.11). `make config` runs it inside the rccar-fw image with
+--user <host uid:gid>, --repo-dir and --dialout-gid passed by make (the container's group db differs).
 Output keys (compose reads them with --env-file, `${VAR:?msg}` for required ones):
   PLATFORM ESP32_DEVICE ROS_DOMAIN_ID TZ RCCAR_ROS_IMAGE REPO_DIR HOST_UID HOST_GID DIALOUT_GID
 Notes: .claude/rules/deploy.md
@@ -106,6 +107,8 @@ def main(argv=None) -> int:
     ap.add_argument('--tuning', type=Path, default=root / 'tuning.toml')
     ap.add_argument('--out', type=Path, default=root / 'deploy' / 'car' / '.env.generated')
     ap.add_argument('--repo-dir', default=str(root))
+    ap.add_argument('--dialout-gid', type=int, default=None,
+                    help='host dialout gid (default: look up group dialout)')
     args = ap.parse_args(argv)
     try:
         if not args.env.is_file():
@@ -116,7 +119,8 @@ def main(argv=None) -> int:
         except (OSError, tomllib.TOMLDecodeError) as exc:
             raise ConfigError(f'cannot read {args.tuning}: {exc}')
         values = render(parse_env(args.env.read_text()), tuning, args.repo_dir,
-                        os.getuid(), os.getgid(), dialout_gid())
+                        os.getuid(), os.getgid(),
+                        args.dialout_gid if args.dialout_gid is not None else dialout_gid())
     except ConfigError as exc:
         print(f'config: {exc}', file=sys.stderr)
         return 1

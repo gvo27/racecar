@@ -60,7 +60,7 @@ def missing_points(stored) -> list:
 
 
 def sweep_plan(center_us: int, left_us: int, right_us: int) -> list:
-    """Steering sweep as (label, raw pulse) steps, like the legacy bench test."""
+    """Steering sweep as (label, raw pulse) steps."""
     return [('center', center_us), ('left lock', left_us), ('center', center_us),
             ('right lock', right_us), ('center', center_us)]
 

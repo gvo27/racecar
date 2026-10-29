@@ -21,14 +21,14 @@ Stop path (blocker if violated)
 Interfaces
 - QoS matches the table in ros2.md; reliable/transient_local only for state/events; no QoS mismatch (run qos_audit.py if available).
 - rccar_msgs: bounded strings, REP-103 units, no priority in messages; `diff -r rccar_msgs firmware/esp32/extra_packages/rccar_msgs` clean; main.cpp + rccar_mcu_bridge + docs updated together.
-- tuning: key change touches tuning.toml + FIRMWARE_KEYS (+ tools/rccar.py while it exists) + main.cpp setKey; no unconfirmed parameter.
+- tuning: key change touches tuning.toml + FIRMWARE_KEYS + main.cpp setKey (test_tuning.py enforces); no unconfirmed parameter.
 Code
 - thin node / fat pure module with pytest; declare_parameter for every parameter; use_sim_time honored; lifecycle for resource owners.
 - instance attributes shadowing rclpy.Node internals (`_services`, `_clients`, `_timers`, `_executor`, ...); blocking spin inside callbacks; `time.sleep` in nodes.
 - package.xml deps complete, no `ament_python` buildtool_depend, versions pinned.
 Deploy
 - compose: x-logging, cap_drop ALL, no-new-privileges, not privileged, read_only, tmpfs size caps, `${VAR:?}` for required vars, digests (no :latest), healthcheck, header comments, tuning.toml the only rw repo file.
-- Makefile: every target has `## help`; ROS targets guard with _need-stack; flash/monitor/legacy guard with _need-stack-down; build/flash keep .pio/libdeps.
+- Makefile: every target has `## help`; ROS targets guard with _need-stack; flash/monitor guard with _need-stack-down; build/flash keep .pio/libdeps.
 - CI: pinned actions, `permissions: contents: read`, timeout-minutes, paths filters cover new files.
 - docs/README/layout.yaml/CLAUDE.md updated for every new path or command.
 

@@ -6,18 +6,18 @@ paths:
 # Firmware implementation rules (ESP32-S3-N16R8)
 
 ## Build
-- Two PlatformIO envs share `[common]` (`platform = espressif32@6.9.0`: Arduino-ESP32 2.0.17, ESP-IDF 4.4.7, `board = esp32-s3-devkitc-1`): `esp32s3` (default, micro-ROS, `-DRCCAR_COMMS_MICROROS`) and `esp32s3_ascii` (legacy ASCII protocol, `-DRCCAR_COMMS_ASCII`, removed after the bench parity test). Select with `FW_ENV=` on make.
+- One PlatformIO env, `esp32s3` (default; `platform = espressif32@6.9.0`: Arduino-ESP32 2.0.17, ESP-IDF 4.4.7, `board = esp32-s3-devkitc-1`). micro-ROS is the only comms layer: no comms macros, no `#ifdef` variants. `FW_ENV=` on make defaults to it.
 - micro-ROS comms layer: `micro_ros_platformio` pinned by commit, `board_microros_distro = jazzy`, serial transport on UART0 (framed XRCE), entity limits in `rccar.meta` (1 node, 2 pubs, 1 sub, 1 service), `rccar_msgs` from `extra_packages/` (synced copy, bounded strings only). The library is colcon-built into `.pio/libdeps` on the first `pio run` (~10 min, needs git, cmake, network). `loop()` runs `spin_some` + a reconnect state machine (sparse pings); time via `rmw_uros_sync_session`.
 - Memory: `board_build.arduino.memory_type = qio_opi` (quad flash, octal PSRAM). Wrong type = boot loop.
 - Compiler is `-std=gnu++11`: no `std::clamp`, no C++14 aggregate init with default member initializers, no `if constexpr`.
 - `ARDUINO_USB_CDC_ON_BOOT=0`: `Serial` = UART0 = CH343 = right-hand USB-C port "COM". Flashing and the host link (laptop now, Pi later) use COM. The left port "USB" (native, GPIO19/20) is reserved as a regulated power input; never use it for comms.
 - Build/flash only via `make build` / `make flash` / `make monitor`: they run in docker image `rccar-fw` (`docker/firmware.Dockerfile`, build with `make fw-image`); `build` and `flash` delete only `firmware/esp32/.pio/build` (keep `.pio/libdeps`, the micro-ROS library cache); `make clean` deletes all of `.pio`. `flash`/`monitor` refuse while the car stack (mcu-agent) holds the serial port.
 - No host `pio` needed. Toolchain cache = named volume `rccar-platformio-v2` on `/opt/platformio`. Serial: `--device $(PORT)` + `--group-add <dialout gid>`.
-- CI: `.github/workflows/firmware.yml` matrix over both envs runs `make build FW_ENV=<env>`, caches `.pio/libdeps` (key: platformio.ini, rccar.meta, extra_packages), uploads `firmware.bin` per env. The micro-ROS env has only been compile-checked in CI; behavior is user bench.
+- CI: `.github/workflows/firmware.yml` runs `make build FW_ENV=esp32s3`, caches `.pio/libdeps` (key: platformio.ini, rccar.meta, extra_packages), uploads `firmware.bin`. CI only compiles; behavior is user bench.
 
 ## Architecture invariants
 - `controlTask()` (100 Hz default, core 1, high prio) is the ONLY writer of PWM outputs.
-- `loop()` is comms only: parse lines, print replies/telemetry. Never block it, never write PWM from it.
+- `loop()` is comms only (micro-ROS spin, publishers, reconnect). Never block it, never write PWM from it. Nothing else may print to `Serial` after `setup()` (UART0 carries the XRCE stream).
 - Shared state (`g_cfg`, `g_cmd`, `g_out`, `g_armed`, `g_rawSteerUs`) is read/written only inside `portENTER_CRITICAL(&g_mux)`. Copy out, then work on the copy. No Serial calls inside critical sections.
 - PWM uses the ESP-IDF LEDC driver (`driver/ledc.h`), not Arduino `ledc*` (its API differs between core 2.x and 3.x). Servo = LEDC timer 0 / channel 0, ESC = timer 1 / channel 1, 14-bit, low-speed mode.
 - `setup()` must initialise both PWM outputs at 50 Hz / 1500 us BEFORE anything else (the ESC learns neutral at power-on).
@@ -25,7 +25,7 @@ paths:
 
 ## Safety invariants (do not weaken without an explicit request)
 - Throttle requires `ARM`; boot state is disarmed.
-- No `D` command for `timeoutMs` -> disarm + neutral + `EVT FAILSAFE`.
+- No drive command (`/rccar/mcu/drive`) for `timeoutMs` -> disarm + neutral + `FAILSAFE` event.
 - Steering clamp: calibrated `left`/`right` in drive mode; 500-2500 us absolute (DS3225 datasheet) in RAW mode.
 - ESC clamp: 900-2100 us absolute; `esc_min < esc_neutral < esc_max` enforced on every SET.
 - Frame rates: servo 50-330 Hz (datasheet), ESC 50-400 Hz (above 50 Hz only after confirming the ESC accepts it).
@@ -37,12 +37,12 @@ paths:
 - Reserved (declared, not configured): BATT_LOW 6, IMU_INT 7, ENC_A/B 15/16, I2C SDA/SCL 8/9, DIST_TRIG/ECHO 10/11. Spare: 12, 13, 14, 17, 18.
 - ESP32 supplies no power to peripherals; sensors use a separate rail with common ground and <=3.3 V signals.
 
-## Protocol (ASCII lines, 115200 8N1 in esp32s3_ascii; same grammar over micro-ROS)
+## Protocol (McuCommand grammar over micro-ROS; no serial ASCII host link)
 - Commands: `D h s`, `ARM`, `DISARM`/`STOP`, `PING [seq]`, `TIME ms`, `TEL hz`, `RAW us|OFF`, `CAL LEFT|CENTER|RIGHT us`, `SET key val`, `GET`, `SAVE`, `DEFAULTS`, `SENS name`, `INFO`.
-- Reply prefixes: `OK`, `ERR`, `CFG`, `PONG`, `INFO`, `TEL`, `EVT`, `READY`, `SENS`. Host code matches on these prefixes.
-- `D` is never acknowledged (streamed at `send_hz`). In micro-ROS mode `D` is the `DriveCmd` subscription on `/rccar/mcu/drive` (heading_rad -> deg internally, throttle [-1,1]) and every other command goes through the `McuCommand` service `/rccar/mcu/command`, which reuses `handleLine` (a print sink writes the reply into a string buffer), so clamps and safety checks stay in one place. `D` over the service is refused (`ERR`): the drive subscription is the only drive path. `TIME` is unsupported in micro-ROS mode (time sync = `rmw_uros_sync_session`). Telemetry/events are `Telemetry`/`McuEvent` topics instead of `TEL`/`EVT` lines.
-- Adding or renaming a command, `SET` key or interface requires matching changes in `rccar_msgs` + `firmware/esp32/extra_packages` (diff -r clean), `rccar_mcu_bridge` (`FIRMWARE_KEYS`, commands), `tools/rccar.py` while legacy, `tuning.toml`, and `docs/`.
-- `tuning.toml` layout per device: `[<dev>]` hand-tuned knobs, `[<dev>.calibration]` measured values (e.g. `[steering.calibration]`, `[throttle.calibration]`; written by `make calibrate` / `make legacy-calibrate`, later auto-calibration warm-up), `[warmup.<dev>]` routine settings. Never add unconfirmed parameters.
+- Reply prefixes: `OK`, `ERR`, `CFG`, `PONG`, `INFO`, `SENS`. `mcu_bridge` matches on these prefixes.
+- Drive is the `DriveCmd` subscription on `/rccar/mcu/drive` (heading_rad -> deg internally, throttle [-1,1]); it is never acknowledged. Every other command goes through the `McuCommand` service `/rccar/mcu/command`, which runs `handleLine(char*, Print&)` (`StrPrint` captures the reply into a bounded string), so clamps and safety checks stay in one place. `D` over the service is refused (`ERR`): the drive subscription is the only drive path. `TIME` returns `ERR` (time sync = `rmw_uros_sync_session`). Telemetry/events are `Telemetry`/`McuEvent` topics. Manual check: `make mcu CMD="GET"` (stack up).
+- Adding or renaming a command, `SET` key or interface requires matching changes in `rccar_msgs` + `firmware/esp32/extra_packages` (diff -r clean), `rccar_mcu_bridge` (`FIRMWARE_KEYS`, commands), `tuning.toml`, and `docs/`. `test_tuning.py` checks `FIRMWARE_KEYS` against `tuning.toml` and the `setKey`/`CAL` names in `main.cpp`.
+- `tuning.toml` layout per device: `[<dev>]` hand-tuned knobs, `[<dev>.calibration]` measured values (e.g. `[steering.calibration]`, `[throttle.calibration]`; written by `make calibrate`, later auto-calibration warm-up), `[warmup.<dev>]` routine settings. Never add unconfirmed parameters.
 
 ## Config persistence
 - `Config` struct is stored as one NVS blob (`Preferences`, namespace `rccar`, key `cfg`).

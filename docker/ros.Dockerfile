@@ -42,7 +42,7 @@ RUN if [ "${ROSDEP_INSTALL}" = "1" ]; then \
       && rm -rf /var/lib/apt/lists/*; \
     else echo "WARN: ROSDEP_INSTALL=0, skipping rosdep install (offline build)"; fi
 
-# full sources + what the tests read from the repo root (tuning.toml, legacy rccar.py key check)
+# full sources + what the tests read from the repo root (tuning.toml, firmware setKey names)
 COPY rccar_msgs/ src/racecar/rccar_msgs/
 COPY rccar_mcu_bridge/ src/racecar/rccar_mcu_bridge/
 COPY rccar_supervisor/ src/racecar/rccar_supervisor/
@@ -50,7 +50,7 @@ COPY rccar_teleop/ src/racecar/rccar_teleop/
 COPY rccar_calibration/ src/racecar/rccar_calibration/
 COPY rccar_bringup/ src/racecar/rccar_bringup/
 COPY tuning.toml src/racecar/tuning.toml
-COPY tools/rccar.py src/racecar/tools/rccar.py
+COPY firmware/esp32/src/main.cpp src/racecar/firmware/esp32/src/main.cpp
 
 RUN source /opt/ros/jazzy/setup.bash \
  && colcon build --merge-install --event-handlers console_cohesion+ \
