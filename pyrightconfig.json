@@ -1,8 +1,7 @@
 {
-  "include": ["tools"],
-  "exclude": ["**/__pycache__", "firmware/esp32/.pio", ".pio-core", "logs", "models/cache"],
-  "venvPath": ".",
-  "venv": ".venv",
+  "include": ["rccar_supervisor", "rccar_mcu_bridge", "rccar_teleop", "rccar_calibration", "rccar_bringup", "deploy"],
+  "exclude": ["**/__pycache__", "firmware/esp32/.pio", ".pio-core", "logs", "models/cache", "build"],
   "pythonVersion": "3.12",
-  "typeCheckingMode": "basic"
+  "typeCheckingMode": "basic",
+  "reportMissingImports": "warning"
 }

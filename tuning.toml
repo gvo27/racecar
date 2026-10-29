@@ -36,7 +36,7 @@ max_steer_deg = 30.0        # road-wheel angle at full lock (measured)
 
 [throttle]                  # THW-1060 ESC on GPIO5
 esc_hz = 50                 # 50 is the RC standard. Only raise after confirming the ESC accepts it
-speed_limit = 0.45          # speed 1.0 -> 30 % throttle (bench safety), speed limit affects fwd vs reverse differently
+speed_limit = 0.7          # speed 1.0 -> 30 % throttle (bench safety), speed limit affects fwd vs reverse differently
 accel_per_s = 2.0           # max change of speed command per second (slew limit)
 reverse_double_tap = true   # ESC needs brake -> neutral -> reverse (Fwd/Br/Rev mode)
 brake_ms = 150
@@ -53,6 +53,12 @@ deadband_us = 0             # ESC dead zone skipped around neutral
 enabled = true
 dir = "logs"
 log_heartbeats = true       # false = log D commands only when heading/speed change
+
+# Host/platform settings, read by `make config` (deploy/render_env.py) -> deploy/car/.env.generated.
+# Selected by PLATFORM in .env. Only confirmed facts here (no mem limits, cpuset, backend yet).
+[platform.pi5]
+esp32_device = "/dev/rccar-esp32"   # symlink created by deploy/car/99-rccar.rules (CH343 1a86:55d3)
+arch = "arm64"                      # Raspberry Pi 5 / Ubuntu 24.04
 
 # ---------------------------------------------------------------------------
 # Reserved sections: intentionally empty until the hardware/routine exists and

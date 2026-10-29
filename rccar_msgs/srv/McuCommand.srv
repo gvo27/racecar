@@ -1,0 +1,7 @@
+# Generic MCU command: the firmware's ASCII command parser (handleLine) over micro-ROS.
+# Same grammar as the serial protocol (ARM, DISARM, RAW, CAL, SET, GET, SAVE, DEFAULTS,
+# TEL, INFO, PING). Only the supervisor and mcu_bridge call it; typed wrappers live on the Pi.
+string<=64 command
+---
+bool ok                    # reply starts with OK/CFG/PONG/INFO (not ERR)
+string<=384 reply          # firmware reply line(s), e.g. "CFG center=1500 ..."

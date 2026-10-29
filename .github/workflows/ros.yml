@@ -1,0 +1,158 @@
+name: ros
+
+# ROS 2 packages (rccar_*) + deploy/: image build + colcon test + deploy unit tests, advisory static checks, msg sync check.
+on:
+  push:
+    paths:
+      - "rccar_*/**"
+      - "docker/ros.Dockerfile"
+      - "docker/ros.Dockerfile.dockerignore"
+      - "docker/entrypoint.sh"
+      - "docker/ros-test.sh"
+      - "repos/**"
+      - "tuning.toml"
+      - "deploy/**"
+      - "firmware/esp32/src/main.cpp"
+      - "Makefile"
+      - ".github/workflows/ros.yml"
+      - "firmware/esp32/extra_packages/**"
+  pull_request:
+    paths:
+      - "rccar_*/**"
+      - "docker/ros.Dockerfile"
+      - "docker/ros.Dockerfile.dockerignore"
+      - "docker/entrypoint.sh"
+      - "docker/ros-test.sh"
+      - "repos/**"
+      - "tuning.toml"
+      - "deploy/**"
+      - "firmware/esp32/src/main.cpp"
+      - "Makefile"
+      - ".github/workflows/ros.yml"
+      - "firmware/esp32/extra_packages/**"
+
+permissions:
+  contents: read
+
+jobs:
+  build-test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+
+      # test stage = builder (rosdep + colcon build) + colcon test entrypoint (docker/ros-test.sh)
+      - name: Build test image (amd64, gha cache)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/ros.Dockerfile
+          target: test
+          load: true
+          tags: rccar-ros-test:local
+          cache-from: type=gha,scope=ros
+          cache-to: type=gha,scope=ros,mode=max
+
+      # runtime stage must build too (exec deps resolve, install tree copies). Shares builder layers.
+      - name: Build runtime image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/ros.Dockerfile
+          target: runtime
+          load: false
+          tags: rccar-ros:ci
+          cache-from: type=gha,scope=ros
+          cache-to: type=gha,scope=ros,mode=max
+
+      # colcon test (pytest, launch_testing with the fake MCU, ament_flake8/pep257/xmllint)
+      # then colcon test-result --verbose; the step fails if any test fails.
+      - name: colcon test
+        run: make ros-test-run
+
+      # deploy/tests (render_env.py) in the same test image, repo mounted read-only
+      - name: deploy unit tests
+        run: make unit-run
+
+      - name: Upload log/ and test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ros-test-results
+          path: build/ros-test
+          if-no-files-found: warn
+
+  # Advisory static analysis from dbwls99706/ros2-engineering-skills (plugin validators).
+  # Rule: findings never fail the job; they are printed and written to the job summary.
+  # The job fails only when a validator itself breaks. Exit codes of the pinned v1.7.2 scripts:
+  #   qos_audit.py           0 clean | 1 confirmed QoS/type conflict (finding) | 2 usage/unreadable path
+  #   launch_validator.py    0 clean | 1 error-severity finding (or missing path) | 2 argparse usage error
+  #   skill_validate_hook.py 0 pass  | 1 error finding (manual --file mode)       | 2 event-mode block only
+  # => 0 and 1 are "findings", any other code (>=2, signals) or a Python traceback in the output
+  # is an internal error and fails the job. Inputs are pre-checked to exist so exit 1 cannot mean "missing".
+  ros2-static:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: dbwls99706/ros2-engineering-skills
+          ref: v1.7.2
+          path: .ros2skill
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run validators (advisory)
+        shell: bash
+        run: |
+          S=.ros2skill/scripts
+          internal_error=0
+          : > "$RUNNER_TEMP/summary.md"
+
+          run_tool() {  # run_tool <title> <cmd...>
+            local title="$1"; shift
+            local out rc
+            set +e
+            out="$("$@" 2>&1)"; rc=$?
+            set -e
+            echo "::group::$title (exit $rc)"; echo "$out"; echo "::endgroup::"
+            {
+              echo "### $title"
+              echo "exit code: $rc"
+              echo '```'; echo "$out" | tail -n 60; echo '```'
+            } >> "$RUNNER_TEMP/summary.md"
+            if [ "$rc" -gt 1 ] || grep -q 'Traceback (most recent call last)' <<<"$out"; then
+              echo "::error::$title: internal validator error (exit $rc)"
+              internal_error=1
+            elif [ "$rc" -eq 1 ]; then
+              echo "::warning::$title reported findings (advisory)"
+            fi
+          }
+
+          for pkg in rccar_*/; do
+            pkg="${pkg%/}"
+            run_tool "qos_audit $pkg" python "$S/qos_audit.py" "$pkg"
+          done
+          run_tool "launch_validator rccar_bringup" python "$S/launch_validator.py" rccar_bringup
+
+          mapfile -t pyfiles < <(find rccar_* -name '*.py' -not -path '*/build/*' | sort)
+          if [ "${#pyfiles[@]}" -gt 0 ]; then
+            run_tool "skill_validate_hook (${#pyfiles[@]} files)" python "$S/skill_validate_hook.py" --file "${pyfiles[@]}"
+          fi
+
+          cat "$RUNNER_TEMP/summary.md" >> "$GITHUB_STEP_SUMMARY"
+          exit "$internal_error"
+
+  # firmware/esp32/extra_packages/rccar_msgs is a synced copy of rccar_msgs (micro-ROS builds it).
+  interfaces-sync:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: rccar_msgs == firmware extra_packages copy
+        run: |
+          diff -r rccar_msgs firmware/esp32/extra_packages/rccar_msgs \
+            || { echo "::error::out of sync: cp -r rccar_msgs/. firmware/esp32/extra_packages/rccar_msgs/"; exit 1; }
