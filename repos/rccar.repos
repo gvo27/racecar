@@ -1,0 +1,4 @@
+# vcstool manifest: third-party sources with no apt binary. Never our own code.
+# Entry: <name>: {type: git, url: <repo url>, version: <tag or commit>}
+# Import: vcs import src < repos/rccar.repos
+repositories: {}

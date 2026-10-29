@@ -1,0 +1,40 @@
+name: firmware
+
+on:
+  push:
+    paths:
+      - "firmware/**"
+      - "docker/**"
+      - "Makefile"
+      - ".github/workflows/firmware.yml"
+  pull_request:
+    paths:
+      - "firmware/**"
+      - "docker/**"
+      - "Makefile"
+      - ".github/workflows/firmware.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      # image pre-installs the PlatformIO packages; the default named volume
+      # (rccar-platformio) is seeded from it, so the build needs no extra download
+      - name: Build firmware image
+        run: make fw-image
+
+      - name: Build firmware in container
+        run: make build
+
+      - name: Upload firmware.bin
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware-esp32s3
+          path: firmware/esp32/.pio/build/esp32s3/firmware.bin
+          if-no-files-found: error

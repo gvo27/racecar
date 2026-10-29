@@ -1,0 +1,21 @@
+{
+  "extraKnownMarketplaces": {
+    "claude-plugins-official": {
+      "source": { "source": "github", "repo": "anthropics/claude-plugins-official" }
+    },
+    "embedded-skills": {
+      "source": { "source": "github", "repo": "rovinax/embedded-skills", "ref": "master" }
+    },
+    "ros2-engineering-skills": {
+      "source": { "source": "github", "repo": "dbwls99706/ros2-engineering-skills", "ref": "v1.7.2" }
+    }
+  },
+  "enabledPlugins": {
+    "superpowers@claude-plugins-official": true,
+    "pyright-lsp@claude-plugins-official": true,
+    "clangd-lsp@claude-plugins-official": true,
+    "embedded-skills@embedded-skills": true,
+    "ros2-engineering@ros2-engineering-skills": true
+  },
+  "enabledMcpjsonServers": ["context7"]
+}

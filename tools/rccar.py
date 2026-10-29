@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Laptop-side CLI for the ESP32-S3 RC car actuator bridge.
 
-Talks the line protocol in firmware/src/main.cpp over the board's "COM"
+Talks the line protocol in firmware/esp32/src/main.cpp over the board's "COM"
 USB-C port (right-hand port, CH343 USB-UART bridge). Tuning comes from tuning.toml at the
 repo root; every session is logged to logs/*.jsonl. Every subcommand is
 wrapped by a Makefile target; run `python tools/rccar.py -h` for the list.
@@ -268,8 +268,8 @@ def open_link(args, label: str, apply: bool = True) -> Link:
 # Subcommands
 # ---------------------------------------------------------------------------
 def cmd_check_env(args) -> int:
-    ok = sys.version_info >= (3, 11)       # tomllib
-    print(f"python   {sys.version.split()[0]}", "OK" if ok else "NEED >= 3.11")
+    ok = sys.version_info >= (3, 12)       # tomllib
+    print(f"python   {sys.version.split()[0]}", "OK" if ok else "NEED >= 3.12")
     for mod, pkg in (("serial", "pyserial"), ("esptool", "esptool")):
         found = importlib.util.find_spec(mod) is not None
         print(f"{pkg:<8} {'OK' if found else 'MISSING (make setup)'}")

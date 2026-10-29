@@ -1,15 +1,13 @@
-# microcontroller: real-time actuation & comms layer for an autonomous RC car
+# racecar
 
-A 1:10 Tamiya TT-02 is being built into a self-driving research platform on a two-layer compute stack: a Raspberry Pi 5 for perception, sensor fusion, semantic SLAM and racing-line optimization, and an ESP32-S3 for hard-real-time control. This repo is the electrical and embedded foundation those models stand on: PWM actuation, failsafes, the host-to-MCU protocol, runtime tuning and data logging.
-
-The ML models and simulators live in separate repos and are deployed to the Pi separately. This repo stays focused on infrastructure and communications.
+A 1:10 Tamiya TT-02 built into a self-driving research platform on a two-layer compute stack: a Raspberry Pi 5 for perception, sensor fusion, semantic SLAM and racing-line optimization, and an ESP32-S3 for hard-real-time control. This repo holds everything that runs on the car: PWM actuation, failsafes, the host-to-MCU protocol, runtime tuning, logging and the Docker/ROS 2 deployment. Setup: [docs/setup.md](docs/setup.md).
 
 ## Compute stack
 
 | Layer | Hardware | Role | Status |
 | --- | --- | --- | --- |
-| High level | Raspberry Pi 5 | autonomy stack (ROS 2), sends heading + speed | bench stand-in: laptop + `tools/` |
-| Real time | ESP32-S3-N16R8 | hardware PWM to servo/ESC, safety, telemetry | this repo, `firmware/` |
+| High level | Raspberry Pi 5 | autonomy stack (ROS 2), sends heading + speed | ROS 2 in Docker (planned); today `tools/` on a host |
+| Real time | ESP32-S3-N16R8 | hardware PWM to servo/ESC, safety, telemetry | this repo, `firmware/esp32/` |
 
 ## Current inventory
 
@@ -26,10 +24,6 @@ Source: [`docs/datasheets/components_list.xlsx`](docs/datasheets/components_list
 | motor controller | THW-1060-BRUSHED | [thw-1060-brushed-esc.md](docs/datasheets/thw-1060-brushed-esc.md) |
 | steering servo | DS3225MG | [ds3225_servo.md](docs/datasheets/ds3225_servo.md) |
 
-## Quick start
-
-Follow [docs/setup.md](docs/setup.md). In short: `make setup` → `make detect` → `make flash` → `make test` → `make calibrate` → `make tune`. Run `make help` for every target.
-
 ## USB-C ports (ESP32-S3-N16R8)
 
 | Port | Position | Connects to | Use |
@@ -41,7 +35,7 @@ Flash and talk to the board **only through COM**.
 
 ## Pin map (left header P1 only)
 
-Source of truth: [`firmware/include/pins.h`](firmware/include/pins.h). Keep this table identical to it.
+Source of truth: [`firmware/esp32/include/pins.h`](firmware/esp32/include/pins.h). Keep this table identical to it.
 
 ```
                 ESP32-S3-N16R8   (top view, antenna up)
@@ -89,6 +83,34 @@ Source of truth: [`firmware/include/pins.h`](firmware/include/pins.h). Keep this
 
 Wire colours: signal = yellow/white, power = red, ground = black. Put a tape flag on the two active signal wires.
 
+## Make commands
+
+Run `make help` for the live list. Setup: [docs/setup.md](docs/setup.md).
+
+| Target | What it does |
+| --- | --- |
+| `setup` | check host prerequisites, create `.venv`, install deps, build the firmware image |
+| `fw-image` | build the firmware toolchain Docker image |
+| `config` | check `.env` exists (rendering arrives in phase 2) |
+| `models` | validate `models/manifest.yaml` (download not implemented yet) |
+| `check` | verify python packages, pio, serial permissions |
+| `detect` | find the ESP32 on USB, read chip id, query firmware |
+| `ping` | check the firmware answers + USB round-trip time |
+| `sync-time` | set the ESP32 clock from the host |
+| `build` | clean + compile firmware (Docker) |
+| `flash` | clean + compile + upload over COM (Docker) |
+| `monitor` | raw serial monitor (Docker) |
+| `clean` | delete `firmware/esp32/.pio` |
+| `compiledb` | firmware `compile_commands.json` for clangd (Docker) |
+| `unit` | host Python unit tests, no hardware |
+| `check-dev` | check optional LSP binaries for Claude Code |
+| `tune` | push `tuning.toml` to the ESP32 and save it to flash |
+| `test` | steering sweep + failsafe check (motor stays off) |
+| `test-throttle` | test + short motor run, wheels off the ground |
+| `calibrate` | interactive servo center/left/right calibration |
+| `teleop` | keyboard driving: arrows = heading/speed |
+| `session` | interactive tuning/test session |
+
 ## Power rules
 
 1. **The ESP32 powers nothing.** It only outputs actuator signals and talks to the host. Sensors run from a separate regulated rail that shares ground with the ESP32 and keeps all signals at ≤ 3.3 V.
@@ -105,12 +127,18 @@ Wire colours: signal = yellow/white, power = red, ground = black. Put a tape fla
 ## Repo layout
 
 ```
-firmware/        ESP32 firmware (PlatformIO): src/main.cpp, include/pins.h
-tools/           rccar.py (CLI + link/log/tuning API), esp32_session.py (interactive scratchpad)
+firmware/esp32/  ESP32 firmware (PlatformIO): src/main.cpp, include/pins.h
+docker/          toolchain Dockerfiles (firmware.Dockerfile)
+tools/           rccar.py (CLI + link/log/tuning API), esp32_session.py
+models/          manifest.yaml (weights are not in git), cache/ gitignored
+repos/           rccar.repos (third-party ROS sources, vcstool)
 tuning.toml      all runtime tuning; pushed to the ESP32 on connect
+.env.example     template for the gitignored .env
 logs/            session history (*.jsonl, gitignored)
-docs/            setup.md, design proposal, datasheets/
-Makefile         every bring-up command (make help)
+docs/            setup.md, docker_ros_plan.md, proposal, datasheets/
+.claude/         CLAUDE.md, layout.yaml, rules/
+.github/         workflows/firmware.yml (CI firmware build)
+Makefile         every command (make help)
 ```
 
-Design rationale (architecture, safety, protocol, latency): [docs/esp32-firmware-proposal.md](docs/esp32-firmware-proposal.md).
+Roadmap: [docs/docker_ros_plan.md](docs/docker_ros_plan.md). Firmware design: [docs/esp32-firmware-proposal.md](docs/esp32-firmware-proposal.md).
