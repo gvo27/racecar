@@ -5506,7 +5506,7 @@
 		(dnp no)
 		(uuid "0fe08ec2-862e-5ba5-87ac-7ddb55b6351e")
 		(property "Reference" "D3"
-			(at 106.68 195.58 90)
+			(at 107.188 195.834 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -5517,7 +5517,7 @@
 			)
 		)
 		(property "Value" "LED"
-			(at 106.68 198.12 90)
+			(at 107.95 197.866 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -5608,7 +5608,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 76.2 69.85 0)
+			(at 74.422 68.834 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -7155,7 +7155,7 @@
 		(dnp no)
 		(uuid "501f625e-dfa6-5cf4-b2da-7ef60f975d39")
 		(property "Reference" "FB1"
-			(at 166.37 172.72 90)
+			(at 168.91 171.45 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -7166,7 +7166,7 @@
 			)
 		)
 		(property "Value" "TBD filter"
-			(at 166.37 175.26 90)
+			(at 168.91 173.99 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -8796,7 +8796,7 @@
 		(dnp no)
 		(uuid "920b2635-112b-5587-8181-10f81c3f1323")
 		(property "Reference" "D4"
-			(at 264.16 195.58 90)
+			(at 264.668 195.834 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -8807,7 +8807,7 @@
 			)
 		)
 		(property "Value" "LED"
-			(at 264.16 198.12 90)
+			(at 265.43 198.12 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -8978,7 +8978,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 27.94 104.14 0)
+			(at 26.416 103.124 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -9663,7 +9663,7 @@
 		(dnp no)
 		(uuid "b3c6779b-bf9f-51ed-8c02-0e5a0acd9780")
 		(property "Reference" "U1"
-			(at 229.87 52.07 0)
+			(at 237.998 46.99 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -9674,7 +9674,7 @@
 			)
 		)
 		(property "Value" "Pololu D36V50F5 buck (req 5.1V >=6A TBD)"
-			(at 218.44 93.98 0)
+			(at 221.234 50.8 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -10178,7 +10178,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 162.56 86.36 0)
+			(at 161.798 85.598 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -10398,7 +10398,7 @@
 		(dnp no)
 		(uuid "dbc0188f-aa57-5175-96c8-1d26af07e7b4")
 		(property "Reference" "U3"
-			(at 222.25 161.29 0)
+			(at 218.948 161.29 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -10664,7 +10664,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 137.16 102.87 0)
+			(at 135.636 101.854 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -10961,7 +10961,7 @@
 		(dnp no)
 		(uuid "e75c5f2e-0b04-5644-9583-10dc9b5dcc33")
 		(property "Reference" "D2"
-			(at 306.07 88.9 90)
+			(at 306.832 89.154 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -10972,7 +10972,7 @@
 			)
 		)
 		(property "Value" "LED"
-			(at 306.07 91.44 90)
+			(at 307.594 91.186 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -11052,7 +11052,7 @@
 		(dnp no)
 		(uuid "e8dddf0a-b461-5c81-99ac-4a7ebaaf5f06")
 		(property "Reference" "U2"
-			(at 57.15 161.29 0)
+			(at 62.992 161.29 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -11218,7 +11218,7 @@
 		(dnp no)
 		(uuid "ea8cc90d-b3d9-504b-8324-8c08da7880b3")
 		(property "Reference" "J1"
-			(at 34.29 69.85 0)
+			(at 32.766 70.866 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -11229,7 +11229,7 @@
 			)
 		)
 		(property "Value" "Battery T-plug pigtail 12AWG"
-			(at 34.29 72.39 0)
+			(at 32.766 73.406 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -11774,7 +11774,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 60.96 69.85 0)
+			(at 59.182 69.088 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
