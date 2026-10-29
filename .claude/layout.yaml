@@ -18,7 +18,7 @@ paths:
     planned_sections: [models, supervisor, more platform keys]
     rules: .claude/rules/tuning.md
     invariants: [no unconfirmed parameters, "key change => tuning.toml + rccar_mcu_bridge.tuning.FIRMWARE_KEYS + main.cpp setKey (test-enforced by rccar_mcu_bridge/test/test_tuning.py)"]
-  Makefile: {role: entry point; no host python: car-*/ros-*/mcu/teleop via compose+docker, config via rccar-fw image, unit via ros test image, fw targets via docker (FW_ENV), rules: .claude/rules/dependencies.md}
+  Makefile: {role: entry point; no host python: car-*/ros-*/mcu/teleop via compose+docker, config via ros image, unit via ros test image, fw targets via docker (FW_ENV), rules: .claude/rules/dependencies.md}
   .env.example: {role: template for gitignored .env (TZ ROS_DOMAIN_ID PLATFORM TS_DOMAIN ADMIN_TS_HOST BACKUP_DEST), rules: .claude/rules/deploy.md}
   .env: {role: secrets + private names, gitignored}
   models/: {role: manifest.yaml + README committed; cache/ gitignored, rules: .claude/rules/models.md, colcon_ignore: true, phase: 1}
@@ -37,7 +37,7 @@ paths:
   deploy/tests/: {role: pytest for deploy/render_env.py (make unit: ros test image; ci ros.yml), rules: .claude/rules/claude-tooling.md, phase: 2}
   .github/workflows/ros.yml: {role: ci ros image build + colcon test + deploy/tests (build-test), advisory ros2-engineering validators (ros2-static), rccar_msgs sync check (interfaces-sync), rules: .claude/rules/ros2.md, phase: 2}
   docs/plans/: {role: superpowers writing-plans output, rules: .claude/rules/claude-tooling.md}
-  deploy/: {role: deploy files + render_env.py (make config, runs in rccar-fw image) + tests/, colcon_ignore: true, rules: .claude/rules/deploy.md, phase: 2}
+  deploy/: {role: deploy files + render_env.py (make config, runs in ros image) + tests/, colcon_ignore: true, rules: .claude/rules/deploy.md, phase: 2}
   deploy/car/compose.yaml: {role: services mcu-agent (digest-pinned micro-ros-agent), core (bringup), tools (profile); x-logging, hardening, heartbeat healthcheck, rules: .claude/rules/deploy.md, phase: 2}
   deploy/car/99-rccar.rules: {role: "udev ch343 1a86:55d3 -> /dev/rccar-esp32 group dialout, installed by make install-host", phase: 2}
   deploy/car/rccar.service: {role: systemd template (@REPO_DIR@ @USER@); compose up -d at boot, phase: 2}

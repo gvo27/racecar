@@ -13,7 +13,7 @@ paths:
 
 ## Host prerequisites
 - git, make, docker engine + compose plugin + buildx. User in groups `docker` and `dialout`.
-- No host Python, no `.venv`, no `requirements.txt`. `make config` runs `deploy/render_env.py` in the `rccar-fw` image (python 3.12); `make unit` runs `deploy/tests` in the ROS test image (`rccar-ros-test:local`); `make setup` checks git/make/docker (+ compose/buildx warnings) and builds both images.
+- No host Python, no `.venv`, no `requirements.txt`. `make config` runs `deploy/render_env.py` in the ROS image (python 3.12, noble); `make unit` runs `deploy/tests` in the ROS test image (`rccar-ros-test:local`); `make setup` checks git/make/docker (+ compose/buildx warnings) and builds both images.
 
 ## Toolchain images
 - `docker/firmware.Dockerfile` -> image `rccar-fw`: python:3.12-slim-bookworm, platformio==6.1.16, esptool==4.8.1, pyserial==3.5, project packages (espressif32@6.9.0, board toolchain, framework, scons) preinstalled via project-context `pio pkg install` into `/opt/platformio` (`PLATFORMIO_CORE_DIR`, a+rwX for `--user <host uid>`). Context filtered by `docker/firmware.Dockerfile.dockerignore`.

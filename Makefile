@@ -38,10 +38,10 @@ setup:           ## check host prereqs (git, make, docker + compose/buildx), bui
 	$(MAKE) fw-image
 	$(MAKE) ros-image
 
-config:          ## render deploy/car/.env.generated from .env + tuning.toml [platform.$PLATFORM] (runs in the rccar-fw image)
+config:          ## render deploy/car/.env.generated from .env + tuning.toml [platform.$PLATFORM] (runs in the ROS image)
 	@test -n "$(DIALOUT_GID)" || { echo "group 'dialout' not found: sudo usermod -aG dialout $$USER (docs/setup.md)"; exit 1; }
-	@docker image inspect $(FW_IMAGE) >/dev/null 2>&1 || { echo "image $(FW_IMAGE) missing: run make fw-image"; exit 1; }
-	docker run --rm --user $(shell id -u):$(shell id -g) -v "$(CURDIR)":/work -w /work $(FW_IMAGE) \
+	@docker image inspect $(ROS_IMAGE) >/dev/null 2>&1 || { echo "image $(ROS_IMAGE) missing: run make ros-image"; exit 1; }
+	docker run --rm --user $(shell id -u):$(shell id -g) -v "$(CURDIR)":/work -w /work $(ROS_IMAGE) \
 	  python3 deploy/render_env.py --repo-dir "$(CURDIR)" --dialout-gid $(DIALOUT_GID)
 
 models:          ## print models/manifest.yaml (download + sha256 verify not implemented; needs tailnet)
@@ -125,9 +125,11 @@ tune: _need-stack  ## push tuning.toml to the ESP32 and save it to flash
 test: _need-stack  ## steering sweep + failsafe check (motor stays off, never arms)
 	$(COMPOSE) run --rm tools ros2 run rccar_calibration bench_test
 
-mcu: _need-stack  ## one McuCommand to the ESP32, e.g. make mcu CMD="GET" (stack up; CMD: GET INFO PING SET ...)
+mcu: _need-stack  ## one McuCommand to the ESP32, e.g. make mcu CMD="GET" (stack up; CMD: GET INFO PING SET ...; ARM refused)
 	@test -n "$(CMD)" || { echo 'usage: make mcu CMD="GET"'; exit 1; }
-	$(COMPOSE) run --rm tools ros2 service call /rccar/mcu/command rccar_msgs/srv/McuCommand "{command: '$(CMD)'}"
+	@case "$(CMD)" in *\'*|*\"*) echo "CMD must not contain quotes"; exit 1;; \
+	  [Aa][Rr][Mm]*) echo "ARM is refused here: arm through the supervisor (make teleop, key a)"; exit 1;; esac
+	$(COMPOSE) run --rm tools timeout 10 ros2 service call /rccar/mcu/command rccar_msgs/srv/McuCommand "{command: '$(CMD)'}"
 
 # ---- firmware (docker) ----------------------------------------------------------------------
 fw-image:        ## build the firmware toolchain docker image (rccar-fw)

@@ -18,7 +18,7 @@ make fw-image ros-image config          # build both images, then render deploy/
 - The repo lives at `~/ros2_ws/src/racecar` on the Pi. The containers mount it at `/ws/src/racecar` (read-only, plus `tuning.toml` and `logs/` read-write), so calibration writes your working copy. One clone per user: nobody edits another user's clone.
 - `make install-host` prints each step. It installs `deploy/car/99-rccar.rules` (CH343 `1a86:55d3` -> `/dev/rccar-esp32`, group `dialout`) and renders `deploy/car/rccar.service` with this clone's path and your user. Unplug and replug the USB cable once afterwards. The unit starts the stack at boot with whatever images are already built; deploys stay explicit (`make car-pull && make car-up`).
 - `make setup` checks the host prerequisites and builds both images (`fw-image`, `ros-image`).
-- `make config` (runs `deploy/render_env.py` inside the `rccar-fw` image) reads `.env` and `tuning.toml [platform.$PLATFORM]` (today: `esp32_device`, `arch`) and writes the gitignored `deploy/car/.env.generated`. It fails with a hint if `.env` is missing.
+- `make config` (runs `deploy/render_env.py` inside the ROS image, so it needs `make ros-image` first) reads `.env` and `tuning.toml [platform.$PLATFORM]` (today: `esp32_device`, `arch`) and writes the gitignored `deploy/car/.env.generated`. It fails with a hint if `.env` is missing.
 - `make ros-image` runs `rosdep` against `package.xml`, so it needs `packages.ros.org` and `raw.githubusercontent.com`.
 
 **Claude Code (optional):** open the repo in Claude Code and trust the folder. It then asks you to install the plugins in `.claude/settings.json` and to approve the Context7 MCP server in `.mcp.json`.
@@ -115,7 +115,7 @@ make tune            # push tuning.toml to the ESP32 and save it to flash
 
 `mcu_bridge` also pushes `tuning.toml` to the ESP32 RAM when it starts (once the ESP32 is reachable) and every time the firmware reports READY. There is no ROS throttle test.
 
-Single commands to the ESP32 (stack up): `make mcu CMD="GET"`, `make mcu CMD="INFO"`, `make mcu CMD="SET gain 1.5"` (calls `/rccar/mcu/command`; `D` is refused, drive goes through the supervisor).
+Single commands to the ESP32 (stack up): `make mcu CMD="GET"`, `make mcu CMD="INFO"`, `make mcu CMD="SET gain 1.5"` (calls `/rccar/mcu/command`; `D` and `ARM` are refused: drive and arming go through the supervisor). `SET` changes RAM only and is overwritten by the next tuning push (on MCU READY); edit `tuning.toml` and `make tune` to persist.
 
 ### Tuning loop
 
@@ -146,7 +146,7 @@ Then switch the ESC off and unplug USB. Containers stay unprivileged; `poweroff`
 
 The procedure used to verify phase 2 (bench-verified 2026-10-29); rerun it after firmware or supervisor changes. Hardware fault injection. **Never run by an agent.** Wheels off the ground, ESC power switch within reach. Paste outputs into the PR.
 
-1. `make config ros-image fw-image`, `make flash`, `make car-up`; `make car-ps` shows `mcu-agent` and `core` healthy.
+1. `make fw-image ros-image config`, `make flash`, `make car-up`; `make car-ps` shows `mcu-agent` and `core` healthy.
 2. `ros2 topic echo /rccar/mcu/telemetry` (from `make ros-shell`) shows telemetry with `armed: false`.
 3. `make test` passes (steering sweep + failsafe, motor off).
 4. `make teleop`: arrow keys drive; space brakes; `d` disarms; after either, motion is refused until `a`; `a` with throttle not at 0 is refused. `make car-logs` shows `mcu_bridge` pushing tuning at startup (`MCU reachable after activation`).

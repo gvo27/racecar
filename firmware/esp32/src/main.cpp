@@ -312,7 +312,7 @@ static void handleLine(char *line, Print &out) {
   char *a1 = strtok(nullptr, " \t\r");
   char *a2 = strtok(nullptr, " \t\r");
 
-  if (!strcasecmp(tok, "D")) {  // D <heading_deg> <speed>
+  if (!strcasecmp(tok, "D")) {  // D <heading_deg> <speed>: grammar kept, but commandCb refuses D (drive = /rccar/mcu/drive)
     if (!a1 || !a2) { out.println("ERR usage: D <heading_deg> <speed>"); return; }
     portENTER_CRITICAL(&g_mux);
     g_cmd.headingDeg = clampv(strtof(a1, nullptr), -180.0f, 180.0f);
@@ -509,7 +509,7 @@ static void commandCb(const void *reqin, void *resout) {
   // over the service would be a second drive path that bypasses the supervisor gate.
   char first[4] = {0};
   sscanf(line, " %3s", first);
-  if (!strcasecmp(first, "D")) g_reply.println("ERR D is /rccar/mcu/drive in micro-ROS mode");
+  if (!strcasecmp(first, "D")) g_reply.println("ERR D refused: drive is /rccar/mcu/drive");
   else handleLine(line, g_reply);
 
   size_t rl = g_reply.length();
