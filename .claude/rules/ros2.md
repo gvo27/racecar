@@ -12,6 +12,7 @@ paths:
 | /rccar/mcu/drive | DriveCmd | supervisor ONLY | best_effort depth 1 | esp32 (micro-ros best effort) |
 | /rccar/mcu/telemetry | Telemetry | esp32 | best_effort | any |
 | /rccar/mcu/event | McuEvent | esp32 | reliable depth 10 | supervisor, mcu_bridge |
+| /rccar/rangefinder/range | sensor_msgs/Range | esp32 (fake_mcu in tests) | best_effort | rangefinder_monitor, any |
 | /rccar/supervisor/state | SupervisorState | supervisor | reliable + transient_local depth 1 | teleop, UIs |
 - services: /supervisor/{arm,disarm,brake}; /mcu_bridge/{set_param,cal_point,raw_pwm,save,get,info,push_tuning}; /rccar/mcu/command (McuCommand, esp32).
 - names: `/rccar/<area>/<stream>`, snake_case, no hardcoded absolute names inside libraries. Standard msgs before custom ones; units SI/REP-103 (rad, + = left).

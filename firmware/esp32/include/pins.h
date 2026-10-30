@@ -6,6 +6,8 @@
 // ---- Active (driven by this firmware) ----
 constexpr int PIN_STEER_PWM    = 4;   // P1-4  -> DS3225 servo signal
 constexpr int PIN_THROTTLE_PWM = 5;   // P1-5  -> THW-1060 ESC throttle signal
+constexpr int PIN_I2C_SDA      = 8;   // P1-12 rangefinder pin 3 SDA; bus shared with IMU later
+constexpr int PIN_I2C_SCL      = 9;   // P1-15 rangefinder pin 4 SCL; bus shared with IMU later
 
 // ---- Reserved for future devices (NOT configured by this firmware) ----
 constexpr int PIN_BATT_LOW     = 6;   // P1-6  battery hi/low digital in (ADC1_CH5 capable)
@@ -14,11 +16,7 @@ constexpr int PIN_ENC_A        = 15;  // P1-8  shaft encoder channel A (PCNT)
 constexpr int PIN_ENC_B        = 16;  // P1-9  shaft encoder channel B (PCNT)
 constexpr int PIN_SPARE_UART_TX = 17; // P1-10 spare (UART1 TX, alt. Pi link)
 constexpr int PIN_SPARE_UART_RX = 18; // P1-11 spare (UART1 RX, alt. Pi link)
-constexpr int PIN_I2C_SDA      = 8;   // P1-12 I2C SDA (IMU + LIDAR-Lite v4)
-constexpr int PIN_I2C_SCL      = 9;   // P1-15 I2C SCL (IMU + LIDAR-Lite v4)
-constexpr int PIN_DIST_TRIG    = 10;  // P1-16 ultrasonic TRIG / LIDAR GPIO
-constexpr int PIN_DIST_ECHO    = 11;  // P1-17 ultrasonic ECHO (via divider) / LIDAR ready
-// Free: 12 (P1-18), 13 (P1-19), 14 (P1-20)
+// Free: 10 (P1-16), 11 (P1-17), 12 (P1-18), 13 (P1-19), 14 (P1-20)
 
 // ---- USB-C ports ----
 // Left  "USB": native USB (GPIO19/20) -> planned regulated power input only
