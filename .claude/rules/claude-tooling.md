@@ -6,6 +6,7 @@ paths:
   - "**/.clangd"
   - "deploy/tests/**"
   - ".github/workflows/**"
+  - ".github/pull_request_template.md"
 ---
 
 # Claude tooling (plugins, MCP, LSP, tests)
@@ -28,4 +29,6 @@ paths:
 - Review: project subagent `.claude/agents/ros2-reviewer.md` (diff vs rules + ros2-engineering refs + stop-path checklist) before requesting-code-review.
 - Domain skills: firmware/esp32/** => embedded-skills (respect .claude/rules/firmware.md invariants over skill defaults: gnu++11, LEDC via driver/ledc.h, critical-section rules). ros2/micro-ROS/rccar_* => ros2-engineering.
 - After editing .py/.cpp/.h: read LSP diagnostics, fix new ones; pyright runs on the host and does not see rclpy/rccar_msgs (warnings), so judge those by `make ros-test`.
+- Every PR body uses `.github/pull_request_template.md` and carries the user-run bench checklist: deploy block (`make setup`, `make config`, `make car-down`, flash, `make car-up && make car-ps`, incl. dependency/rebuild steps) plus feature checks. Agents never tick hardware boxes.
+- Each newly arriving sensor gets `.claude/rules/<sensor>.md` (software name, e.g. rangefinder) that explicitly links all its docs and datasheets, plus `docs/datasheets/<sensor>_<model>.md` (summary + tuning key map). Model names appear only in datasheet docs, README inventory/wiring.
 - Plugin bumps: change ref/sha deliberately, note in PR; never enable a plugin with hooks without reading its hooks.

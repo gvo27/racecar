@@ -22,6 +22,7 @@ setup(
             'calibrate = rccar_calibration.calibrate:main',
             'bench_test = rccar_calibration.bench_test:main',
             'tune = rccar_calibration.tune:main',
+            'rangefinder_monitor = rccar_calibration.rangefinder_monitor:main',
         ],
     },
 )

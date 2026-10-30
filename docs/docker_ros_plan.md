@@ -182,6 +182,7 @@ A systemd unit runs `compose up -d` at boot. Deploys are explicit: `make car-pul
 | `msgs.md` | `rccar_msgs/**` |
 | `mcu_bridge.md` | `rccar_mcu_bridge/**` |
 | `calibration.md` | `rccar_calibration/**` |
+| `rangefinder.md` | firmware rangefinder files, `rccar_calibration/**/rangefinder*`, rangefinder datasheets, `tuning.toml` |
 | `supervisor.md` | `rccar_supervisor/**`, `rccar_teleop/**` |
 | `ros2.md` | `rccar_*/**` (phase 2; see "Sim/real parity + ROS 2 conventions") |
 | `captain.md` | `rccar_captain/**` (later) |
@@ -232,7 +233,7 @@ captain / perception / planning / supervisor      ← identical in sim and on th
    - **New invariant:** "protocol/interface change => rccar_msgs + firmware/esp32/extra_packages + main.cpp + rccar_mcu_bridge + docs"; the supervisor is the sole publisher of `/rccar/mcu/drive`; agents never run hardware fault-injection tests.
    - **Conventions:** add `.claude/rules/ros2.md`. Make the supervisor output the hardware boundary, and have every launch file accept `use_sim_time` (see "Sim/real parity").
 3. **Recorder + backup.** MCAP bags to `/data`; upload only when disarmed and idle, to the destination set in `.env`.
-4. **Sensors.** `rccar_drivers`, `rccar_description` TF, sensor calibration, time sync (chrony). `rccar_description` is the single URDF for car and sim; sensor topics/frames are defined once so the sim adapter can publish the same ones.
+4. **Sensors.** Started: rangefinder (Garmin LIDAR-Lite v4 LED) on ESP32 I2C: driver + `/rccar/rangefinder/range` + `make rangefinder` (PR `rangefinder`, compile-only; bench pending); e-brake after bench data. `rccar_drivers`, `rccar_description` TF, sensor calibration, time sync (chrony). `rccar_description` is the single URDF for car and sim; sensor topics/frames are defined once so the sim adapter can publish the same ones.
 5. **Captain, perception, inference, admin-link failsafe.** Per the notes above.
 6. **Sim adapter (sim repo).** Gazebo world + `ros_gz_bridge` below the supervisor, and a `sim:=true` arg in `rccar_bringup`. Verify the captain/perception stack runs unchanged in sim and on the car.
 

@@ -99,3 +99,12 @@ def test_resolve_tuning_path_order(monkeypatch):
     monkeypatch.setenv('RCCAR_TUNING', '/env/t.toml')
     assert t.resolve_tuning_path('') == Path('/env/t.toml')
     assert t.resolve_tuning_path('/param/t.toml') == Path('/param/t.toml')
+
+
+def test_rangefinder_keys_present_and_max_before_min():
+    cmds = [cmd for (table, _k), cmd in t.FIRMWARE_KEYS if table == 'rangefinder']
+    assert set(cmds) == {
+        'SET rf_driver', 'SET rf_addr', 'SET rf_period_ms', 'SET rf_scale_m',
+        'SET rf_no_return', 'SET rf_min_m', 'SET rf_max_m', 'SET rf_fov_rad',
+        'SET rf_radiation'}
+    assert cmds.index('SET rf_max_m') < cmds.index('SET rf_min_m')

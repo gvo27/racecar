@@ -54,6 +54,18 @@ enabled = true
 dir = "logs"
 log_heartbeats = true       # false = log D commands only when heading/speed change
 
+[rangefinder]               # Garmin LIDAR-Lite v4 LED on ESP32 I2C (docs/datasheets/rangefinder_lidar_lite_v4.md)
+driver = 1                  # firmware driver: 0 = off, 1 = Garmin LIDAR-Lite v4 LED (I2C)
+i2c_addr = 98               # 0x62, datasheet default address
+period_ms = 20              # measurement period (50 Hz); datasheet: >200 Hz typical over I2C
+reading_scale_m = 0.01      # raw reading unit = 1 cm (datasheet)
+no_return_raw = 1           # raw value reported when there is no valid return (datasheet: 1 cm)
+min_range_m = 0.05          # datasheet range 5 cm .. 10 m
+max_range_m = 10.0
+fov_rad = 0.0833            # 4.77 deg beam divergence (datasheet)
+radiation_type = 1          # sensor_msgs/Range: 0 ULTRASOUND, 1 INFRARED (940 nm LED)
+# emergency-brake thresholds: added only after bench-confirmed readings
+
 # Host/platform settings, read by `make config` (deploy/render_env.py) -> deploy/car/.env.generated.
 # Selected by PLATFORM in .env. Only confirmed facts here (no mem limits, cpuset, backend yet).
 [platform.pi5]
@@ -77,9 +89,6 @@ arch = "arm64"                      # Raspberry Pi 5 / Ubuntu 24.04
 [imu]
 # suggested tenants: sample rate, ranges, filter settings
 # [imu.calibration]: biases, mounting orientation
-
-[distance]
-# suggested tenants: sensor selection, sample rate, emergency-brake thresholds
 
 [encoder]
 # suggested tenants: sample rate, filtering

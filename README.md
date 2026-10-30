@@ -6,7 +6,7 @@ A 1:10 Tamiya TT-02 built into a self-driving research platform on a two-layer c
 
 | Layer | Hardware | Role | Status |
 | --- | --- | --- | --- |
-| High level | Raspberry Pi 5 | autonomy stack: ROS 2 Jazzy in Docker (`deploy/car/`), supervisor + micro-ROS agent, sends `DriveCmd` (heading, throttle) | phase 2 complete (bench-verified) |
+| High level | Raspberry Pi 5 | autonomy stack: ROS 2 Jazzy in Docker (`deploy/car/`), supervisor + micro-ROS agent, sends `DriveCmd` (heading, throttle) | phase 2 complete (bench-verified); phase 4 rangefinder: compile-only, not bench-verified |
 | Real time | ESP32-S3-N16R8 | hardware PWM to servo/ESC, failsafe, telemetry; micro-ROS client over UART0 | this repo, `firmware/esp32/` (env `esp32s3`, micro-ROS) |
 
 ## Current inventory
@@ -20,7 +20,7 @@ Source: [`docs/datasheets/components_list.xlsx`](docs/datasheets/components_list
 | battery | 2S 7.4V 80C 5200mAh LiPo Battery Pack | — |
 | computer | Raspberry Pi 5 | needs 5V, 5A |
 | voltage regulator for rpi | Pololu D36V50F5 (5V 5.5A, 6-50V in) | [pololu.com/product/4091](https://www.pololu.com/product/4091), [archived](docs/datasheets/Pololu%20-%205V%2C%205.5A%20Step-Down%20Voltage%20Regulator%20D36V50F5.htm) |
-| lidar | Garmin LIDAR-Lite v4 LED, part number 010-02022-00 | [instructions](https://static.garmin.com/pumac/LIDAR-Lite%20LED%20v4%20Instructions_EN-US.pdf) |
+| lidar | Garmin LIDAR-Lite v4 LED, part number 010-02022-00 | [archived PDF](docs/datasheets/LIDAR-Lite%20LED%20v4%20Instructions_EN-US.pdf), [summary](docs/datasheets/rangefinder_lidar_lite_v4.md), [instructions](https://static.garmin.com/pumac/LIDAR-Lite%20LED%20v4%20Instructions_EN-US.pdf) (software name: rangefinder) |
 | motor controller | THW-1060-BRUSHED | [thw-1060-brushed-esc.md](docs/datasheets/thw-1060-brushed-esc.md) |
 | steering servo | DS3225MG | [ds3225_servo.md](docs/datasheets/ds3225_servo.md) |
 
@@ -52,12 +52,12 @@ Source of truth: [`firmware/esp32/include/pins.h`](firmware/esp32/include/pins.h
   GPIO16│  9  │ ○ ENC_B                      │
   GPIO17│ 10  │ · spare (UART1 TX)           │
   GPIO18│ 11  │ · spare (UART1 RX)           │
-  GPIO8 │ 12  │ ○ I2C SDA                    │
+  GPIO8 │ 12  │ ● I2C SDA → rangefinder 3    │
   GPIO3 │ 13  │ ✗ strapping                  │
   GPIO46│ 14  │ ✗ strapping                  │
-  GPIO9 │ 15  │ ○ I2C SCL                    │
-  GPIO10│ 16  │ ○ DIST_TRIG                  │
-  GPIO11│ 17  │ ○ DIST_ECHO (≤3.3V!)         │
+  GPIO9 │ 15  │ ● I2C SCL → rangefinder 4    │
+  GPIO10│ 16  │ · spare                      │
+  GPIO11│ 17  │ · spare                      │
   GPIO12│ 18  │ · spare                      │
   GPIO13│ 19  │ · spare                      │
   GPIO14│ 20  │ · spare                      │
@@ -75,17 +75,32 @@ Source of truth: [`firmware/esp32/include/pins.h`](firmware/esp32/include/pins.h
 | 6 | 6 | *BATT_LOW* (hi/low input) | *reserved* |
 | 7 | 7 | *IMU_INT* | *reserved* |
 | 8 / 9 | 15 / 16 | *ENC_A / ENC_B* (shaft encoder) | *reserved* |
-| 12 / 15 | 8 / 9 | *I2C SDA / SCL* (IMU, LIDAR) | *reserved* |
-| 16 / 17 | 10 / 11 | *DIST_TRIG / DIST_ECHO* (distance sensor) | *reserved* |
-| 10, 11, 18-20 | 17, 18, 12-14 | spare | spare |
+| 12 / 15 | 8 / 9 | **I2C SDA / SCL** → rangefinder (Garmin pin 3 / 4) | **active** |
+| 10, 11, 16-20 | 17, 18, 10, 11, 12-14 | spare | spare |
 | 3, 13, 14 | RST, 3, 46 | ~~reset / strapping pins~~ | ~~do not use~~ |
 | 22 | G | common ground | power |
 
 Wire colours: signal = yellow/white, power = red, ground = black. Put a tape flag on the two active signal wires.
 
+## Rangefinder wiring (Garmin LIDAR-Lite v4 LED)
+
+Software name: *rangefinder*. Datasheet: [archived PDF](docs/datasheets/LIDAR-Lite%20LED%20v4%20Instructions_EN-US.pdf), [summary](docs/datasheets/rangefinder_lidar_lite_v4.md). Power off while wiring.
+
+| Garmin pin | Name | Wire | Connect to |
+| --- | --- | --- | --- |
+| 1 | VIN (5 V, 4.75-5.25 V) | red | regulated 5 V **sensor rail** (never ESP32 5V/3V3) |
+| 2 | GND | black | common ground (P1-22) |
+| 3 | I2C SDA | white or green (TBD) | GPIO8 (P1-12) |
+| 4 | I2C SCL | white or green (TBD) | GPIO9 (P1-15) |
+| 5-10 | GPIOA, GPIOB, nRF debug | n/a | leave unconnected |
+
+- The sensor has internal 13 kOhm pull-ups to 3.3 V: no level shifter, no external pull-ups. Signals are 3.3 V max.
+- Leave GPIOB (pin 6) unconnected: low at power-up starts the BLE bootloader.
+- Status: driver compiled in CI, not yet bench-verified. Enable with `make mcu CMD="SENS rangefinder"`, watch with `make rangefinder`.
+
 ## Make commands
 
-Run `make help` for the live list. Setup: [docs/setup.md](docs/setup.md). ROS tools (`teleop`, `calibrate`, `tune`, `test`, `mcu`) need the stack running (`make car-up`).
+Run `make help` for the live list. Setup: [docs/setup.md](docs/setup.md). ROS tools (`teleop`, `calibrate`, `tune`, `test`, `mcu`, `rangefinder`) need the stack running (`make car-up`).
 
 **Car stack (ROS 2 + micro-ROS in Docker)**
 
@@ -109,6 +124,7 @@ Run `make help` for the live list. Setup: [docs/setup.md](docs/setup.md). ROS to
 | `calibrate` | interactive servo center/left/right calibration, writes `tuning.toml` |
 | `tune` | push `tuning.toml` to the ESP32 and save it to flash |
 | `test` | steering sweep + failsafe check (motor stays off, never arms) |
+| `rangefinder` | live terminal feed of `/rccar/rangefinder/range` (MCU timestamp, Pi receive time, range m/cm, rate); enable with `make mcu CMD="SENS rangefinder"` |
 | `mcu CMD="GET"` | send one `McuCommand` to the ESP32 (`GET`, `INFO`, `PING`, `SET key val`, ...) and print the reply |
 
 **Firmware (Docker; `FW_ENV=esp32s3`)**

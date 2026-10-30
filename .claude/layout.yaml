@@ -2,8 +2,10 @@
 paths:
   firmware/esp32/: {role: esp32 platformio project; single env esp32s3 (micro-ros), owner: firmware, rules: [.claude/rules/firmware.md, .claude/rules/msgs.md], colcon_ignore: true, phase: 1, invariants: [pins.h == README table, "protocol/interface change => rccar_msgs + extra_packages + main.cpp + rccar_mcu_bridge + docs"]}
   firmware/esp32/extra_packages/rccar_msgs/: {role: synced copy of rccar_msgs for the micro-ros lib build; never edit here (ci diff -r), rules: .claude/rules/msgs.md, phase: 2}
-  firmware/esp32/rccar.meta: {role: micro-ros entity limits (rmw_microxrcedds), rules: .claude/rules/firmware.md, phase: 2}
+  firmware/esp32/rccar.meta: {role: micro-ros entity limits (rmw_microxrcedds; 3 publishers), rules: .claude/rules/firmware.md, phase: 2}
   firmware/esp32/include/pins.h: {role: pin ssot, rules: .claude/rules/firmware.md}
+  firmware/esp32/include/rangefinder.h: {role: device-agnostic rangefinder driver interface, rules: .claude/rules/rangefinder.md, phase: 4}
+  firmware/esp32/src/rangefinder_lidar_lite_v4.cpp: {role: Garmin LIDAR-Lite v4 LED I2C protocol (only place with device registers), rules: .claude/rules/rangefinder.md, phase: 4}
   firmware/esp32/src/main.cpp: {role: "firmware main: control task, McuCommand grammar (handleLine, setKey), micro-ros comms layer"}
   docker/firmware.Dockerfile: {role: firmware toolchain image rccar-fw (platformio+esptool pinned), rules: .claude/rules/dependencies.md, phase: 1}
   docker/ros.Dockerfile: {role: "ros jazzy image, stages builder/test/runtime; base ros:jazzy-ros-base by digest; rosdep+colcon --merge-install; ROSDEP_INSTALL=0 only for offline builds", rules: .claude/rules/dependencies.md, phase: 2}
@@ -13,7 +15,7 @@ paths:
   docker/: {role: toolchain dockerfiles, rules: [.claude/rules/dependencies.md, .claude/rules/deploy.md], colcon_ignore: true, phase: 1}
   tuning.toml:
     role: "runtime tuning ssot"
-    sections: [link, control, safety, steering, steering.calibration, throttle, throttle.calibration, logging, warmup, battery, imu, distance, encoder]
+    sections: [link, control, safety, steering, steering.calibration, throttle, throttle.calibration, logging, warmup, battery, imu, rangefinder, encoder]
     confirmed_platform: ["platform.pi5: esp32_device, arch"]
     planned_sections: [models, supervisor, more platform keys]
     rules: .claude/rules/tuning.md
@@ -26,9 +28,11 @@ paths:
   logs/: {role: session jsonl, gitignored, mounted rw into core/tools, colcon_ignore: true}
   build/: {role: make ros-test output (log + xml), gitignored}
   docs/: {role: setup.md, docker_ros_plan.md, esp32-firmware-proposal.md, tuning-notes.txt, colcon_ignore: true}
-  docs/datasheets/: {role: archived datasheets + components_list.xlsx (ground truth inventory)}
+  docs/datasheets/: {role: "archived datasheets + summaries (ds3225_servo.md, thw-1060-brushed-esc.md, rangefinder_lidar_lite_v4.md) + components_list.xlsx (ground truth inventory)", rules: .claude/rules/rangefinder.md}
+  .github/pull_request_template.md: {role: PR body template incl. user-run bench checklist (deploy + feature checks), rules: .claude/rules/claude-tooling.md, phase: 4}
   .github/workflows/firmware.yml: {role: ci firmware build env esp32s3 in container, libdeps cache, firmware.bin artifact, phase: 1}
   .claude/: {role: CLAUDE.md, layout.yaml, rules/*.md, agents/*.md, settings.json}
+  .claude/rules/rangefinder.md: {role: rangefinder wiring, names, invariants, sensor-swap recipe; links all rangefinder docs, rules: .claude/rules/claude-tooling.md, phase: 4}
   .claude/agents/ros2-reviewer.md: {role: project subagent; reviews diffs vs rules + ros2-engineering refs + stop-path checklist, phase: 2}
   .claude/settings.json: {role: project claude plugins + mcp enablement, rules: [.claude/rules/dependencies.md, .claude/rules/claude-tooling.md], phase: 1}
   .mcp.json: {role: project mcp servers (context7), location: repo root (required), rules: .claude/rules/claude-tooling.md, phase: 1}
@@ -48,7 +52,7 @@ paths:
   rccar_bringup/: {role: car.launch.py (use_sim_time, sim, tuning_file, heartbeat_dir); tuning.toml -> params, rules: [.claude/rules/tuning.md, .claude/rules/ros2.md], phase: 2}
   rccar_supervisor/: {role: "safety authority: arbiter, latched stop, arm/disarm/brake services; sole publisher of /rccar/mcu/drive", rules: [.claude/rules/supervisor.md, .claude/rules/ros2.md], phase: 2}
   rccar_teleop/: {role: admin keyboard teleop (ssh), rules: [.claude/rules/calibration.md, .claude/rules/ros2.md], phase: 2}
-  rccar_calibration/: {role: calibrate, bench_test, tune clis (ros2 run), rules: [.claude/rules/calibration.md, .claude/rules/ros2.md], phase: 2}
+  rccar_calibration/: {role: calibrate, bench_test, tune, rangefinder_monitor clis (ros2 run; make rangefinder), rules: [.claude/rules/calibration.md, .claude/rules/ros2.md], phase: 2}
   rccar_description/: {role: urdf + tf, phase: 4}
   rccar_drivers/: {role: sensor drivers, phase: 4}
   rccar_recorder/: {role: mcap bags to /data, phase: 3}
