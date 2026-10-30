@@ -37,4 +37,5 @@ paths:
 - embedded-skills@embedded-skills: github rovinax/embedded-skills, ref master (no tags upstream); firmware arch, driver layering, rtos, isr.
 - ros2-engineering@ros2-engineering-skills: github dbwls99706/ros2-engineering-skills, ref v1.7.2; micro-ros, ros2_control, nav2, perception.
 - ros2-engineering ships advisory hooks (PreToolUse edit/bash validator, Stop advisory; never blocks). opt out: ROS2_SKILL_DISABLE_HOOKS=all.
+- kicad-happy@kicad-happy: github aklofas/kicad-happy, ref v2.3.2 (commit 2fd9aa0, reviewed: no hooks, no MCP, stdlib-only python; network only for distributor APIs). KiCad schematic review, SPICE, EMC, datasheets, BOM. Optional host dev tools: ngspice (SPICE), kicad-cli (ERC/netlist).
 - bump plugin = change ref to a tag; never track a moving branch when a tag exists.
