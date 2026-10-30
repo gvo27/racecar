@@ -73,7 +73,7 @@ Takeaways for this board:
 | 5 A | 1.4 mm | 2.7 mm | 1.4 mm |
 | 3 A | 0.7 mm | 1.1 mm | 0.6 mm |
 
-IPC-2152 figures use the approximate formula from secondary sources (the full standard is paywalled). A solid copper plane close to the trace lowers its temperature a lot, so real boards land between the two columns. The ESC's 20 A path is on wire off the board, so the board's copper only has to carry F1's rating: size `VBAT_RAW`, `VBAT` and `GND` for the fuse (a MINI fuse holds 110 % indefinitely, so about 16.5 A for a 15 A fuse), not for the 7.3 A load.
+IPC-2152 figures use the approximate formula from secondary sources (the full standard is paywalled). A solid copper plane close to the trace lowers its temperature a lot, so real boards land between the two columns. The ESC's 20 A path is on wire off the board, so the board's copper only has to carry F1's rating: size `VBAT_RAW`, `VBAT` and `GND` for the fuse (a blade fuse holds 110 % indefinitely, so about 16.5 A for a 15 A fuse), not for the 7.3 A load.
 
 ### Ground
 
@@ -237,7 +237,7 @@ Either way, use the standard `power:GND` for ground everywhere, and never `GNDA`
 Press **A**, type the symbol name in the search box, pick it, click to place. Then press **E** on each part to set its **Value** and later its **Footprint**.
 
 1. Place `Connector_Generic:Conn_01x02` as **J1**, value `Battery T-plug pigtail 12AWG`. The battery has a T-plug (Deans) lead; a matching T-plug pigtail with bare 12 AWG ends is soldered into two wire pads on the board. Pin 1 is +, pin 2 is −.
-2. Place `Device:Fuse` as **F1**, value `TBD ATM mini blade 10-15A`. Wire J1 pin 1 to one end of F1 with **W**.
+2. Place `Device:Fuse` as **F1**, value `TBD ATO/ATC blade 10-15A`. Wire J1 pin 1 to one end of F1 with **W**.
 3. Press **L** on the wire between J1 and F1 and name it `VBAT_RAW` (the unfused side). Put a `VBAT` power symbol on the other side of F1.
 4. Place `Device:D_Zener` as **D1** (KiCad's stock `D_TVS` symbol is bidirectional; a unidirectional TVS is drawn with the Zener symbol), value `TVS unidir. TBD, standoff ≥ 9 V`, from `VBAT` to `GND`, cathode (the bar, pin 1) toward `VBAT`.
 5. Place `Device:C_Polarized` as **C1**, value `TBD µF, ≥ 16 V, low ESR`, from `VBAT` to `GND`, + toward `VBAT`. This is the bulk capacitor.
@@ -247,9 +247,9 @@ Press **A**, type the symbol name in the search box, pick it, click to place. Th
 ### Step 6: region B, ESC and servo
 
 1. **No ESC power on the board.** The battery feeds the ESC directly on its own 12 AWG leads (up to 20 A motor current), so the board has no J2/F2 and its copper only carries the board's own loads.
-2. **J3** `Connector_Generic:Conn_01x03`, value `ESC receiver lead (BEC in)`. The ESC's 3-wire lead carries the throttle signal *into* the ESC and the 6 V BEC power *out*. Pin 1 `GND`, pin 2 net label `+6V_BEC`, pin 3 net label `THROTTLE_PWM`.
-3. **J4** `Connector_Generic:Conn_01x03`, value `Servo DS3225MG`. Pin 1 `GND`, pin 2 `+6V_BEC`, pin 3 `STEER_PWM`.
-4. **J5** `Connector_Generic:Conn_01x04`, value `Signals to ESP32`. Pin 1 `U1_PG`, pin 2 `THROTTLE_PWM` (GPIO5), pin 3 `STEER_PWM` (GPIO4), pin 4 `GND`. Wire J3's and J4's signal pins straight to J5 (no labels needed inside the region). The `U1_PG` GPIO is TBD until the firmware adds it (`pins.h` and the README pin table change together).
+2. **J3** `Connector_Generic:Conn_01x03`, value `ESC receiver lead (BEC in)`, footprint 3-pin JST-XH (`JST_XH_B3B-XH-A`). The ESC's 3-wire lead carries the throttle signal *into* the ESC and the 6 V BEC power *out*; crimp an XHP-3 housing onto it (or use an adapter lead). Pin 1 `GND`, pin 2 `+6V_BEC`, pin 3 `THROTTLE_PWM`.
+3. **J4** `Connector_Generic:Conn_01x03`, value `Servo DS3225MG`, footprint 3-pin JST-XH (servo lead re-terminated in an XHP-3 housing; stall 2.3 A = 77 % of XH's 3 A/pin with 22 AWG only; the BEC pin can carry up to 3 A = 100 %). Pin 1 `GND`, pin 2 `+6V_BEC`, pin 3 `STEER_PWM`.
+4. **J5** `Connector_Generic:Conn_01x06`, value `Signals to ESP32`, footprint 6-pin JST-XH (`JST_XH_B6B-XH-A`). Pin 1 `U1_PG`, pin 2 `THROTTLE_PWM` (GPIO5), pin 3 `STEER_PWM` (GPIO4), pin 4 `I2C_SDA` (GPIO8), pin 5 `I2C_SCL` (GPIO9), pin 6 `GND`. Wire J3's and J4's signal pins straight to J5; the I2C pins connect to J8 by net labels. The `U1_PG` GPIO is TBD until the firmware adds it (`pins.h` and the README pin table change together); GPIO8/9 match the rangefinder firmware.
 5. Add a text note: `+6V_BEC comes only from the ESC. Never connect to any 5 V rail.`
 
 ### Step 7: region C, compute 5 V
@@ -272,7 +272,7 @@ Same pattern as region C:
 
 1. **U2** `REG_MODULE` value `5 V buck rated 4 A, TBD`, input on `VBAT` (no branch fuse), input cap **C4**, output cap **C5**.
 2. VOUT to a `+5V_SENS` power symbol. LED **R2** + **D3**, test point **TP2**.
-3. Output headers, each `Conn_01x02` (pin 1 `+5V_SENS`, pin 2 `GND`): **J8** `LIDAR-Lite v4`, **J9** `Camera USB hub`, **J11** `Spare 5 V` (the radar header J10 was removed from scope).
+3. Output headers, all JST-XH (the project convention for sensors and low-power parts: single Dupont jumper sockets push onto the XH pins for breadboard debugging, and they are lab stock). **J8** `LIDAR-Lite v4` is a 4-pin XH whose pins match the Garmin's: 1 `+5V_SENS` (red), 2 `GND` (black), 3 `I2C_SDA` (white), 4 `I2C_SCL` (green); I2C address 0x62, no external pull-ups (13 kΩ to 3.3 V inside the sensor). **J9** `Camera USB hub` and **J11** `Spare 5 V` are 2-pin XH (pin 1 `+5V_SENS`, pin 2 `GND`); the radar header J10 was removed from scope.
 4. `+5V_SENS` also feeds the 3.3 V LDO in region E. A net with the same name joins them; no wire across the sheet is needed.
 
 ### Step 9: region E, sensor 3.3 V
@@ -284,7 +284,7 @@ The 3.3 V rail is a **linear regulator (LDO)** fed from `+5V_SENS`, not a buck f
 3. **U3**: press **A**, search `AP2112K-3.3` (a common 600 mA low-noise LDO, symbol `Regulator_Linear:AP2112K-3.3`) or search `LDO 3.3` and pick a similar one. Value `3.3 V LDO ≥ 300 mA, TBD`. Wire VIN to the filter output (or straight to `+5V_SENS`), GND to `GND`, VOUT to a `+3V3_SENS` power symbol. If it has an EN pin, tie it to VIN unless the datasheet says otherwise.
 4. **C7** at the LDO input and **C8** at its output, `Device:C`, values from its datasheet (often 1 µF ceramic each). LDOs can oscillate with the wrong output capacitor, so follow the datasheet exactly.
 5. LED **R3** + **D4**, value `680R` for a 3.3 V rail, test point **TP3**.
-6. Output headers: **J12** `IMU`, **J13** `Shaft encoder`, **J14** `Spare 3.3 V`.
+6. Output headers, 2-pin XH (pin 1 +3V3\_SENS, pin 2 GND): **J12** `IMU`, **J13** `Shaft encoder`, **J14** `Spare 3.3 V`.
 7. Note: the ESP32's own 3V3 pin must not power these sensors (project rule: the ESP32 powers nothing), and the ESP32 itself stays on `+5V_CPU`.
 
 ### Step 10: notes box
@@ -335,15 +335,15 @@ A **symbol** is the logical drawing; a **footprint** is the copper pads and hole
 | Part | Search term in the footprint list | Check |
 | --- | --- | --- |
 | J1 battery (T-plug pigtail) | `SolderWire` (wire pads) | 12 AWG is 3.3 mm²; KiCad's largest stock pad is the 2.5 mm² one (3.0 mm hole, 4.4 mm pad, for 2.4 mm conductors); 12 AWG's conductor likely fits, but its current rating and thin copper ring need checking, so the final pad is TBD |
-| F1 | `Fuse:Fuseholder_Blade_Mini_Keystone_3568` (Mini/ATM blade, replaceable; type pending confirmation) | Holder current rating (Keystone 3568 is listed at 20 to 30 A, so confirm it for the suffix ordered; F1 is 10 to 15 A) |
+| F1 | `Fuse:FuseHolder_Blade_ATO_Littelfuse_FLR_178.6165` (standard ATO/ATC blade, replaceable) | Holder current rating (Littelfuse FLR 178.6165: 22.5 A continuous, 30 A max; F1 is 10 to 15 A) |
 | U1 D36V50F5 | `PinHeader_2x06_P2.54mm` (pin numbering in Step 7) | Check against Pololu's dimension drawing; header pins are 3 A each |
 | U2 module | Matches the chosen module | Pin order and spacing from the module drawing |
 | U3 LDO | The footprint its symbol suggests (SOT-23-5) |  |
 | Q1 (only if the PR's reverse-polarity proposal is adopted) | PowerPAK SO-8 (P-FET) |  |
-| J3, J4 servo/ESC | `PinHeader_1x03_P2.54mm` | Standard servo spacing |
-| J5 signals to ESP32 | `PinHeader_1x04_P2.54mm` |  |
+| J3, J4 servo/ESC | `JST_XH_B3B-XH-A_1x03_P2.50mm_Vertical` | 2.5 mm XH: does not mate with stock 2.54 mm servo plugs; XHP-3 re-termination or an adapter lead, 22 AWG (BEC pin at the 3 A XH limit) |
+| J5 signals to ESP32 | `JST_XH_B6B-XH-A_1x06_P2.50mm_Vertical` |  |
 | J6, J7 USB-C pigtails | `TerminalBlock` 5.08 mm, 2 pin | Clamps 20 AWG; ≥ 5 A per pin |
-| J8 to J14 sensor outputs | `JST_XH` 2 pin, or pin headers | About 3 A per pin |
+| J8 to J14 sensor outputs | `JST_XH` 4-pin (J8) and 2-pin (J9, J11 to J14) | About 3 A per pin |
 | C, R, LED | `C_0805`, `R_0805`, `LED_0805` (surface-mount, hand-solderable) | Capacitor voltage rating |
 | Mounting holes | `MountingHole_3.2mm_M3` (add with **A**, symbol `Mechanical:MountingHole`) | Match the chassis mount |
 
@@ -354,7 +354,7 @@ A **net class** is a group of nets that share copper rules. Set them in the Sche
 | Net class | Nets (pattern) | Track width | Via (drill / pad) | Comment |
 | --- | --- | --- | --- | --- |
 | `HighCurrent` | `VBAT*`, `GND` | zones on both layers; 6 mm is only the IPC-2221 minimum at +20 °C | 0.6 / 1.2 mm, many in parallel | `GND` carries the board's return current (size it for F1's rating) back to the battery |
-| `Power5A` | `+5V_CPU` | 1.5 mm | 0.4 / 0.8 mm | 2 oz copper |
+| `Power5A` | `+5V_CPU` | 1.6 mm | 0.4 / 0.8 mm | 2 oz copper |
 | `Power3A` | `+5V_SENS`, `+6V_BEC` | 1.0 mm | 0.4 / 0.8 mm |  |
 | `Default` | everything else, incl. `+3V3_SENS` and signals | 0.25 mm | 0.3 / 0.6 mm | KiCad's default |
 
@@ -395,7 +395,7 @@ The widths assume 2 oz copper and a 10 to 20 °C rise, from the table in the bac
 Put these in your hand-off message, numbered, so the reviewer can answer by number.
 
 1. **20 A path (resolved):** the ESC is powered off-board, straight from the battery on its own 12 AWG leads. The board carries only its own loads, about 7.3 A worst case, so `HighCurrent` (6 mm, zones) is now oversized: should it be resized for F1's rating (about 16.5 A at 15 A, 11 A at 10 A) rather than the 7.3 A load?
-2. **Fuses (resolved, rating open):** one replaceable main fuse F1 (Mini/ATM blade in a Keystone 3568 PCB holder; type pending confirmation) protects every board load. There are no branch fuses, because the fuse inventory is high-current. Trade-off: a sensor-branch short now opens F1 and drops compute too; U1 and U2 limit their own output current. Rating: 10 A or 15 A, against about 7.3 A worst-case board load (15 A keeps 7.3 to 7.8 A under 75 % of the rating; a 10 A fuse sits at 73 to 78 %). A standard MINI fuse (ISO 8820-3: 200 % opens in 0.15–5 s) rides through the board's capacitor inrush, so slow-blow isn't needed; the motor is off-board.
+2. **Fuses (resolved, rating open):** one replaceable main fuse F1, a standard ATO/ATC automotive blade in a Littelfuse FLR 178.6165 PCB holder, protects every board load. There are no branch fuses, because the fuse inventory is high-current. Trade-off: a sensor-branch short now opens F1 and drops compute too; U1 and U2 limit their own output current. Rating: 10 A or 15 A, against about 7.3 A worst-case board load (15 A keeps 7.3 to 7.8 A under 75 % of the rating; a 10 A fuse sits at 73 to 78 %). A standard ATO fuse (ISO 8820-3; the 15 A part's melting I²t is about 340 A²s) rides through the board's capacitor inrush, so slow-blow isn't needed; the motor is off-board.
 3. **Compute rail and the Pi:** the Pi 5 and ESP32 need about 5.5 A. The Pi takes power through a 2-wire USB-C pigtail, so it keeps its USB-C input protection but gets no USB-PD 5 A offer: it limits its USB ports to about 0.6 A total unless set in `config.txt`. Is that acceptable?
 4. **Regulator U1:** the D36V50F5 outputs 5.0 V ± 4 % (not the Pi's preferred 5.1 V) and is rated 5.5 A typical. What is its dropout at 5.5 A with the battery near 6.0 V? Its VRP output is deliberately unused (the sensor buck stays on `VBAT`, because VRP would push about 7.3 A through U1's 6 A-rated VIN pin pair).
 5. **IMU noise:** is the LDO's noise rejection enough at the sensor buck's switching frequency, or should the ferrite-bead filter in front of it stay?

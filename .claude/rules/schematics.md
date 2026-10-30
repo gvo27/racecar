@@ -21,7 +21,11 @@ paths:
 - ESC battery power is off-board (battery -> ESC on its own 12 AWG leads, up to 20 A). The board carries only the ESC's 3-wire lead (THROTTLE_PWM + `+6V_BEC`); size the fuse for board loads (~7.3 A at 6.4 V, ~7.8 A at the 6.0 V cutoff), but size VBAT_RAW/VBAT/GND copper for F1's rating (~16.5 A for 15 A, ~11 A for 10 A), not the load.
 - Wiring style: each region's local nets are wired as one bus/trunk source-to-load with one net label, avoiding crossings; GND stays as symbols.
 - U1 VRP is unused; the sensor buck is fed from VBAT (VRP would overload U1's 6 A VIN pin pair).
-- One replaceable main fuse F1 protects all board loads; no branch fuses (fuse inventory is high-current).
+- One replaceable main fuse F1 (standard ATO/ATC blade in a Littelfuse FLR 178.6165 PCB holder) protects all board loads; no branch fuses (fuse inventory is high-current).
+- Connectors: JST-XH (2.5 mm) for sensors and low-power parts (single Dupont jumper sockets push onto XH pins for breadboard debug; 2.54 mm multi-pin housings don't fit; lab stock); exceptions: J1 battery T-plug pads, J6/J7 USB-C pigtail screw terminals (>3 A).
+- XH pin order (crimp table in `fab_handoff.md`; keep it in step with the schematic): Rule A, device with its own pinout, header follows the device (J3/J4: 1 GND, 2 +6V_BEC, 3 signal; J8: 1 +5V_SENS, 2 GND, 3 SDA, 4 SCL). Rule B, generic power header: 1 V+, 2 GND (J9, J11 +5V_SENS; J12-J14 +3V3_SENS). Rule C, signal harness: signals in order, GND last (J5: 1 U1_PG, 2 THROTTLE_PWM, 3 STEER_PWM, 4 I2C_SDA, 5 I2C_SCL, 6 GND). Layout: XH headers on the board edge, entry outward, pin 1 at the same end.
+- J3/J4 XH current: 3 A/pin with 22 AWG only; BEC pin up to 3 A = 100 % of rating. Never claim it "fits" or is "within" rating.
+- Garmin LIDAR-Lite v4 on J8 (4-pin XH, pin order = Garmin 1–4); I2C_SDA GPIO8, I2C_SCL GPIO9 via J5; no external pull-ups (13 kΩ internal to 3.3 V).
 - Power to the Pi 5 and ESP32 leaves through 2-wire USB-C pigtails (J6/J7) so their own USB-C input protection stays in the path.
 - Net classes live in `rc_power_board.kicad_pro` and must match the plan's net-class table.
 
