@@ -28,8 +28,8 @@ Software name is always "rangefinder"; the model name appears only in docs/datas
 ## Wiring (P1 only; Garmin pin -> target)
 - 1 VIN 5 V (4.75-5.25 V; 85 mA acquiring, 2 mA idle), red -> regulated 5 V sensor rail. never ESP32 5V/3V3
 - 2 GND, black -> common ground (P1-22)
-- 3 SDA, white/green (TBD) -> GPIO8 (P1-12)
-- 4 SCL, white/green (TBD) -> GPIO9 (P1-15)
+- 3 SDA, white -> GPIO8 (P1-12)
+- 4 SCL, green -> GPIO9 (P1-15)
 - 5-10 GPIOA, GPIOB, nRF debug: unconnected (GPIOB low at power-up = BLE bootloader)
 - internal 13 kOhm pull-ups to 3.3 V: no level shifter, no external pull-ups; all signals <= 3.3 V
 - GPIO10/11 (P1-16/17) are spare (no longer reserved DIST_TRIG/ECHO)

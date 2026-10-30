@@ -34,8 +34,8 @@ Sources: Garmin "LIDAR-Lite v4 LED Operation Manual and Technical Specifications
 | --- | --- | --- | --- | --- |
 | 1 | VIN | 5 V power | 5 V | red; regulated 5 V sensor rail (never ESP32 5V/3V3) |
 | 2 | GND | ground | n/a | black; common ground |
-| 3 | I2C SDA | I2C data | 3.3 V | white or green (TBD); ESP32 GPIO8 (P1-12) |
-| 4 | I2C SCL | I2C clock | 3.3 V | white or green (TBD); ESP32 GPIO9 (P1-15) |
+| 3 | I2C SDA | I2C data | 3.3 V | white wire; ESP32 GPIO8 (P1-12) |
+| 4 | I2C SCL | I2C clock | 3.3 V | green wire; ESP32 GPIO9 (P1-15) |
 | 5 | GPIOA | TRIGGER input (mode control) | 3.3 V | unconnected |
 | 6 | GPIOB | MONITOR busy output; boot pin | 3.3 V | unconnected (low at power-up = BLE bootloader) |
 | 7 | VRETURN | nRF52840 debug | 3.3 V | unconnected |

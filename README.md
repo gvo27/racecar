@@ -80,7 +80,7 @@ Source of truth: [`firmware/esp32/include/pins.h`](firmware/esp32/include/pins.h
 | 3, 13, 14 | RST, 3, 46 | ~~reset / strapping pins~~ | ~~do not use~~ |
 | 22 | G | common ground | power |
 
-Wire colours: signal = yellow/white, power = red, ground = black. Put a tape flag on the two active signal wires.
+Wire colours: signal = yellow/white, power = red, ground = black; rangefinder I2C: SDA = white, SCL = green. Put a tape flag on the two active signal wires.
 
 ## Rangefinder wiring (Garmin LIDAR-Lite v4 LED)
 
@@ -90,12 +90,21 @@ Software name: *rangefinder*. Datasheet: [archived PDF](docs/datasheets/LIDAR-Li
 | --- | --- | --- | --- |
 | 1 | VIN (5 V, 4.75-5.25 V) | red | regulated 5 V **sensor rail** (never ESP32 5V/3V3) |
 | 2 | GND | black | common ground (P1-22) |
-| 3 | I2C SDA | white or green (TBD) | GPIO8 (P1-12) |
-| 4 | I2C SCL | white or green (TBD) | GPIO9 (P1-15) |
+| 3 | I2C SDA | **white** | GPIO8 (P1-12) |
+| 4 | I2C SCL | **green** | GPIO9 (P1-15) |
 | 5-10 | GPIOA, GPIOB, nRF debug | n/a | leave unconnected |
 
 - The sensor has internal 13 kOhm pull-ups to 3.3 V: no level shifter, no external pull-ups. Signals are 3.3 V max.
 - Leave GPIOB (pin 6) unconnected: low at power-up starts the BLE bootloader.
+- Schematic net list (confirmed wire colours):
+
+  | Net | Garmin pin | Wire | ESP32 / rail |
+  | --- | --- | --- | --- |
+  | `RF_5V` | 1 VIN | red | 5 V sensor rail |
+  | `GND` | 2 GND | black | common ground, P1-22 |
+  | `I2C_SDA` | 3 SDA | white | GPIO8, P1-12 |
+  | `I2C_SCL` | 4 SCL | green | GPIO9, P1-15 |
+
 - Status: compile pending CI; not bench-verified. Publishing is on by default (`driver = 1`); watch with `make rangefinder`; `make mcu CMD="SENS rangefinder"` is a read-only status/config query. Disable with `make mcu CMD="SET rf_driver 0"`, or `[rangefinder] driver = 0` in `tuning.toml` + `make tune`.
 
 ## Make commands
