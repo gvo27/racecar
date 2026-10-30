@@ -54,10 +54,10 @@ enabled = true
 dir = "logs"
 log_heartbeats = true       # false = log D commands only when heading/speed change
 
-[rangefinder]               # Garmin LIDAR-Lite v4 LED on ESP32 I2C (docs/datasheets/rangefinder_lidar_lite_v4.md)
+[rangefinder]               # rangefinder on ESP32 I2C; datasheet summary + key map: docs/datasheets/rangefinder_lidar_lite_v4.md
 driver = 1                  # firmware driver: 0 = off, 1 = Garmin LIDAR-Lite v4 LED (I2C)
 i2c_addr = 98               # 0x62, datasheet default address
-period_ms = 20              # measurement period (50 Hz); datasheet: >200 Hz typical over I2C
+period_ms = 20              # measurement period (50 Hz); firmware clamp >= 20 ms (UART0 link budget)
 reading_scale_m = 0.01      # raw reading unit = 1 cm (datasheet)
 no_return_raw = 1           # raw value reported when there is no valid return (datasheet: 1 cm)
 min_range_m = 0.05          # datasheet range 5 cm .. 10 m

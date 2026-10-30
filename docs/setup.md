@@ -129,11 +129,11 @@ Single commands to the ESP32 (stack up): `make mcu CMD="GET"`, `make mcu CMD="IN
 Wiring (power off): see [README "Rangefinder wiring"](../README.md#rangefinder-wiring-garmin-lidar-lite-v4-led); datasheet summary: [rangefinder_lidar_lite_v4.md](datasheets/rangefinder_lidar_lite_v4.md). Sensor 5 V comes from the sensor rail, never from the ESP32.
 
 ```sh
-make mcu CMD="SENS rangefinder"   # enable publishing on /rccar/rangefinder/range (stack up)
+make mcu CMD="SENS rangefinder"   # read-only status + config line (stack up); publishing is on while driver = 1
 make rangefinder                  # live feed: MCU timestamp, Pi receive time, range (m/cm), rate; Ctrl+C to exit
 ```
 
-The first flash after this feature needs the micro-ROS library rebuilt (`rccar.meta` has 3 publishers): `make clean && make flash` once. `+inf` means no return (nothing within 10 m, or too close/dark). Bench checklists now live in each PR body ([`.github/pull_request_template.md`](../.github/pull_request_template.md)), not here.
+The first flash after this feature needs the micro-ROS library rebuilt (`rccar.meta` has 3 publishers): `make clean && make flash` once. `+inf` means the sensor reported its no-return value (`rf_no_return`); every other reading is published unchanged, so consumers must check `min_range`/`max_range` (REP-117). Disable the sensor with `make mcu CMD="SET rf_driver 0"` or `[rangefinder] driver = 0` + `make tune`. Bench checklists now live in each PR body ([`.github/pull_request_template.md`](../.github/pull_request_template.md)), not here.
 
 **How I2C clocking works (for newcomers).** I2C uses two wires: SCL (clock) and SDA (data). The ESP32 is the bus master and is the only one that drives SCL. The sensor changes SDA only while SCL is low, and the receiver samples SDA while SCL is high, so data and clock stay in step in hardware; there is no software synchronisation to do. The timestamp on a range sample marks when the ESP32 finished reading it (converted to ROS time via `rmw_uros_sync_session`), not when the light left the sensor.
 

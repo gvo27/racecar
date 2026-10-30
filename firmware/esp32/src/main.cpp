@@ -12,6 +12,7 @@
 #include <Preferences.h>
 #include <Wire.h>
 #include <driver/ledc.h>
+#include <esp_log.h>
 #include <esp_task_wdt.h>
 #include <esp_timer.h>
 #include <cmath>
@@ -80,8 +81,8 @@ struct Config {
   uint16_t servoHz       = 50;     // DS3225 accepts 50..330
   uint16_t escHz         = 50;     // RC standard; raise only if the ESC accepts it
   uint16_t controlHz     = 100;    // control loop rate
-  // Rangefinder (defaults = Garmin LIDAR-Lite v4 LED datasheet; all output characteristics live here)
-  uint8_t  rfDriver      = 1;      // 0 = off, 1 = Garmin LIDAR-Lite v4 LED
+  // Rangefinder (defaults = driver 1 datasheet values; all output characteristics live here)
+  uint8_t  rfDriver      = 1;      // 0 = off, 1 = rangefinder driver 1
   uint8_t  rfI2cAddr     = 0x62;
   uint16_t rfPeriodMs    = 20;     // measurement period
   float    rfScaleM      = 0.01f;  // raw unit -> metres (cm)
@@ -281,9 +282,7 @@ static void rangefinderSetPresent(bool present) {
 }
 
 static void rangefinderTask(void *) {
-  Wire.begin(PIN_I2C_SDA, PIN_I2C_SCL, 400000U);
-  Wire.setTimeOut(20);  // ms; a stuck bus must not hang the task
-  vTaskDelay(pdMS_TO_TICKS(25));  // sensor self-test after power-up (~22 ms)
+  bool wireUp = false;  // Wire.begin only once a driver is selected: driver 0 leaves GPIO8/9 untouched
   uint8_t curDriver = 0, curAddr = 0;
   bool probed = false;
   TickType_t last = xTaskGetTickCount();
@@ -299,6 +298,13 @@ static void rangefinderTask(void *) {
       vTaskDelay(pdMS_TO_TICKS(1000));
       last = xTaskGetTickCount();
       continue;
+    }
+    if (!wireUp) {
+      Wire.begin(PIN_I2C_SDA, PIN_I2C_SCL, 400000U);
+      Wire.setTimeOut(20);  // ms; a stuck bus must not hang the task
+      vTaskDelay(pdMS_TO_TICKS(25));  // sensor self-test after power-up (~22 ms)
+      wireUp = true;
+      last = xTaskGetTickCount();
     }
     RfCfg rc;
     rc.addr = cfg.rfI2cAddr;
@@ -360,16 +366,11 @@ static void printConfig(Print &out) {
   out.printf("CFG center=%u left=%u right=%u maxdeg=%.1f gain=%.2f limit=%.2f "
                 "deadband=%u accel=%.2f timeout=%u revmode=%u brake_ms=%u gap_ms=%u "
                 "brake_level=%.2f esc_min=%u esc_neutral=%u esc_max=%u servo_hz=%u "
-                "esc_hz=%u control_hz=%u "
-                "rf_driver=%u rf_addr=0x%02x rf_period_ms=%u rf_scale_m=%.4f rf_no_return=%u "
-                "rf_min_m=%.2f rf_max_m=%.2f rf_fov_rad=%.4f rf_radiation=%u\n",
+                "esc_hz=%u control_hz=%u\n",
                 c.steerCenterUs, c.steerLeftUs, c.steerRightUs, c.maxSteerDeg,
                 c.headingGain, c.speedLimit, c.deadbandUs, c.accelPerSec,
                 c.timeoutMs, c.doubleTapRev, c.brakeMs, c.gapMs, c.brakeLevel,
-                c.escMinUs, c.escNeutralUs, c.escMaxUs, c.servoHz, c.escHz, c.controlHz,
-                (unsigned)c.rfDriver, (unsigned)c.rfI2cAddr, (unsigned)c.rfPeriodMs,
-                (double)c.rfScaleM, (unsigned)c.rfNoReturnRaw, (double)c.rfMinM,
-                (double)c.rfMaxM, (double)c.rfFovRad, (unsigned)c.rfRadiation);
+                c.escMinUs, c.escNeutralUs, c.escMaxUs, c.servoHz, c.escHz, c.controlHz);
 }
 
 static bool setKey(Config &c, const char *key, float v) {
@@ -391,11 +392,11 @@ static bool setKey(Config &c, const char *key, float v) {
   else if (!strcasecmp(key, "control_hz"))  c.controlHz = (uint16_t)clampv(v, 20.0f, 500.0f);
   else if (!strcasecmp(key, "rf_driver"))    c.rfDriver    = (uint8_t)lroundf(clampv(v, 0.0f, 1.0f));
   else if (!strcasecmp(key, "rf_addr"))      c.rfI2cAddr   = (uint8_t)lroundf(clampv(v, 8.0f, 119.0f));
-  else if (!strcasecmp(key, "rf_period_ms")) c.rfPeriodMs  = (uint16_t)lroundf(clampv(v, 5.0f, 1000.0f));
+  else if (!strcasecmp(key, "rf_period_ms")) c.rfPeriodMs  = (uint16_t)lroundf(clampv(v, 20.0f, 1000.0f));  // 20 ms: UART0 link budget
   else if (!strcasecmp(key, "rf_scale_m"))   c.rfScaleM    = clampv(v, 1e-4f, 1.0f);
   else if (!strcasecmp(key, "rf_no_return")) c.rfNoReturnRaw = (uint32_t)lroundf(clampv(v, 0.0f, 65535.0f));
-  else if (!strcasecmp(key, "rf_min_m"))     c.rfMinM      = clampv(v, 0.0f, c.rfMaxM - 0.01f);  // keeps min < max
-  else if (!strcasecmp(key, "rf_max_m"))     c.rfMaxM      = clampv(v, c.rfMinM + 0.01f, 100.0f);
+  else if (!strcasecmp(key, "rf_min_m"))     c.rfMinM      = clampv(v, 0.0f, 100.0f);  // min < max: checked in handleLine
+  else if (!strcasecmp(key, "rf_max_m"))     c.rfMaxM      = clampv(v, 0.01f, 100.0f);
   else if (!strcasecmp(key, "rf_fov_rad"))   c.rfFovRad    = clampv(v, 0.001f, 3.14f);
   else if (!strcasecmp(key, "rf_radiation")) c.rfRadiation = v != 0 ? 1 : 0;
   else return false;
@@ -453,6 +454,7 @@ static void handleLine(char *line, Print &out) {
     if (!(c.escMinUs < c.escNeutralUs && c.escNeutralUs < c.escMaxUs)) {
       out.println("ERR need esc_min < esc_neutral < esc_max"); return;
     }
+    if (!(c.rfMinM < c.rfMaxM)) { out.println("ERR rf_min_m must be < rf_max_m"); return; }
     portENTER_CRITICAL(&g_mux); g_cfg = c; portEXIT_CRITICAL(&g_mux);
     printConfig(out);
   } else if (!strcasecmp(tok, "GET")) {
@@ -474,11 +476,17 @@ static void handleLine(char *line, Print &out) {
     if (a1 && !strcasecmp(a1, "rangefinder")) {
       RangefinderSample s; Config c;
       portENTER_CRITICAL(&g_mux); s = g_rangefinder; c = g_cfg; portEXIT_CRITICAL(&g_mux);
-      const double m = s.raw == c.rfNoReturnRaw ? (double)INFINITY : (double)s.raw * c.rfScaleM;
+      const unsigned raw = s.present ? (unsigned)s.raw : 0u;
+      const double m = !s.present ? (double)NAN
+                     : s.raw == c.rfNoReturnRaw ? (double)INFINITY : (double)s.raw * c.rfScaleM;
       const unsigned age = s.present ? (unsigned)(nowMs() - s.stampMs) : 0u;
-      out.printf("SENS rangefinder present=%d driver=%u raw=%u range_m=%.3f status=0x%02x age_ms=%u seq=%u\n",
-                 s.present ? 1 : 0, (unsigned)c.rfDriver, (unsigned)s.raw, m,
-                 (unsigned)s.status, age, (unsigned)s.seq);
+      out.printf("SENS rangefinder present=%d driver=%u addr=0x%02x period_ms=%u scale_m=%.4f "
+                 "no_return=%u min_m=%.2f max_m=%.2f fov_rad=%.4f radiation=%u "
+                 "raw=%u range_m=%.3f status=0x%02x age_ms=%u seq=%u\n",
+                 s.present ? 1 : 0, (unsigned)c.rfDriver, (unsigned)c.rfI2cAddr,
+                 (unsigned)c.rfPeriodMs, (double)c.rfScaleM, (unsigned)c.rfNoReturnRaw,
+                 (double)c.rfMinM, (double)c.rfMaxM, (double)c.rfFovRad, (unsigned)c.rfRadiation,
+                 raw, m, (unsigned)s.status, age, (unsigned)s.seq);
     } else {
       out.printf("ERR SENS %s not implemented\n", a1 ? a1 : "?");
     }
@@ -580,12 +588,13 @@ static rcl_node_t         g_node;
 static rcl_publisher_t    g_telPub;
 static rcl_publisher_t    g_evtPub;
 static rcl_publisher_t    g_rangePub;
+static bool               g_rangePubOk = false;  // optional: a stale micro-ROS lib may lack the 3rd publisher
 static rcl_subscription_t g_driveSub;
 static rcl_service_t      g_cmdSrv;
 static rclc_executor_t    g_exec;
 
 // How far creation got, so a failed or lost session is torn down exactly as far as needed.
-enum { ST_NONE = 0, ST_SUPPORT, ST_NODE, ST_TELPUB, ST_EVTPUB, ST_RANGEPUB, ST_DRIVESUB, ST_CMDSRV, ST_EXEC };
+enum { ST_NONE = 0, ST_SUPPORT, ST_NODE, ST_TELPUB, ST_EVTPUB, ST_DRIVESUB, ST_CMDSRV, ST_EXEC };
 static int g_stage = ST_NONE;
 
 // rcl calls are warn_unused_result and gcc ignores a (void) cast; the link state is
@@ -642,6 +651,7 @@ static bool createEntities() {
   g_telPub   = rcl_get_zero_initialized_publisher();
   g_evtPub   = rcl_get_zero_initialized_publisher();
   g_rangePub = rcl_get_zero_initialized_publisher();
+  g_rangePubOk = false;
   g_driveSub = rcl_get_zero_initialized_subscription();
   g_cmdSrv   = rcl_get_zero_initialized_service();
   g_exec     = rclc_executor_get_zero_initialized_executor();
@@ -652,8 +662,6 @@ static bool createEntities() {
       ROSIDL_GET_MSG_TYPE_SUPPORT(rccar_msgs, msg, Telemetry), "/rccar/mcu/telemetry"), ST_TELPUB);
   RCCAR_STEP(rclc_publisher_init_default(&g_evtPub, &g_node,
       ROSIDL_GET_MSG_TYPE_SUPPORT(rccar_msgs, msg, McuEvent), "/rccar/mcu/event"), ST_EVTPUB);
-  RCCAR_STEP(rclc_publisher_init_best_effort(&g_rangePub, &g_node,
-      ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, Range), "/rccar/rangefinder/range"), ST_RANGEPUB);
   RCCAR_STEP(rclc_subscription_init_best_effort(&g_driveSub, &g_node,
       ROSIDL_GET_MSG_TYPE_SUPPORT(rccar_msgs, msg, DriveCmd), "/rccar/mcu/drive"), ST_DRIVESUB);
   RCCAR_STEP(rclc_service_init_default(&g_cmdSrv, &g_node,
@@ -661,6 +669,10 @@ static bool createEntities() {
   RCCAR_STEP(rclc_executor_init(&g_exec, &g_support.context, 2, &g_alloc), ST_EXEC);  // sub + service
   if (rclc_executor_add_subscription(&g_exec, &g_driveSub, &g_driveMsg, &driveCb, ON_NEW_DATA) != RCL_RET_OK) return false;
   if (rclc_executor_add_service(&g_exec, &g_cmdSrv, &g_cmdReq, &g_cmdRes, commandCb) != RCL_RET_OK) return false;
+  // Created last and non-fatal: drive/command must work even if this fails (stale library
+  // with only 2 publishers); publishRange() then does nothing.
+  g_rangePubOk = rclc_publisher_init_best_effort(&g_rangePub, &g_node,
+      ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, Range), "/rccar/rangefinder/range") == RCL_RET_OK;
   return true;
 }
 
@@ -672,7 +684,8 @@ static void destroyEntities() {
   if (g_stage >= ST_EXEC)     ignoreRet(rclc_executor_fini(&g_exec));
   if (g_stage >= ST_CMDSRV)   ignoreRet(rcl_service_fini(&g_cmdSrv, &g_node));
   if (g_stage >= ST_DRIVESUB) ignoreRet(rcl_subscription_fini(&g_driveSub, &g_node));
-  if (g_stage >= ST_RANGEPUB) ignoreRet(rcl_publisher_fini(&g_rangePub, &g_node));
+  if (g_rangePubOk)           ignoreRet(rcl_publisher_fini(&g_rangePub, &g_node));
+  g_rangePubOk = false;
   if (g_stage >= ST_EVTPUB)   ignoreRet(rcl_publisher_fini(&g_evtPub, &g_node));
   if (g_stage >= ST_TELPUB)   ignoreRet(rcl_publisher_fini(&g_telPub, &g_node));
   if (g_stage >= ST_NODE)     ignoreRet(rcl_node_fini(&g_node));
@@ -721,7 +734,7 @@ static uint32_t g_lastRangeSeq = 0;
 static void publishRange() {
   RangefinderSample s; Config c;
   portENTER_CRITICAL(&g_mux); s = g_rangefinder; c = g_cfg; portEXIT_CRITICAL(&g_mux);
-  if (!s.present || s.seq == g_lastRangeSeq) return;
+  if (!g_rangePubOk || !s.present || s.seq == g_lastRangeSeq) return;
   g_lastRangeSeq = s.seq;
   const uint64_t now = nowMs();
   fillStamp(g_rangeMsg.header.stamp, now >= s.stampMs ? now - s.stampMs : 0);  // sample time
@@ -823,6 +836,8 @@ void setup() {
 
   Serial.setRxBufferSize(1024);  // before begin(); NVS writes can stall loop() for a while
   Serial.begin(115200);
+  // UART0 carries the XRCE stream: any IDF log line (ESP_LOGx, driver warnings) would corrupt it.
+  esp_log_level_set("*", ESP_LOG_NONE);
   loadConfig();
   xTaskCreatePinnedToCore(controlTask, "control", 4096, nullptr,
                           configMAX_PRIORITIES - 2, nullptr, 1);

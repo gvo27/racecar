@@ -6,8 +6,8 @@
 // ---- Active (driven by this firmware) ----
 constexpr int PIN_STEER_PWM    = 4;   // P1-4  -> DS3225 servo signal
 constexpr int PIN_THROTTLE_PWM = 5;   // P1-5  -> THW-1060 ESC throttle signal
-constexpr int PIN_I2C_SDA      = 8;   // P1-12 rangefinder I2C SDA (Garmin pin 3); bus shared with IMU later
-constexpr int PIN_I2C_SCL      = 9;   // P1-15 rangefinder I2C SCL (Garmin pin 4); bus shared with IMU later
+constexpr int PIN_I2C_SDA      = 8;   // P1-12 rangefinder pin 3 SDA; bus shared with IMU later
+constexpr int PIN_I2C_SCL      = 9;   // P1-15 rangefinder pin 4 SCL; bus shared with IMU later
 
 // ---- Reserved for future devices (NOT configured by this firmware) ----
 constexpr int PIN_BATT_LOW     = 6;   // P1-6  battery hi/low digital in (ADC1_CH5 capable)

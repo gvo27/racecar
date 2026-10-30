@@ -96,7 +96,7 @@ Software name: *rangefinder*. Datasheet: [archived PDF](docs/datasheets/LIDAR-Li
 
 - The sensor has internal 13 kOhm pull-ups to 3.3 V: no level shifter, no external pull-ups. Signals are 3.3 V max.
 - Leave GPIOB (pin 6) unconnected: low at power-up starts the BLE bootloader.
-- Status: driver compiled in CI, not yet bench-verified. Enable with `make mcu CMD="SENS rangefinder"`, watch with `make rangefinder`.
+- Status: compile pending CI; not bench-verified. Publishing is on by default (`driver = 1`); watch with `make rangefinder`; `make mcu CMD="SENS rangefinder"` is a read-only status/config query. Disable with `make mcu CMD="SET rf_driver 0"`, or `[rangefinder] driver = 0` in `tuning.toml` + `make tune`.
 
 ## Make commands
 
@@ -124,7 +124,7 @@ Run `make help` for the live list. Setup: [docs/setup.md](docs/setup.md). ROS to
 | `calibrate` | interactive servo center/left/right calibration, writes `tuning.toml` |
 | `tune` | push `tuning.toml` to the ESP32 and save it to flash |
 | `test` | steering sweep + failsafe check (motor stays off, never arms) |
-| `rangefinder` | live terminal feed of `/rccar/rangefinder/range` (MCU timestamp, Pi receive time, range m/cm, rate); enable with `make mcu CMD="SENS rangefinder"` |
+| `rangefinder` | live terminal feed of `/rccar/rangefinder/range` (MCU timestamp, Pi receive time, range m/cm, rate); `make mcu CMD="SENS rangefinder"` prints the sensor status and config (read-only) |
 | `mcu CMD="GET"` | send one `McuCommand` to the ESP32 (`GET`, `INFO`, `PING`, `SET key val`, ...) and print the reply |
 
 **Firmware (Docker; `FW_ENV=esp32s3`)**

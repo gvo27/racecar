@@ -84,7 +84,7 @@ Notable, not used (defaults kept; changing them needs a confirmed reason and a t
 Optionally the read of 0x10/0x11 can overlap the next measurement (returns the previously triggered result); not used.
 
 ## no return
-If the correlation peak is not above the valid-signal threshold, the device reports **1 cm**. The driver treats raw value 1 (and out of range values) as "no return" and publishes +inf.
+If the correlation peak is not above the valid-signal threshold, the device reports **1 cm**. Only a raw value equal to `no_return_raw` (1) is published as +inf; all other values are published unchanged (scaled), and consumers check `min_range`/`max_range` (REP-117).
 
 ## mode control pins and BLE bootloader
 - GPIOA (pin 5): toggle to trigger a measurement (rising or falling edge; ignored while busy).

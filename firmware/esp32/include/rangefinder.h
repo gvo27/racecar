@@ -17,5 +17,5 @@ struct RangefinderDriver {
   bool (*read)(const RfCfg &, uint32_t &raw, uint8_t &status);
 };
 
-// 0 = off -> nullptr, 1 = Garmin LIDAR-Lite v4 LED, unknown -> nullptr.
+// 0 = off -> nullptr, 1 = rangefinder (driver 1), unknown -> nullptr.
 const RangefinderDriver *rangefinderDriver(uint8_t id);

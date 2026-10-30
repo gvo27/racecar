@@ -40,7 +40,8 @@ FIRMWARE_KEYS = [
     (('rangefinder', 'period_ms'), 'SET rf_period_ms'),
     (('rangefinder', 'reading_scale_m'), 'SET rf_scale_m'),
     (('rangefinder', 'no_return_raw'), 'SET rf_no_return'),
-    # firmware clamps min < max: push max first so a wider range never rejects
+    # firmware rejects min >= max with ERR: pushing max before min keeps the usual
+    # widen/narrow pushes valid when starting from the firmware defaults
     (('rangefinder', 'max_range_m'), 'SET rf_max_m'),
     (('rangefinder', 'min_range_m'), 'SET rf_min_m'),
     (('rangefinder', 'fov_rad'), 'SET rf_fov_rad'),

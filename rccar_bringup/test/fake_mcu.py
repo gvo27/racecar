@@ -36,6 +36,7 @@ class FakeMcu(Node):
 
     def _publish_range(self):
         msg = Range()
+        # constants below mirror tuning.toml [rangefinder]
         msg.header.stamp = self.get_clock().now().to_msg()
         msg.header.frame_id = 'rangefinder_link'
         msg.radiation_type = Range.INFRARED

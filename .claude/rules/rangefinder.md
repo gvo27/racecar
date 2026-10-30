@@ -35,8 +35,10 @@ Software name is always "rangefinder"; the model name appears only in docs/datas
 - GPIO10/11 (P1-16/17) are spare (no longer reserved DIST_TRIG/ECHO)
 
 ## Names
-- topic `/rccar/rangefinder/range` sensor_msgs/Range, best effort; frame `rangefinder_link`; +inf = no return
-- McuCommand `SENS rangefinder` enables/disables publishing
+- topic `/rccar/rangefinder/range` sensor_msgs/Range, best effort; frame `rangefinder_link` (no TF yet: `rccar_description` is phase 4); only raw == `no_return_raw` -> +inf, all other values published unchanged (consumers check min_range/max_range, REP-117)
+- McuCommand `SENS rangefinder` = read-only status + config line (does not enable/disable publishing); disable with `SET rf_driver 0` or `[rangefinder] driver = 0` + `make tune`
+- link budget: UART0 115200 baud = ~11.5 KB/s; a Range frame is ~80 B, so 50 Hz (default) = ~4 KB/s; firmware clamps `rf_period_ms` >= 20 ms
+- the Range publisher is created last and is non-fatal (a stale micro-ROS lib with 2 publishers still gives a working drive/command session, no range topic)
 - firmware: `rangefinderTask` (core 0, device-agnostic), `include/rangefinder.h` (driver interface), `src/rangefinder_lidar_lite_v4.cpp` (Garmin protocol only here); FW 0.3.0; rccar.meta publishers = 3
 - pi tool: `make rangefinder` -> rccar_calibration `rangefinder_monitor` (MCU stamp via rmw_uros_sync_session, Pi receive time, range m/cm, rate)
 - keys: tuning.toml `[rangefinder]` driver i2c_addr period_ms reading_scale_m no_return_raw min_range_m max_range_m fov_rad radiation_type -> `SET rf_*` (rccar_mcu_bridge.tuning.FIRMWARE_KEYS + main.cpp setKey, test-enforced)
@@ -58,6 +60,11 @@ Software name is always "rangefinder"; the model name appears only in docs/datas
 3. new `[rangefinder]` values from its datasheet (confirmed only)
 4. new `docs/datasheets/rangefinder_<model>.md` summary + archived PDF; update this file's Docs and Wiring, README wiring, mapping table
 5. update paths above, layout.yaml; wiring change => pins.h == README
+
+## Deploy
+- flash firmware BEFORE `make car-up` with the new Pi image: old firmware answers `ERR unknown key rf_driver` and the tuning push stops before SAVE
+- `CFG_MAGIC` bump resets NVS config to defaults until the automatic tuning push / `make tune`
+- `make clean && make flash` once (`rccar.meta` changed: 3 publishers)
 
 ## Verification
 - CI: `make build` (firmware.yml), `make ros-test` (FIRMWARE_KEYS drift test, monitor unit tests)
