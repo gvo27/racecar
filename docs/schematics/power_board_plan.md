@@ -1,6 +1,6 @@
 # KiCad Power Rail Schematic Guide — RC Car Platform
 
-Exported 2026-10-29 from the live doc: https://claude.ai/artifact/G7oi8ZxQaXkXNUEQmDbfmX (edit there, re-export here). Build guide and background for the schematic in this folder (`rc_power_board.kicad_sch`). Project KiCad version: 10.0.
+Exported 2026-10-30 from the live doc: https://claude.ai/artifact/G7oi8ZxQaXkXNUEQmDbfmX (edit there, re-export here). Build guide and background for the schematic in this folder (`rc_power_board.kicad_sch`). Project KiCad version: 10.0.
 
 > **For the design meeting:** the one-page summary of the current schematic is `docs/schematics/design_overview.md`. This guide is the step-by-step build and background reference.
 
@@ -12,7 +12,7 @@ The board carries four power circuits, all sharing one ground:
 
 | Rail (net name) | Voltage | Current budget | Made by | Feeds |
 | --- | --- | --- | --- | --- |
-| `VBAT` | 7.4 V nominal (6.0 to 8.4 V) | about 7.3 A of board loads (the ESC's 20 A is off-board) | battery, through the main fuse | ESC power input; inputs of the two switching regulators |
+| `VBAT` | 7.4 V nominal (6.0 to 8.4 V) | about 7.3 A of board loads (the ESC's 20 A is off-board) | battery, through the main fuse | &#32;inputs of the two switching regulators |
 | `+5V_CPU` | 5.0 to 5.1 V | 5.5 A (regulator rated 6 A or more) | dedicated, higher-grade step-down regulator | Raspberry Pi 5, ESP32-S3 |
 | `+5V_SENS` | 5.0 V | 3.3 A (buck rated 4 A, TBD) | buck converter | Garmin LIDAR-Lite v4, extra cameras and the 3.3 V LDO |
 | `+3V3_SENS` | 3.3 V | 0.3 A (TBD) | low-noise LDO fed from `+5V_SENS` | IMU, shaft encoder, other light sensors |
@@ -21,7 +21,7 @@ The servo is powered by the ESC's built-in 6 V / 3 A output (its **BEC**, batter
 
 ![Power architecture: battery, VBAT bus, four branches, common ground](power_architecture.png)
 
-Everything hangs off one fused `VBAT` bus; each branch has its own fuse placeholder, and only the compute branch gets the higher-grade regulator.
+Everything hangs off one fused `VBAT` bus: a single replaceable main fuse protects all branches, and only the compute branch gets the higher-grade regulator.
 
 **How the work flows.** You draw the schematic (a logical wiring diagram), assign each symbol a physical footprint, lay out the PCB (where copper actually goes), and export Gerber files that a fab house (JLCPCB, PCBWay, OSH Park) turns into a board. This guide gets you through the schematic in detail and sketches the later steps so you and the reviewer share vocabulary.
 
@@ -52,7 +52,7 @@ where I is current in amps, ΔT is the allowed temperature rise in °C, and A is
 | Current | 1 oz, +10 °C | 1 oz, +20 °C | 2 oz, +10 °C | 2 oz, +20 °C | Used for |
 | --- | --- | --- | --- | --- | --- |
 | 20 A | 18.7 mm | 12.3 mm | 9.4 mm | 6.1 mm | battery to ESC path |
-| 8 A | 5.3 mm | 3.5 mm | 2.6 mm | 1.7 mm | `VBAT` feed to the three regulators |
+| 8 A | 5.3 mm | 3.5 mm | 2.6 mm | 1.7 mm | `VBAT` feed to the two regulators |
 | 5 A | 2.8 mm | 1.8 mm | 1.4 mm | 0.9 mm | `+5V_CPU` |
 | 3 A | 1.4 mm | 0.9 mm | 0.7 mm | 0.4 mm | `+5V_SENS` |
 | 1 A | 0.3 mm | 0.2 mm | 0.2 mm | 0.1 mm | `+3V3_SENS` |
@@ -73,7 +73,7 @@ Takeaways for this board:
 | 5 A | 1.4 mm | 2.7 mm | 1.4 mm |
 | 3 A | 0.7 mm | 1.1 mm | 0.6 mm |
 
-IPC-2152 figures use the approximate formula from secondary sources (the full standard is paywalled). A solid copper plane close to the trace lowers its temperature a lot, so real boards land between the two columns. IPC-2152's test data stops at 25 A and this board's worst case is about 27 A, so the 20 A path is beyond what either formula covers well. That strengthens the case for keeping it on wire off the board (open question 1).
+IPC-2152 figures use the approximate formula from secondary sources (the full standard is paywalled). A solid copper plane close to the trace lowers its temperature a lot, so real boards land between the two columns. The ESC's 20 A path is on wire off the board, so the board's copper only has to carry F1's rating: size `VBAT_RAW`, `VBAT` and `GND` for the fuse (a MINI fuse holds 110 % indefinitely, so about 16.5 A for a 15 A fuse), not for the 7.3 A load.
 
 ### Ground
 
@@ -81,7 +81,7 @@ All rails share one ground (`GND`) so signals between the Pi, ESP32 and sensors 
 
 ### Regulator, buck converter: what's the difference?
 
-Both turn a higher voltage into a lower one. A **linear regulator** (LDO) burns the difference as heat: dropping 2.4 V at 5 A wastes 12 W, which is impossible on a small board. A **buck converter** (switching step-down regulator) switches on and off thousands of times a second and wastes only 5 to 15 %. So the two high-current rails use bucks; the "dedicated voltage regulator" for the compute rail means a higher-grade buck with more headroom, better transient response and its own fuse. The 3.3 V rail is the exception: its load is tiny (about 0.1 A), so an LDO fed from `+5V_SENS` wastes well under 0.5 W and gives far cleaner power than a buck. Chaining regulators this way costs almost nothing here because the efficiency loss only applies to the small 3.3 V load. Two things about bucks matter here:
+Both turn a higher voltage into a lower one. A **linear regulator** (LDO) burns the difference as heat: dropping 2.4 V at 5 A wastes 12 W, which is impossible on a small board. A **buck converter** (switching step-down regulator) switches on and off thousands of times a second and wastes only 5 to 15 %. So the two high-current rails use bucks; the "dedicated voltage regulator" for the compute rail means a higher-grade buck with more headroom, better transient response. The 3.3 V rail is the exception: its load is tiny (about 0.1 A), so an LDO fed from `+5V_SENS` wastes well under 0.5 W and gives far cleaner power than a buck. Chaining regulators this way costs almost nothing here because the efficiency loss only applies to the small 3.3 V load. Two things about bucks matter here:
 
 - **Dropout.** A 2S LiPo sags to about 6.4 V near empty, leaving only 1.3 V of headroom above 5.1 V. The compute regulator must still hold 5.1 V at 5 A with 6.0 V in. Check the datasheet's minimum input voltage at full load.
 - **Noise.** Switching makes ripple. IMUs are sensitive to it, which is why the 3.3 V rail is an LDO after the sensor buck; a ferrite-bead filter in front of the LDO may still help (open question 5).
@@ -91,7 +91,7 @@ Both turn a higher voltage into a lower one. A **linear regulator** (LDO) burns 
 - **Fuse:** a sacrificial link that opens on overcurrent so a short burns the fuse, not the wiring or the battery. Size it above normal peak current and below what the copper and wire can carry. Placeholders here are `TBD`.
 - **Bulk and decoupling capacitors:** a big electrolytic capacitor on `VBAT` absorbs the ESC's current spikes; small ceramic capacitors at each regulator's input and output keep it stable. Values come from each regulator's datasheet. Ceramic capacitors lose much of their capacitance under DC voltage ("DC bias"): a 22 µF 10 V part on a 5 V rail may act like 10 µF or less, so check its bias curve or choose a higher voltage rating.
 - **TVS diode** (transient-voltage suppressor): clamps voltage spikes on `VBAT` caused by the motor. Its standoff voltage must be above 8.4 V.
-- **Reverse-polarity protection:** the T-plug is keyed, but a hand-soldered pigtail can still be wired backwards. A P-channel MOSFET or ideal-diode controller on the regulator branch is cheap insurance.
+- **Reverse-polarity protection:** the T-plug is keyed, but a hand-soldered pigtail can still be wired backwards. Proposal (open, not drawn): one P-channel MOSFET between F1 and `VBAT` with a gate resistor to GND, about 0.3 W of loss at 7 A. Details are in the PR.
 - **Power LEDs and test points** on each rail let you see and probe what's alive during bring-up.
 
 ### Why the extra capacitors, LEDs and test points
@@ -106,7 +106,7 @@ They're standard practice, and most can't live inside the module:
 
 ## Power budget
 
-Worst case, the battery supplies about **27 A**: 20 A to the ESC plus about 7.3 A into the two switching regulators when the battery is nearly empty. That total, not just the ESC's 20 A, sets the main fuse, the battery connector and the `VBAT` copper. The 3.3 V rail is now a low-noise **LDO** fed from `+5V_SENS`, so its current is counted inside the sensor buck's load. Per-device figures marked "approx." are from memory and must be checked against each datasheet before the review.
+Worst case, the board's battery input carries about **7.3 A** into the two switching regulators when the battery is nearly empty (about 7.8 A at the 6.0 V cutoff). The ESC (up to 20 A) is fed from the battery on its own leads, off-board. That load sets the main fuse; the `VBAT_RAW`, `VBAT` and `GND` copper and the J1 pads are sized for F1's rating (about 16.5 A for a 15 A fuse). The 3.3 V rail is a low-noise **LDO** fed from `+5V_SENS`, so its current is counted inside the sensor buck's load. Per-device figures marked "approx." are from memory and must be checked against each datasheet before the review.
 
 | Rail | Load | Est. peak current | Notes |
 | --- | --- | --- | --- |
@@ -122,9 +122,9 @@ Worst case, the battery supplies about **27 A**: 20 A to the ESC plus about 7.3 
 | `+3V3_SENS` | Shaft encoder | < 0.05 A (approx.) |  |
 | `+3V3_SENS` | **Rail total** | **0.3 A (TBD)** | LDO heat at 0.3 A: (5 − 3.3) × 0.3 ≈ 0.5 W |
 | ESC BEC (off-board) | DS3225MG servo | 2.3 A stall at 6.8 V (datasheet) | Fed by the ESC's 6 V / 3 A output |
-| `VBAT` | ESC + motor | 20 A | Peaks may exceed this briefly |
+| `VBAT` | ESC + motor (off-board, own 12 AWG leads) | 20 A | Peaks may exceed this briefly |
 | `VBAT` | Two regulators' inputs | 7.3 A at 6.4 V in | U1 4.4 A + U2 2.9 A, at 90 % efficiency |
-| `VBAT` | **Battery total** | **about 27 A** | Main fuse TBD, likely 30 A class |
+| `VBAT` | **Battery total** | **about 7.3 A on the board (7.8 A at 6.0 V)** | F1 10 or 15 A (TBD); the ESC is fused off-board |
 |  |  |  |  |
 
 **Why the ESP32 stays on `+5V_CPU` rather than moving to 3.3 V.** It would free at most about 0.5 A of the Pi's budget, and only during Wi-Fi bursts; idle it draws closer to 0.1 A. The costs outweigh that. Its radio bursts would put noise on the IMU's clean rail. The LDO would have to grow to about 1 A and shed about 1.7 W of heat. Feeding a dev board's 3V3 pin bypasses its own regulator and fights it when USB is plugged in. And the ESP32 controls the throttle, so it belongs with the protected compute rail, not the sensor rail. Rating U1 at 6 A buys more margin than moving the ESP32 would.
@@ -183,7 +183,7 @@ All of these also exist in the **Place** menu and the right-hand toolbar, so you
 
 ## Draw the schematic, step by step
 
-You will build one A3 sheet split into six labelled regions (A to E for the rails, F for U1's EN/PG control), with power flowing left to right. Work in this order and save after each step.
+You will build one A3 sheet split into five labelled regions (A to E) plus a Notes area, with power flowing left to right. Work in this order and save after each step.
 
 ### Step 1: page settings
 
@@ -237,12 +237,12 @@ Either way, use the standard `power:GND` for ground everywhere, and never `GNDA`
 Press **A**, type the symbol name in the search box, pick it, click to place. Then press **E** on each part to set its **Value** and later its **Footprint**.
 
 1. Place `Connector_Generic:Conn_01x02` as **J1**, value `Battery T-plug pigtail 12AWG`. The battery has a T-plug (Deans) lead; a matching T-plug pigtail with bare 12 AWG ends is soldered into two wire pads on the board. Pin 1 is +, pin 2 is −.
-2. Place `Device:Fuse` as **F1**, value `TBD (main, about 30 A)`. Wire J1 pin 1 to one end of F1 with **W**.
+2. Place `Device:Fuse` as **F1**, value `TBD ATM mini blade 10-15A`. Wire J1 pin 1 to one end of F1 with **W**.
 3. Press **L** on the wire between J1 and F1 and name it `VBAT_RAW` (the unfused side). Put a `VBAT` power symbol on the other side of F1.
 4. Place `Device:D_Zener` as **D1** (KiCad's stock `D_TVS` symbol is bidirectional; a unidirectional TVS is drawn with the Zener symbol), value `TVS unidir. TBD, standoff ≥ 9 V`, from `VBAT` to `GND`, cathode (the bar, pin 1) toward `VBAT`.
 5. Place `Device:C_Polarized` as **C1**, value `TBD µF, ≥ 16 V, low ESR`, from `VBAT` to `GND`, + toward `VBAT`. This is the bulk capacitor.
 6. Put `power:GND` on J1 pin 2.
-7. Press **P**, choose `power:PWR_FLAG`, and put one on the `VBAT_RAW` wire and one on the `GND` wire near J1. A **PWR\_FLAG** tells the checker "power enters here", because a connector pin can't prove that on its own. A flag does not pass through a fuse or ferrite bead, so after the later steps also add one on `VIN_CPU`, `VIN_SENS` and `LDO_IN` (each feeds a regulator's power input), and on `VBAT` and `+6V_BEC`. Without them the checker reports "input power pin not driven" on U1, U2 and U3.
+7. Press **P**, choose `power:PWR_FLAG`, and put one on the `VBAT_RAW` wire and one on the `GND` wire near J1. A **PWR\_FLAG** tells the checker "power enters here", because a connector pin can't prove that on its own. A flag does not pass through a fuse or ferrite bead, so after the later steps also add one on `LDO_IN` (it feeds U3's power input through FB1), and on `VBAT` and `+6V_BEC`. Without them the checker reports "input power pin not driven" on U1, U2 and U3.
 
 ### Step 6: region B, ESC and servo
 
@@ -254,14 +254,14 @@ Press **A**, type the symbol name in the search box, pick it, click to place. Th
 
 ### Step 7: region C, compute 5 V
 
-1. **F3** `Device:Fuse`, value `TBD`, from `VBAT` to a net labelled `VIN_CPU`.
+1. **No branch fuse:** U1's input sits directly on `VBAT`; the single main fuse F1 protects every board load.
 2. **U1** is the Pololu D36V50F5, soldered to the PCB on its 2 × 6, 0.1 in pin grid. Make a symbol `rc_power:D36V50F5` showing all 12 module pins, numbered to match the `PinHeader_2x06_P2.54mm` footprint: 1 `PG` (open collector), 2 `EN` (input), 3–4 `VRP`, 5–6 `VIN` (power input), 7–10 `GND` (power input), 11–12 `VOUT` (one power output, one passive, so ERC doesn't see two outputs fighting). Value `Pololu D36V50F5 buck (req 5.1V ≥6A TBD)`.
-3. Join both `VIN` pins to `VIN_CPU`, all four `GND` pins to `GND` and both `VOUT` pins to a `+5V_CPU` power symbol. Each header pin is rated 3 A, which is why every power connection uses its pin pair.
-4. Mark both `VRP` pins no-connect (**Q**). VRP is the input after the module's reverse protection; the sensor buck stays fed from `VBAT` through F4, so VRP is unused.
+3. Join both `VIN` pins to `VBAT`, all four `GND` pins to `GND` and both `VOUT` pins to a `+5V_CPU` power symbol. Each header pin is rated 3 A, which is why every power connection uses its pin pair.
+4. Mark both `VRP` pins no-connect (**Q**). VRP is the input after the module's reverse protection; the sensor buck stays fed from `VBAT`, so VRP is unused.
 5. **EN** is left unconnected (no-connect flag). The module turns off below 1.2 V and on above 1.35 V, and has a 100 kΩ pull-up to VIN inside it, so unconnected means always on. Never wire EN straight to an ESP32 GPIO: it floats to battery voltage (8.4 V). ESP32 control of EN is archived for now (question 13).
-6. **PG** (net `U1_PG`) to J5 pin 3. PG is open-drain and goes low when VOUT is more than 20 % high or 10 % low; the ESP32 reads it with its internal pull-up (3.3 V).
+6. **PG** (net `U1_PG`) to J5 pin 1. PG is open-drain and goes low when VOUT is more than 20 % high or 10 % low; the ESP32 reads it with its internal pull-up (3.3 V).
 7. The module has input reverse protection to 40 V, so this branch needs no extra reverse-polarity part (question 6 covers the rest of the board).
-8. **C2** `Device:C`, value `TBD µF, ≥ 16 V` on `VIN_CPU`; **C3** `Device:C`, value `TBD µF, ≥ 10 V` on `+5V_CPU`.
+8. **C2** `Device:C`, value `TBD µF, ≥ 16 V` on `VBAT`; **C3** `Device:C`, value `TBD µF, ≥ 10 V` on `+5V_CPU`.
 9. Power LED: **R1** `Device:R`, value `1k5` (about 2 mA), in series with **D2** `Device:LED`, from `+5V_CPU` to `GND`, LED cathode toward `GND`.
 10. **TP1** `Connector:TestPoint` on `+5V_CPU`.
 11. **J6** and **J7** `Connector_Generic:Conn_01x02`, values `USB-C pigtail > Pi 5` and `USB-C pigtail > ESP32`. Each is a 2-wire USB-C cable with bare ends: the Pi 5 and the ESP32 (left, native USB port) take power through their own USB-C inputs and keep that input protection. Pin 1 `+5V_CPU`, pin 2 `GND`.
@@ -270,7 +270,7 @@ Press **A**, type the symbol name in the search box, pick it, click to place. Th
 
 Same pattern as region C:
 
-1. **F4** fuse `TBD`, **U2** `REG_MODULE` value `5 V buck rated 4 A, TBD`, input cap **C4**, output cap **C5**.
+1. **U2** `REG_MODULE` value `5 V buck rated 4 A, TBD`, input on `VBAT` (no branch fuse), input cap **C4**, output cap **C5**.
 2. VOUT to a `+5V_SENS` power symbol. LED **R2** + **D3**, test point **TP2**.
 3. Output headers, each `Conn_01x02` (pin 1 `+5V_SENS`, pin 2 `GND`): **J8** `LIDAR-Lite v4`, **J9** `Camera USB hub`, **J11** `Spare 5 V` (the radar header J10 was removed from scope).
 4. `+5V_SENS` also feeds the 3.3 V LDO in region E. A net with the same name joins them; no wire across the sheet is needed.
@@ -279,7 +279,7 @@ Same pattern as region C:
 
 The 3.3 V rail is a **linear regulator (LDO)** fed from `+5V_SENS`, not a buck from the battery. KiCad has real symbols for common LDOs, so you don't need the custom `REG_MODULE` here.
 
-1. Put a `+5V_SENS` power symbol at the left of region E. That is the LDO's supply; no separate fuse is needed because F4 already protects this branch.
+1. Put a `+5V_SENS` power symbol at the left of region E. That is the LDO's supply; no separate fuse is needed because the main fuse F1 already protects this branch.
 2. Optional noise filter: **FB1** `Device:FerriteBead` in series from `+5V_SENS` to the LDO input, plus **C6** `Device:C` to `GND`, values `TBD`. Leave it in so the reviewer can decide.
 3. **U3**: press **A**, search `AP2112K-3.3` (a common 600 mA low-noise LDO, symbol `Regulator_Linear:AP2112K-3.3`) or search `LDO 3.3` and pick a similar one. Value `3.3 V LDO ≥ 300 mA, TBD`. Wire VIN to the filter output (or straight to `+5V_SENS`), GND to `GND`, VOUT to a `+3V3_SENS` power symbol. If it has an EN pin, tie it to VIN unless the datasheet says otherwise.
 4. **C7** at the LDO input and **C8** at its output, `Device:C`, values from its datasheet (often 1 µF ceramic each). LDOs can oscillate with the wrong output capacitor, so follow the datasheet exactly.
@@ -335,13 +335,13 @@ A **symbol** is the logical drawing; a **footprint** is the copper pads and hole
 | Part | Search term in the footprint list | Check |
 | --- | --- | --- |
 | J1 battery (T-plug pigtail) | `SolderWire` (wire pads) | 12 AWG is 3.3 mm²; KiCad's largest stock pad is the 2.5 mm² one (3.0 mm hole, 4.4 mm pad, for 2.4 mm conductors); 12 AWG's conductor likely fits, but its current rating and thin copper ring need checking, so the final pad is TBD |
-| F1 to F4 | `Fuseholder` (blade/ATO) or an inline holder off-board | Holder current rating (F1 about 27 to 30 A) |
+| F1 | `Fuse:Fuseholder_Blade_Mini_Keystone_3568` (Mini/ATM blade, replaceable; type pending confirmation) | Holder current rating (Keystone 3568 is listed at 20 to 30 A, so confirm it for the suffix ordered; F1 is 10 to 15 A) |
 | U1 D36V50F5 | `PinHeader_2x06_P2.54mm` (pin numbering in Step 7) | Check against Pololu's dimension drawing; header pins are 3 A each |
 | U2 module | Matches the chosen module | Pin order and spacing from the module drawing |
 | U3 LDO | The footprint its symbol suggests (SOT-23-5) |  |
-| Q1 | `SOT-23` |  |
+| Q1 (only if the PR's reverse-polarity proposal is adopted) | PowerPAK SO-8 (P-FET) |  |
 | J3, J4 servo/ESC | `PinHeader_1x03_P2.54mm` | Standard servo spacing |
-| J5 signals to ESP32 | `PinHeader_1x05_P2.54mm` |  |
+| J5 signals to ESP32 | `PinHeader_1x04_P2.54mm` |  |
 | J6, J7 USB-C pigtails | `TerminalBlock` 5.08 mm, 2 pin | Clamps 20 AWG; ≥ 5 A per pin |
 | J8 to J14 sensor outputs | `JST_XH` 2 pin, or pin headers | About 3 A per pin |
 | C, R, LED | `C_0805`, `R_0805`, `LED_0805` (surface-mount, hand-solderable) | Capacitor voltage rating |
@@ -353,9 +353,9 @@ A **net class** is a group of nets that share copper rules. Set them in the Sche
 
 | Net class | Nets (pattern) | Track width | Via (drill / pad) | Comment |
 | --- | --- | --- | --- | --- |
-| `HighCurrent` | `VBAT*`, `GND` | zones on both layers; 6 mm is only the IPC-2221 minimum at +20 °C | 0.6 / 1.2 mm, many in parallel | `GND` carries the same 20 A back to the battery |
-| `Power5A` | `+5V_CPU`, VIN\_CPU | 1.5 mm | 0.4 / 0.8 mm | 2 oz copper |
-| `Power3A` | `+5V_SENS`, VIN\_SENS, `+6V_BEC` | 1.0 mm | 0.4 / 0.8 mm |  |
+| `HighCurrent` | `VBAT*`, `GND` | zones on both layers; 6 mm is only the IPC-2221 minimum at +20 °C | 0.6 / 1.2 mm, many in parallel | `GND` carries the board's return current (size it for F1's rating) back to the battery |
+| `Power5A` | `+5V_CPU` | 1.5 mm | 0.4 / 0.8 mm | 2 oz copper |
+| `Power3A` | `+5V_SENS`, `+6V_BEC` | 1.0 mm | 0.4 / 0.8 mm |  |
 | `Default` | everything else, incl. `+3V3_SENS` and signals | 0.25 mm | 0.3 / 0.6 mm | KiCad's default |
 
 The widths assume 2 oz copper and a 10 to 20 °C rise, from the table in the background section. Treat them as a starting proposal for the reviewer.
@@ -384,7 +384,7 @@ The widths assume 2 oz copper and a 10 to 20 °C rise, from the table in the bac
 - [ ] The two 5 V rails have different net names (click a wire on each and read the message panel)
 - [ ] Only `power:GND` is used for ground; no `GNDA`, `GNDD` or `GNDPWR`
 - [ ] `+6V_BEC` touches only J3 and J4
-- [ ] `PWR_FLAG` on `VBAT_RAW`, `GND`, `VBAT`, `VIN_CPU`, `VIN_SENS`, `LDO_IN` and `+6V_BEC`
+- [ ] `PWR_FLAG` on `VBAT_RAW`, `GND`, `VBAT`, `LDO_IN` and `+6V_BEC`
 - [ ] Every part has a reference and a value; unknowns say `TBD`
 - [ ] Title block filled in, revision `A (draft)`
 - [ ] Notes box lists the assumptions
@@ -394,12 +394,12 @@ The widths assume 2 oz copper and a 10 to 20 °C rise, from the table in the bac
 
 Put these in your hand-off message, numbered, so the reviewer can answer by number.
 
-1. **20 A path (resolved):** the ESC is powered off-board, straight from the battery on its own 12 AWG leads. The board carries only its own loads, about 7.3 A worst case, so `HighCurrent` (6 mm, zones) is now oversized: should it be resized for about 8 A?
-2. **Fuses:** main fuse rating and type (blade vs inline), and whether each regulator branch needs its own fuse (F3, F4) or only the main one.
+1. **20 A path (resolved):** the ESC is powered off-board, straight from the battery on its own 12 AWG leads. The board carries only its own loads, about 7.3 A worst case, so `HighCurrent` (6 mm, zones) is now oversized: should it be resized for F1's rating (about 16.5 A at 15 A, 11 A at 10 A) rather than the 7.3 A load?
+2. **Fuses (resolved, rating open):** one replaceable main fuse F1 (Mini/ATM blade in a Keystone 3568 PCB holder; type pending confirmation) protects every board load. There are no branch fuses, because the fuse inventory is high-current. Trade-off: a sensor-branch short now opens F1 and drops compute too; U1 and U2 limit their own output current. Rating: 10 A or 15 A, against about 7.3 A worst-case board load (15 A keeps 7.3 to 7.8 A under 75 % of the rating; a 10 A fuse sits at 73 to 78 %). A standard MINI fuse (ISO 8820-3: 200 % opens in 0.15–5 s) rides through the board's capacitor inrush, so slow-blow isn't needed; the motor is off-board.
 3. **Compute rail and the Pi:** the Pi 5 and ESP32 need about 5.5 A. The Pi takes power through a 2-wire USB-C pigtail, so it keeps its USB-C input protection but gets no USB-PD 5 A offer: it limits its USB ports to about 0.6 A total unless set in `config.txt`. Is that acceptable?
 4. **Regulator U1:** the D36V50F5 outputs 5.0 V ± 4 % (not the Pi's preferred 5.1 V) and is rated 5.5 A typical. What is its dropout at 5.5 A with the battery near 6.0 V? Its VRP output is deliberately unused (the sensor buck stays on `VBAT`, because VRP would push about 7.3 A through U1's 6 A-rated VIN pin pair).
 5. **IMU noise:** is the LDO's noise rejection enough at the sensor buck's switching frequency, or should the ferrite-bead filter in front of it stay?
-6. **Protection:** U1 has its own reverse protection to 40 V. Does the rest of the board (sensor buck, ESC branch) need a board-level P-FET or ideal diode? TVS part and rating?
+6. **Protection:** U1 has its own reverse protection to 40 V, and so does the proposed U2 (D24V50F5). The rest (C1, D1) is exposed. The PR proposes Q1 (P-FET) + R4 between F1 and `VBAT`; it is not drawn yet. Adopt it for rev A? TVS proposed: SMBJ10A.
 7. **Low battery:** the ESC's low-voltage cutoff stops the motor, but the regulators keep draining the pack. Add a resistor divider from `VBAT` to an ESP32 ADC pin so firmware can warn or shut down? A 100k / 33k divider gives about 2.1 V at 8.4 V.
 8. **ESP32 back-feed:** the ESP32 gets 5 V on its left USB-C port (J7) and may also be connected by USB on its right COM port (to the laptop now, the Pi later). Does the dev board keep the two USB power inputs apart, or is a diode or a data-only cable needed?
 9. **Cameras:** cameras plugged into the Pi draw from `+5V_CPU`. Move them to a powered USB hub on `+5V_SENS` (J9)?

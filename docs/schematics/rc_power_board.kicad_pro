@@ -593,16 +593,8 @@
         "pattern": "+5V_CPU"
       },
       {
-        "netclass": "Power5A",
-        "pattern": "*VIN_CPU"
-      },
-      {
         "netclass": "Power3A",
         "pattern": "+5V_SENS"
-      },
-      {
-        "netclass": "Power3A",
-        "pattern": "*VIN_SENS"
       },
       {
         "netclass": "Power3A",
