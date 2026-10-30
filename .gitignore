@@ -9,3 +9,4 @@ firmware/esp32/compile_commands.json
 .pytest_cache/
 deploy/car/.env.generated
 build/
+.venv
