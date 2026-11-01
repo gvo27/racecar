@@ -65,3 +65,12 @@ def test_yaw_to_quat():
     assert c.yaw_to_quat(0.0) == (0.0, 0.0, 0.0, 1.0)
     x, y, z, w = c.yaw_to_quat(math.pi)
     assert z == pytest.approx(1.0) and w == pytest.approx(0.0, abs=1e-12)
+
+
+def test_free_is_high_false_swaps_meaning():
+    assert c.cell_to_occupancy(0, free_is_high=False) == -1
+    assert c.cell_to_occupancy(1, free_is_high=False) == 0
+    assert c.cell_to_occupancy(255, free_is_high=False) == 100
+    m = MapData(3, 2, 0.05, 0.0, 0.0, bytes([0, 1, 255, 255, 0, 1]))
+    g = c.map_to_grid(m, free_is_high=False)
+    assert g.data == [-1, 0, 100, 100, -1, 0]

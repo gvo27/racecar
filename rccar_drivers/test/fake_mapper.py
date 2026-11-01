@@ -1,8 +1,11 @@
 """
 Fake Slamtec Mapper TCP server for tests (stdlib only).
 
-Usage: `from fake_mapper import FakeMapper` with the test dir on sys.path.
+Usage: `from fake_mapper import FakeMapper` with the test dir on sys.path, or
+run as a subprocess: `python3 fake_mapper.py --port N` (0 = pick a free port,
+the bound port is printed on the first stdout line).
 """
+import argparse
 import base64
 import json
 import socket
@@ -68,7 +71,7 @@ def default_results():
 class FakeMapper:
     """Threaded TCP server speaking the Mapper protocol on 127.0.0.1."""
 
-    def __init__(self, results=None, chunk=None, stale_first=False):
+    def __init__(self, results=None, chunk=None, stale_first=False, port=0):
         """
         Create the server.
 
@@ -87,7 +90,7 @@ class FakeMapper:
         self._stop = threading.Event()
         self._srv = socket.socket()
         self._srv.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self._srv.bind(('127.0.0.1', 0))
+        self._srv.bind(('127.0.0.1', port))
         self._srv.listen(4)
         self._srv.settimeout(0.1)
         self.port = self._srv.getsockname()[1]
@@ -161,3 +164,22 @@ class FakeMapper:
         self.drop_connections()
         self._srv.close()
         self._thread.join(timeout=2.0)
+
+
+def main(argv=None):
+    """Run a fake Mapper until killed (for launch tests)."""
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument('--port', type=int, default=0)
+    args = ap.parse_args(argv)
+    server = FakeMapper(port=args.port)
+    print(server.port, flush=True)
+    try:
+        threading.Event().wait()
+    except KeyboardInterrupt:
+        pass
+    finally:
+        server.stop()
+
+
+if __name__ == '__main__':
+    main()

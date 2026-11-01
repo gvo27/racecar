@@ -137,6 +137,53 @@ The first flash after this feature needs the micro-ROS library rebuilt (`rccar.m
 
 **How I2C clocking works (for newcomers).** I2C uses two wires: SCL (clock) and SDA (data). The ESP32 is the bus master and is the only one that drives SCL. The sensor changes SDA only while SCL is low, and the receiver samples SDA while SCL is high, so data and clock stay in step in hardware; there is no software synchronisation to do. The timestamp on a range sample marks when the ESP32 finished reading it (converted to ROS time via `rmw_uros_sync_session`), not when the light left the sensor.
 
+### Lidar (Slamtec Mapper M2M1)
+
+Software name: *lidar* (topics `/rccar/lidar/*`, `/rccar/mapper/*`). Datasheet digest: [slamtec_mapper_M2M1_datasheet.md](datasheets/slamtec_mapper_M2M1_datasheet.md). Rules: `.claude/rules/drivers.md`. Status: compile/CI only, not bench-verified.
+
+**What it is.** A 2-D lidar with its own onboard SLAM computer. It publishes scans, IMU, a SLAM pose and an occupancy map over JSON on TCP port 1445, via its own Wi-Fi or its Ethernet port. There is no USB or serial data connection; the only wire is power. Nothing connects to the ESP32 or the GPIO header.
+
+**Why our own driver.** The ROS drivers that exist do not fit: `hatchbed/opensw_ros` is ROS 1 (catkin/roscpp; the datasheet's "ROS 1/2" is wrong) and Slamtec's `slamware_ros_sdk` is ROS 1 around a closed binary SDK. `rccar_drivers` (node `mapper_driver`, container `drivers`) speaks the protocol directly with the Python stdlib; no new pip deps.
+
+**Power and wiring (power off; nothing here is bench-verified).**
+- Load: 4.8-12 V, ~0.75 A typical, 1.3 A max running, 1.6 A at start-up, ripple <= 50 mV.
+- Source: the `+5V_SENS` rail of the power board (branch `schematic`) through a spare 2-pin JST-XH header (J11-J14): pin 1 `+5V_SENS` (red), pin 2 GND (black). Rail ground is common with the car ground.
+- Not from the Pi USB ports: without a USB-PD 5 A supply the Pi limits USB to 600 mA total (1.6 A shared with `usb_max_current_enable=1`), and the Pi's own regulator is already fully used by the Pi. The raw 2S battery (6-8.4 V) is in the voltage range but ESC/motor noise breaks the ripple limit; regulate.
+- The kit's 1 ft 22 AWG 3 A USB pigtail is electrically sufficient (~0.6 m round trip x 53 mohm/m = ~32 mohm, ~50 mV drop at 1.6 A) but its USB-A plug does not mate with the XH header. Re-terminate the kit's 2-pin housing lead onto an XHP-2 housing instead: red to +, black to GND. Verify polarity with a multimeter before connecting.
+- Mounting: M2.5 bottom screws no longer than 6 mm, tilt within +-3 deg, <= 2 m/s while mapping, the arrow on the cap is +X (forward).
+- Allow ~40 s after power-up until it spins steadily.
+
+**Networking (novice notes).** A Wi-Fi radio is either a *station* (joins someone else's network) or an *access point* (AP, offers one). The Mapper is an AP named `SLAMWARE-xxxx` at 192.168.11.1. The Pi's `wlan0` joins it as a station; `eth0` stays on the lab LAN. The *default route* is where the Pi sends traffic for any address it has no specific route to (the internet). The Mapper network has no internet, so `wlan0` must not take the default route or `apt`, `docker pull` and SSH-by-name break. Netplan on Ubuntu 24.04 server (`/etc/netplan/60-mapper.yaml`, mode 600):
+
+```yaml
+network:
+  version: 2
+  wifis:
+    wlan0:
+      dhcp4: true
+      dhcp4-overrides: {use-routes: false, use-dns: false}
+      access-points:
+        "SLAMWARE-XXXXXX": {}   # replace with the SSID on the Mapper label; add a password: if you set one
+```
+
+```sh
+sudo netplan try                          # applies, reverts after 120 s unless you confirm
+ip route | grep default                   # must still show eth0 only
+nmcli -t -f ACTIVE,SSID dev wifi | grep '^yes'   # SLAMWARE-...
+nc -vz 192.168.11.1 1445                  # "succeeded" = driver can connect
+```
+
+- Live tests: the only radio is busy, so admin SSH from the laptop also goes over the Mapper AP: join the laptop to the same `SLAMWARE-xxxx` network and SSH to the Pi's address on it (`ip -4 addr show wlan0`).
+- Fallback: cable the Mapper to the Pi's Ethernet (static IP on the Pi in the Mapper's subnet) and set `MAPPER_HOST=<mapper ip>` in the environment of the `drivers` service (compose default 192.168.11.1; not in `.env`, it is not a secret).
+
+**Bandwidth.** One scan is ~930 points x 12 B = ~11 KB raw, ~15 KB base64. At 10-20 Hz that is 1.2-2.4 Mbit/s; with pose, IMU at 50 Hz and the map at ~1 Hz the total stays under 5 Mbit/s, far below what 802.11n/ac gives. The real cost is jitter (5-50 ms spikes) and dropouts, so messages are stamped on receive, gaps beyond the timeout are stale (diagnostics `mapper_driver: link`) and the lidar is **not** in the stop path (supervisor/ESP32 failsafe are unaffected).
+
+**Viewing: `make viz`.** Runs foxglove_bridge (binary, handles LaserScan/OccupancyGrid well; rosbridge is JSON and slow). It binds to `127.0.0.1` only: a websocket has no login, so binding to the Pi's LAN address would let anyone on the network read the feed. On localhost only something already on the Pi can connect, and SSH carries the rest. In VS Code Remote-SSH the **Ports** tab forwards 8765 automatically (add it if not). On the laptop open Foxglove (app.foxglove.dev or desktop) or Lichtblick, choose "Foxglove WebSocket", `ws://localhost:8765`, add a 3D panel with fixed frame `map` and enable `/rccar/lidar/scan`, `/rccar/mapper/map`, `/tf`. Served: `/rccar/*`, `/tf`, `/tf_static`, `/diagnostics`, `/robot_description`. Override: `ros2 launch rccar_bringup viz.launch.py port:=9000`.
+
+**Topics.** See `.claude/rules/ros2.md`. Scan/IMU/pose are best effort (~10/50/10 Hz); the map is reliable + transient_local (~1 Hz). Bench-TBD parameters of `mapper_driver`: `scan_angle_sign`, `map_transpose`, `map_free_is_high`; IMU `linear_acceleration` units are raw until measured; the URDF mount offsets in `rccar_description` are unmeasured until you measure them on the car.
+
+**IMU feed: `make lidar-imu`.** Read-only, stack up. One line per sample (at most ~10/s): Pi time, `heading` (SLAM pose yaw), `imu_heading` (IMU quaternion yaw, cross-check), `yaw_rate` (gyro z, deg/s), `acc_long` (x), `acc_lat` (y), `speed` (from successive SLAM poses), IMU rate. Pitch, roll, vertical accel, gyro x/y and compass are ignored. Each run appends JSON lines to `logs/lidar_imu_<UTC>.jsonl` (override dir: parameter `log_dir` / env `RCCAR_LOG_DIR`; unwritable => warning, printing continues). Prints `waiting for /rccar/lidar/imu (Mapper powered + on Wi-Fi? ...)` when nothing arrives for 2 s. Check the Mapper link with `make car-logs`.
+
 ## 8. USB disconnect
 
 After the USB cable is unplugged and replugged (or the ESP32 resets its USB serial device), the device node passed into the `mcu-agent` container goes stale. Run:

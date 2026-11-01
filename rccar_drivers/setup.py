@@ -18,6 +18,8 @@ setup(
     license='MIT',
     tests_require=['pytest'],
     entry_points={
-        'console_scripts': [],
+        'console_scripts': [
+            'mapper_driver = rccar_drivers.mapper_node:main',
+        ],
     },
 )

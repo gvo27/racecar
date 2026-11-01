@@ -6,7 +6,7 @@ A 1:10 Tamiya TT-02 built into a self-driving research platform on a two-layer c
 
 | Layer | Hardware | Role | Status |
 | --- | --- | --- | --- |
-| High level | Raspberry Pi 5 | autonomy stack: ROS 2 Jazzy in Docker (`deploy/car/`), supervisor + micro-ROS agent, sends `DriveCmd` (heading, throttle) | phase 2 complete (bench-verified); phase 4 rangefinder: compile-only, not bench-verified |
+| High level | Raspberry Pi 5 | autonomy stack: ROS 2 Jazzy in Docker (`deploy/car/`), supervisor + micro-ROS agent, sends `DriveCmd` (heading, throttle) | phase 2 complete (bench-verified); phase 4 rangefinder + lidar (Slamtec Mapper, `make viz`): compile-only, not bench-verified |
 | Real time | ESP32-S3-N16R8 | hardware PWM to servo/ESC, failsafe, telemetry; micro-ROS client over UART0 | this repo, `firmware/esp32/` (env `esp32s3`, micro-ROS) |
 
 ## Current inventory
@@ -109,7 +109,7 @@ Software name: *rangefinder*. Datasheet: [archived PDF](docs/datasheets/LIDAR-Li
 
 ## Make commands
 
-Run `make help` for the live list. Setup: [docs/setup.md](docs/setup.md). ROS tools (`teleop`, `calibrate`, `tune`, `test`, `mcu`, `rangefinder`) need the stack running (`make car-up`).
+Run `make help` for the live list. Setup: [docs/setup.md](docs/setup.md). ROS tools (`teleop`, `calibrate`, `tune`, `test`, `mcu`, `rangefinder`, `viz`, `lidar-imu`) need the stack running (`make car-up`).
 
 **Car stack (ROS 2 + micro-ROS in Docker)**
 
@@ -134,6 +134,8 @@ Run `make help` for the live list. Setup: [docs/setup.md](docs/setup.md). ROS to
 | `tune` | push `tuning.toml` to the ESP32 and save it to flash |
 | `test` | steering sweep + failsafe check (motor stays off, never arms) |
 | `rangefinder` | live terminal feed of `/rccar/rangefinder/range` (MCU timestamp, Pi receive time, range m/cm, rate); `make mcu CMD="SENS rangefinder"` prints the sensor status and config (read-only) |
+| `viz` | live websocket feed (foxglove_bridge) on `localhost:8765` for Foxglove/Lichtblick; bound to localhost, reach it via SSH port forwarding (docs/setup.md "Lidar") |
+| `lidar-imu` | live Mapper IMU feed (heading, yaw rate, horizontal accel, speed) and `logs/lidar_imu_*.jsonl` |
 | `mcu CMD="GET"` | send one `McuCommand` to the ESP32 (`GET`, `INFO`, `PING`, `SET key val`, ...) and print the reply |
 
 **Firmware (Docker; `FW_ENV=esp32s3`)**

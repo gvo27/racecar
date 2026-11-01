@@ -24,7 +24,7 @@ COMPOSE  := docker compose -f deploy/car/compose.yaml --env-file deploy/car/.env
 .DEFAULT_GOAL := help
 .PHONY: help setup clean build flash monitor fw-image config models compiledb unit check-dev \
         ros-image ros-test ros-test-image ros-test-run ros-shell car-up car-down car-ps car-logs car-pull \
-        car-shutdown install-host teleop calibrate tune test rangefinder mcu unit-run \
+        car-shutdown install-host teleop calibrate tune test rangefinder viz lidar-imu mcu unit-run \
         _clean-build _need-config _need-stack _need-stack-down
 
 help:            ## list targets (grouped in README.md)
@@ -127,6 +127,13 @@ test: _need-stack  ## steering sweep + failsafe check (motor stays off, never ar
 
 rangefinder: _need-stack  ## live rangefinder feed: MCU timestamp, Pi time, range (Ctrl+C to exit)
 	$(COMPOSE) run --rm tools ros2 run rccar_calibration rangefinder_monitor
+
+viz: _need-stack  ## live websocket feed for Foxglove/Lichtblick on localhost:8765 (VS Code forwards it; Ctrl+C to exit)
+	@echo "viz: open ws://localhost:8765 in Foxglove or Lichtblick (VS Code Remote-SSH forwards port 8765)"
+	$(COMPOSE) run --rm tools ros2 launch rccar_bringup viz.launch.py
+
+lidar-imu: _need-stack  ## live Mapper IMU feed (heading, yaw rate, horizontal accel, speed) + logs/lidar_imu_*.jsonl (Ctrl+C to exit)
+	$(COMPOSE) run --rm tools ros2 run rccar_calibration lidar_imu_monitor
 
 mcu: _need-stack  ## one McuCommand to the ESP32, e.g. make mcu CMD="GET" (stack up; CMD: GET INFO PING SET ...; ARM refused)
 	@test -n "$(CMD)" || { echo 'usage: make mcu CMD="GET"'; exit 1; }
