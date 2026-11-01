@@ -69,7 +69,9 @@ services:
         condition: service_started
     environment:
       <<: *ros-env
-    volumes: *ros-mounts
+    # repo read-only only: the drivers never write tuning.toml or logs/
+    volumes:
+      - ${REPO_DIR:?run make config}:/ws/src/racecar:ro
     tmpfs:
       - /run/hb:size=1m,mode=1777
       - /tmp:size=128m,mode=1777

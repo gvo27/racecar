@@ -17,6 +17,12 @@ Software name "lidar"/"mapper"; model name only in datasheet docs. Docs: `docs/d
 - no ROS 2 driver exists (opensw_ros and slamware_ros_sdk are ROS 1): own stdlib-only driver; logic in `rccar_drivers/slamtec/*` (no rclpy), node = lifecycle wiring (`mapper_driver`).
 - all socket IO on one thread (no sharing the socket between callbacks/timers); reconnect with backoff; stamp on receive.
 
+## Viz bridge + TF
+- viz bridge is read-only; never enable clientPublish/services/parameters (would bypass the supervisor: a viewer could publish /rccar/mcu/drive or call /supervisor/arm). viz.launch.py sets `capabilities: [connectionGraph, assets]` and `^$` for client_topic/service/param whitelists (foxglove_bridge defaults are all `.*`); test_viz_launch.py asserts it.
+- REP-105 deviation: odom->base_link comes from the SLAM pose and may jump on relocalization/loop closure until a continuous odom source (wheel encoder/IMU) exists; then the driver should publish map->odom instead.
+- LaserScan.scan_time = polling period, stamp = receive time (device per-scan pose/timestamp not used yet).
+- map fetch is skipped (throttled warning) when the known area exceeds `map_max_cells` (default 4e6); `map_period_s` default 2.0. Device command errors (nonzero code) keep the link up; only socket/protocol errors reconnect (backoff reset by the first good scan).
+
 ## Bench-TBD (do not hide behind guessed values; defaults in code, not in tuning.toml)
 - `scan_angle_sign`, `map_transpose`, `map_free_is_high`: flip per the bench check (obstacle in front of the cap arrow must appear on +X, left on +Y; map not mirrored).
 - IMU `linear_acceleration` units (raw), gyro rad/s assumed.

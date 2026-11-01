@@ -6,8 +6,11 @@ only something already on the Pi. The laptop reaches it through an SSH port
 forward (VS Code Remote-SSH forwards localhost:8765 automatically), so the
 feed inherits SSH authentication instead of exposing an open websocket.
 Only car topics, TF, diagnostics and the URDF are served (whitelist).
-Read-only for the car: the bridge is never given a client-publish whitelist
-of command topics (the whitelist only matches what is advertised).
+Read-only for the car: foxglove_bridge defaults enable clientPublish,
+services and parameters with '.*' whitelists, which would let a viewer
+publish /rccar/mcu/drive (bypassing the supervisor) or call /supervisor/arm.
+So capabilities are limited to connectionGraph + assets, and the client-topic,
+service and parameter whitelists match nothing (defense in depth).
 
 Usage: ros2 launch rccar_bringup viz.launch.py [port:=8765] [address:=127.0.0.1]
 """
@@ -24,6 +27,9 @@ TOPIC_WHITELIST = [
     '^/diagnostics$',
     '^/robot_description$',
 ]
+# read-only: never add clientPublish / services / parameters (see drivers.md)
+CAPABILITIES = ['connectionGraph', 'assets']
+NOTHING = ['^$']
 
 
 def generate_launch_description():
@@ -41,6 +47,10 @@ def generate_launch_description():
                 'port': ParameterValue(LaunchConfiguration('port'), value_type=int),
                 'address': LaunchConfiguration('address'),
                 'topic_whitelist': TOPIC_WHITELIST,
+                'capabilities': CAPABILITIES,
+                'client_topic_whitelist': NOTHING,
+                'service_whitelist': NOTHING,
+                'param_whitelist': NOTHING,
                 'use_sim_time': ParameterValue(use_sim_time, value_type=bool),
             }],
         ),

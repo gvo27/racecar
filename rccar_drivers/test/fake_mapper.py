@@ -136,7 +136,7 @@ class FakeMapper:
             return
         cmd, rid = req['command'], req['request_id']
         if cmd in self.results:
-            result = dict(self.results[cmd], code=0)
+            result = {'code': 0, **self.results[cmd]}
         else:
             result = {'code': 1}
         out = b''

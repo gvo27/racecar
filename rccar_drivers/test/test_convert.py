@@ -1,5 +1,6 @@
 """Scan binning, occupancy mapping, quaternion helper."""
 import math
+import time
 
 import pytest
 
@@ -51,14 +52,14 @@ def test_map_to_grid_row_major():
     g = c.map_to_grid(m)
     assert (g.width, g.height, g.resolution) == (3, 2, 0.05)
     assert (g.origin_x, g.origin_y) == (-1.0, -2.0)
-    assert g.data == [-1, 100, 0, 0, -1, 100]
+    assert list(g.data) == [-1, 100, 0, 0, -1, 100]
 
 
 def test_map_to_grid_transpose():
     # x-major buffer: index = x * height + y
     m = MapData(3, 2, 0.05, 0.0, 0.0, bytes([0, 1, 255, 255, 0, 1]))
     g = c.map_to_grid(m, transpose=True)
-    assert g.data == [-1, 0, -1, 100, 0, 100]
+    assert list(g.data) == [-1, 0, -1, 100, 0, 100]
 
 
 def test_yaw_to_quat():
@@ -73,4 +74,29 @@ def test_free_is_high_false_swaps_meaning():
     assert c.cell_to_occupancy(255, free_is_high=False) == 100
     m = MapData(3, 2, 0.05, 0.0, 0.0, bytes([0, 1, 255, 255, 0, 1]))
     g = c.map_to_grid(m, free_is_high=False)
-    assert g.data == [-1, 0, 100, 100, -1, 0]
+    assert list(g.data) == [-1, 0, 100, 100, -1, 0]
+
+
+def test_map_to_grid_is_int8_array():
+    m = MapData(3, 2, 0.05, 0.0, 0.0, bytes([0, 1, 255, 255, 0, 1]))
+    assert c.map_to_grid(m).data.typecode == 'b'
+
+
+def test_map_to_grid_large_is_fast():
+    n = 2000
+    cells = bytes(range(256)) * (n * n // 256 + 1)
+    m = MapData(n, n, 0.05, 0.0, 0.0, cells[:n * n])
+    for transpose in (False, True):
+        t0 = time.perf_counter()
+        g = c.map_to_grid(m, transpose=transpose)
+        assert time.perf_counter() - t0 < 0.5
+        assert len(g.data) == n * n
+
+
+def test_map_to_grid_transpose_matches_naive():
+    w, h = 5, 3
+    cells = bytes([(i * 37) % 256 for i in range(w * h)])
+    m = MapData(w, h, 0.05, 0.0, 0.0, cells)
+    g = c.map_to_grid(m, transpose=True)
+    naive = [c.cell_to_occupancy(cells[x * h + y]) for y in range(h) for x in range(w)]
+    assert list(g.data) == naive

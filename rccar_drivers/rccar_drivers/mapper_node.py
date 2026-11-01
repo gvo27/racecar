@@ -7,24 +7,31 @@ worker's sink converts each decoded result and publishes it directly from that
 thread (rclpy publish is thread-safe), so no queue is needed and executor
 callbacks (timers for diagnostics + heartbeat) never touch the socket.
 
-Stamps are the node clock at receive time. IMU values are published raw:
+Stamps are the node clock at receive time, and LaserScan.scan_time is the
+polling period (1 / scan_rate_hz): the device's per-scan pose/timestamp is not
+used yet. IMU values are published raw:
 the acc unit (m/s^2 vs g) is bench-TBD (see slamtec.protocol docstring).
 
 TF: map->odom identity (static, once on activate); odom->base_link = Mapper pose
 of the lidar composed with the inverse of base_link->lidar_link (looked up from
 TF, published by robot_state_publisher). Skipped while that lookup fails.
 Planar only: z, roll and pitch of the extrinsic are ignored.
+REP-105 deviation: odom->base_link comes from the SLAM pose, so it can jump on
+relocalization or loop closure until a continuous odom source (wheel encoder,
+IMU) exists; then this driver should publish map->odom instead.
 """
 from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus, KeyValue
 from geometry_msgs.msg import PoseStamped, TransformStamped
 from nav_msgs.msg import OccupancyGrid
 from rccar_drivers.heartbeat import touch
 from rccar_drivers.slamtec import convert
-from rccar_drivers.slamtec.diagnostics import link_level
+from rccar_drivers.slamtec.diagnostics import link_level, SCAN_FRESH_S
 from rccar_drivers.slamtec.frames import odom_to_base
+from rccar_drivers.slamtec.params import check_params
 from rccar_drivers.slamtec.protocol import MapperClient
 from rccar_drivers.slamtec.vehicle_state import quat_to_yaw
 from rccar_drivers.slamtec.worker import MapperWorker
+from rcl_interfaces.msg import ParameterDescriptor
 import rclpy
 from rclpy.duration import Duration
 from rclpy.executors import ExternalShutdownException, SingleThreadedExecutor
@@ -38,14 +45,14 @@ from tf2_ros import TransformException, TransformListener
 
 MAP_QOS = QoSProfile(depth=1, reliability=ReliabilityPolicy.RELIABLE,
                      durability=DurabilityPolicy.TRANSIENT_LOCAL)
-SCAN_FRESH_S = 2.0  # heartbeat only while a scan arrived this recently
 HB_PERIOD_S = 0.5
 
 # name -> default; every one is a ROS parameter (not in tuning.toml: unconfirmed)
 PARAMS = {
     'host': '192.168.11.1', 'port': 1445, 'timeout_s': 1.0,
     'scan_rate_hz': 10.0, 'imu_rate_hz': 50.0, 'pose_rate_hz': 10.0,
-    'map_period_s': 1.0, 'health_period_s': 1.0, 'reconnect_max_s': 5.0,
+    'map_period_s': 2.0, 'health_period_s': 1.0, 'reconnect_max_s': 5.0,
+    'map_max_cells': 4_000_000,
     'n_bins': 1080, 'range_min': 0.15, 'range_max': 40.0,
     'scan_angle_sign': 1.0, 'map_transpose': False, 'map_free_is_high': True,
     'map_frame': 'map', 'odom_frame': 'odom', 'base_frame': 'base_link',
@@ -119,7 +126,7 @@ class _RosSink:
         msg.info.origin.position.x = g.origin_x
         msg.info.origin.position.y = g.origin_y
         msg.info.origin.orientation.w = 1.0
-        msg.data = g.data
+        msg.data = g.data  # array('b'): rclpy fast path
         n.pub_map.publish(msg)
 
 
@@ -128,8 +135,11 @@ class MapperDriver(Node):
 
     def __init__(self, **kwargs):
         super().__init__('mapper_driver', **kwargs)
+        # dynamic typing: launch may pass ints for double params (range_max:=40);
+        # check_params casts by the default's type
+        desc = ParameterDescriptor(dynamic_typing=True)
         for key, default in PARAMS.items():
-            self.declare_parameter(key, default)
+            self.declare_parameter(key, default, desc)
         # NB: no attribute names that shadow rclpy.Node internals (see ros2.md)
         self.cfg = dict(PARAMS)
         self.pub_scan = self.pub_imu = self.pub_pose = None
@@ -141,7 +151,13 @@ class MapperDriver(Node):
 
     # -- lifecycle ----------------------------------------------------------
     def on_configure(self, state):
-        self.cfg = {k: self.get_parameter(k).value for k in PARAMS}
+        raw = {k: self.get_parameter(k).value for k in PARAMS}
+        cfg, errors = check_params(raw, PARAMS)
+        if errors:
+            for err in errors:
+                self.get_logger().error(f'invalid parameter: {err}')
+            return TransitionCallbackReturn.FAILURE
+        self.cfg = cfg
         c = self.cfg
         self.pub_scan = self.create_lifecycle_publisher(
             LaserScan, '/rccar/lidar/scan', qos_profile_sensor_data)
@@ -163,7 +179,8 @@ class MapperDriver(Node):
             {'scan': 1.0 / c['scan_rate_hz'], 'imu': 1.0 / c['imu_rate_hz'],
              'pose': 1.0 / c['pose_rate_hz'], 'map': c['map_period_s'],
              'health': c['health_period_s']},
-            reconnect_max_s=float(c['reconnect_max_s']), log=self._log)
+            reconnect_max_s=float(c['reconnect_max_s']), log=self._log,
+            map_max_cells=int(c['map_max_cells']))
         # Not fatal: the Mapper needs ~40 s to boot; the worker keeps retrying.
         if not self._worker.connect_once():
             self.get_logger().warning(
@@ -174,7 +191,9 @@ class MapperDriver(Node):
         if self.cfg['publish_tf'] and self._tf_static is None:
             self._tf_static = StaticTransformBroadcaster(self)
             self._tf_static.sendTransform(self._identity_tf())
-        self._worker.start()
+        if not self._worker.start():
+            self.get_logger().error('previous IO thread still running; cannot activate')
+            return TransitionCallbackReturn.FAILURE
         self._diag_timer = self.create_timer(
             float(self.cfg['health_period_s']), self._publish_diagnostics)
         self._hb_timer = self.create_timer(HB_PERIOD_S, self._beat)
@@ -208,18 +227,32 @@ class MapperDriver(Node):
         for name in ('pub_scan', 'pub_imu', 'pub_pose', 'pub_map', 'pub_diag'):
             pub = getattr(self, name)
             if pub is not None:
-                self.destroy_publisher(pub)
+                self.destroy_lifecycle_publisher(pub)
                 setattr(self, name, None)
         if self._tf_listener is not None:
             self._tf_listener.unregister()
-        self._tf_listener = self._tf_buf = self._tf_dyn = None
+        self._tf_listener = self._tf_buf = None
+        for name in ('_tf_dyn', '_tf_static'):
+            bc = getattr(self, name)
+            if bc is not None:
+                self.destroy_publisher(bc.pub_tf)
+                setattr(self, name, None)
 
     def stop_io(self):
         """Stop the IO thread (process exit path)."""
         self._stop_io()
 
     def _log(self, level, text):
-        getattr(self.get_logger(), {'warn': 'warning'}.get(level, level))(text)
+        # one call site per severity: rclpy forbids changing severity at a call site
+        log = self.get_logger()
+        if level == 'error':
+            log.error(text)
+        elif level == 'warn':
+            log.warning(text)
+        elif level == 'debug':
+            log.debug(text)
+        else:
+            log.info(text)
 
     # -- TF -------------------------------------------------------------------
     def _identity_tf(self):
@@ -260,7 +293,7 @@ class MapperDriver(Node):
         if self._worker is None or self.pub_diag is None:
             return
         up, version, health, temp, age = self._worker.snapshot()
-        level, message = link_level(up, health)
+        level, message = link_level(up, health, age)
         st = DiagnosticStatus()
         st.level = bytes([level])
         st.name = 'mapper_driver: link'

@@ -73,7 +73,7 @@ ros-test-run:    ## run colcon test in an already built test image; results in b
 
 ros-test: ros-test-image ros-test-run  ## build the test image + colcon test + test-result (no hardware)
 
-car-up: config   ## render config, start mcu-agent + core (docker compose up -d)
+car-up: config   ## render config, start mcu-agent + core + drivers (docker compose up -d)
 	$(COMPOSE) up -d
 	@echo "car-up: check health with: make car-ps   logs: make car-logs"
 

@@ -27,7 +27,7 @@ Every service:
 - serial: `devices: [${ESP32_DEVICE}]` (udev symlink /dev/rccar-esp32) + `group_add: [dialout gid]`
 
 ## drivers service (phase 4, lidar)
-- `drivers` runs `rccar_bringup drivers.launch.py` (mapper_driver + robot_state_publisher). No `devices`, no `cap_add`; same hardening/logging anchors as core. Talks to the Mapper over wlan0 (host network).
+- `drivers` runs `rccar_bringup drivers.launch.py` (mapper_driver + robot_state_publisher). No `devices`, no `cap_add`; same hardening/logging anchors as core. Mounts only the repo read-only (`${REPO_DIR}:/ws/src/racecar:ro`), NOT `*ros-mounts`: no rw tuning.toml, no logs/. Talks to the Mapper over wlan0 (host network).
 - healthcheck = heartbeat file, touched only while scans flow; unhealthy when the Mapper is off is expected and does not affect core/mcu-agent.
 - `MAPPER_HOST` env override (default 192.168.11.1) for the Ethernet fallback; not in `.env`/`tuning.toml` until the bench confirms the address.
 

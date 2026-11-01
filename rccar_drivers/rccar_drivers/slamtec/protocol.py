@@ -21,12 +21,16 @@ class MapperError(Exception):
     """Protocol or device error."""
 
 
+class MapperCommandError(MapperError):
+    """The device answered with a nonzero result code; the link is fine."""
+
+
 class MapperTimeout(MapperError):
     """No (matching) response within the socket timeout."""
 
 
 class MapperClient:
-    """Synchronous request/response client; any error closes the socket."""
+    """Synchronous request/response client; link errors close the socket."""
 
     def __init__(self, host, port=1445, timeout_s=1.0,
                  sock_factory=socket.create_connection):
@@ -102,8 +106,11 @@ class MapperClient:
                     raise MapperError('%s: no result' % command)
                 code = result.get('code', 0)
                 if code != 0:
-                    raise MapperError('%s failed: code %s' % (command, code))
+                    raise MapperCommandError(
+                        '%s failed: code %s' % (command, code))
                 return result
+        except MapperCommandError:
+            raise  # complete answer consumed: the socket stays usable
         except socket.timeout as e:
             self.close()
             raise MapperTimeout('%s timed out' % command) from e
@@ -173,15 +180,24 @@ class MapData:
     cells: bytes = field(repr=False, default=b'')
 
 
-def decode_map(result):
-    """Build MapData from a getmapdata result, validating the cell count."""
+def decode_map(result, origin=None):
+    """
+    Build MapData from a getmapdata result, validating the cell count.
+
+    origin: (x, y) of the requested area, used when the result lacks
+    real_x/real_y. Without either the map is rejected (never a silent 0).
+    """
     try:
         width = int(result['dimension_x'])
         height = int(result['dimension_y'])
         cells = rle_inflate(result['map_data'])
         res = float(result['resolution'])
-        ox = float(result.get('real_x', 0.0))
-        oy = float(result.get('real_y', 0.0))
+        if 'real_x' in result and 'real_y' in result:
+            ox, oy = float(result['real_x']), float(result['real_y'])
+        elif origin is not None:
+            ox, oy = float(origin[0]), float(origin[1])
+        else:
+            raise KeyError('real_x/real_y')
     except (KeyError, TypeError, ValueError) as e:
         raise MapperError('bad map result: %r' % (e,)) from e
     if width < 0 or height < 0 or len(cells) < width * height:

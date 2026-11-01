@@ -179,11 +179,11 @@ def test_client_timeout_closes():
         s.stop()
 
 
-def test_client_unknown_command_error_closes(server):
+def test_client_unknown_command_error_keeps_socket(server):
     c = client_for(server)
-    with pytest.raises(p.MapperError):
+    with pytest.raises(p.MapperCommandError):
         c.call('nonsense')
-    assert not c.connected
+    assert c.connected
 
 
 def test_client_link_drop(server):
@@ -215,3 +215,42 @@ def test_request_id_wraps():
     assert c._new_id() == p.MAX_REQUEST_ID
     assert c._new_id() == 1
     assert math.isfinite(c._new_id())
+
+
+def test_decode_map_origin_fallback():
+    res = {'dimension_x': 4, 'dimension_y': 3, 'resolution': 0.05,
+           'map_data': rle_deflate(bytes(12))}
+    m = p.decode_map(res, origin=(-1.5, 2.5))
+    assert (m.origin_x, m.origin_y) == (-1.5, 2.5)
+
+
+def test_decode_map_missing_origin_without_fallback_raises():
+    res = {'dimension_x': 4, 'dimension_y': 3, 'resolution': 0.05,
+           'map_data': rle_deflate(bytes(12))}
+    with pytest.raises(p.MapperError):
+        p.decode_map(res)
+
+
+def test_decode_map_real_origin_wins_over_fallback():
+    res = {'dimension_x': 1, 'dimension_y': 1, 'resolution': 0.05,
+           'real_x': 3.0, 'real_y': 4.0, 'map_data': rle_deflate(bytes(1))}
+    m = p.decode_map(res, origin=(9.0, 9.0))
+    assert (m.origin_x, m.origin_y) == (3.0, 4.0)
+
+
+def test_command_error_keeps_socket_open():
+    srv = FakeMapper(results={'getmapdata': {'code': 7}})
+    try:
+        c = p.MapperClient('127.0.0.1', srv.port, timeout_s=0.5)
+        c.connect()
+        with pytest.raises(p.MapperCommandError):
+            c.call('getmapdata')
+        assert c.connected
+        assert c.call('getsdpversion')['sdp_version'] == 'fake-1.0'
+        c.close()
+    finally:
+        srv.stop()
+
+
+def test_command_error_is_a_mapper_error():
+    assert issubclass(p.MapperCommandError, p.MapperError)

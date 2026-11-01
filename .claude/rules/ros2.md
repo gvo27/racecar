@@ -15,11 +15,11 @@ paths:
 | /rccar/rangefinder/range | sensor_msgs/Range | esp32 (fake_mcu in tests) | best_effort | rangefinder_monitor, any |
 | /rccar/lidar/scan | sensor_msgs/LaserScan (frame lidar_link, ~10 Hz) | rccar_drivers mapper_driver | best_effort (sensor_data) | viz, any |
 | /rccar/lidar/imu | sensor_msgs/Imu (frame lidar_imu_link, ~50 Hz; accel units raw/bench-TBD, gyro rad/s assumed) | mapper_driver | best_effort | lidar_imu_monitor, any |
-| /rccar/mapper/pose | geometry_msgs/PoseStamped (frame map, ~10 Hz) | mapper_driver | best_effort | lidar_imu_monitor, any |
-| /rccar/mapper/map | nav_msgs/OccupancyGrid (~1 Hz) | mapper_driver | reliable + transient_local depth 1 | viz, any |
+| /rccar/mapper/pose | geometry_msgs/PoseStamped (pose of lidar_link in map, ~10 Hz) | mapper_driver | best_effort | lidar_imu_monitor, any |
+| /rccar/mapper/map | nav_msgs/OccupancyGrid (~0.5 Hz, map_period_s 2.0) | mapper_driver | reliable + transient_local depth 1 | viz, any |
 | /diagnostics | diagnostic_msgs/DiagnosticArray (status 'mapper_driver: link') | mapper_driver | default | any |
 | /rccar/supervisor/state | SupervisorState | supervisor | reliable + transient_local depth 1 | teleop, UIs |
-- TF: map->odom identity (static); odom->base_link from the Mapper SLAM pose; robot_state_publisher publishes base_link->lidar_link->lidar_imu_link (rccar_description).
+- TF: map->odom identity (static); odom->base_link from the Mapper SLAM pose (REP-105 deviation: it can jump on relocalization/loop closure until a continuous odom source (wheel encoder/IMU) exists; then the driver should publish map->odom instead); robot_state_publisher publishes base_link->lidar_link->lidar_imu_link (rccar_description).
 - services: /supervisor/{arm,disarm,brake}; /mcu_bridge/{set_param,cal_point,raw_pwm,save,get,info,push_tuning}; /rccar/mcu/command (McuCommand, esp32).
 - names: `/rccar/<area>/<stream>`, snake_case, no hardcoded absolute names inside libraries. Standard msgs before custom ones; units SI/REP-103 (rad, + = left).
 - freshness beats delivery for commands (best effort, timeout at consumer); events/state must not be lost (reliable).

@@ -1,4 +1,5 @@
 """Pure converters from decoded Slamtec data to plain values (no rclpy)."""
+from array import array
 from collections import namedtuple
 import math
 
@@ -42,25 +43,31 @@ def cell_to_occupancy(u8, free_is_high=True):
     return 0 if (u8 >= 128) == free_is_high else 100
 
 
-_LUTS = {True: [cell_to_occupancy(v, True) for v in range(256)],
-         False: [cell_to_occupancy(v, False) for v in range(256)]}
+def _lut(free_is_high):
+    """256-byte table: raw cell -> OccupancyGrid value as an unsigned byte (-1 -> 255)."""
+    return bytes(cell_to_occupancy(v, free_is_high) & 0xFF for v in range(256))
+
+
+_LUTS = {True: _lut(True), False: _lut(False)}
 
 
 def map_to_grid(m, transpose=False, free_is_high=True):
     """
-    Convert MapData to OccupancyGrid arrays.
+    Convert MapData to OccupancyGrid arrays (data is array('b'), int8).
 
     Default assumes row-major with x fastest (index = y * width + x). With
     transpose=True the buffer is read as x-major (index = x * height + y),
     for the case where the bench shows the orientation is flipped.
+    Uses bytes.translate with a LUT: C speed, no per-cell Python loop.
     """
     w, h = m.width, m.height
-    cells = m.cells
-    lut = _LUTS[bool(free_is_high)]
+    cells = bytes(m.cells)
     if transpose:
-        data = [lut[cells[x * h + y]] for y in range(h) for x in range(w)]
+        # row y = cells[y], cells[y + h], ... (x = 0..w-1)
+        raw = b''.join(cells[y:w * h:h] for y in range(h))
     else:
-        data = [lut[c] for c in cells[:w * h]]
+        raw = cells[:w * h]
+    data = array('b', raw.translate(_LUTS[bool(free_is_high)]))
     return GridArrays(w, h, m.resolution, m.origin_x, m.origin_y, data)
 
 

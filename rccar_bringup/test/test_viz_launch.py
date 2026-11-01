@@ -65,3 +65,29 @@ class TestViz(unittest.TestCase):
                 err = exc
                 time.sleep(0.2)
         self.fail(f'foxglove_bridge did not open 127.0.0.1:{PORT}: {err}')
+
+    def test_bridge_is_read_only(self):
+        """Capabilities exclude clientPublish/services/parameters (would bypass the supervisor)."""
+        from rcl_interfaces.srv import GetParameters
+        import rclpy
+        rclpy.init()
+        node = rclpy.create_node('viz_param_probe')
+        try:
+            cli = node.create_client(GetParameters, '/foxglove_bridge/get_parameters')
+            self.assertTrue(cli.wait_for_service(timeout_sec=20.0), 'no parameter service')
+            req = GetParameters.Request()
+            req.names = ['capabilities', 'client_topic_whitelist',
+                         'service_whitelist', 'param_whitelist']
+            fut = cli.call_async(req)
+            rclpy.spin_until_future_complete(node, fut, timeout_sec=10.0)
+            self.assertTrue(fut.done(), 'get_parameters timed out')
+            caps, client_wl, service_wl, param_wl = [
+                list(v.string_array_value) for v in fut.result().values]
+        finally:
+            node.destroy_node()
+            rclpy.shutdown()
+        for forbidden in ('clientPublish', 'services', 'parameters', 'parametersSubscribe'):
+            self.assertNotIn(forbidden, caps)
+        self.assertEqual(client_wl, ['^$'])
+        self.assertEqual(service_wl, ['^$'])
+        self.assertEqual(param_wl, ['^$'])
