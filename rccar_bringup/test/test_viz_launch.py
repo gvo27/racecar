@@ -20,12 +20,18 @@ from launch.launch_description_sources import (  # noqa: E402,I100,I201,I202
 import launch_testing  # noqa: E402,I100,I201,I202
 import launch_testing.actions  # noqa: E402,I100,I201,I202
 
-try:
-    from ament_index_python.packages import get_package_prefix
-    get_package_prefix('foxglove_bridge')
-except Exception:
-    pytest.skip('foxglove_bridge not installed (rosdep installs it in CI)',
-                allow_module_level=True)
+
+def _have_bridge():
+    try:
+        from ament_index_python.packages import get_package_prefix
+        get_package_prefix('foxglove_bridge')
+        return True
+    except Exception:
+        return False
+
+
+# no module-level skip: it hides every other test of the package from colcon's pytest run
+HAVE_BRIDGE = _have_bridge()
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 LAUNCH = os.path.join(HERE, '..', 'launch', 'viz.launch.py')
@@ -34,6 +40,8 @@ PORT = 18765
 
 @pytest.mark.launch_test
 def generate_test_description():
+    if not HAVE_BRIDGE:
+        return launch.LaunchDescription([launch_testing.actions.ReadyToTest()])
     return launch.LaunchDescription([
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(LAUNCH),
@@ -42,6 +50,7 @@ def generate_test_description():
     ])
 
 
+@unittest.skipUnless(HAVE_BRIDGE, 'foxglove_bridge not installed (rosdep installs it in CI)')
 class TestViz(unittest.TestCase):
     """The bridge listens on localhost."""
 
