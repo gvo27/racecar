@@ -31,6 +31,8 @@ Every service:
 - healthcheck = heartbeat file, touched only while scans flow; unhealthy when the Mapper is off is expected and does not affect core/mcu-agent.
 - `MAPPER_HOST` env override (default 192.168.11.1) for the Ethernet fallback; not in `.env`/`tuning.toml` until the bench confirms the address.
 
+- `make drivers-stop` / `drivers-start` / `lidar-hw-test`: see `.claude/rules/hw-testing.md`; `make ros-image` refuses while `drivers` runs.
+
 ## Host files (installed by `make install-host`, prints each step)
 - `deploy/car/99-rccar.rules` -> /etc/udev/rules.d (CH343 1a86:55d3 -> /dev/rccar-esp32, group dialout, 0660)
 - `deploy/car/rccar.service` -> /etc/systemd/system with @REPO_DIR@ and @USER@ substituted; oneshot `compose up -d` at boot, `down` at stop. Does not pull or build.

@@ -21,10 +21,10 @@ import launch
 from launch.actions import EmitEvent, RegisterEventHandler
 from launch.event_handlers import OnProcessStart
 from launch.events import matches_action
-import launch_testing.actions
 from launch_ros.actions import LifecycleNode, Node
 from launch_ros.event_handlers import OnStateTransition
 from launch_ros.events.lifecycle import ChangeState
+import launch_testing.actions
 from lifecycle_msgs.msg import Transition
 from rccar_drivers import hw_criteria as hc
 from rccar_drivers.mapper_node import PARAMS
@@ -79,8 +79,8 @@ class TestMapperHardware(unittest.TestCase):
     def setUpClass(cls):
         from diagnostic_msgs.msg import DiagnosticArray
         from nav_msgs.msg import OccupancyGrid
-        from sensor_msgs.msg import Imu, LaserScan
         from geometry_msgs.msg import PoseStamped
+        from sensor_msgs.msg import Imu, LaserScan
         from tf2_ros import Buffer, TransformListener
         print('\n' + PRECONDITIONS)
         rclpy.init()

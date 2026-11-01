@@ -176,7 +176,7 @@ def eval_pose_drift(poses, max_m=POSE_MAX_DRIFT_M, max_deg=POSE_MAX_DRIFT_DEG):
 
 
 def eval_map_received(grid, timeout_s=MAP_TIMEOUT_S):
-    """grid = dict(t, width, height, resolution, data) or None; t = seconds to first map."""
+    """Map arrived in time and non-empty; grid = dict(t, width, height, ...) or None."""
     if grid is None:
         return False, 'no OccupancyGrid within %.0f s' % timeout_s
     ok = grid['t'] <= timeout_s and grid['width'] > 0 and grid['height'] > 0

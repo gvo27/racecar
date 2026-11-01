@@ -30,4 +30,4 @@ Software name "lidar"/"mapper"; model name only in datasheet docs. Docs: `docs/d
 - `calibration` (lidar_imu_monitor) must not import rccar_drivers; the quaternion/speed math is duplicated on purpose.
 
 ## Verify
-`make ros-test` (protocol, convert, fake-Mapper launch test, viz launch test). Hardware behavior = user bench (PR body checklist); never claim it without output.
+`make ros-test` (protocol, convert, fake-Mapper launch test, viz launch test). Hardware: `make lidar-hw-test` (agent-run on the Pi, `.claude/rules/hw-testing.md`) then user bench (PR body checklist); never claim it without output.
