@@ -9,6 +9,8 @@ setup(
     data_files=[
         ('share/ament_index/resource_index/packages', ['resource/rccar_drivers']),
         ('share/' + package_name, ['package.xml']),
+        # hardware acceptance test (make lidar-hw-test); not run by colcon test
+        ('share/' + package_name + '/test_hw', ['test_hw/test_mapper_hw.py']),
     ],
     install_requires=['setuptools'],
     zip_safe=True,

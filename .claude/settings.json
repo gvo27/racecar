@@ -1,13 +1,24 @@
 {
   "extraKnownMarketplaces": {
     "claude-plugins-official": {
-      "source": { "source": "github", "repo": "anthropics/claude-plugins-official" }
+      "source": {
+        "source": "github",
+        "repo": "anthropics/claude-plugins-official"
+      }
     },
     "embedded-skills": {
-      "source": { "source": "github", "repo": "rovinax/embedded-skills", "ref": "master" }
+      "source": {
+        "source": "github",
+        "repo": "rovinax/embedded-skills",
+        "ref": "master"
+      }
     },
     "ros2-engineering-skills": {
-      "source": { "source": "github", "repo": "dbwls99706/ros2-engineering-skills", "ref": "v1.7.2" }
+      "source": {
+        "source": "github",
+        "repo": "dbwls99706/ros2-engineering-skills",
+        "ref": "v1.7.2"
+      }
     }
   },
   "enabledPlugins": {
@@ -17,5 +28,38 @@
     "embedded-skills@embedded-skills": true,
     "ros2-engineering@ros2-engineering-skills": true
   },
-  "enabledMcpjsonServers": ["context7"]
+  "enabledMcpjsonServers": [
+    "context7"
+  ],
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/hw_guard.py\""
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/hw_guard.py\""
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "ask": [
+      "Bash(make car-up*)",
+      "Bash(make drivers-start*)",
+      "Bash(make install-host*)",
+      "Bash(make flash*)",
+      "Bash(make car-shutdown*)"
+    ]
+  }
 }

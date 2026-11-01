@@ -1,6 +1,7 @@
 firmware/esp32/.pio/
 __pycache__/
 logs/*.jsonl
+logs/hw_test_*.json
 .env
 models/cache/
 firmware/esp32/compile_commands.json
