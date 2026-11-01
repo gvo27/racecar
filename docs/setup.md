@@ -147,9 +147,14 @@ Software name: *lidar* (topics `/rccar/lidar/*`, `/rccar/mapper/*`). Datasheet d
 
 **Power and wiring (power off; nothing here is bench-verified).**
 - Load: 4.8-12 V, ~0.75 A typical, 1.3 A max running, 1.6 A at start-up, ripple <= 50 mV.
-- Source: the `+5V_SENS` rail of the power board (branch `schematic`) through a spare 2-pin JST-XH header (J11-J14): pin 1 `+5V_SENS` (red), pin 2 GND (black). Rail ground is common with the car ground.
+- Source: the `+5V_SENS` rail of the power board (branch `schematic`) through a spare 2-pin JST-XH header (J11-J14): pin 1 `+5V_SENS`, pin 2 GND. Rail ground is common with the car ground.
+- Harness: the Mapper's "5V DC" input is a standard USB-A socket right beside the Ethernet (RJ45) port. Take a 1 ft 22 AWG 3 A USB-A male 2-wire pigtail (a second-hand unit may lack the kit cable) and crimp an XHP-2 housing onto its bare ends: XH pin 1 `+5V_SENS` to red, pin 2 GND to black. Then plug the USB-A end into the Mapper's "5V DC" socket. Only USB pins 1 (VBUS) and 4 (GND) are used; no data lines.
 - Not from the Pi USB ports: without a USB-PD 5 A supply the Pi limits USB to 600 mA total (1.6 A shared with `usb_max_current_enable=1`), and the Pi's own regulator is already fully used by the Pi. The raw 2S battery (6-8.4 V) is in the voltage range but ESC/motor noise breaks the ripple limit; regulate.
-- The kit's 1 ft 22 AWG 3 A USB pigtail is electrically sufficient (~0.6 m round trip x 53 mohm/m = ~32 mohm, ~50 mV drop at 1.6 A) but its USB-A plug does not mate with the XH header. Re-terminate the kit's 2-pin housing lead onto an XHP-2 housing instead: red to +, black to GND. Verify polarity with a multimeter before connecting.
+- The pigtail is electrically sufficient (3 A rating vs 1.6 A start-up; ~0.6 m round trip x 53 mohm/m = ~32 mohm, ~50 mV drop at 1.6 A, so ~4.95 V at the Mapper, above the 4.8 V minimum).
+- Before first connection (power off), with a multimeter: (1) check the pigtail colors against the plug, since cheap pigtails sometimes swap them: continuity from USB pin 1 (VBUS) to red and pin 4 (GND) to black; (2) with the Mapper unpowered and the pigtail unplugged, measure across the Mapper socket's pins 1 and 4 to confirm the port is not sourcing voltage.
+- First power-up: if you have a bench supply, set 5.0 V with about a 2 A current limit. Expect about 1.5 A at start-up falling to about 0.75 A, and the head spinning within about 40 s. Then move the connection to `+5V_SENS`.
+- Feed 5 V only. The datasheet allows up to 12 V, but we stay at the USB/`+5V_SENS` level. Never power it from a Pi USB port, and never straight from the 2S pack (ripple must be <= 50 mV).
+- This socket is a power input only, not a USB data port.
 - Mounting: M2.5 bottom screws no longer than 6 mm, tilt within +-3 deg, <= 2 m/s while mapping, the arrow on the cap is +X (forward).
 - Allow ~40 s after power-up until it spins steadily.
 

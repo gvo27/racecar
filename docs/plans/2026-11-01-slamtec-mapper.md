@@ -33,15 +33,15 @@ The real Wi‑Fi costs are latency jitter (5–50 ms spikes) and dropouts. Mitig
 
 **Power and wiring:**
 - The Mapper takes 4.8–12 V, starts at up to 1.6 A, and runs at about 0.75 A typical. Ripple must stay at 50 mV or less.
-- The only wire it needs is power to its 2‑pin "5V DC" receptacle. Data goes over Wi‑Fi. Nothing connects to the ESP32 or the GPIO header.
+- The only wire it needs is power to its "5V DC" input, a standard USB‑A socket beside the RJ45 port (corrected; earlier drafts said a 2‑pin receptacle). Data goes over Wi‑Fi. Nothing connects to the ESP32 or the GPIO header.
 - **Do not power it from the Pi 5 USB ports.** Without a USB‑PD 5 A supply (the Pololu isn't PD), the Pi caps USB at 600 mA total. Even with `usb_max_current_enable=1` the cap is 1.6 A shared, and the Pololu D36V50F5 (5.5 A) is already fully used by the Pi's 5 A.
-- Per the "sensors on separate rail, common ground" invariant: add a **second regulator** from the 2S LiPo as the sensor rail. For example, a second Pololu D36V50F5 or a smaller 5 V ≥3 A buck. Add a USB‑A female breakout or wire it straight to the 2‑pin plug, and tie the grounds together.
+- Per the "sensors on separate rail, common ground" invariant: add a **second regulator** from the 2S LiPo as the sensor rail. For example, a second Pololu D36V50F5 or a smaller 5 V ≥3 A buck. Feed it from `+5V_SENS` via the USB‑A male pigtail (below), and tie the grounds together.
 - Direct 2S battery (6–8.4 V) is inside the voltage range, but ESC/motor noise breaks the 50 mV ripple limit. Regulate.
 - **The 1 ft 22AWG 3 A pigtail is electrically sufficient.**
   - Round‑trip resistance is about 0.6 m × 53 mΩ/m ≈ 32 mΩ, so the drop is ≈50 mV at 1.6 A. That stays above 4.8 V from a 5.0 V source.
   - Its rated 3 A is more than the 1.6 A peak.
-  - But it only solves the conductor: it needs a USB‑A female source that can supply 2 A, and its bare end needs the Mapper's 2‑pin housing.
-  - Simplest route: reuse or cut the kit cable's 2‑pin end and splice it to the pigtail, with red to + and black to GND. Check polarity with a multimeter before connecting.
+  - **Corrected:** the pigtail's USB‑A male plugs straight into the Mapper's "5V DC" USB‑A socket. Crimp an XHP‑2 onto its bare ends (red to pin 1 `+5V_SENS`, black to pin 2 GND). No kit-cable splicing is needed.
+  - Multimeter-check the pigtail colors (USB pin 1 red, pin 4 black) and that the Mapper port is not sourcing voltage before first connection. First power-up ideally from a bench supply at 5.0 V, about 2 A limit.
 - Mount: keep the M2.5 bottom screws ≤6 mm long, keep tilt within ±3°, and keep the speed at 2 m/s or less while mapping.
 
 **Semantic SLAM path:**
@@ -130,7 +130,7 @@ The real Wi‑Fi costs are latency jitter (5–50 ms spikes) and dropouts. Mitig
   - The Mapper M2M1 load is 4.8–12 V, 0.75 A typical / 1.3 A max running / 1.6 A startup, with ripple ≤50 mV. It isn't in the `+5V_SENS` budget, which is 3.3 A TBD against a 4 A buck. Adding it takes running current to about 4.0–4.6 A worst case, so the buck rating should be revisited, maybe 5–6 A.
   - Suggested connection: a spare 2‑pin XH header (J11–J14), pin 1 +5V_SENS red, pin 2 GND black.
   - The 22AWG lead and the XH 3 A/pin rating are fine for 1.6 A.
-  - The kit cable's 2‑pin housing is re‑terminated onto XHP‑2.
+  - Corrected: crimp XHP‑2 onto the bare ends of a USB‑A male 22AWG pigtail (red to +, black to GND); its USB‑A plug goes into the Mapper's "5V DC" USB‑A socket.
 - The draft PR body also gets the same wiring summary.
 
 ## Process

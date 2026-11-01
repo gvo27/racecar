@@ -33,6 +33,7 @@ Software name "lidar"/"mapper"; model name only in datasheet docs. Docs: `docs/d
 - lidar is never in the stop path; link loss => diagnostics ERROR/stale + reconnect, supervisor/core unaffected.
 - `drivers` container separate from core (crash isolation); no devices, no cap_add.
 - sensors on separate power rail (`+5V_SENS`), common ground; the lidar needs no ESP32 pin.
+- lidar power: `+5V_SENS` XH header (J11-J14) -> XHP-2 -> USB-A male 2-wire pigtail (red=+, black=GND) -> the Mapper's USB-A "5V DC" socket (power input only, no data); 5 V only, never from Pi USB.
 - `calibration` (lidar_imu_monitor) must not import rccar_drivers; the quaternion/speed math is duplicated on purpose.
 
 ## Verify

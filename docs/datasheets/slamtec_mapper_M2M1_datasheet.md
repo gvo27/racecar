@@ -60,14 +60,14 @@ Modulated pulsed IR rejects ambient light. Works indoors and outdoors, but avoid
 | Current, 5 V, running | – | 750 mA | 1300 mA | ≈ 3.75 W typ |
 | PoE | IEEE 802.3at Type 2 (Pro kit) | | | |
 
-Kit power cable: 1.5 m, **USB‑A male → 2‑pin wire‑to‑board housing** [DS fig 2‑6]. A USB port must supply ≥ 1.5 A at startup, so use a ≥ 2 A USB charger rather than a PC port.
+Kit power cable: 1.5 m, **USB‑A male (into the Mapper) ↔ 2‑pin housing (supply side)** [DS fig 2‑6]; direction inferred from fig 2‑5 (the Mapper's 5V DC port is USB‑A) [INF]. Second-hand units may lack it; a USB‑A male pigtail works (see `docs/setup.md` Lidar). A USB port must supply ≥ 1.5 A at startup, so use a ≥ 2 A USB charger rather than a PC port.
 
 ## 5. Interfaces & pinouts
 
 ### 5.1 External connectors (on the Data Processing Unit) [DS fig 2‑5]
 | Connector | Function | Notes |
 |---|---|---|
-| "5V DC" | Power in | 2‑pin wire‑to‑board receptacle that mates with the kit cable. Standard colors: red = +V, black = GND [INF]. 4.8–12 V |
+| "5V DC" | Power in | Standard USB‑A receptacle beside the RJ45 [DS fig 2‑5 label; user-observed]. Power input only: VBUS (pin 1) = +V, GND (pin 4); D+/D− unused. 4.8–12 V (feed 5 V only) |
 | RJ45 "Ethernet" | 10/100BASE‑TX (802.3/802.3u), PoE 802.3at Type 2 | standard pinout below |
 | "Connection" (side) | Internal link to the lidar head | 0.3 m multi‑wire jumper; see 5.3 |
 | Wi‑Fi (internal) | 802.11 a/b/g/n/ac, dual‑mode AP/Station | |
@@ -251,6 +251,7 @@ Validated: `parse_scan` reproduces opensw's expected output exactly on all 24 ca
 4. After ~1 h of continuous mapping, graph optimization stops. Save the map and restart for large sessions.
 5. Mapping tolerates only ±3° of tilt, and speeds up to 2 m/s.
 6. The datasheet's 20 m figure is a copy error. The spec table (40 m) is authoritative for M2M1.
+7. The USB‑A "5V DC" port is a power input, not a USB host/data port. Never connect a PC or Pi to it for data, and check with a multimeter that it does not source voltage before first connecting a supply.
 
 ## 13. Sources
 - M2M1 datasheet rev 1.1: https://cdn.sparkfun.com/assets/0/5/8/f/a/DS-15871-Slamtec_Mapper_Pro.pdf
