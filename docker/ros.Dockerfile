@@ -28,6 +28,7 @@ COPY rccar_teleop/package.xml src/racecar/rccar_teleop/package.xml
 COPY rccar_calibration/package.xml src/racecar/rccar_calibration/package.xml
 COPY rccar_bringup/package.xml src/racecar/rccar_bringup/package.xml
 COPY rccar_drivers/package.xml src/racecar/rccar_drivers/package.xml
+COPY rccar_description/package.xml src/racecar/rccar_description/package.xml
 COPY repos/ src/racecar/repos/
 
 # third-party sources (manifest is empty today; vcs import is skipped then)
@@ -51,6 +52,7 @@ COPY rccar_teleop/ src/racecar/rccar_teleop/
 COPY rccar_calibration/ src/racecar/rccar_calibration/
 COPY rccar_bringup/ src/racecar/rccar_bringup/
 COPY rccar_drivers/ src/racecar/rccar_drivers/
+COPY rccar_description/ src/racecar/rccar_description/
 COPY tuning.toml src/racecar/tuning.toml
 COPY firmware/esp32/src/main.cpp src/racecar/firmware/esp32/src/main.cpp
 
@@ -83,6 +85,7 @@ COPY --from=builder /ws/src/racecar/rccar_teleop/package.xml /tmp/src/rccar_tele
 COPY --from=builder /ws/src/racecar/rccar_calibration/package.xml /tmp/src/rccar_calibration/package.xml
 COPY --from=builder /ws/src/racecar/rccar_bringup/package.xml /tmp/src/rccar_bringup/package.xml
 COPY --from=builder /ws/src/racecar/rccar_drivers/package.xml /tmp/src/rccar_drivers/package.xml
+COPY --from=builder /ws/src/racecar/rccar_description/package.xml /tmp/src/rccar_description/package.xml
 RUN if [ "${ROSDEP_INSTALL}" = "1" ]; then \
       rosdep update --rosdistro jazzy \
       && apt-get update \

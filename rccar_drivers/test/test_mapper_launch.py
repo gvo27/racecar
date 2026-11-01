@@ -15,7 +15,8 @@ pytest.importorskip('launch_testing')
 pytest.importorskip('rclpy')
 
 import launch  # noqa: E402,I100,I201,I202
-from launch.actions import EmitEvent, ExecuteProcess, RegisterEventHandler  # noqa: E402,I100,I201,I202
+from launch.actions import (  # noqa: E402,I100,I201,I202
+    EmitEvent, ExecuteProcess, RegisterEventHandler)
 from launch.event_handlers import OnProcessStart  # noqa: E402,I100,I201,I202
 from launch.events import matches_action  # noqa: E402,I100,I201,I202
 import launch_testing  # noqa: E402,I100,I201,I202

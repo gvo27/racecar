@@ -20,6 +20,13 @@ from launch.launch_description_sources import (  # noqa: E402,I100,I201,I202
 import launch_testing  # noqa: E402,I100,I201,I202
 import launch_testing.actions  # noqa: E402,I100,I201,I202
 
+try:
+    from ament_index_python.packages import get_package_prefix
+    get_package_prefix('foxglove_bridge')
+except Exception:
+    pytest.skip('foxglove_bridge not installed (rosdep installs it in CI)',
+                allow_module_level=True)
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 LAUNCH = os.path.join(HERE, '..', 'launch', 'viz.launch.py')
 PORT = 18765

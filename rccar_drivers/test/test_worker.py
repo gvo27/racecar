@@ -4,11 +4,10 @@ import sys
 import threading
 import time
 
-import pytest
-
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from fake_mapper import FakeMapper  # noqa: E402
+from fake_mapper import FakeMapper  # noqa: E402,I100,I201
+import pytest  # noqa: E402,I100,I201
 from rccar_drivers.slamtec.protocol import MapperClient  # noqa: E402
 from rccar_drivers.slamtec.worker import MapperWorker  # noqa: E402
 
@@ -20,16 +19,16 @@ class Sink:
         self.scans, self.imus, self.poses, self.maps = [], [], [], []
         self.lock = threading.Lock()
 
-    def scan(self, v):
+    def on_scan(self, v):
         self.scans.append(v)
 
-    def imu(self, v):
+    def on_imu(self, v):
         self.imus.append(v)
 
-    def pose(self, v):
+    def on_pose(self, v):
         self.poses.append(v)
 
-    def map(self, v):
+    def on_map(self, v):
         self.maps.append(v)
 
 
@@ -134,7 +133,7 @@ def test_handler_exception_does_not_kill_thread(server):
     def bad(v):
         calls.append(v)
         raise RuntimeError('boom')
-    sink.scan = bad
+    sink.on_scan = bad
     w.start()
     try:
         assert wait_for(lambda: len(calls) > 2)

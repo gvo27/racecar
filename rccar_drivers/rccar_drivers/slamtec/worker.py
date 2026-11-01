@@ -3,7 +3,7 @@ Single-thread Mapper IO loop (no rclpy).
 
 The Mapper protocol is synchronous request/response over ONE socket, so every
 request is issued from this one thread, never two at once. Decoded results go
-to a sink object (scan/imu/pose/map methods); the ROS node's sink converts and
+to a sink object (on_scan/on_imu/on_pose/on_map methods); the ROS node's sink converts and
 publishes directly from the worker thread (rclpy publish is thread-safe), so
 no queue or executor hop is needed and rclpy callbacks never block on IO.
 
@@ -128,14 +128,14 @@ class MapperWorker:
         points = parse_scan(r['laser_points'])
         with self._lock:
             self._last_scan = self._clock()
-        self._sink.scan(points)
+        self._sink.on_scan(points)
 
     def _do_imu(self):
-        self._sink.imu(ImuSample.from_result(
+        self._sink.on_imu(ImuSample.from_result(
             self._client.call('getimuinrobotcoordinate')))
 
     def _do_pose(self):
-        self._sink.pose(Pose.from_result(self._client.call('getpose')))
+        self._sink.on_pose(Pose.from_result(self._client.call('getpose')))
 
     def _do_map(self):
         area = self._client.call(
@@ -151,7 +151,7 @@ class MapperWorker:
         r = self._client.call('getmapdata', {
             'area': {'x': x0, 'y': y0, 'width': w, 'height': h},
             'type': 0, 'kind': 0, 'partially': False})
-        self._sink.map(decode_map(r))
+        self._sink.on_map(decode_map(r))
 
     def _do_health(self):
         health = Health.from_result(self._client.call('getrobothealth'))

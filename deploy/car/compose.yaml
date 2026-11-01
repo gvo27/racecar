@@ -1,4 +1,4 @@
-# car stack: micro-ROS agent + ROS 2 core (supervisor + mcu_bridge) + on-demand tools.
+# car stack: micro-ROS agent + ROS 2 core (supervisor + mcu_bridge) + drivers (Mapper lidar) + on-demand tools.
 # Notes: .claude/rules/deploy.md
 # Env: deploy/car/.env.generated (make config; compose --env-file). Run: make car-up
 # Images: base by digest, ours as rccar-ros:local (make ros-image) or ${RCCAR_ROS_IMAGE} (git SHA from GHCR). Never :latest.
@@ -85,6 +85,36 @@ services:
       timeout: 3s
       retries: 3
       start_period: 20s
+    logging: *logging
+
+  # drivers — sensor drivers (Slamtec Mapper lidar over Wi-Fi/TCP; robot_state_publisher)
+  # Notes: .claude/rules/deploy.md
+  drivers:
+    image: ${RCCAR_ROS_IMAGE:-rccar-ros:local}
+    command: ["ros2", "launch", "rccar_bringup", "drivers.launch.py",
+              "heartbeat_dir:=/run/hb", "mapper_host:=${MAPPER_HOST:-192.168.11.1}"]
+    user: "${HOST_UID:?run make config}:${HOST_GID:?run make config}"
+    network_mode: host
+    ipc: host
+    restart: unless-stopped
+    environment:
+      <<: *ros-env
+    volumes: *ros-mounts
+    tmpfs:
+      - /run/hb:size=1m,mode=1777
+      - /tmp:size=128m,mode=1777
+    mem_limit: ${DRIVERS_MEM_LIMIT:-256m}
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    read_only: true
+    # healthy = the mapper_driver heartbeat file was touched in the last 6 s (link up AND scans arriving);
+    # start_period covers the ~40 s Mapper boot
+    healthcheck:
+      test: ["CMD-SHELL", "[ -n \"$$(find /run/hb -type f -name mapper_driver -mmin -0.1)\" ]"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+      start_period: 90s
     logging: *logging
 
   # tools — on-demand ROS shell: teleop, calibrate, tune, bench_test (docker compose run --rm tools ...)

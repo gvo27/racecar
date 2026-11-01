@@ -1,4 +1,5 @@
-"""Pure formatting + planar helpers for the lidar IMU monitor (no rclpy).
+"""
+Pure formatting + planar helpers for the lidar IMU monitor (no rclpy).
 
 quat_to_yaw / wrap_angle / planar_speed duplicate the math of
 rccar_drivers.slamtec.vehicle_state on purpose: this package stays decoupled

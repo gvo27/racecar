@@ -18,13 +18,6 @@ Planar only: z, roll and pitch of the extrinsic are ignored.
 from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus, KeyValue
 from geometry_msgs.msg import PoseStamped, TransformStamped
 from nav_msgs.msg import OccupancyGrid
-import rclpy
-from rclpy.duration import Duration
-from rclpy.executors import ExternalShutdownException, SingleThreadedExecutor
-from rclpy.lifecycle import Node, TransitionCallbackReturn
-from rclpy.qos import (
-    DurabilityPolicy, qos_profile_sensor_data, QoSProfile, ReliabilityPolicy)
-from rclpy.time import Time
 from rccar_drivers.heartbeat import touch
 from rccar_drivers.slamtec import convert
 from rccar_drivers.slamtec.diagnostics import link_level
@@ -32,6 +25,13 @@ from rccar_drivers.slamtec.frames import odom_to_base
 from rccar_drivers.slamtec.protocol import MapperClient
 from rccar_drivers.slamtec.vehicle_state import quat_to_yaw
 from rccar_drivers.slamtec.worker import MapperWorker
+import rclpy
+from rclpy.duration import Duration
+from rclpy.executors import ExternalShutdownException, SingleThreadedExecutor
+from rclpy.lifecycle import Node, TransitionCallbackReturn
+from rclpy.qos import (
+    DurabilityPolicy, qos_profile_sensor_data, QoSProfile, ReliabilityPolicy)
+from rclpy.time import Time
 from sensor_msgs.msg import Imu, LaserScan
 from tf2_ros import Buffer, StaticTransformBroadcaster, TransformBroadcaster
 from tf2_ros import TransformException, TransformListener
@@ -60,7 +60,7 @@ class _RosSink:
     def __init__(self, node):
         self._n = node
 
-    def scan(self, points):
+    def on_scan(self, points):
         n = self._n
         c = n.cfg
         sign = c['scan_angle_sign']
@@ -79,7 +79,7 @@ class _RosSink:
         msg.ranges = s.ranges
         n.pub_scan.publish(msg)
 
-    def imu(self, sample):
+    def on_imu(self, sample):
         n = self._n
         msg = Imu()
         msg.header.stamp = n.get_clock().now().to_msg()
@@ -92,7 +92,7 @@ class _RosSink:
          msg.linear_acceleration.z) = sample.acc
         n.pub_imu.publish(msg)
 
-    def pose(self, pose):
+    def on_pose(self, pose):
         n = self._n
         stamp = n.get_clock().now().to_msg()
         msg = PoseStamped()
@@ -106,7 +106,7 @@ class _RosSink:
         if n.cfg['publish_tf']:
             n.publish_odom_tf(stamp, pose)
 
-    def map(self, m):
+    def on_map(self, m):
         n = self._n
         c = n.cfg
         g = convert.map_to_grid(m, c['map_transpose'], c['map_free_is_high'])
