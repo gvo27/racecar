@@ -158,27 +158,95 @@ Software name: *lidar* (topics `/rccar/lidar/*`, `/rccar/mapper/*`). Datasheet d
 - Mounting: M2.5 bottom screws no longer than 6 mm, tilt within +-3 deg, <= 2 m/s while mapping, the arrow on the cap is +X (forward).
 - Allow ~40 s after power-up until it spins steadily.
 
-**Networking (novice notes).** A Wi-Fi radio is either a *station* (joins someone else's network) or an *access point* (AP, offers one). The Mapper is an AP named `SLAMWARE-xxxx` at 192.168.11.1. The Pi's `wlan0` joins it as a station; `eth0` stays on the lab LAN. The *default route* is where the Pi sends traffic for any address it has no specific route to (the internet). The Mapper network has no internet, so `wlan0` must not take the default route or `apt`, `docker pull` and SSH-by-name break. Netplan on Ubuntu 24.04 server (`/etc/netplan/60-mapper.yaml`, mode 600):
+**Networking (novice notes).** A Wi-Fi radio is either a *station* (joins someone else's network) or an *access point* (AP, offers one). The Mapper is an AP named `SLAMWARE-xxxxxx` at 192.168.11.1 (bench-confirmed: `nc -vz 192.168.11.1 1445` succeeded on this unit; the `opensw` default of 192.168.11.11 does not apply). The Pi's `wlan0` joins it as a station; at the lab `eth0` stays on the LAN. The *default route* is where the Pi sends traffic for any address it has no specific route to (the internet). The Mapper network has no internet, so it must not win the default route at the lab, or `apt`, `docker pull` and SSH-by-name break.
+
+The tool is a *route metric*: a priority number on a default route, lowest wins. We give `eth0` 100 and `wlan0` 600 (whichever SSID it is on). Lab: both exist, `eth0` (100) wins, and the Mapper's 192.168.11.0/24 subnet is still reached over `wlan0`. Home: no cable, so `wlan0` is the only default route and home internet works. (Without `eth0` at the lab the only default is via the Mapper, which has no internet; harmless while driving.)
+
+Netplan merges every `/etc/netplan/*.yaml` file *per interface*, so settings in one file apply to that interface for all SSIDs. This is why dropping routes/DNS on `wlan0` (an earlier version of this doc) also killed internet on the home Wi-Fi. Use a separate file `/etc/netplan/60-mapper.yaml` (`sudo chmod 600` it). It only adds metrics and the Mapper SSID; DHCP and the home SSID stay in `50-cloud-init.yaml` (cloud-init may regenerate that file, ours is untouched):
 
 ```yaml
 network:
   version: 2
+  ethernets:
+    eth0:
+      dhcp4-overrides: {route-metric: 100}   # lab LAN wins when cabled
+      dhcp6-overrides: {route-metric: 100}   # must equal dhcp4 (eth0 has dhcp6: true in 50-cloud-init)
   wifis:
     wlan0:
-      dhcp4: true
-      dhcp4-overrides: {use-routes: false, use-dns: false}
+      dhcp4-overrides: {route-metric: 600}   # any Wi-Fi (home or Mapper) loses to eth0
+      dhcp6-overrides: {route-metric: 600}
       access-points:
-        "SLAMWARE-XXXXXX": {}   # replace with the SSID on the Mapper label; add a password: if you set one
+        "SLAMWARE-D22981": {}                # this unit's SSID; yours: label or laptop Wi-Fi list (open; add password: if set)
 ```
 
 ```sh
-sudo netplan try                          # applies, reverts after 120 s unless you confirm
-ip route | grep default                   # must still show eth0 only
-nmcli -t -f ACTIVE,SSID dev wifi | grep '^yes'   # SLAMWARE-...
-nc -vz 192.168.11.1 1445                  # "succeeded" = driver can connect
+sudo chmod 600 /etc/netplan/60-mapper.yaml
+sudo netplan try
 ```
 
-- Live tests: the only radio is busy, so admin SSH from the laptop also goes over the Mapper AP: join the laptop to the same `SLAMWARE-xxxx` network and SSH to the Pi's address on it (`ip -4 addr show wlan0`).
+`netplan try` applies the config and reverts by itself after 120 s unless you press Enter, so a mistake cannot lock you out for good. Over Wi-Fi SSH (home) prefer applying at the lab over Ethernet. If it errors `networkd requires that route-metric has the same value in both dhcp4_overrides and dhcp6_overrides`, the merged config has DHCPv6 on that interface (cloud-init sets `dhcp6: true` on `eth0`) without a matching `dhcp6-overrides`; that is why both are set. A `netplan-ovs-cleanup.service changed on disk` warning is harmless; `sudo systemctl daemon-reload` clears it.
+
+Checks (all read-only). Merged config, works before applying (`netplan get` needs a key path; a bare name prints `null`). Expect eth0: dhcp4, dhcp6, optional, both overrides 100; wlan0: both SSIDs, regulatory-domain, 600:
+
+```sh
+sudo netplan get ethernets.eth0
+sudo netplan get wifis.wlan0
+```
+
+What networkd actually uses (100 for eth0, 600 for wlan0):
+
+```sh
+grep -H RouteMetric /run/systemd/network/10-netplan-*.network
+```
+
+Lab (cable in, Mapper on):
+
+```sh
+ip route show default
+networkctl status wlan0
+nc -vz 192.168.11.1 1445
+ping -c1 ubuntu.com
+```
+
+Expect: default via eth0 metric 100 listed first (wlan0 600 may follow), wlan0 on `SLAMWARE-...` with a 192.168.11.x address, `succeeded`, ping works. Slow DNS at the lab: `resolvectl status` shows whether the Mapper's DHCP offered a DNS server.
+
+Home (no Mapper):
+
+```sh
+ip route show default
+ping -c1 ubuntu.com
+```
+
+Expect: default via wlan0 only, ping works.
+
+**One radio, one network.** With the home SSID in range, wpa_supplicant has no priority between saved SSIDs and stays on the current one; at the lab only the Mapper is in range, so it joins automatically. To switch by hand: `sudo wpa_cli -i wlan0 list_networks`, then `sudo wpa_cli -i wlan0 select_network <id>` (SSH over Wi-Fi drops). Switch back with `select_network <home id>` and `sudo wpa_cli -i wlan0 enable_network all`.
+
+**Pi doesn't join the Mapper Wi-Fi.** In order:
+
+1. Placeholder still present? A leftover `SLAMWARE-XXXXXX` makes wpa_supplicant chase a network that does not exist (wlan0 no-carrier, "Network is unreachable"):
+   ```sh
+   sudo netplan get wifis.wlan0.access-points
+   sudo sed -i 's/SLAMWARE-XXXXXX/<real SSID>/' /etc/netplan/60-mapper.yaml
+   sudo netplan apply
+   ```
+   (use `netplan try` instead of `apply` when on Wi-Fi SSH).
+2. Which network is it on? `networkctl status wlan0` (see "one radio, one network" above).
+3. Is the AP visible? Check frequency and signal; for 5 GHz also `iw reg get` should show US:
+   ```sh
+   sudo wpa_cli -i wlan0 scan
+   sudo wpa_cli -i wlan0 scan_results | grep -i slamware
+   ```
+4. Client log, look for `CTRL-EVENT-CONNECTED` and association attempts:
+   ```sh
+   journalctl -u netplan-wpa-wlan0 -b
+   ```
+5. Force it: `sudo wpa_cli -i wlan0 select_network <id>` (ids from `list_networks`); revert as above.
+6. Joined but no IP (DHCP):
+   ```sh
+   journalctl -u systemd-networkd -b | grep wlan0
+   ```
+
+- Live tests: the only radio is busy, so admin SSH from the laptop also goes over the Mapper AP: join the laptop to the same `SLAMWARE-xxxxxx` network and SSH to the Pi's address on it (`ip -4 addr show wlan0`).
 - Fallback: cable the Mapper to the Pi's Ethernet (static IP on the Pi in the Mapper's subnet) and set `MAPPER_HOST=<mapper ip>` in the environment of the `drivers` service (compose default 192.168.11.1; not in `.env`, it is not a secret).
 
 **Bandwidth.** One scan is ~930 points x 12 B = ~11 KB raw, ~15 KB base64. At 10-20 Hz that is 1.2-2.4 Mbit/s; with pose, IMU at 50 Hz and the map at ~0.5 Hz the total stays under 5 Mbit/s, far below what 802.11n/ac gives. The real cost is jitter (5-50 ms spikes) and dropouts, so messages are stamped on receive, gaps beyond the timeout are stale (diagnostics `mapper_driver: link`) and the lidar is **not** in the stop path (supervisor/ESP32 failsafe are unaffected).

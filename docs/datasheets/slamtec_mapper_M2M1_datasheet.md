@@ -108,7 +108,7 @@ The M2M1's ranging specs match the **RPLIDAR S1** core exactly (40 m, 9200 Hz, 9
 | Device IP in AP mode | **192.168.11.1** | [QS] |
 | Control/data port | **TCP 1445** | [QS], [OSW] |
 | Ethernet | PC set as **DHCP client** when cabled directly | [QS] (M1M1) |
-| `opensw` default host | 192.168.11.11 | [OSW] (if 192.168.11.1 fails, try this) |
+| `opensw` default host | 192.168.11.11 | [OSW] (bench: 192.168.11.1 confirmed for AP mode; .11 does not apply) |
 | Station (client) mode | configurable via RoboStudio / SDK | [RET] |
 | Boot | spins up ≈ 20 s (M1M1) / ≈ 40 s (M2M3) after power. M1M1 dev kit has power switch SW1 and LED D1 | [QS] |
 

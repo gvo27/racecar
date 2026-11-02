@@ -27,7 +27,7 @@ The real Wi‑Fi costs are latency jitter (5–50 ms spikes) and dropouts. Mitig
 
 **Network layout:**
 - Bench and live: Ethernet stays on the lab LAN, and the Pi's onboard Wi‑Fi (wlan0) joins the Mapper's own `SLAMWARE-xxxx` AP, where the Mapper is 192.168.11.1.
-- wlan0 must **not** take the default route, so internet keeps going over eth0. In netplan this is `dhcp4-overrides: {use-routes: false}` or a high route-metric.
+- wlan0 must not win the default route at the lab, so internet keeps going over eth0. Corrected: netplan route metrics (eth0 100, wlan0 600, dhcp4 and dhcp6 overrides), not `use-routes: false`, which broke home Wi‑Fi because overrides are per interface. Home: wlan0 is the only default route. Details: docs/setup.md. AP IP 192.168.11.1 bench-confirmed.
 - Consequence for live tests: the only radio is busy, so admin SSH from the laptop has to happen on the Mapper's AP. The laptop joins `SLAMWARE-xxxx` and SSHes to the Pi's 192.168.11.x address.
 - Fallback: Mapper on Pi Ethernet (direct cable, Pi as DHCP server or static IP), the same driver with `host` changed.
 
@@ -154,7 +154,7 @@ Yes, the visual checks use `make viz`: the websocket feeds a viewer on your lapt
 
 1. **Power + link**
    - Power the Mapper from `+5V_SENS` and wait about 40 s until it spins steadily.
-   - On the Pi, check that `nmcli -t -f ACTIVE,SSID dev wifi | grep '^yes'` shows `SLAMWARE-…`.
+   - On the Pi, check that `networkctl status wlan0` shows `SLAMWARE-…`.
    - Check that `ip route | grep default` still shows `eth0`.
    - Check that `nc -vz 192.168.11.1 1445` says `succeeded`.
 2. **Stack:** `make car-up && make car-ps`, and `drivers` shows healthy.

@@ -13,7 +13,7 @@ paths:
 Software name "lidar"/"mapper"; model name only in datasheet docs. Docs: `docs/datasheets/slamtec_mapper_M2M1_datasheet.md` (protocol section 11), `docs/setup.md` "Lidar" (power, networking, viewing). Topics/QoS table: `.claude/rules/ros2.md`. Service: `.claude/rules/deploy.md`.
 
 ## Protocol facts
-- JSON over TCP 1445 on the Mapper's Wi-Fi (192.168.11.1) or Ethernet; messages end with `\n\r\n\r\n`, matched by request_id. No USB/serial data.
+- JSON over TCP 1445 on the Mapper's Wi-Fi (192.168.11.1, bench-confirmed; `mapper_host` may be promoted to tuning.toml [platform.pi5] in a later change) or Ethernet; messages end with `\n\r\n\r\n`, matched by request_id. No USB/serial data.
 - no ROS 2 driver exists (opensw_ros and slamware_ros_sdk are ROS 1): own stdlib-only driver; logic in `rccar_drivers/slamtec/*` (no rclpy), node = lifecycle wiring (`mapper_driver`).
 - all socket IO on one thread (no sharing the socket between callbacks/timers); reconnect with backoff; stamp on receive.
 
