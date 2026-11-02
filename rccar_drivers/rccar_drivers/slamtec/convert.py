@@ -30,13 +30,13 @@ def scan_to_ranges(points, n_bins=1080, range_min=0.0, range_max=40.0):
     return ScanArrays(angle_min, angle_min + inc * (n_bins - 1), inc, ranges)
 
 
-def cell_to_occupancy(u8, free_is_high=True):
+def cell_to_occupancy(u8, free_is_high=False):
     """
     Map a Slamtec Bitmap8Bit cell to OccupancyGrid (-1 unknown, 0 free, 100 occ).
 
-    Convention from slamware_ros_sdk: the cell is a signed char; 0 -> unknown,
-    negative (128..255 as uint8) -> free, positive -> occupied. Must be
-    bench-verified against RoboStudio; free_is_high=False swaps free/occupied.
+    Bench-confirmed (2026-11-02, real Mapper M2M1, open room): 0 -> unknown,
+    1..127 -> free, 128..255 -> occupied. free_is_high=True swaps free and
+    occupied, kept for other firmware versions.
     """
     if u8 == 0:
         return -1
@@ -51,7 +51,7 @@ def _lut(free_is_high):
 _LUTS = {True: _lut(True), False: _lut(False)}
 
 
-def map_to_grid(m, transpose=False, free_is_high=True):
+def map_to_grid(m, transpose=False, free_is_high=False):
     """
     Convert MapData to OccupancyGrid arrays (data is array('b'), int8).
 

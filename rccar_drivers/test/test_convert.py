@@ -41,10 +41,18 @@ def test_scan_wraps_at_pi():
 
 def test_cell_to_occupancy():
     assert c.cell_to_occupancy(0) == -1
-    assert c.cell_to_occupancy(1) == 100
-    assert c.cell_to_occupancy(127) == 100
-    assert c.cell_to_occupancy(128) == 0
-    assert c.cell_to_occupancy(255) == 0
+    assert c.cell_to_occupancy(1) == 0
+    assert c.cell_to_occupancy(127) == 0
+    assert c.cell_to_occupancy(128) == 100
+    assert c.cell_to_occupancy(255) == 100
+
+
+def test_bench_confirmed_default_encoding():
+    # 2026-11-02 bench: 0 unknown, 1..127 free, 128..255 occupied.
+    cells = [0, 1, 127, 128, 255]
+    assert [c.cell_to_occupancy(v) for v in cells] == [-1, 0, 0, 100, 100]
+    g = c.map_to_grid(MapData(5, 1, 0.05, 0.0, 0.0, bytes(cells)))
+    assert list(g.data) == [-1, 0, 0, 100, 100]
 
 
 def test_map_to_grid_row_major():
@@ -52,14 +60,14 @@ def test_map_to_grid_row_major():
     g = c.map_to_grid(m)
     assert (g.width, g.height, g.resolution) == (3, 2, 0.05)
     assert (g.origin_x, g.origin_y) == (-1.0, -2.0)
-    assert list(g.data) == [-1, 100, 0, 0, -1, 100]
+    assert list(g.data) == [-1, 0, 100, 100, -1, 0]
 
 
 def test_map_to_grid_transpose():
     # x-major buffer: index = x * height + y
     m = MapData(3, 2, 0.05, 0.0, 0.0, bytes([0, 1, 255, 255, 0, 1]))
     g = c.map_to_grid(m, transpose=True)
-    assert list(g.data) == [-1, 0, -1, 100, 0, 100]
+    assert list(g.data) == [-1, 100, -1, 0, 100, 0]
 
 
 def test_yaw_to_quat():
@@ -68,13 +76,13 @@ def test_yaw_to_quat():
     assert z == pytest.approx(1.0) and w == pytest.approx(0.0, abs=1e-12)
 
 
-def test_free_is_high_false_swaps_meaning():
-    assert c.cell_to_occupancy(0, free_is_high=False) == -1
-    assert c.cell_to_occupancy(1, free_is_high=False) == 0
-    assert c.cell_to_occupancy(255, free_is_high=False) == 100
+def test_free_is_high_true_swaps_meaning():
+    assert c.cell_to_occupancy(0, free_is_high=True) == -1
+    assert c.cell_to_occupancy(1, free_is_high=True) == 100
+    assert c.cell_to_occupancy(255, free_is_high=True) == 0
     m = MapData(3, 2, 0.05, 0.0, 0.0, bytes([0, 1, 255, 255, 0, 1]))
-    g = c.map_to_grid(m, free_is_high=False)
-    assert list(g.data) == [-1, 0, 100, 100, -1, 0]
+    g = c.map_to_grid(m, free_is_high=True)
+    assert list(g.data) == [-1, 100, 0, 0, -1, 100]
 
 
 def test_map_to_grid_is_int8_array():

@@ -162,6 +162,7 @@ Operating −5 °C … +45 °C (typ 25 °C). Storage TBD. Pre‑heating improves
 | `getsdpversion` | – | `sdp_version` (firmware string) |
 
 - **MapType:** 0 Bitmap8Bit, 1 Pointmap, 2 ImageFeaturesMap, 3 RectangleAreaMap.
+- **Bitmap8Bit cell encoding (bench-confirmed 2026-11-02):** 0 unknown, 1..127 free, 128..255 occupied (driver: `map_free_is_high=false`).
 - **MapKind:** 0 EXPLORERMAP, 5 COSTMAP, 10 SWEEPERMAP, 20 UWBMAP, 30 SLAMMAP, 40 LOCALSLAMMAP, 50 DBOWMAP, 60 OPTIMALOPERATIONALMAP, 70 MARKERMAP, 80 RECTANGLEAREAMAP, 90 DISCREPANCYRECORDMAP. Use 0 (explorer) for the live occupancy map.
 
 **Binary payload encoding** (`laser_points`, `map_data`): base64‑decode, then apply custom RLE.

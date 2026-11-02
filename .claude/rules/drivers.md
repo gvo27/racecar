@@ -25,7 +25,8 @@ Software name "lidar"/"mapper"; model name only in datasheet docs. Docs: `docs/d
 - map fetch is skipped (throttled warning) when the known area exceeds `map_max_cells` (default 4e6); `map_period_s` default 2.0. Device command errors (code other than `RESULT_OK`) keep the link up; only socket/protocol errors reconnect (backoff reset by the first good scan).
 
 ## Bench-TBD (do not hide behind guessed values; defaults in code, not in tuning.toml)
-- `scan_angle_sign`, `map_transpose`, `map_free_is_high`: flip per the bench check (obstacle in front of the cap arrow must appear on +X, left on +Y; map not mirrored).
+- `scan_angle_sign`, `map_transpose`: flip per the bench check (obstacle in front of the cap arrow must appear on +X, left on +Y; map not mirrored).
+- `map_free_is_high`: CONFIRMED False (bench 2026-11-02: Bitmap8Bit 0 unknown, 1..127 free, 128..255 occupied); parameter kept for other firmware versions.
 - IMU `linear_acceleration` units (raw), gyro rad/s assumed. Bench: acc ~0.003 at rest (no gravity), raw_acc/gyro/compass exactly 0 over repeated samples: units unresolved, IMU may only supply the quaternion.
 - `rccar_description` mount offsets: UNMEASURED until the user measures them on the car. No guessed numbers.
 - no unconfirmed parameters in tuning.toml (`[platform.pi5] mapper_host` only after the bench confirms the IP).

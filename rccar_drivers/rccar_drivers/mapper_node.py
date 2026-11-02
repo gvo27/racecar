@@ -54,7 +54,7 @@ PARAMS = {
     'map_period_s': 2.0, 'health_period_s': 1.0, 'reconnect_max_s': 5.0,
     'map_max_cells': 4_000_000,
     'n_bins': 1080, 'range_min': 0.15, 'range_max': 40.0,
-    'scan_angle_sign': 1.0, 'map_transpose': False, 'map_free_is_high': True,
+    'scan_angle_sign': 1.0, 'map_transpose': False, 'map_free_is_high': False,
     'map_frame': 'map', 'odom_frame': 'odom', 'base_frame': 'base_link',
     'lidar_frame': 'lidar_link', 'imu_frame': 'lidar_imu_link',
     'publish_tf': True, 'heartbeat_file': '',
