@@ -15,6 +15,8 @@ import struct
 
 DELIM = b'\n\r\n\r\n'
 MAX_REQUEST_ID = 99_999_999
+# Bench (firmware 2.6.0_dev): every successful getter returns result.code == 1.
+RESULT_OK = 1
 
 
 class MapperError(Exception):
@@ -22,7 +24,7 @@ class MapperError(Exception):
 
 
 class MapperCommandError(MapperError):
-    """The device answered with a nonzero result code; the link is fine."""
+    """The device answered with a result code other than RESULT_OK; the link is fine."""
 
 
 class MapperTimeout(MapperError):
@@ -104,8 +106,8 @@ class MapperClient:
                 result = resp.get('result')
                 if not isinstance(result, dict):
                     raise MapperError('%s: no result' % command)
-                code = result.get('code', 0)
-                if code != 0:
+                code = result.get('code')
+                if code != RESULT_OK:
                     raise MapperCommandError(
                         '%s failed: code %s' % (command, code))
                 return result
@@ -266,4 +268,8 @@ class Health:
     @classmethod
     def from_result(cls, r):
         """Build from a getrobothealth result."""
-        return cls(**{k: bool(r.get(k, False)) for k in cls.__dataclass_fields__})
+        # Bench: the device sends camelCase (hasLidarDisconnected); datasheet says snake_case.
+        def flag(name):
+            camel = ''.join(w.capitalize() if i else w for i, w in enumerate(name.split('_')))
+            return bool(r.get(name, r.get(camel, False)))
+        return cls(**{k: flag(k) for k in cls.__dataclass_fields__})

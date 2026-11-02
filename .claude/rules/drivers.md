@@ -14,6 +14,7 @@ Software name "lidar"/"mapper"; model name only in datasheet docs. Docs: `docs/d
 
 ## Protocol facts
 - JSON over TCP 1445 on the Mapper's Wi-Fi (192.168.11.1, bench-confirmed; `mapper_host` may be promoted to tuning.toml [platform.pi5] in a later change) or Ethernet; messages end with `\n\r\n\r\n`, matched by request_id. No USB/serial data.
+- result `code == 1` means success on the bench firmware (2.6.0_dev); the datasheet envelope does not say so (`protocol.RESULT_OK`). `getrobothealth` flags are camelCase (`hasError`...), parsed by `Health.from_result` (snake_case also accepted). The device's failure code is unobserved.
 - no ROS 2 driver exists (opensw_ros and slamware_ros_sdk are ROS 1): own stdlib-only driver; logic in `rccar_drivers/slamtec/*` (no rclpy), node = lifecycle wiring (`mapper_driver`).
 - all socket IO on one thread (no sharing the socket between callbacks/timers); reconnect with backoff; stamp on receive.
 
@@ -21,11 +22,11 @@ Software name "lidar"/"mapper"; model name only in datasheet docs. Docs: `docs/d
 - viz bridge is read-only; never enable clientPublish/services/parameters (would bypass the supervisor: a viewer could publish /rccar/mcu/drive or call /supervisor/arm). viz.launch.py sets `capabilities: [connectionGraph, assets]` and `^$` for client_topic/service/param whitelists (foxglove_bridge defaults are all `.*`); test_viz_launch.py asserts it.
 - REP-105 deviation: odom->base_link comes from the SLAM pose and may jump on relocalization/loop closure until a continuous odom source (wheel encoder/IMU) exists; then the driver should publish map->odom instead.
 - LaserScan.scan_time = polling period, stamp = receive time (device per-scan pose/timestamp not used yet).
-- map fetch is skipped (throttled warning) when the known area exceeds `map_max_cells` (default 4e6); `map_period_s` default 2.0. Device command errors (nonzero code) keep the link up; only socket/protocol errors reconnect (backoff reset by the first good scan).
+- map fetch is skipped (throttled warning) when the known area exceeds `map_max_cells` (default 4e6); `map_period_s` default 2.0. Device command errors (code other than `RESULT_OK`) keep the link up; only socket/protocol errors reconnect (backoff reset by the first good scan).
 
 ## Bench-TBD (do not hide behind guessed values; defaults in code, not in tuning.toml)
 - `scan_angle_sign`, `map_transpose`, `map_free_is_high`: flip per the bench check (obstacle in front of the cap arrow must appear on +X, left on +Y; map not mirrored).
-- IMU `linear_acceleration` units (raw), gyro rad/s assumed.
+- IMU `linear_acceleration` units (raw), gyro rad/s assumed. Bench: acc ~0.003 at rest (no gravity), raw_acc/gyro/compass exactly 0 over repeated samples: units unresolved, IMU may only supply the quaternion.
 - `rccar_description` mount offsets: UNMEASURED until the user measures them on the car. No guessed numbers.
 - no unconfirmed parameters in tuning.toml (`[platform.pi5] mapper_host` only after the bench confirms the IP).
 

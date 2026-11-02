@@ -146,7 +146,8 @@ Operating −5 °C … +45 °C (typ 25 °C). Storage TBD. Pre‑heating improves
 ## 11. Wire protocol (reverse‑engineered, [OSW])
 - **Transport:** TCP to port 1445. Each message is a single JSON object terminated by the delimiter **`"\n\r\n\r\n"`**. Request/response is synchronous and matched by `request_id` (int 1–99999999).
 - **Simple request:** `{"command":"<cmd>","request_id":12345}`
-- **Response envelope:** `{"command":"<cmd>","request_id":12345,"result":{"code":<int>,"timestamp":<int>, ...}}`
+- **Response envelope:** `{"command":"<cmd>","request_id":12345,"result":{"code":<int>,"timestamp":<int>, ...}}`. **Bench (firmware 2.6.0_dev, 2019-12-12): `code` is `1` on every successful getter, not 0.** The value used for failures has not been observed.
+- **Key casing (bench):** `getrobothealth` returns camelCase (`hasError`, `hasWarning`, `hasFatal`, `hasLidarDisconnected`, `hasSdpDisconnected`, `hasDepthCameraDisconnected`, `hasSystemEmergencyStop`, plus `baseError: []`), not the snake_case in the table below. `getsdpversion` returns `sdp_version`; `getsystemresource` returns snake_case as listed. `getimuinrobotcoordinate` also returns `availibilityBitMap` (sic, 131) and `optional`. At rest `raw_acc`, `gyro`, `raw_gyro`, `compass` were exactly 0 and `acc` about 0.003 (no gravity), quaternion valid.
 
 | command | args | result fields |
 |---|---|---|

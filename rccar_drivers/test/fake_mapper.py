@@ -136,13 +136,13 @@ class FakeMapper:
             return
         cmd, rid = req['command'], req['request_id']
         if cmd in self.results:
-            result = {'code': 0, **self.results[cmd]}
+            result = {'code': 1, **self.results[cmd]}
         else:
-            result = {'code': 1}
+            result = {'code': 2}
         out = b''
         if self.stale_first:
             out += json.dumps({'command': cmd, 'request_id': rid + 1000,
-                               'result': {'code': 0, 'stale': True}}).encode() + DELIM
+                               'result': {'code': 1, 'stale': True}}).encode() + DELIM
         out += json.dumps({'command': cmd, 'request_id': rid,
                            'result': result}).encode() + DELIM
         self._send(conn, out)

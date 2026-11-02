@@ -78,6 +78,7 @@ def test_from_result_defaults():
     assert p.Pose.from_result({}) == p.Pose(0.0, 0.0, 0.0, 0.0, 0.0)
     imu = p.ImuSample.from_result({'acc': {'x': 1.0}})
     assert imu.acc == (1.0, 0.0, 0.0) and imu.quat == (1.0, 0.0, 0.0, 0.0)
+    assert p.Health.from_result({'hasLidarDisconnected': True}).has_lidar_disconnected
     h = p.Health.from_result({'has_error': True})
     assert h.has_error and not h.has_fatal and not h.has_lidar_disconnected
 
@@ -147,9 +148,9 @@ def test_client_multiple_messages_in_one_recv():
         def sendall(self, data):
             req = json.loads(data[:-len(DELIM)])
             rid = req['request_id']
-            msgs = [{'request_id': rid - 1, 'result': {'code': 0, 'old': 1}},
-                    {'request_id': rid, 'result': {'code': 0, 'v': 7}},
-                    {'request_id': rid + 1, 'result': {'code': 0, 'v': 8}}]
+            msgs = [{'request_id': rid - 1, 'result': {'code': 1, 'old': 1}},
+                    {'request_id': rid, 'result': {'code': 1, 'v': 7}},
+                    {'request_id': rid + 1, 'result': {'code': 1, 'v': 8}}]
             self.out = b''.join(json.dumps(m).encode() + DELIM for m in msgs)
 
         def recv(self, n):
