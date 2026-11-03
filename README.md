@@ -11,29 +11,19 @@ A 1:10 Tamiya TT-02 built into a self-driving research platform on a two-layer c
 
 ## Current inventory
 
-Source: [`docs/datasheets/components_list.xlsx`](docs/datasheets/components_list.xlsx)
-
 | Component | Item | Documentation |
 | --- | --- | --- |
-| microcontroller | ESP32 S3 N16R8 | [user guide](https://github.com/microrobotics/ESP32-S3-N16R8/blob/main/ESP32-S3-N16R8_User_Guide.pdf) |
 | chassis | Tamiya TT-02 | — |
 | battery | 2S 7.4V 80C 5200mAh LiPo Battery Pack | — |
-| computer | Raspberry Pi 5 | needs 5V, 5A |
-| voltage regulator for rpi | Pololu D36V50F5 (5V 5.5A, 6-50V in) | [pololu.com/product/4091](https://www.pololu.com/product/4091), [archived](docs/datasheets/Pololu%20-%205V%2C%205.5A%20Step-Down%20Voltage%20Regulator%20D36V50F5.htm) |
-| lidar | Garmin LIDAR-Lite v4 LED, part number 010-02022-00 | [archived PDF](docs/datasheets/LIDAR-Lite%20LED%20v4%20Instructions_EN-US.pdf), [summary](docs/datasheets/rangefinder_lidar_lite_v4.md), [instructions](https://static.garmin.com/pumac/LIDAR-Lite%20LED%20v4%20Instructions_EN-US.pdf) (software name: rangefinder) |
+| microcontroller | ESP32 S3 N16R8 | [user guide](https://github.com/microrobotics/ESP32-S3-N16R8/blob/main/ESP32-S3-N16R8_User_Guide.pdf) |
+| edge compute | Raspberry Pi 5 | 5V 5A |
+| voltage regulator for compute rail | Pololu D36V50F5 (5V 5.5A, 6-50V in) | [pololu.com/product/4091](https://www.pololu.com/product/4091), [archived](docs/datasheets/Pololu%20-%205V%2C%205.5A%20Step-Down%20Voltage%20Regulator%20D36V50F5.htm) |
+| rangefinder | Garmin LIDAR-Lite v4 LED, part number 010-02022-00 | [archived PDF](docs/datasheets/LIDAR-Lite%20LED%20v4%20Instructions_EN-US.pdf), [summary](docs/datasheets/rangefinder_lidar_lite_v4.md), [instructions](https://static.garmin.com/pumac/LIDAR-Lite%20LED%20v4%20Instructions_EN-US.pdf) (software name: rangefinder) |
+| lidar | | |
 | motor controller | THW-1060-BRUSHED | [thw-1060-brushed-esc.md](docs/datasheets/thw-1060-brushed-esc.md) |
 | steering servo | DS3225MG | [ds3225_servo.md](docs/datasheets/ds3225_servo.md) |
 
-## USB-C ports (ESP32-S3-N16R8)
-
-| Port | Position | Connects to | Use |
-| --- | --- | --- | --- |
-| **COM** | right | CH343 USB-UART → UART0 (GPIO43/44) | **flashing** + host link (laptop now, Raspberry Pi later) |
-| **USB** | left | native USB (GPIO19/20) | planned regulated power input. Not used for data |
-
-Flash and talk to the board **only through COM**.
-
-## Pin map (left header P1 only)
+## Microcontroller Pin map (left header P1 only)
 
 Source of truth: [`firmware/esp32/include/pins.h`](firmware/esp32/include/pins.h). Keep this table identical to it.
 
@@ -82,34 +72,9 @@ Source of truth: [`firmware/esp32/include/pins.h`](firmware/esp32/include/pins.h
 
 Wire colours: signal = yellow/white, power = red, ground = black; rangefinder I2C: SDA = white, SCL = green. Put a tape flag on the two active signal wires.
 
-## Rangefinder wiring (Garmin LIDAR-Lite v4 LED)
-
-Software name: *rangefinder*. Datasheet: [archived PDF](docs/datasheets/LIDAR-Lite%20LED%20v4%20Instructions_EN-US.pdf), [summary](docs/datasheets/rangefinder_lidar_lite_v4.md). Power off while wiring.
-
-| Garmin pin | Name | Wire | Connect to |
-| --- | --- | --- | --- |
-| 1 | VIN (5 V, 4.75-5.25 V) | red | regulated 5 V **sensor rail** (never ESP32 5V/3V3) |
-| 2 | GND | black | common ground (P1-22) |
-| 3 | I2C SDA | **white** | GPIO8 (P1-12) |
-| 4 | I2C SCL | **green** | GPIO9 (P1-15) |
-| 5-10 | GPIOA, GPIOB, nRF debug | n/a | leave unconnected |
-
-- The sensor has internal 13 kOhm pull-ups to 3.3 V: no level shifter, no external pull-ups. Signals are 3.3 V max.
-- Leave GPIOB (pin 6) unconnected: low at power-up starts the BLE bootloader.
-- Schematic net list (confirmed wire colours):
-
-  | Net | Garmin pin | Wire | ESP32 / rail |
-  | --- | --- | --- | --- |
-  | `RF_5V` | 1 VIN | red | 5 V sensor rail |
-  | `GND` | 2 GND | black | common ground, P1-22 |
-  | `I2C_SDA` | 3 SDA | white | GPIO8, P1-12 |
-  | `I2C_SCL` | 4 SCL | green | GPIO9, P1-15 |
-
-- Status: compile pending CI; not bench-verified. Publishing is on by default (`driver = 1`); watch with `make rangefinder`; `make mcu CMD="SENS rangefinder"` is a read-only status/config query. Disable with `make mcu CMD="SET rf_driver 0"`, or `[rangefinder] driver = 0` in `tuning.toml` + `make tune`.
-
 ## Make commands
 
-Run `make help` for the live list. Setup: [docs/setup.md](docs/setup.md). ROS tools (`teleop`, `calibrate`, `tune`, `test`, `mcu`, `rangefinder`, `viz`, `lidar-imu`) need the stack running (`make car-up`).
+Run `make help` for the live list. Setup: [docs/setup.md](docs/setup.md). 
 
 **Car stack (ROS 2 + micro-ROS in Docker)**
 
@@ -158,11 +123,23 @@ Run `make help` for the live list. Setup: [docs/setup.md](docs/setup.md). ROS to
 | `check-dev` | check optional LSP binaries for Claude Code |
 | `models` | print `models/manifest.yaml` (download not implemented yet) |
 
+## Wiring: Rangefinder (Garmin LIDAR-Lite v4 LED)
+
+Nickname: *rangefinder*. Datasheet: [archived PDF](docs/datasheets/LIDAR-Lite%20LED%20v4%20Instructions_EN-US.pdf), [summary](docs/datasheets/rangefinder_lidar_lite_v4.md). Power off while wiring.
+
+| Garmin pin | Name | Wire | Connect to |
+| --- | --- | --- | --- |
+| 1 | VIN (5 V, 4.75-5.25 V) | red | regulated 5 V **sensor rail** (never ESP32 5V/3V3) |
+| 2 | GND | black | common ground (P1-22) |
+| 3 | I2C SDA | **white** | GPIO8 (P1-12) |
+| 4 | I2C SCL | **green** | GPIO9 (P1-15) |
+| 5-10 | GPIOA, GPIOB, nRF debug | n/a | leave unconnected |
+
 ## Power rules
 
-1. **The ESP32 powers nothing.** It only outputs actuator signals and talks to the host. Sensors run from a separate regulated rail that shares ground with the ESP32 and keeps all signals at ≤ 3.3 V.
-2. Servo power comes from the ESC's built-in 6 V / 3 A BEC (red wire of the throttle lead), connected by Y-harness. **Never connect it to the ESP32**, and don't run servo current through the breadboard.
-3. The ESP32, ESC and servo grounds must all be connected (P1-22).
+1. **The ESP32 powers nothing.** It only outputs actuator signals and communications. Sensors are powered from a separate regulated power rail that shares ground with the ESP32 and keeps all signals at ≤ 3.3 V.
+2. Servo power comes from the ESC's built-in 6 V / 3 A BEC (red wire of the throttle lead), connected by Y-harness. 
+3. COMMON GROUND.
 
 ## Power-up sequence
 
