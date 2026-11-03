@@ -74,54 +74,45 @@ Wire colours: signal = yellow/white, power = red, ground = black; rangefinder I2
 
 ## Make commands
 
-Run `make help` for the live list. Setup: [docs/setup.md](docs/setup.md). 
+Day-to-day commands only, in the order you'll use them. `make help` lists everything (dev, CI and firmware tools too); [docs/setup.md](docs/setup.md) has the details.
 
-**Car stack (ROS 2 + micro-ROS in Docker)**
+**Once per Pi** (first, `cp .env.example .env` and add yourself to the `docker` and `dialout` groups: docs/setup.md §1)
 
-| Target | What it does |
+| # | Command | What it does |
+| --- | --- | --- |
+| 1 | `make setup` | checks git/make/docker and builds both Docker images (it runs `fw-image` + `ros-image` for you) |
+| 2 | `make install-host` | sudo: names the ESP32 `/dev/rccar-esp32` and starts the car stack automatically at every boot. Replug USB once afterwards |
+| 3 | `make flash` | ESC off: uploads the firmware to the ESP32 (again only when `firmware/` changes) |
+
+You never run `make config` by hand: `car-up` and the boot service run it for you.
+
+**Every session**
+
+| # | Command | What it does |
+| --- | --- | --- |
+| 1 | `make car-up` | starts the stack (micro-ROS agent, supervisor, lidar driver). Already running after a boot if you did `install-host`; running it again is harmless |
+| 2 | `make car-ps` | every service shows `healthy`, then switch the ESC on |
+| 3 | `make teleop` | drive over SSH (arrows, space = brake, `x` = disarm + quit) |
+| 4 | `make car-shutdown` | disarm, stop the stack, offer to power off the Pi. Then ESC off |
+
+**Sensors** (stack running)
+
+| Command | Sensor | What it does |
+| --- | --- | --- |
+| `make rangefinder` | rangefinder (Garmin LIDAR-Lite v4) | live distance feed in the terminal |
+| `make viz` | lidar (Slamtec Mapper) | scan, map and pose on `localhost:8765` for Foxglove; forward the port with VS Code SSH |
+| `make lidar-imu` | lidar (Slamtec Mapper) | live heading, yaw rate, speed and acceleration; also saved to `logs/` |
+| `make lidar-hw-test` | lidar (Slamtec Mapper) | automated PASS/FAIL check of the real unit, car still. Run `make drivers-stop` first and `make car-up` afterwards |
+
+**When needed**
+
+| Situation | Commands |
 | --- | --- |
-| `config` | render `deploy/car/.env.generated` from `.env` + `tuning.toml [platform.$PLATFORM]` (runs in the firmware image; needs `make fw-image` first) |
-| `install-host` | sudo: install the udev rule (`/dev/rccar-esp32`) and the `rccar.service` systemd unit |
-| `ros-image` | build the ROS 2 image (`docker/ros.Dockerfile` → `rccar-ros:local`) |
-| `ros-test` | build the test image, `colcon test` + `test-result` (no hardware); `ros-test-image` / `ros-test-run` are its two halves (`unit-run` runs `deploy/tests` in the same image) |
-| `car-up` / `car-down` | start / stop `mcu-agent` + `core` (docker compose) |
-| `car-ps` / `car-logs` | health / follow logs |
-| `car-pull` | pull the pinned third-party images |
-| `car-shutdown` | disarm via the supervisor, stop the stack, then `sudo poweroff` (asks first) |
-| `ros-shell` | shell in the tools container (ROS sourced) |
-
-**ROS tools (stack running)**
-
-| Target | What it does |
-| --- | --- |
-| `teleop` | SSH keyboard driving through the supervisor |
-| `calibrate` | interactive servo center/left/right calibration, writes `tuning.toml` |
-| `tune` | push `tuning.toml` to the ESP32 and save it to flash |
-| `test` | steering sweep + failsafe check (motor stays off, never arms) |
-| `rangefinder` | live terminal feed of `/rccar/rangefinder/range` (MCU timestamp, Pi receive time, range m/cm, rate); `make mcu CMD="SENS rangefinder"` prints the sensor status and config (read-only) |
-| `viz` | live websocket feed (foxglove_bridge) on `localhost:8765` for Foxglove/Lichtblick; bound to localhost, reach it via SSH port forwarding (docs/setup.md "Lidar") |
-| `lidar-imu` | live Mapper IMU feed (heading, yaw rate, horizontal accel, speed) and `logs/lidar_imu_*.jsonl` |
-| `mcu CMD="GET"` | send one `McuCommand` to the ESP32 (`GET`, `INFO`, `PING`, `SET key val`, ...) and print the reply |
-
-**Firmware (Docker; `FW_ENV=esp32s3`)**
-
-| Target | What it does |
-| --- | --- |
-| `fw-image` | build the firmware toolchain image |
-| `build` | clean `.pio/build` (keeps the slow micro-ROS `libdeps` cache) + compile |
-| `flash` | compile + upload over COM (stack must be down, ESC off) |
-| `monitor` | raw serial monitor (stack must be down) |
-| `clean` | delete all of `firmware/esp32/.pio` (incl. `libdeps`) |
-| `compiledb` | `compile_commands.json` for clangd |
-
-**Host / dev**
-
-| Target | What it does |
-| --- | --- |
-| `setup` | check host prerequisites (git, make, docker), build the firmware and ROS images |
-| `unit` | `deploy/tests` (pytest) in the ROS test image, no hardware |
-| `check-dev` | check optional LSP binaries for Claude Code |
-| `models` | print `models/manifest.yaml` (download not implemented yet) |
+| something looks wrong | `make car-logs` |
+| USB cable replugged | `make car-down`, then `make car-up` |
+| first drive, or the servo/linkage changed | `make calibrate`, then `make test` (steering sweep; the motor never runs) |
+| edited `tuning.toml` | `make tune` |
+| after `git pull` | `make car-down`, `make ros-image`, `make flash` (only if `firmware/` changed, ESC off), `make car-up` |
 
 ## Wiring: Rangefinder (Garmin LIDAR-Lite v4 LED)
 
