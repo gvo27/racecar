@@ -27,7 +27,8 @@ Software name "lidar"/"mapper"; model name only in datasheet docs. Docs: `docs/d
 ## Bench-TBD (do not hide behind guessed values; defaults in code, not in tuning.toml)
 - `scan_angle_sign`, `map_transpose`: flip per the bench check (obstacle in front of the cap arrow must appear on +X, left on +Y; map not mirrored).
 - `map_free_is_high`: CONFIRMED False (bench 2026-11-02: Bitmap8Bit 0 unknown, 1..127 free, 128..255 occupied); parameter kept for other firmware versions.
-- IMU `linear_acceleration` units (raw), gyro rad/s assumed. Bench: acc ~0.003 at rest (no gravity), raw_acc/gyro/compass exactly 0 over repeated samples: units unresolved, IMU may only supply the quaternion.
+- IMU (fw 2.6.0_dev): orientation only. Bench: `availibilityBitMap` 131, acc ~0.003 at rest (no gravity, units unverified), gyro/raw_*/compass exactly 0. Bit layout is INFERRED (`protocol.ImuBit`, datasheet section 11; SDK lists names without values), consistent with the bench: 131 = QUATERNION + CALIBRATED_ACC + FUSION_6DOF. `/rccar/lidar/imu` marks what is provided via covariance[0] = -1 (`slamtec/imu.py`): rates unless the CALIBRATED_GYRO bit, acceleration unless the CALIBRATED_ACC bit AND param `imu_trust_acc` (default false). Values are still copied raw. The bitmap is published as the `imu_avail_bitmap` value of the `mapper_driver: link` diagnostics status (hw test reads it).
+- heading and yaw rate come from the SLAM pose (10 Hz, ~100 ms latency, jumps on relocalization/loop closure; `make lidar-imu` derives them, gating jumps), not from the IMU. A dedicated IMU (tuning.toml `[imu]`, reserved, add nothing) is needed for true yaw rate and body acceleration.
 - `rccar_description` mount offsets: UNMEASURED until the user measures them on the car. No guessed numbers.
 - no unconfirmed parameters in tuning.toml (`[platform.pi5] mapper_host` only after the bench confirms the IP).
 

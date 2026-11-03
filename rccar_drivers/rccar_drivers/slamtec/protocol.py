@@ -8,6 +8,7 @@ must confirm m/s^2 vs g before the node scales them.
 """
 import base64
 from dataclasses import dataclass, field
+import enum
 import json
 import math
 import socket
@@ -237,20 +238,61 @@ class Pose:
                    _f(r, 'roll'))
 
 
+class ImuBit(enum.IntFlag):
+    """
+    Bits of the IMU availibilityBitMap: inferred order, bench-consistent, not confirmed by Slamtec.
+
+    Slamtec SDK enum ImuBitMap. The SDK docs list the names in this order but give no
+    numeric values; the layout is sequential flags. Bench (M2M1, firmware 2.6.0_dev): bitmap 131 =
+    QUATERNION + CALIBRATED_ACC + FUSION_6DOF matches the observed data
+    (quaternion valid, acc ~0.003, every other field exactly 0).
+    """
+
+    NO_IMU_READY = 0
+    QUATERNION_READY = 1 << 0
+    CALIBRATED_ACC_READY = 1 << 1
+    CALIBRATED_GYRO_READY = 1 << 2
+    CALIBRATED_COMPASS_READY = 1 << 3
+    RAW_ACC_READY = 1 << 4
+    RAW_GYRO_READY = 1 << 5
+    RAW_COMPASS_READY = 1 << 6
+    FUSION_6DOF_READY = 1 << 7
+    FUSION_9DOF_READY = 1 << 8
+
+
+def _avail(r):
+    """Bitmap from `availibilityBitMap` (sic, device) or `availabilityBitmap`; None if absent."""
+    for key in ('availibilityBitMap', 'availabilityBitmap'):
+        v = r.get(key)
+        if isinstance(v, int) and not isinstance(v, bool):
+            return v
+    return None
+
+
 @dataclass
 class ImuSample:
-    """IMU in robot coordinates; units raw (see module docstring)."""
+    """
+    IMU in robot coordinates; units raw (see module docstring).
+
+    avail: availability bitmap (ImuBit layout, inferred) or None if the device
+    sent none.
+    """
 
     acc: tuple = (0.0, 0.0, 0.0)
     gyro: tuple = (0.0, 0.0, 0.0)
     quat: tuple = (1.0, 0.0, 0.0, 0.0)  # w, x, y, z
+    avail: int = None
 
     @classmethod
     def from_result(cls, r):
         """Build from a getimuinrobotcoordinate result."""
         q = r.get('quaternion') or {}
         quat = (_f(q, 'w', 1.0), _f(q, 'x'), _f(q, 'y'), _f(q, 'z'))
-        return cls(_xyz(r, 'acc'), _xyz(r, 'gyro'), quat)
+        return cls(_xyz(r, 'acc'), _xyz(r, 'gyro'), quat, _avail(r))
+
+    def has(self, bit):
+        """Return True if `bit` is flagged; with no bitmap every field counts as available."""
+        return self.avail is None or (self.avail & int(bit)) == int(bit)
 
 
 @dataclass

@@ -4,9 +4,28 @@ Pass/fail criteria for the physical lidar acceptance test (no rclpy).
 Used by rccar_drivers/test_hw/test_mapper_hw.py (make lidar-hw-test). Thresholds are
 module constants so they are versioned in git. Changing one needs a stated reason and
 user approval (.claude/rules/hw-testing.md). Every eval_* takes collected samples and
-returns (passed: bool, detail: str).
+returns (passed: bool, detail: str); the tri-state ones (IMU, pose yaw rate) return
+(status, detail) with status PASS / FAIL / NA ("not provided by device"). NA never fails
+the run (see overall()).
 """
 import math
+
+from rccar_drivers.slamtec.protocol import ImuBit
+
+PASS, FAIL, NA = 'PASS', 'FAIL', 'NA'
+
+
+def to_status(result):
+    """Normalise a bool or a status string to PASS / FAIL / NA."""
+    if isinstance(result, str):
+        return result
+    return PASS if result else FAIL
+
+
+def overall(statuses):
+    """PASS iff there is at least one result and none is FAIL (NA does not fail)."""
+    return PASS if statuses and all(to_status(s) != FAIL for s in statuses) else FAIL
+
 
 # --- thresholds -------------------------------------------------------------------------
 CONNECT_TIMEOUT_S = 60.0       # Mapper boots in ~40 s
@@ -19,6 +38,7 @@ IMU_MIN_RATE_FRACTION = 0.8       # of the imu_rate_hz parameter
 ACC_MS2_RANGE = (9.0, 10.6)
 ACC_G_RANGE = (0.9, 1.1)
 GYRO_Z_REST_MAX = 0.05            # rad/s, mean |z|
+POSE_YAW_RATE_REST_MAX = 0.05     # rad/s, |mean| of the SLAM pose yaw rate at rest
 QUAT_NORM_TOL = 0.02
 POSE_MIN_HZ = 5.0
 POSE_MAX_DRIFT_M = 0.05
@@ -205,3 +225,72 @@ def eval_map_known(grid, min_fraction=MAP_MIN_KNOWN_FRACTION):
 def eval_tf(resolved):
     """map->base_link resolvable."""
     return bool(resolved), 'map->base_link %s' % ('resolvable' if resolved else 'NOT resolvable')
+
+
+# --- tri-state IMU / pose-rate criteria ------------------------------------------------
+def parse_avail(text):
+    """IMU bitmap from the diagnostics value string; None if empty or unparsable."""
+    try:
+        return int(text)
+    except (TypeError, ValueError):
+        return None
+
+
+def _has(avail, bit):
+    """Bit flagged, or no bitmap observed (legacy: assume every field is provided)."""
+    return avail is None or (avail & int(bit)) == int(bit)
+
+
+def _na_bit(name):
+    return NA, 'not provided by device (%s bit absent from availability bitmap)' % name
+
+
+def eval_imu_acc_units(accs, avail, acc_provided=True):
+    """
+    Acc units at rest.
+
+    NA when the CALIBRATED_ACC bit is absent from the bitmap, or when the driver marks
+    acceleration as not provided (linear_acceleration_covariance[0] == -1, i.e.
+    imu_trust_acc is false: fw 2.6.0_dev reports a gravity-removed ~0.003 whose
+    semantics are unverified, so a units check would fail on a correct device).
+    """
+    if not _has(avail, ImuBit.CALIBRATED_ACC_READY):
+        return _na_bit('CALIBRATED_ACC')
+    if not acc_provided:
+        return NA, ('not provided by driver (imu_trust_acc false: '
+                    'linear_acceleration_covariance[0] == -1)')
+    ok, detail = eval_acc_units(accs)
+    return to_status(ok), detail
+
+
+def eval_imu_gyro_rest(gyro_z, avail):
+    """Gyro z at rest; NA when the CALIBRATED_GYRO bit is absent from the bitmap."""
+    if not _has(avail, ImuBit.CALIBRATED_GYRO_READY):
+        return _na_bit('CALIBRATED_GYRO')
+    ok, detail = eval_gyro_rest(gyro_z)
+    return to_status(ok), detail
+
+
+def eval_imu_quat_provided(avail):
+    """Check that the device flags a quaternion; NA if no bitmap was observed."""
+    if avail is None:
+        return NA, 'no availability bitmap observed'
+    ok = _has(avail, ImuBit.QUATERNION_READY)
+    return to_status(ok), 'bitmap %d, QUATERNION bit %s' % (avail, 'set' if ok else 'absent')
+
+
+def eval_pose_yaw_rate_rest(samples, max_abs=POSE_YAW_RATE_REST_MAX):
+    """|mean| of the SLAM pose yaw rate over (t_s, yaw_rad) samples (unwrapped steps)."""
+    if len(samples) < 2:
+        return FAIL, 'fewer than 2 poses'
+    total = span = 0.0
+    for (t0, a0), (t1, a1) in zip(samples, samples[1:]):
+        if t1 <= t0:
+            continue
+        total += math.atan2(math.sin(a1 - a0), math.cos(a1 - a0))
+        span += t1 - t0
+    if span <= 0:
+        return FAIL, 'no time span between poses'
+    rate = total / span
+    return to_status(abs(rate) < max_abs), 'pose yaw rate %.4f rad/s (max |%.2f|)' % (
+        rate, max_abs)

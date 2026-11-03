@@ -14,7 +14,7 @@ paths:
 | /rccar/mcu/event | McuEvent | esp32 | reliable depth 10 | supervisor, mcu_bridge |
 | /rccar/rangefinder/range | sensor_msgs/Range | esp32 (fake_mcu in tests) | best_effort | rangefinder_monitor, any |
 | /rccar/lidar/scan | sensor_msgs/LaserScan (frame lidar_link, ~10 Hz) | rccar_drivers mapper_driver | best_effort (sensor_data) | viz, any |
-| /rccar/lidar/imu | sensor_msgs/Imu (frame lidar_imu_link, ~50 Hz; accel units raw/bench-TBD, gyro rad/s assumed) | mapper_driver | best_effort | lidar_imu_monitor, any |
+| /rccar/lidar/imu | sensor_msgs/Imu (frame lidar_imu_link, ~50 Hz; orientation only on fw 2.6.0_dev; rate/accel covariance[0]=-1 (not provided), values raw) | mapper_driver | best_effort | lidar_imu_monitor, any |
 | /rccar/mapper/pose | geometry_msgs/PoseStamped (pose of lidar_link in map, ~10 Hz) | mapper_driver | best_effort | lidar_imu_monitor, any |
 | /rccar/mapper/map | nav_msgs/OccupancyGrid (~0.5 Hz, map_period_s 2.0) | mapper_driver | reliable + transient_local depth 1 | viz, any |
 | /diagnostics | diagnostic_msgs/DiagnosticArray (status 'mapper_driver: link') | mapper_driver | default | any |

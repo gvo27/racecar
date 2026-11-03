@@ -9,8 +9,8 @@ callbacks (timers for diagnostics + heartbeat) never touch the socket.
 
 Stamps are the node clock at receive time, and LaserScan.scan_time is the
 polling period (1 / scan_rate_hz): the device's per-scan pose/timestamp is not
-used yet. IMU values are published raw:
-the acc unit (m/s^2 vs g) is bench-TBD (see slamtec.protocol docstring).
+used yet. IMU values are published raw; the covariances mark what is provided
+(slamtec.imu: orientation only on fw 2.6.0_dev; acc needs `imu_trust_acc`).
 
 TF: map->odom identity (static, once on activate); odom->base_link = Mapper pose
 of the lidar composed with the inverse of base_link->lidar_link (looked up from
@@ -27,6 +27,7 @@ from rccar_drivers.heartbeat import touch
 from rccar_drivers.slamtec import convert
 from rccar_drivers.slamtec.diagnostics import link_level, SCAN_FRESH_S
 from rccar_drivers.slamtec.frames import odom_to_base
+from rccar_drivers.slamtec.imu import imu_fields
 from rccar_drivers.slamtec.params import check_params
 from rccar_drivers.slamtec.protocol import MapperClient
 from rccar_drivers.slamtec.vehicle_state import quat_to_yaw
@@ -58,6 +59,8 @@ PARAMS = {
     'map_frame': 'map', 'odom_frame': 'odom', 'base_frame': 'base_link',
     'lidar_frame': 'lidar_link', 'imu_frame': 'lidar_imu_link',
     'publish_tf': True, 'heartbeat_file': '',
+    # linear_acceleration is gravity-removed with unverified units on fw 2.6.0_dev
+    'imu_trust_acc': False,
 }
 
 
@@ -91,12 +94,17 @@ class _RosSink:
         msg = Imu()
         msg.header.stamp = n.get_clock().now().to_msg()
         msg.header.frame_id = n.cfg['imu_frame']
-        w, x, y, z = sample.quat
-        msg.orientation.w, msg.orientation.x = w, x
-        msg.orientation.y, msg.orientation.z = y, z
-        msg.angular_velocity.x, msg.angular_velocity.y, msg.angular_velocity.z = sample.gyro
+        f = imu_fields(sample, n.cfg['imu_trust_acc'])
+        n.imu_avail = sample.avail  # read by the diagnostics timer (atomic int)
+        (msg.orientation.w, msg.orientation.x,
+         msg.orientation.y, msg.orientation.z) = f['orientation']
+        msg.orientation_covariance = f['orientation_covariance']
+        (msg.angular_velocity.x, msg.angular_velocity.y,
+         msg.angular_velocity.z) = f['angular_velocity']
+        msg.angular_velocity_covariance = f['angular_velocity_covariance']
         (msg.linear_acceleration.x, msg.linear_acceleration.y,
-         msg.linear_acceleration.z) = sample.acc
+         msg.linear_acceleration.z) = f['linear_acceleration']
+        msg.linear_acceleration_covariance = f['linear_acceleration_covariance']
         n.pub_imu.publish(msg)
 
     def on_pose(self, pose):
@@ -144,6 +152,7 @@ class MapperDriver(Node):
         self.cfg = dict(PARAMS)
         self.pub_scan = self.pub_imu = self.pub_pose = None
         self.pub_map = self.pub_diag = None
+        self.imu_avail = None  # latest ImuSample.avail (worker thread writes)
         self._worker = None
         self._diag_timer = self._hb_timer = None
         self._tf_buf = self._tf_listener = None
@@ -306,6 +315,8 @@ class MapperDriver(Node):
                      value='' if age is None else f'{age:.2f}'),
             KeyValue(key='board_temperature_c',
                      value='' if temp is None else f'{temp:.1f}'),
+            KeyValue(key='imu_avail_bitmap',
+                     value='' if self.imu_avail is None else str(self.imu_avail)),
         ]
         msg = DiagnosticArray()
         msg.header.stamp = self.get_clock().now().to_msg()

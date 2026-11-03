@@ -113,6 +113,10 @@ class TestMapperDriver(unittest.TestCase):
         self.assertTrue(self._wait(lambda: 'imu' in self.got), 'no Imu')
         self.assertEqual(self.got['imu'].header.frame_id, 'lidar_imu_link')
         self.assertAlmostEqual(self.got['imu'].angular_velocity.z, 0.3)
+        # fake sends no bitmap: legacy (all provided) except acc, gated by imu_trust_acc=False
+        self.assertEqual(self.got['imu'].orientation_covariance[0], 0.0)
+        self.assertEqual(self.got['imu'].angular_velocity_covariance[0], 0.0)
+        self.assertEqual(self.got['imu'].linear_acceleration_covariance[0], -1.0)
 
     def test_map(self):
         self.assertTrue(self._wait(lambda: 'map' in self.got), 'no OccupancyGrid')

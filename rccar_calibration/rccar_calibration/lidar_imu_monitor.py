@@ -7,8 +7,9 @@ import time
 
 from geometry_msgs.msg import PoseStamped
 from rccar_calibration.lidar_imu_format import (
-    format_line, HEADER, log_filename, make_record, planar_speed, quat_to_yaw,
-    RateEstimator, Throttle)
+    format_line, HEADER, log_filename, make_record, quat_to_yaw, RateEstimator,
+    Throttle)
+from rccar_calibration.lidar_imu_pose import PlanarEstimator
 import rclpy
 from rclpy.node import Node
 from rclpy.qos import qos_profile_sensor_data
@@ -33,9 +34,9 @@ class LidarImuMonitor(Node):
         self._rate = RateEstimator(2.0)
         self._throttle = Throttle(PRINT_PERIOD_S)
         self._last_rx = None
-        self._prev_pose = None
-        self._heading_deg = None
-        self._speed = None
+        self._est = PlanarEstimator()
+        self._planar = None
+        self._jump_latched = False
         self._log = self._open_log(log_dir)
         self.create_subscription(Imu, self.imu_topic, self._on_imu,
                                  qos_profile_sensor_data)
@@ -58,13 +59,11 @@ class LidarImuMonitor(Node):
         return self.get_clock().now().nanoseconds * 1e-9
 
     def _on_pose(self, msg: PoseStamped):
-        now = self._now_s()
         q = msg.pose.orientation
-        self._heading_deg = math.degrees(quat_to_yaw(q.x, q.y, q.z, q.w))
-        cur = (msg.pose.position.x, msg.pose.position.y, now)
-        if self._prev_pose is not None:
-            self._speed = planar_speed(self._prev_pose, cur)
-        self._prev_pose = cur
+        yaw = quat_to_yaw(q.x, q.y, q.z, q.w)
+        self._planar = self._est.update(
+            self._now_s(), msg.pose.position.x, msg.pose.position.y, yaw)
+        self._jump_latched = self._jump_latched or self._planar.jump
 
     def _on_imu(self, msg: Imu):
         now = self._now_s()
@@ -73,12 +72,22 @@ class LidarImuMonitor(Node):
         if not self._throttle.ready(now):
             return
         q = msg.orientation
+        imu_heading = (None if msg.orientation_covariance[0] == -1.0 else
+                       math.degrees(quat_to_yaw(q.x, q.y, q.z, q.w)))
+        gyro = (None if msg.angular_velocity_covariance[0] == -1.0 else
+                math.degrees(msg.angular_velocity.z))
+        acc = (None if msg.linear_acceleration_covariance[0] == -1.0 else
+               (msg.linear_acceleration.x, msg.linear_acceleration.y))
+        p = self._planar
+        heading = None if p is None else math.degrees(p.heading)
+        yaw_rate = None if p is None or p.yaw_rate is None else math.degrees(p.yaw_rate)
         values = (
-            now, self._heading_deg,
-            math.degrees(quat_to_yaw(q.x, q.y, q.z, q.w)),
-            math.degrees(msg.angular_velocity.z),
-            msg.linear_acceleration.x, msg.linear_acceleration.y,
-            self._speed, self._rate.rate(now))
+            now, heading, imu_heading, yaw_rate,
+            None if p is None else p.speed,
+            None if p is None else p.acc_long,
+            None if p is None else p.acc_lat,
+            self._rate.rate(now), gyro, acc, self._jump_latched)
+        self._jump_latched = False
         print(format_line(*values), flush=True)
         if self._log is not None:
             self._log.write(json.dumps(make_record(*values)) + '\n')
@@ -90,10 +99,10 @@ class LidarImuMonitor(Node):
         if stale:
             print(f'waiting for {self.imu_topic} (Mapper powered + on Wi-Fi? '
                   'check: make car-logs, drivers service)', flush=True)
-        # a stale pose must not report a frozen speed
+        # a stale pose must not report a frozen speed/rate
         if stale:
-            self._speed = None
-            self._prev_pose = None
+            self._est.reset()
+            self._planar = None
 
     def close(self):
         if self._log is not None:

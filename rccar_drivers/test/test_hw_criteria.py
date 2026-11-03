@@ -118,3 +118,76 @@ def test_publisher_precheck():
     ok, detail = c.eval_single_publisher(2)
     assert not ok and 'make drivers-stop' in detail
     assert not c.eval_single_publisher(0)[0]
+
+
+# --- tri-state (PASS / FAIL / NA) ------------------------------------------------------
+BENCH_AVAIL = 131  # quaternion + calibrated acc + 6dof fusion (inferred layout)
+
+
+def test_status_constants():
+    assert (c.PASS, c.FAIL, c.NA) == ('PASS', 'FAIL', 'NA')
+    assert c.to_status(True) == 'PASS' and c.to_status(False) == 'FAIL'
+    assert c.to_status('NA') == 'NA'
+
+
+def test_overall_na_does_not_fail():
+    assert c.overall(['PASS', 'NA', 'PASS']) == 'PASS'
+    assert c.overall(['PASS', 'FAIL', 'NA']) == 'FAIL'
+    assert c.overall([]) == 'FAIL'
+
+
+def test_parse_avail():
+    assert c.parse_avail('131') == 131
+    assert c.parse_avail('') is None
+    assert c.parse_avail(None) is None
+    assert c.parse_avail('x') is None
+
+
+def test_imu_acc_units_na_when_bit_absent():
+    st, detail = c.eval_imu_acc_units([(0.0, 0.0, 0.003)], 1)  # quaternion only
+    assert st == 'NA' and 'not provided' in detail
+
+
+def test_imu_acc_units_evaluated_when_bit_present_or_unknown_bitmap():
+    assert c.eval_imu_acc_units([(0.0, 0.0, 9.8)] * 3, BENCH_AVAIL)[0] == 'PASS'
+    assert c.eval_imu_acc_units([(0.0, 0.0, 0.003)] * 3, BENCH_AVAIL)[0] == 'FAIL'
+    assert c.eval_imu_acc_units([(0.0, 0.0, 9.8)] * 3, None)[0] == 'PASS'
+
+
+def test_imu_acc_units_na_when_driver_does_not_provide_acc():
+    # bench fw 2.6.0_dev: bitmap 131 flags CALIBRATED_ACC, but imu_trust_acc is false
+    st, detail = c.eval_imu_acc_units([(0.0, 0.0, 0.003)] * 3, BENCH_AVAIL, False)
+    assert st == 'NA' and 'imu_trust_acc' in detail
+
+
+def test_imu_gyro_rest_na_when_bit_absent():
+    assert c.eval_imu_gyro_rest([0.0] * 3, BENCH_AVAIL)[0] == 'NA'
+    assert c.eval_imu_gyro_rest([0.0] * 3, BENCH_AVAIL | 4)[0] == 'PASS'
+    assert c.eval_imu_gyro_rest([0.3] * 3, BENCH_AVAIL | 4)[0] == 'FAIL'
+    assert c.eval_imu_gyro_rest([0.0] * 3, None)[0] == 'PASS'
+
+
+def test_imu_quaternion_provided():
+    assert c.eval_imu_quat_provided(BENCH_AVAIL)[0] == 'PASS'
+    assert c.eval_imu_quat_provided(2)[0] == 'FAIL'
+    assert c.eval_imu_quat_provided(None)[0] == 'NA'  # bitmap unobserved: cannot tell
+
+
+def test_pose_yaw_rate_rest():
+    still = [(0.1 * i, 0.5) for i in range(20)]
+    st, detail = c.eval_pose_yaw_rate_rest(still)
+    assert st == 'PASS' and 'rad/s' in detail
+    turning = [(0.1 * i, 0.2 * 0.1 * i) for i in range(20)]  # 0.2 rad/s
+    assert c.eval_pose_yaw_rate_rest(turning)[0] == 'FAIL'
+    assert c.eval_pose_yaw_rate_rest([(0.0, 0.0)])[0] == 'FAIL'
+    assert c.eval_pose_yaw_rate_rest([])[0] == 'FAIL'
+
+
+def test_pose_yaw_rate_rest_wrap_small_step():
+    # monotone slow rotation across the +-pi seam: 0.01 rad/s, passes
+    poses = []
+    for i in range(20):
+        yaw = math.pi - 0.1 + 0.001 * i
+        yaw = (yaw + math.pi) % (2 * math.pi) - math.pi
+        poses.append((0.1 * i, yaw))
+    assert c.eval_pose_yaw_rate_rest(poses)[0] == 'PASS'

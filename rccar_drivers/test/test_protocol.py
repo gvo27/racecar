@@ -255,3 +255,33 @@ def test_command_error_keeps_socket_open():
 
 def test_command_error_is_a_mapper_error():
     assert issubclass(p.MapperCommandError, p.MapperError)
+
+
+def test_imu_avail_parsed_sic_and_correct_spelling():
+    assert p.ImuSample.from_result({'availibilityBitMap': 131}).avail == 131
+    assert p.ImuSample.from_result({'availabilityBitmap': 3}).avail == 3
+    assert p.ImuSample.from_result({}).avail is None
+    assert p.ImuSample.from_result({'availibilityBitMap': 'x'}).avail is None
+    assert p.ImuSample.from_result({'availibilityBitMap': True}).avail is None
+
+
+def test_imu_bit_values_inferred_layout():
+    assert p.ImuBit.QUATERNION_READY == 1
+    assert p.ImuBit.CALIBRATED_ACC_READY == 2
+    assert p.ImuBit.CALIBRATED_GYRO_READY == 4
+    assert p.ImuBit.FUSION_6DOF_READY == 128
+    assert p.ImuBit.FUSION_9DOF_READY == 256
+    assert 'inferred' in p.ImuBit.__doc__
+
+
+def test_imu_has_bench_bitmap_131():
+    s = p.ImuSample.from_result({'availibilityBitMap': 131})
+    assert s.has(p.ImuBit.QUATERNION_READY)
+    assert s.has(p.ImuBit.CALIBRATED_ACC_READY)
+    assert not s.has(p.ImuBit.CALIBRATED_GYRO_READY)
+    assert not s.has(p.ImuBit.RAW_ACC_READY)
+
+
+def test_imu_has_without_bitmap_is_legacy_all_available():
+    s = p.ImuSample.from_result({})
+    assert all(s.has(b) for b in p.ImuBit)

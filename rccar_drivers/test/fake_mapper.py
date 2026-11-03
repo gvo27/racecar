@@ -45,6 +45,17 @@ MAP_W, MAP_H = 4, 3
 MAP_CELLS = bytes([0, 0, 255, 255, 1, 1, 0, 200, 0, 5, 128, 0])
 
 
+# Bench (M2M1 fw 2.6.0_dev): bitmap 131, orientation + near-zero acc, every rate exactly 0.
+M2M1_IMU = {
+    'acc': {'x': 0.003, 'y': 0.0, 'z': 0.0},
+    'gyro': {'x': 0.0, 'y': 0.0, 'z': 0.0},
+    'raw_acc': {'x': 0.0, 'y': 0.0, 'z': 0.0},
+    'raw_gyro': {'x': 0.0, 'y': 0.0, 'z': 0.0},
+    'compass': {'x': 0.0, 'y': 0.0, 'z': 0.0},
+    'quaternion': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+    'availibilityBitMap': 131}
+
+
 def default_results():
     """Return canned results keyed by command."""
     return {
@@ -170,8 +181,11 @@ def main(argv=None):
     """Run a fake Mapper until killed (for launch tests)."""
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--port', type=int, default=0)
+    ap.add_argument('--m2m1-imu', action='store_true',
+                    help='mimic the real M2M1 IMU: bitmap 131, zero gyro, no gravity in acc')
     args = ap.parse_args(argv)
-    server = FakeMapper(port=args.port)
+    server = FakeMapper(results={'getimuinrobotcoordinate': M2M1_IMU} if args.m2m1_imu else None,
+                        port=args.port)
     print(server.port, flush=True)
     try:
         threading.Event().wait()

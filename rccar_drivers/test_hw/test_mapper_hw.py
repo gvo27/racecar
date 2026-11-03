@@ -98,6 +98,8 @@ class TestMapperHardware(unittest.TestCase):
                     for kv in st.values:
                         if kv.key == 'sdp_version' and kv.value:
                             cls.extra['sdp_version'] = kv.value
+                        if kv.key == 'imu_avail_bitmap' and kv.value:
+                            cls.extra['imu_avail_bitmap'] = kv.value
 
         def on_scan(m):
             cls.scan.append((now(), m.header.stamp.sec + m.header.stamp.nanosec * 1e-9,
@@ -106,7 +108,7 @@ class TestMapperHardware(unittest.TestCase):
         def on_imu(m):
             q = m.orientation
             cls.imu.append((now(), m.linear_acceleration, m.angular_velocity,
-                            (q.x, q.y, q.z, q.w)))
+                            (q.x, q.y, q.z, q.w), m.linear_acceleration_covariance[0]))
 
         def on_pose(m):
             q = m.pose.orientation
@@ -170,11 +172,18 @@ class TestMapperHardware(unittest.TestCase):
     def _window(cls, samples):
         return [s for s in samples if cls.w0 <= s[0] <= cls.w1]
 
+    @classmethod
+    def _avail(cls):
+        """IMU availability bitmap seen in /diagnostics (None: not observed => legacy)."""
+        return hc.parse_avail(cls.extra.get('imu_avail_bitmap'))
+
     def _check(self, name, threshold, result):
         passed, detail = result
-        type(self).results.append({'criterion': name, 'passed': bool(passed),
+        status = hc.to_status(passed)
+        type(self).results.append({'criterion': name, 'status': status,
+                                   'passed': status != hc.FAIL,
                                    'threshold': threshold, 'measured': detail})
-        self.assertTrue(passed, '%s: %s' % (name, detail))
+        self.assertNotEqual(status, hc.FAIL, '%s: %s' % (name, detail))
 
     def _need(self):
         if self.abort:
@@ -243,10 +252,12 @@ class TestMapperHardware(unittest.TestCase):
     def test_21_imu_units(self):
         self._need()
         w = self._window(self.imu)
-        res = hc.eval_acc_units([(s[1].x, s[1].y, s[1].z) for s in w])
-        if res[0]:
+        accs = [(s[1].x, s[1].y, s[1].z) for s in w]
+        acc_provided = any(s[4] != -1.0 for s in w)
+        res = hc.eval_imu_acc_units(accs, self._avail(), acc_provided)
+        if res[0] == hc.PASS:
             type(self).extra['imu_units'] = hc.classify_acc_units(
-                sum(math.sqrt(s[1].x ** 2 + s[1].y ** 2 + s[1].z ** 2) for s in w) / len(w))
+                sum(math.sqrt(x * x + y * y + z * z) for x, y, z in accs) / len(w))
         else:
             type(self).extra.setdefault('imu_units', 'unknown')
         self._check('imu acc units (rest)', 'm/s^2 [%.1f,%.1f] or g [%.1f,%.1f]' % (
@@ -256,13 +267,18 @@ class TestMapperHardware(unittest.TestCase):
         self._need()
         w = self._window(self.imu)
         self._check('imu gyro z at rest', '< %.2f rad/s' % hc.GYRO_Z_REST_MAX,
-                    hc.eval_gyro_rest([s[2].z for s in w]))
+                    hc.eval_imu_gyro_rest([s[2].z for s in w], self._avail()))
 
     def test_23_imu_quat(self):
         self._need()
         w = self._window(self.imu)
         self._check('imu quaternion norm', '1 +- %.2f' % hc.QUAT_NORM_TOL,
                     hc.eval_quat_norm([s[3] for s in w]))
+
+    def test_24_imu_quat_provided(self):
+        self._need()
+        self._check('imu quaternion provided', 'QUATERNION bit set',
+                    hc.eval_imu_quat_provided(self._avail()))
 
     def test_30_pose_rate(self):
         self._need()
@@ -281,6 +297,13 @@ class TestMapperHardware(unittest.TestCase):
         self._check('pose drift (stationary)', '< %.2f m, < %.0f deg' % (
             hc.POSE_MAX_DRIFT_M, hc.POSE_MAX_DRIFT_DEG),
             hc.eval_pose_drift([s[1:] for s in w]))
+
+    def test_33_pose_yaw_rate_rest(self):
+        self._need()
+        w = self._window(self.pose)
+        self._check('pose yaw rate (stationary)',
+                    '|mean| < %.2f rad/s' % hc.POSE_YAW_RATE_REST_MAX,
+                    hc.eval_pose_yaw_rate_rest([(s[0], s[3]) for s in w]))
 
     def test_40_map_received(self):
         self._need()
@@ -306,17 +329,19 @@ class TestMapperHardware(unittest.TestCase):
     def _report(cls):
         res = cls.results
         width = max([len(r['criterion']) for r in res] + [9])
-        print('\n%-*s  %-5s  %s' % (width, 'criterion', 'RESULT', 'measured'))
+        print('\n%-*s  %-6s  %s' % (width, 'criterion', 'RESULT', 'measured'))
         for r in res:
-            print('%-*s  %-6s  %s' % (width, r['criterion'],
-                                      'PASS' if r['passed'] else 'FAIL', r['measured']))
-        ok = bool(res) and all(r['passed'] for r in res)
-        print('OVERALL: %s (%d/%d)' % ('PASS' if ok else 'FAIL',
-                                       sum(r['passed'] for r in res), len(res)))
+            print('%-*s  %-6s  %s' % (width, r['criterion'], r['status'], r['measured']))
+        overall = hc.overall([r['status'] for r in res])
+        ok = overall == hc.PASS
+        counts = {k: sum(1 for r in res if r['status'] == k) for k in (hc.PASS, hc.FAIL, hc.NA)}
+        print('OVERALL: %s (%d PASS, %d FAIL, %d NA of %d)' % (
+            overall, counts[hc.PASS], counts[hc.FAIL], counts[hc.NA], len(res)))
         stamp = datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%SZ')
         report = {'utc': stamp, 'git_sha': GIT_SHA, 'mapper_host': HOST,
                   'sdp_version': cls.extra.get('sdp_version', ''),
                   'imu_units': cls.extra.get('imu_units', ''),
+                  'imu_avail_bitmap': cls.extra.get('imu_avail_bitmap', ''),
                   'overall_pass': ok, 'criteria': res}
         try:
             os.makedirs(LOG_DIR, exist_ok=True)
