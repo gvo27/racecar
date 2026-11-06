@@ -33,7 +33,7 @@ Prices/stock as checked 2026-10-30; confirm before ordering.
 | mating, J11 (Mapper harness) | 1 | Slamtec Mapper M2M1 power pigtail | n/a | 22 AWG 3 A USB-A male 2-wire pigtail (XHP-2 on the board end); lab/owner stock? **TBD** | n/a | J11 pin 1 +5V_SENS to red/VBUS, pin 2 GND to black. Non-board item; not in totals. Never power the Mapper from Pi USB or straight from the pack | — | not in totals |
 | mating, all XH | 26 | Crimp contacts | n/a | JST SXH-001T-P0.6 | n/a | 22-28 AWG; 26 = 3+3+6+4+5x2 pins | [DigiKey](https://www.digikey.com/en/products/detail/jst-sales-america-inc/SXH-001T-P0-6/527371) | est. 0.10 |
 | Stock | 1 | Copper-clad board blank | n/a | Kepro P22-365G FR-4, 2 oz, double-sided, 3" x 6" x 0.062" | n/a | 76.2 x 152.4 x 1.57 mm; lab stock (5 pcs, dated 1997, unsensitized: scrub oxide before milling) | — | 0.00 (lab stock) |
-| Rivets | about 20 (TBD) | PCB copper rivets (vias) | n/a | proposed 0.8 mm ID / 1.0 mm OD; size TBD pending lab tech | n/a | hole about 1.1 mm, collar about 1.6 mm; max board 1.6 mm; solder both sides; qty and size TBD | — | est. 0.10 (unverified) |
+| Rivets | about 20 | PCB through-hole rivets (vias) | n/a | LPKF EasyContac kit (0.6/0.8/1.0/1.2 mm) + setting tool, lab stock, $0; use 0.8 mm (≈20) | n/a | 0.8 mm: hole 1.1 mm, collar 1.6 mm; max board 1.6 mm; solder both sides; 1.2 mm / 1.0 mm optional, see `fab_handoff.md` | — | 0.00 (lab stock) |
 | Dowel pins | 2-3 | Flip registration | n/a | from Makera PCB Fabrication Pack (diameter TBD) | n/a | lab stock | — | 0.00 (lab stock) |
 | V-bits / drill bits | n/a | Isolation milling, drilling | n/a | Makera pack: 2x 60° 0.1 mm, 2x 30° 0.2 mm V-bits; 20x milling/drilling bits (diameters TBD) | n/a | lab stock | — | 0.00 (lab stock) |
 | J6 option | 1 | Pi 5 pigtail header (replaces Phoenix 1715721 if chosen) | n/a | JST B2P-VH(LF)(SN) + VHR-2N + 2x SVH-21T-P1.1 | `JST_VH_B2P-VH_1x02_P3.96mm_Vertical` | 3.96 mm; rating per JST VH datasheet, confirm; SVH-21T-P1.1 takes 18-22 AWG (confirm) | — | TBD; not in totals |
@@ -52,10 +52,10 @@ Prices/stock as checked 2026-10-30; confirm before ordering.
 | D1, C1-C9, FB1, U3, R1-R3, D2-D4 | 4.32 |
 | J6/J7 | 1.60 |
 | XH: 9 headers (4 x 0.15 + 5 x 0.10 = 1.10) + 9 housings (1.10) + 26 crimps (2.60) | 4.80 |
-| Rivets: about 20 x 0.10 (est., qty TBD); stock, dowels, bits: lab stock 0.00 | 2.00 |
-| **Total** | **about 89.0** |
+| Stock, rivets (EasyContac kit), dowels, bits: lab stock | 0.00 |
+| **Total** | **about 87.0** |
 
-Excluding U1 (already owned): about 49.1. (Check: 3.40 + 39.95 + 32.95 + 4.32 + 1.60 + 4.80 + 2.00 = 89.02; minus 39.95 = 49.07.) The U2 figure is a placeholder until the D24V60F5 price is checked. No PCB fab cost: rev A is milled in-house. J6/J7 JST options are not included. Buy spare fuses and a few spare passives.
+Excluding U1 (already owned): about 47.1. (Check: 3.40 + 39.95 + 32.95 + 4.32 + 1.60 + 4.80 + 0.00 = 87.02; minus 39.95 = 47.07.) The U2 figure is a placeholder until the D24V60F5 price is checked. No PCB fab cost: rev A is milled in-house. J6/J7 JST options are not included. Buy spare fuses and a few spare passives.
 
 ## Out of stock / backorder (as checked)
 

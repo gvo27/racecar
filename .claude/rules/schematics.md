@@ -28,8 +28,8 @@ paths:
 - J3/J4 XH current: 3 A/pin with 22 AWG only; BEC pin up to 3 A = 100 % of rating. Never claim it "fits" or is "within" rating.
 - Garmin LIDAR-Lite v4 on J8 (4-pin XH, pin order = Garmin 1–4); I2C_SDA GPIO8, I2C_SCL GPIO9 via J5; no external pull-ups (13 kΩ internal to 3.3 V).
 - Power to the Pi 5 and ESP32 leaves through 2-wire USB-C pigtails (J6/J7) so their own USB-C input protection stays in the path.
-- Rev A prototype is milled in-house on a Makera Carvera from 2 oz double-sided FR-4 (3"×6"): no plated holes; vias are soldered copper rivets (size TBD); DRC clearance ≥0.4 mm; route THT connector pins on the bottom; board outline fits the stock.
-- Net classes live in `rc_power_board.kicad_pro`; clearance 0.4 mm all classes; HighCurrent 6.0, Power5A (`+5V_CPU`, `+5V_SENS`) 1.6, Power3A (`*+6V_BEC`) 1.0, Default 0.5 mm; DRC rules min clearance 0.4, track 0.5, via 2.0, annular 0.45, min hole 0.8; via 2.0/1.1 mm (rivet, provisional). `fab_handoff.md` matches the plan's net-class table for rev A; fab-house revisions restore the plan values.
+- Rev A prototype is milled in-house on a Makera Carvera from 2 oz double-sided FR-4 (3"×6"): no plated holes; vias are LPKF EasyContac 0.8 mm rivets (drill 1.1 / pad 2.0 mm; 1.2 mm optional for high current); DRC clearance ≥0.4 mm; route THT connector pins on the bottom; board outline fits the stock.
+- Net classes live in `rc_power_board.kicad_pro`; clearance 0.4 mm all classes; HighCurrent 6.0, Power5A (`+5V_CPU`, `+5V_SENS`) 1.6, Power3A (`*+6V_BEC`) 1.0, Default 0.5 mm; DRC rules min clearance 0.4, track 0.5, via 2.0, annular 0.45, min hole 0.8; via 2.0/1.1 mm (EasyContac 0.8 mm rivet). `fab_handoff.md` matches the plan's net-class table for rev A; fab-house revisions restore the plan values.
 
 ## Tooling (kicad-happy@kicad-happy)
 - Review/analysis => `kicad` skill; subcircuit checks => `spice` skill (needs ngspice); EMC once a PCB exists => `emc`.

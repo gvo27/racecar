@@ -17,7 +17,7 @@ V-bit isolation milling, Gerber + Excellon via MakeraCAM. The board is not fabri
 - **Bottom (B.Cu):** signal and power routing; VBAT / HighCurrent as wide pours.
 - **Top (F.Cu):** GND pour, stitched to bottom GND with a few rivets near connectors and regulators. Each rivet is manual: keep the count low. Unplated, so THT pads cannot be soldered on top: set the F.Cu GND zone to "Pad connections: None" for THT pads (or a custom rule excluding THT pads from the F.Cu zone), and connect every THT GND pin on B.Cu. The top pour joins bottom GND only through soldered rivet stitching.
 - **Placement:** place all SMD parts on the bottom (B.Cu side; select + F to flip); THT parts on top, soldered from the bottom. SMD on the bottom is soldered on the routing side, so no rivets are needed per pad.
-- Keep current-carrying paths off rivets. A 0.8 mm-ID rivet is fine for signals and GND stitching; for HighCurrent use several rivets in parallel or avoid the layer change.
+- Keep current-carrying paths off rivets. A 0.8 mm EasyContac rivet is fine for signals and GND stitching; for HighCurrent use several rivets in parallel (optionally the 1.2 mm size) or avoid the layer change.
 
 ## DRC and net classes (provisional)
 
@@ -28,13 +28,13 @@ Isolation width per pass is about tip + 2·depth·tan(half-angle): 30°/0.2 mm t
 | Min clearance (all net classes) | 0.4 mm (was 0.2) |
 | Min track | 0.5 mm |
 | Min annular ring | 0.45 mm for the rivet pad ((2.0 - 1.1) / 2; no plating); enlarge pads where possible |
-| Via (rivet), all classes | 2.0 mm pad / 1.1 mm hole, pending rivet size |
+| Via (EasyContac 0.8 rivet), all classes | 2.0 mm pad / 1.1 mm hole |
 
 Net classes (`rc_power_board.kicad_pro`; HighCurrent = `*VBAT*`, GND; Power5A = `+5V_CPU`, `+5V_SENS`; Power3A = `*+6V_BEC`). Clearance 0.4 mm everywhere:
 
-| Class | Track width | Via (rivet, pad / hole) |
+| Class | Track width | Via (EasyContac rivet, pad / hole) |
 | --- | --- | --- |
-| HighCurrent | 6.0 mm or a zone | 2.0 / 1.1 mm, several in parallel if a layer change is unavoidable |
+| HighCurrent | 6.0 mm or a zone | 2.0 / 1.1 mm, several in parallel if a layer change is unavoidable (optional 1.2 mm rivet: 3.0 / 1.7 mm) |
 | Power5A (`+5V_CPU`, `+5V_SENS`) | 1.6 mm | 2.0 / 1.1 mm |
 | Power3A (`*+6V_BEC`) | 1.0 mm | 2.0 / 1.1 mm |
 | Default | 0.5 mm (was 0.25) | 2.0 / 1.1 mm |
@@ -43,23 +43,28 @@ The project DRC rules in `rc_power_board.kicad_pro` are set to match: `min_clear
 
 **U3 flag (owner decides).** AP2112K SOT-23-5 pads are 0.6 mm wide at 0.95 mm pitch, so the gap is 0.35 mm, below 0.4 mm. Options: (1) custom U3 footprint with pads about 0.5 mm wide (gap about 0.45 mm); (2) accept a local DRC exception: Board Setup > Design Rules > Custom Rules, `(version 1) (rule U3_fine (condition "A.memberOfFootprint('U3') || B.memberOfFootprint('U3')") (constraint clearance (min 0.3mm)))`. Either way, mill U3 with the 60°/0.1 mm bit. 0805 passives are fine. XH pads (1.7 x 2.0 mm at 2.5 mm pitch) leave a 0.8 mm gap.
 
-## Vias: copper rivets
+## Vias: LPKF EasyContac rivets
 
-No plated through-holes. Vias are PCB copper rivets, pressed then **soldered on both sides**. Max board thickness for rivets is 1.6 mm (stock 1.57 mm OK). Reference sizes (Vanderbilt table, MIT fab tests, Rapid/Bungard):
+No plated through-holes. Vias are **LPKF EasyContac** through-hole rivets from the lab kit (sizes 0.6 / 0.8 / 1.0 / 1.2 mm, label = inner diameter, with a press tool). Press each rivet with the kit's setting tool, then **solder both sides**. Max board thickness for rivets is 1.6 mm (stock 1.57 mm OK). Sizes from the Vanderbilt design-guide table for LPKF EasyContac (https://my.vanderbilt.edu/daniel/?p=200); the LPKF US store lists outer diameters 0.8 / 1.0 / 1.4 / 1.6 mm, inner 0.2-0.4 mm smaller. **Unverified:** confirm against the LPKF EasyContac manual.
 
-| Rivet ID / OD | Hole | Collar |
-| --- | --- | --- |
-| 0.6 / 0.8 mm | 0.83-0.9 mm | about 1.3 mm |
-| 0.8 / 1.0 mm | about 1.1 mm | about 1.6 mm |
-| 1.0 / 1.4-1.5 mm | about 1.5 mm | about 2.2 mm |
+| Rivet (inner) | Outer | Drill | Collar |
+| --- | --- | --- | --- |
+| 0.6 mm | 0.8 mm | 0.9 mm | 1.3 mm |
+| 0.8 mm | 1.0 mm | 1.1 mm | 1.6 mm |
+| 1.0 mm | 1.4 mm | 1.5 mm | 2.2 mm |
+| 1.2 mm | 1.6 mm | 1.7 mm | 2.6 mm |
 
-**Proposal:** plan around a ~1.0 mm drill (the most common PCB bit): 0.8 ID / 1.0 OD rivet, hole about 1.1 mm, via pad at least 2.0 mm (collar 1.6 + annular margin). Exact rivet and hole size **TBD** pending the lab tech's bit list.
+Rule of thumb: drill = outer diameter + 0.1 mm.
+
+- **Default via: EasyContac 0.8 mm** (about 20 needed): drill 1.1 mm, pad 2.0 mm (collar 1.6 + margin), annular 0.45 mm. Matches the via settings already in `rc_power_board.kicad_pro` (2.0 / 1.1), so no change there. Rivet size is fixed by lab stock and the drill size by the rivet; the remaining open point is whether the lab has a 1.1 mm bit (otherwise mill the hole): **TBD**.
+- **Optional, high current (VBAT / GND layer changes): EasyContac 1.2 mm**, several in parallel: drill 1.7 mm, collar 2.6 mm, pad at least 3.0 mm. If used, define it as a separate via size in Board Setup > Design Rules > Pre-defined Sizes.
+- **Optional, plated THT hole:** an EasyContac 1.0 mm rivet can "plate" a THT hole so a component pin is soldered on one side and still connects both layers. Round leads up to about 0.8 mm fit; 0.64 mm square pins (diagonal about 0.905 mm vs 1.0 mm bore) are a tight fit: test first. The 2.4 mm pad (2.2 mm collar) needs ≥2.8 mm pitch for 0.4 mm clearance, so it does not fit XH (2.5 mm) or 2.54 mm headers; use it only on wider-pitch parts (e.g. C9 3.5 mm, VH 3.96 mm, screw terminals). The footprint hole then becomes 1.5 mm drill with a pad of at least 2.4 mm. Not the default: the default stays "THT pins routed on the bottom".
 
 ## Holes (size, method: TBD per lab bit list)
 
 | Feature | Hole | Method |
 | --- | --- | --- |
-| Rivet vias | about 1.1 mm | drill if a matching bit exists, TBD |
+| Rivet vias (EasyContac 0.8) | 1.1 mm | drill if a 1.1 mm bit exists, else mill; TBD |
 | U1 header | 1.0 mm | drill, TBD |
 | JST XH pins | B2B 1.0 mm; B3B/B4B/B6B 0.95 mm (or drill all at 1.0 mm) | drill, TBD |
 | C9 (CP_Radial_D8.0mm_P3.50mm) | 0.8 mm | drill, TBD |
@@ -73,7 +78,7 @@ No plated through-holes. Vias are PCB copper rivets, pressed then **soldered on 
 
 ## Unplated THT soldering
 
-Solder each THT pin on every layer where it has copper. JST XH shrouds and screw terminals block top-side soldering: route those pins on the **bottom (solder side) only**, or bring the top connection through a rivet. Same for the F1 holder and the U1 header.
+Solder each THT pin on every layer where it has copper. JST XH shrouds and screw terminals block top-side soldering: route those pins on the **bottom (solder side) only**, or bring the top connection through a rivet (on wide-pitch parts only, an EasyContac 1.0 mm rivet in the THT hole, see Vias). Same for the F1 holder and the U1 header.
 
 ## Registration and outline
 
@@ -90,7 +95,7 @@ Solder each THT pin on every layer where it has copper. JST XH shrouds and screw
 
 - **No solder mask or silkscreen by default.** Optional: Makera UV solder-mask paint; otherwise tin or lacquer the copper. Mark pin 1 and polarity by milling text in copper or with a marker.
 - **Before populating:** continuity check every net against the netlist; check for shorts across adjacent isolation cuts (especially U3, J5).
-- **Open items:** lab tech to confirm bit diameters and rivet size; U3 option.
+- **Open items:** lab tech to confirm bit diameters (incl. a 1.1 mm bit for the rivet holes); U3 option.
 
 ## Layout
 
@@ -204,4 +209,4 @@ Not the rev A path. Essentials if the board goes to a fab house:
 4. All `TBD` values in the schematic.
 5. U1 EN stays unconnected until the rev 2 prototype board.
 6. I2C pull-ups: bus is pulled up only by the Garmin's internal 13 kΩ; consider two DNP 0805 4.7-10 kΩ pull-up footprints to `+3V3_SENS` for a future IMU. Not drawn.
-7. Rev A CNC: bit list, rivet/hole sizes, U3 footprint option.
+7. Rev A CNC: bit list (incl. 1.1 mm for rivet holes), U3 footprint option.

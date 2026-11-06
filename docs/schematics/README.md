@@ -48,9 +48,11 @@ Previous revision: the meeting-cleanup revision was generated in KiCad 7 format,
 
 Rev A is milled in-house from Kepro P22-365G 2 oz double-sided FR-4 (3" x 6"); no fab house, no plated holes, vias are soldered copper rivets.
 
-- **`rc_power_board.kicad_pro`:** all four net classes clearance 0.2 -> 0.4 mm; Default track 0.25 -> 0.5 mm; via diameter/drill for all classes -> 2.0 / 1.1 mm (rivet, provisional). DRC rules set: clearance 0.4, track 0.5, via 2.0/1.1, annular 0.45, min hole 0.8; plan's net-class table updated.
-- **Docs:** `fab_handoff.md` restructured (A: CNC prototype, B: fab house later) with a JST header table for every external connection; `bom.md` adds stock, rivets, dowels, bits and optional VH/XH rows, no PCB fab cost (total about 89.0 USD, about 49.1 excluding U1); `design_overview.md` and `.claude/rules/schematics.md` updated.
-- **Owner steps:** pull; open Board Setup in KiCad 10 and verify the preloaded design-rule minimums (clearance 0.4, track 0.5, via 2.0, annular 0.45, min hole 0.8); the net-class values are provisional; confirm the bit list and rivet size with the lab tech; decide the U3 footprint option. (The DRC minimums are now set in `rc_power_board.kicad_pro`, see the Mapper revision; the Mapper question is decided.)
+- **Rivets (update):** lab stock is an LPKF EasyContac kit (0.6/0.8/1.0/1.2 mm, with setting tool). Default via = 0.8 mm rivet, drill 1.1 mm, pad 2.0 mm (matches the existing `.kicad_pro` via settings); 1.2 mm optional for high current. Table and source: `fab_handoff.md`. BOM rivets now $0.
+
+- **`rc_power_board.kicad_pro`:** all four net classes clearance 0.2 -> 0.4 mm; Default track 0.25 -> 0.5 mm; via diameter/drill for all classes -> 2.0 / 1.1 mm (LPKF EasyContac 0.8 mm rivet). DRC rules set: clearance 0.4, track 0.5, via 2.0/1.1, annular 0.45, min hole 0.8; plan's net-class table updated.
+- **Docs:** `fab_handoff.md` restructured (A: CNC prototype, B: fab house later) with a JST header table for every external connection; `bom.md` adds stock, rivets, dowels, bits and optional VH/XH rows, no PCB fab cost (total about 87.0 USD, about 47.1 excluding U1 after the rivet update); `design_overview.md` and `.claude/rules/schematics.md` updated.
+- **Owner steps:** pull; open Board Setup in KiCad 10 and verify the preloaded design-rule minimums (clearance 0.4, track 0.5, via 2.0, annular 0.45, min hole 0.8); the net-class values are provisional; confirm the bit list (incl. a 1.1 mm bit) with the lab tech; decide the U3 footprint option. (The DRC minimums are now set in `rc_power_board.kicad_pro`, see the Mapper revision; the Mapper question is decided.)
 
 ## Meeting-cleanup revision (what changed)
 

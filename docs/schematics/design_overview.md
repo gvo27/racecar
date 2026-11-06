@@ -42,7 +42,7 @@ Netlist: 40 parts, 21 nets. Schematic: `rc_power_board.kicad_sch` / `.pdf` (KiCa
 - **Decoupling/probes.** C2/C4 in, C3/C5 out, C7/C8 per LDO datasheet; R + LED per rail; TP1–TP3.
 - **Net classes.** HighCurrent (`VBAT`, GND), Power5A (`+5V_CPU`, `+5V_SENS`), Power3A (`+6V_BEC`), Default 0.5 mm. IPC-2221 widths: `fab_handoff.md`.
 - **Rev A is a CNC-milled prototype** (Makera Carvera, in-house); details and provisional values in `fab_handoff.md`.
-  - Stock: 2 oz double-sided FR-4, 3" x 6"; no plated holes, vias are soldered copper rivets (size TBD, about 2.0 / 1.1 mm).
+  - Stock: 2 oz double-sided FR-4, 3" x 6"; no plated holes, vias are LPKF EasyContac 0.8 mm rivets from lab stock (drill 1.1 mm, pad 2.0 mm; 1.2 mm optional for high current; 1.1 mm bit availability TBD).
   - DRC clearance 0.4 mm, min track 0.5 mm; THT connector pins routed on the bottom.
 
 ## Power budget (worst case)

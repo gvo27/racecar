@@ -25,7 +25,7 @@ Everything hangs off one fused `VBAT` bus: a single replaceable main fuse protec
 
 **How the work flows.** You draw the schematic (a logical wiring diagram), assign each symbol a physical footprint, lay out the PCB (where copper actually goes), and export Gerber files that a fab house (JLCPCB, PCBWay, OSH Park) turns into a board. This guide gets you through the schematic in detail and sketches the later steps so you and the reviewer share vocabulary.
 
-> **Rev A is milled in-house** on the lab's Makera Carvera from 2 oz double-sided FR-4 (no plated holes; rivet vias). The repo's `docs/schematics/fab_handoff.md` part A has the milling workflow; the fab-house steps in this guide apply to later revisions.
+> **Rev A is milled in-house** on the lab's Makera Carvera from 2 oz double-sided FR-4 (no plated holes; vias are LPKF EasyContac 0.8 mm rivets from the lab kit, 1.1 mm drill, 2.0 mm pad). The repo's `docs/schematics/fab_handoff.md` part A has the milling workflow; the fab-house steps in this guide apply to later revisions.
 
 **What a good review draft contains:** a clean, readable schematic PDF; the KiCad project folder (zipped or in git); the power budget table below; and a list of open questions. Reviewers spend their time on design when the drawing itself is tidy, so the formatting section matters as much as the electrical one.
 
@@ -356,10 +356,10 @@ A **net class** is a group of nets that share copper rules. Set them in the Sche
 
 | Net class | Nets (pattern) | Track width | Via (drill / pad) | Comment |
 | --- | --- | --- | --- | --- |
-| `HighCurrent` | `VBAT*`, `GND` | zones on both layers; 6 mm is only the IPC-2221 minimum at +20 °C | 1.1 / 2.0 mm copper rivets (size TBD), several in parallel | `GND` carries the board's return current (size it for F1's rating) back to the battery |
-| `Power5A` | `+5V_CPU`, `+5V_SENS` | 1.6 mm | 1.1 / 2.0 mm rivet (TBD) | 2 oz copper |
-| `Power3A` | `*+6V_BEC` | 1.0 mm | 1.1 / 2.0 mm rivet (TBD) |  |
-| `Default` | everything else, incl. `+3V3_SENS` and signals | 0.5 mm | 1.1 / 2.0 mm rivet (TBD) | minimum for V-bit milling; all classes use 0.4 mm clearance |
+| `HighCurrent` | `VBAT*`, `GND` | zones on both layers; 6 mm is only the IPC-2221 minimum at +20 °C | 1.1 / 2.0 mm (LPKF EasyContac 0.8 mm rivet), several in parallel; optional 1.2 mm rivet (1.7 mm drill, 3.0 mm pad) for layer changes | `GND` carries the board's return current (size it for F1's rating) back to the battery |
+| `Power5A` | `+5V_CPU`, `+5V_SENS` | 1.6 mm | 1.1 / 2.0 mm (EasyContac 0.8 mm rivet) | 2 oz copper |
+| `Power3A` | `*+6V_BEC` | 1.0 mm | 1.1 / 2.0 mm (EasyContac 0.8 mm rivet) |  |
+| `Default` | everything else, incl. `+3V3_SENS` and signals | 0.5 mm | 1.1 / 2.0 mm (EasyContac 0.8 mm rivet) | minimum for V-bit milling; all classes use 0.4 mm clearance |
 
 The widths assume 2 oz copper and a 10 to 20 °C rise, from the table in the background section. Treat them as a starting proposal for the reviewer.
 
