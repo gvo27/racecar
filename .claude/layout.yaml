@@ -25,7 +25,7 @@ paths:
   .env: {role: secrets + private names, gitignored}
   models/: {role: manifest.yaml + README committed; cache/ gitignored, rules: .claude/rules/models.md, colcon_ignore: true, phase: 1}
   repos/: {role: rccar.repos vcstool manifest (third-party only) + README, rules: .claude/rules/repos.md, colcon_ignore: true, phase: 1}
-  logs/: {role: session jsonl, gitignored, mounted rw into core/tools, colcon_ignore: true}
+  logs/: {role: runtime data (jsonl logs, snapshots, bags), fully gitignored except .gitkeep + COLCON_IGNORE (maps = private floor plans; public repo), mounted rw into core/tools, colcon_ignore: true}
   build/: {role: make ros-test output (log + xml), gitignored}
   docs/: {role: setup.md, docker_ros_plan.md, esp32-firmware-proposal.md, tuning-notes.txt, colcon_ignore: true}
   docs/datasheets/: {role: "archived datasheets + summaries (ds3225_servo.md, thw-1060-brushed-esc.md, rangefinder_lidar_lite_v4.md) + components_list.xlsx (ground truth inventory)", rules: .claude/rules/rangefinder.md}
@@ -52,7 +52,7 @@ paths:
   rccar_bringup/: {role: car.launch.py (use_sim_time, sim, tuning_file, heartbeat_dir); tuning.toml -> params, rules: [.claude/rules/tuning.md, .claude/rules/ros2.md], phase: 2}
   rccar_supervisor/: {role: "safety authority: arbiter, latched stop, arm/disarm/brake services; sole publisher of /rccar/mcu/drive", rules: [.claude/rules/supervisor.md, .claude/rules/ros2.md], phase: 2}
   rccar_teleop/: {role: admin keyboard teleop (ssh), rules: [.claude/rules/calibration.md, .claude/rules/ros2.md], phase: 2}
-  rccar_calibration/: {role: calibrate, bench_test, tune, rangefinder_monitor + lidar_imu_monitor clis (ros2 run; make rangefinder, make lidar-imu), rules: [.claude/rules/calibration.md, .claude/rules/ros2.md], phase: 2}
+  rccar_calibration/: {role: calibrate, bench_test, tune, rangefinder_monitor + lidar_imu_monitor + lidar_snapshot + lidar_record clis (ros2 run; make rangefinder, make lidar-imu, make lidar-snapshot, make lidar-record), rules: [.claude/rules/calibration.md, .claude/rules/ros2.md], phase: 2}
   rccar_description/: {role: "urdf/xacro base_link, lidar_link, lidar_imu_link for rsp; mount offsets UNMEASURED until user measures", rules: [.claude/rules/drivers.md, .claude/rules/ros2.md], phase: 4}
   rccar_drivers/: {role: "lifecycle node mapper_driver (Slamtec Mapper M2M1 over TCP 1445) + slamtec/* protocol/convert library; exists now (branch lidar, bench pending)", rules: [.claude/rules/drivers.md, .claude/rules/ros2.md], phase: 4}
   rccar_bringup/launch/drivers.launch.py: {role: robot_state_publisher + mapper_driver (auto configure/activate), used by compose service drivers, rules: .claude/rules/drivers.md, phase: 4}
@@ -62,6 +62,8 @@ paths:
   .claude/hooks/: {role: hw_guard.py PreToolUse hook (ask before hardware restarts; deny driver edits/rebuilds while drivers runs); tests deploy/tests/test_hw_guard.py, rules: .claude/rules/hw-testing.md, phase: 4}
   logs/hw_test_lidar_*.json: {role: make lidar-hw-test report (gitignored), phase: 4}
   logs/lidar_imu_*.jsonl: {role: per-run log of make lidar-imu (gitignored via logs/), phase: 4}
+  logs/lidar_snapshot_<UTC>/: {role: make lidar-snapshot output (map.png + json + summary.txt; agent-readable debug data, gitignored), phase: 4}
+  logs/lidar_bag_<UTC>/: {role: make lidar-record rosbag2 mcap of the lidar topics (gitignored), phase: 4}
   rccar_recorder/: {role: mcap bags to /data, phase: 3}
   rccar_backup/: {role: upload when disarmed+idle, phase: 3}
   rccar_captain/: {role: central orchestrator, phase: 5}

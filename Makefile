@@ -24,7 +24,7 @@ COMPOSE  := docker compose -f deploy/car/compose.yaml --env-file deploy/car/.env
 .DEFAULT_GOAL := help
 .PHONY: help setup clean build flash monitor fw-image config models compiledb unit check-dev \
         ros-image ros-test ros-test-image ros-test-run ros-shell car-up car-down car-ps car-logs car-pull \
-        car-shutdown install-host teleop calibrate tune test rangefinder viz lidar-imu mcu unit-run \
+        car-shutdown install-host teleop calibrate tune test rangefinder viz lidar-imu lidar-snapshot lidar-record mcu unit-run \
         drivers-stop drivers-start lidar-hw-test _clean-build _need-config _need-stack _need-stack-down _need-drivers-down
 
 help:            ## list targets (grouped in README.md)
@@ -154,6 +154,14 @@ viz: _need-stack  ## live websocket feed for Foxglove/Lichtblick on localhost:87
 
 lidar-imu: _need-stack  ## live Mapper IMU feed (heading, yaw rate, horizontal accel, speed) + logs/lidar_imu_*.jsonl (Ctrl+C to exit)
 	$(COMPOSE) run --rm tools ros2 run rccar_calibration lidar_imu_monitor
+
+lidar-snapshot: _need-stack  ## one lidar capture -> logs/lidar_snapshot_<UTC>/ (map.png + scan, pose, summary; read-only)
+	$(COMPOSE) run --rm tools ros2 run rccar_calibration lidar_snapshot
+
+SECS ?= 30
+lidar-record: _need-stack  ## record the lidar topics for SECS (default 30) -> logs/lidar_bag_<UTC>/ (mcap; read-only)
+	@case '$(SECS)' in ''|*[!0-9]*) echo "SECS must be a whole number of seconds (1..600), got '$(SECS)'"; exit 1;; esac
+	$(COMPOSE) run --rm tools ros2 run rccar_calibration lidar_record --secs $(SECS)
 
 mcu: _need-stack  ## one McuCommand to the ESP32, e.g. make mcu CMD="GET" (stack up; CMD: GET INFO PING SET ...; ARM refused)
 	@test -n "$(CMD)" || { echo 'usage: make mcu CMD="GET"'; exit 1; }

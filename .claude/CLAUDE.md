@@ -8,7 +8,7 @@ next: phase 4 lidar bench (power from +5V_SENS, wlan0 on SLAMWARE AP, make viz c
 plan: docs/docker_ros_plan.md
 stack:
   mcu: {build: platformio in docker (docker/firmware.Dockerfile, image rccar-fw, make build/flash/monitor, FW_ENV=esp32s3), platform: espressif32@6.9.0, framework: arduino-esp32-2.0.17, comms: micro_ros_platformio jazzy serial uart0 (libdeps cached in .pio/libdeps), lang: c++gnu11}
-  ros: {distro: jazzy, image: docker/ros.Dockerfile (ros:jazzy-ros-base by digest, rosdep+colcon, target test/runtime), stack: deploy/car/compose.yaml (mcu-agent, core, drivers, tools), pkgs: [rccar_msgs, rccar_supervisor, rccar_mcu_bridge, rccar_teleop, rccar_calibration, rccar_bringup, rccar_drivers, rccar_description], make: [config, ros-image, car-up, car-down, drivers-stop, drivers-start, lidar-hw-test, ros-test, unit, teleop, calibrate, tune, test, mcu, rangefinder, viz, lidar-imu]}
+  ros: {distro: jazzy, image: docker/ros.Dockerfile (ros:jazzy-ros-base by digest, rosdep+colcon, target test/runtime), stack: deploy/car/compose.yaml (mcu-agent, core, drivers, tools), pkgs: [rccar_msgs, rccar_supervisor, rccar_mcu_bridge, rccar_teleop, rccar_calibration, rccar_bringup, rccar_drivers, rccar_description], make: [config, ros-image, car-up, car-down, drivers-stop, drivers-start, lidar-hw-test, ros-test, unit, teleop, calibrate, tune, test, mcu, rangefinder, viz, lidar-imu, lidar-snapshot, lidar-record]}
   host: {prereqs: [git, make, docker+compose+buildx], groups: [docker, dialout], python: none (make config runs in ros image, make unit in ros test image)}
 hw: {steer: ds3225mg@gpio4, throttle: thw1060_esc@gpio5, battery: 2s_lipo, rangefinder: garmin_lidar_lite_v4_led@esp32 i2c gpio8(sda,garmin pin3,white)/gpio9(scl,garmin pin4,green) 0x62, vin(pin1,red) 5v sensor rail, gnd(pin2,black)}
 usb_ports: {left_USB: native, planned regulated power input; right_COM: ch343 uart0, flashing + host link}
@@ -25,7 +25,7 @@ invariants:
   - protocol/interface change => rccar_msgs + firmware/esp32/extra_packages (diff -r clean) + main.cpp + rccar_mcu_bridge + docs
   - tuning key change => tuning.toml + rccar_mcu_bridge.tuning.FIRMWARE_KEYS + main.cpp setKey (test-enforced: rccar_mcu_bridge/test/test_tuning.py)
   - supervisor = sole publisher of /rccar/mcu/drive; brake/disarm latch, arm = Reset(incident) -> armed but stationary
-  - agents never run hardware fault-injection tests (kill core, unplug usb, motor runs); bench checklist is user-run (docs/setup.md). Exception: read-only `make lidar-hw-test` (launch_testing vs the physical lidar, stationary car) IS allowed on the Pi
+  - agents never run hardware fault-injection tests (kill core, unplug usb, motor runs); bench checklist is user-run (docs/setup.md). Exception: read-only `make lidar-hw-test`, `make lidar-snapshot`, `make lidar-record` (launch_testing vs the physical lidar, stationary car) IS allowed on the Pi
   - lidar: `make drivers-stop` before changing/rebuilding rccar_drivers|rccar_description (hook-enforced)
   - no hardware (re)start (drivers-start, car-up, flash, compose up/restart, systemctl, reboot) without explicit human approval, regardless of auto mode (hook asks)
   - usb replug => make car-down && make car-up (device node in mcu-agent container goes stale)

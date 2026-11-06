@@ -1,7 +1,9 @@
 firmware/esp32/.pio/
 __pycache__/
-logs/*.jsonl
-logs/hw_test_*.json
+# logs/: runtime data only (maps/bags = floor plans of private spaces; public repo)
+logs/*
+!logs/.gitkeep
+!logs/COLCON_IGNORE
 .env
 models/cache/
 firmware/esp32/compile_commands.json

@@ -102,6 +102,8 @@ You never run `make config` by hand: `car-up` and the boot service run it for yo
 | `make rangefinder` | rangefinder (Garmin LIDAR-Lite v4) | live distance feed in the terminal |
 | `make viz` | lidar (Slamtec Mapper) | scan, map and pose on `localhost:8765` for Foxglove; forward the port with VS Code SSH |
 | `make lidar-imu` | lidar (Slamtec Mapper) | live heading, yaw rate, speed and acceleration; also saved to `logs/` |
+| `make lidar-snapshot` | lidar (Slamtec Mapper) | one capture to `logs/`: `map.png` (map + scan + pose) and a text summary; Claude Code can read both |
+| `make lidar-record SECS=30` | lidar (Slamtec Mapper) | records the lidar topics to a rosbag (`.mcap`, opens in Foxglove) in `logs/` |
 | `make lidar-hw-test` | lidar (Slamtec Mapper) | automated PASS/FAIL check of the real unit, car still. Run `make drivers-stop` first and `make car-up` afterwards |
 
 **When needed**
