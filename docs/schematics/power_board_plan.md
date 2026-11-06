@@ -1,6 +1,6 @@
 # KiCad Power Rail Schematic Guide — RC Car Platform
 
-Exported 2026-10-30 from the live doc: https://claude.ai/artifact/G7oi8ZxQaXkXNUEQmDbfmX (edit there, re-export here). Build guide and background for the schematic in this folder (`rc_power_board.kicad_sch`). Project KiCad version: 10.0.
+Exported 2026-11-06 from the live doc: https://claude.ai/artifact/G7oi8ZxQaXkXNUEQmDbfmX (edit there, re-export here). Build guide and background for the schematic in this folder (`rc_power_board.kicad_sch`). Project KiCad version: 10.0.
 
 > **For the design meeting:** the one-page summary of the current schematic is `docs/schematics/design_overview.md`. This guide is the step-by-step build and background reference.
 
@@ -12,9 +12,9 @@ The board carries four power circuits, all sharing one ground:
 
 | Rail (net name) | Voltage | Current budget | Made by | Feeds |
 | --- | --- | --- | --- | --- |
-| `VBAT` | 7.4 V nominal (6.0 to 8.4 V) | about 7.3 A of board loads (the ESC's 20 A is off-board) | battery, through the main fuse | &#32;inputs of the two switching regulators |
+| `VBAT` | 7.4 V nominal (6.0 to 8.4 V) | about 9 A of board loads (the ESC's 20 A is off-board) | battery, through the main fuse | &#32;inputs of the two switching regulators |
 | `+5V_CPU` | 5.0 to 5.1 V | 5.5 A (regulator rated 6 A or more) | dedicated, higher-grade step-down regulator | Raspberry Pi 5, ESP32-S3 |
-| `+5V_SENS` | 5.0 V | 3.3 A (buck rated 4 A, TBD) | buck converter | Garmin LIDAR-Lite v4, extra cameras and the 3.3 V LDO |
+| `+5V_SENS` | 5.0 V | 4.6 A (buck rated 6 A, TBD) | buck converter | Garmin LIDAR-Lite v4, Slamtec Mapper lidar, extra cameras and the 3.3 V LDO |
 | `+3V3_SENS` | 3.3 V | 0.3 A (TBD) | low-noise LDO fed from `+5V_SENS` | IMU, shaft encoder, other light sensors |
 
 The servo is powered by the ESC's built-in 6 V / 3 A output (its **BEC**, battery eliminator circuit), so it never touches this board's 5 V rails. Actuator signal lines (PWM from the ESP32, data to the Pi) are out of scope; the board only has to give every device power and a shared ground reference.
@@ -24,6 +24,8 @@ The servo is powered by the ESC's built-in 6 V / 3 A output (its **BEC**, batter
 Everything hangs off one fused `VBAT` bus: a single replaceable main fuse protects all branches, and only the compute branch gets the higher-grade regulator.
 
 **How the work flows.** You draw the schematic (a logical wiring diagram), assign each symbol a physical footprint, lay out the PCB (where copper actually goes), and export Gerber files that a fab house (JLCPCB, PCBWay, OSH Park) turns into a board. This guide gets you through the schematic in detail and sketches the later steps so you and the reviewer share vocabulary.
+
+> **Rev A is milled in-house** on the lab's Makera Carvera from 2 oz double-sided FR-4 (no plated holes; rivet vias). The repo's `docs/schematics/fab_handoff.md` part A has the milling workflow; the fab-house steps in this guide apply to later revisions.
 
 **What a good review draft contains:** a clean, readable schematic PDF; the KiCad project folder (zipped or in git); the power budget table below; and a list of open questions. Reviewers spend their time on design when the drawing itself is tidy, so the formatting section matters as much as the electrical one.
 
@@ -73,7 +75,7 @@ Takeaways for this board:
 | 5 A | 1.4 mm | 2.7 mm | 1.4 mm |
 | 3 A | 0.7 mm | 1.1 mm | 0.6 mm |
 
-IPC-2152 figures use the approximate formula from secondary sources (the full standard is paywalled). A solid copper plane close to the trace lowers its temperature a lot, so real boards land between the two columns. The ESC's 20 A path is on wire off the board, so the board's copper only has to carry F1's rating: size `VBAT_RAW`, `VBAT` and `GND` for the fuse (a blade fuse holds 110 % indefinitely, so about 16.5 A for a 15 A fuse), not for the 7.3 A load.
+IPC-2152 figures use the approximate formula from secondary sources (the full standard is paywalled). A solid copper plane close to the trace lowers its temperature a lot, so real boards land between the two columns. The ESC's 20 A path is on wire off the board, so the board's copper only has to carry F1's rating: size `VBAT_RAW`, `VBAT` and `GND` for the fuse (a blade fuse holds 110 % indefinitely, so about 16.5 A for a 15 A fuse), not for the 9 A load.
 
 ### Ground
 
@@ -106,7 +108,7 @@ They're standard practice, and most can't live inside the module:
 
 ## Power budget
 
-Worst case, the board's battery input carries about **7.3 A** into the two switching regulators when the battery is nearly empty (about 7.8 A at the 6.0 V cutoff). The ESC (up to 20 A) is fed from the battery on its own leads, off-board. That load sets the main fuse; the `VBAT_RAW`, `VBAT` and `GND` copper and the J1 pads are sized for F1's rating (about 16.5 A for a 15 A fuse). The 3.3 V rail is a low-noise **LDO** fed from `+5V_SENS`, so its current is counted inside the sensor buck's load. Per-device figures marked "approx." are from memory and must be checked against each datasheet before the review.
+Worst case, the board's battery input carries about **8.4 A** into the two switching regulators when the battery is nearly empty (about 9.0 A at the 6.0 V cutoff, and about 9.3 A for a few seconds while the Mapper lidar starts). The ESC (up to 20 A) is fed from the battery on its own leads, off-board. That load sets the main fuse at 15 A; the `VBAT_RAW`, `VBAT` and `GND` copper and the J1 pads are sized for F1's rating (about 16.5 A). The 3.3 V rail is a low-noise **LDO** fed from `+5V_SENS`, so its current is counted inside the sensor buck's load. Per-device figures marked "approx." are from memory and must be checked against each datasheet before the review.
 
 | Rail | Load | Est. peak current | Notes |
 | --- | --- | --- | --- |
@@ -115,16 +117,17 @@ Worst case, the board's battery input carries about **7.3 A** into the two switc
 | `+5V_CPU` | **Rail total** | **5.5 A** | Rate U1 at 6 A or more |
 | `+5V_SENS` | Garmin LIDAR-Lite v4 LED | 0.1 A (approx.) | 5 V supply, 3.3 V logic |
 | `+5V_SENS` | Extra cameras (USB, via powered hub) | 0.3 to 0.5 A each (approx.) | Cameras plugged directly into the Pi draw from `+5V_CPU`, not here |
+| +5V\_SENS | Slamtec Mapper M2M1 lidar (J11) | 0.75 A typ, 1.3 A max; 1.4 to 1.6 A for a few seconds at startup (datasheet) | Ripple 50 mV max: C9 bulk cap right at J11; USB-A pigtail harness |
 | `+5V_SENS` | Radar (removed from scope) | TBD | Model not chosen |
 | `+5V_SENS` | 3.3 V LDO input | 0.3 A | An LDO draws the same current it delivers |
-| `+5V_SENS` | **Rail total** | **3.3 A (TBD)** | Pick a buck rated 4 A |
+| `+5V_SENS` | **Rail total** | **4.6 A (4.9 A at Mapper startup)** | Pick a buck rated 6 A (proposed: Pololu D24V60F5) |
 | `+3V3_SENS` | IMU | < 0.02 A (approx.) | Noise-sensitive; the reason for the LDO |
 | `+3V3_SENS` | Shaft encoder | < 0.05 A (approx.) |  |
 | `+3V3_SENS` | **Rail total** | **0.3 A (TBD)** | LDO heat at 0.3 A: (5 − 3.3) × 0.3 ≈ 0.5 W |
 | ESC BEC (off-board) | DS3225MG servo | 2.3 A stall at 6.8 V (datasheet) | Fed by the ESC's 6 V / 3 A output |
 | `VBAT` | ESC + motor (off-board, own 12 AWG leads) | 20 A | Peaks may exceed this briefly |
-| `VBAT` | Two regulators' inputs | 7.3 A at 6.4 V in | U1 4.4 A + U2 2.9 A, at 90 % efficiency |
-| `VBAT` | **Battery total** | **about 7.3 A on the board (7.8 A at 6.0 V)** | F1 10 or 15 A (TBD); the ESC is fused off-board |
+| `VBAT` | Two regulators' inputs | 8.4 A at 6.4 V in | U1 4.4 A + U2 4.0 A, at 90 % efficiency |
+| `VBAT` | **Battery total** | **about 8.4 A on the board (9.0 A at 6.0 V; about 9.3 A during Mapper startup)** | F1 15 A (a 10 A fuse would run at about 90 %); the ESC is fused off-board |
 |  |  |  |  |
 
 **Why the ESP32 stays on `+5V_CPU` rather than moving to 3.3 V.** It would free at most about 0.5 A of the Pi's budget, and only during Wi-Fi bursts; idle it draws closer to 0.1 A. The costs outweigh that. Its radio bursts would put noise on the IMU's clean rail. The LDO would have to grow to about 1 A and shed about 1.7 W of heat. Feeding a dev board's 3V3 pin bypasses its own regulator and fights it when USB is plugged in. And the ESP32 controls the throttle, so it belongs with the protected compute rail, not the sensor rail. Rating U1 at 6 A buys more margin than moving the ESP32 would.
@@ -270,9 +273,9 @@ Press **A**, type the symbol name in the search box, pick it, click to place. Th
 
 Same pattern as region C:
 
-1. **U2** `REG_MODULE` value `5 V buck rated 4 A, TBD`, input on `VBAT` (no branch fuse), input cap **C4**, output cap **C5**.
+1. **U2** `REG_MODULE` value `5 V buck rated 6 A, TBD`, input on `VBAT` (no branch fuse), input cap **C4**, output cap **C5**.
 2. VOUT to a `+5V_SENS` power symbol. LED **R2** + **D3**, test point **TP2**.
-3. Output headers, all JST-XH (the project convention for sensors and low-power parts: single Dupont jumper sockets push onto the XH pins for breadboard debugging, and they are lab stock). **J8** `LIDAR-Lite v4` is a 4-pin XH whose pins match the Garmin's: 1 `+5V_SENS` (red), 2 `GND` (black), 3 `I2C_SDA` (white), 4 `I2C_SCL` (green); I2C address 0x62, no external pull-ups (13 kΩ to 3.3 V inside the sensor). **J9** `Camera USB hub` and **J11** `Spare 5 V` are 2-pin XH (pin 1 `+5V_SENS`, pin 2 `GND`); the radar header J10 was removed from scope.
+3. Output headers, all JST-XH (the project convention for sensors and low-power parts: single Dupont jumper sockets push onto the XH pins for breadboard debugging, and they are lab stock). **J8** `LIDAR-Lite v4` is a 4-pin XH whose pins match the Garmin's: 1 `+5V_SENS` (red), 2 `GND` (black), 3 `I2C_SDA` (white), 4 `I2C_SCL` (green); I2C address 0x62, no external pull-ups (13 kΩ to 3.3 V inside the sensor). **J9** `Camera USB hub` and **J11** `Slamtec Mapper (5V)` are 2-pin XH (pin 1 `+5V_SENS`, pin 2 `GND`); the radar header J10 was removed from scope. J11 feeds the Slamtec Mapper M2M1 lidar (0.75 A typ, 1.3 A max, 1.6 A at startup, ripple 50 mV max) through a 22 AWG USB-A male pigtail (pin 1 red to VBUS, pin 2 black to GND); place C9 (Device:C\_Polarized, at least 100 µF low-ESR, TBD) right at J11.
 4. `+5V_SENS` also feeds the 3.3 V LDO in region E. A net with the same name joins them; no wire across the sheet is needed.
 
 ### Step 9: region E, sensor 3.3 V
@@ -353,10 +356,10 @@ A **net class** is a group of nets that share copper rules. Set them in the Sche
 
 | Net class | Nets (pattern) | Track width | Via (drill / pad) | Comment |
 | --- | --- | --- | --- | --- |
-| `HighCurrent` | `VBAT*`, `GND` | zones on both layers; 6 mm is only the IPC-2221 minimum at +20 °C | 0.6 / 1.2 mm, many in parallel | `GND` carries the board's return current (size it for F1's rating) back to the battery |
-| `Power5A` | `+5V_CPU` | 1.6 mm | 0.4 / 0.8 mm | 2 oz copper |
-| `Power3A` | `+5V_SENS`, `+6V_BEC` | 1.0 mm | 0.4 / 0.8 mm |  |
-| `Default` | everything else, incl. `+3V3_SENS` and signals | 0.25 mm | 0.3 / 0.6 mm | KiCad's default |
+| `HighCurrent` | `VBAT*`, `GND` | zones on both layers; 6 mm is only the IPC-2221 minimum at +20 °C | 1.1 / 2.0 mm copper rivets (size TBD), several in parallel | `GND` carries the board's return current (size it for F1's rating) back to the battery |
+| `Power5A` | `+5V_CPU`, `+5V_SENS` | 1.6 mm | 1.1 / 2.0 mm rivet (TBD) | 2 oz copper |
+| `Power3A` | `*+6V_BEC` | 1.0 mm | 1.1 / 2.0 mm rivet (TBD) |  |
+| `Default` | everything else, incl. `+3V3_SENS` and signals | 0.5 mm | 1.1 / 2.0 mm rivet (TBD) | minimum for V-bit milling; all classes use 0.4 mm clearance |
 
 The widths assume 2 oz copper and a 10 to 20 °C rise, from the table in the background section. Treat them as a starting proposal for the reviewer.
 
@@ -373,7 +376,7 @@ The widths assume 2 oz copper and a 10 to 20 °C rise, from the table in the bac
 
 1. **File → Fabrication Outputs → Gerbers (.gbr)…**, click **Plot**, then **Generate Drill Files…** in the same window.
 2. Open the output in KiCad's **Gerber Viewer** to check that every layer looks right.
-3. Zip the folder and upload it to a fab such as JLCPCB, PCBWay or OSH Park. Choose 2 layers, 1.6 mm thickness, **2 oz outer copper**, HASL or ENIG finish.
+3. Later revisions only (rev A is CNC-milled, see fab\_handoff.md part A): zip the folder and upload it to a fab such as JLCPCB, PCBWay or OSH Park. Choose 2 layers, 1.6 mm thickness, **2 oz outer copper**, HASL or ENIG finish.
 4. Order a small batch (often 5) first and bring it up one rail at a time with a bench supply and current limit before ever connecting the LiPo.
 
 ## Before you send it, and what to ask
@@ -394,12 +397,12 @@ The widths assume 2 oz copper and a 10 to 20 °C rise, from the table in the bac
 
 Put these in your hand-off message, numbered, so the reviewer can answer by number.
 
-1. **20 A path (resolved):** the ESC is powered off-board, straight from the battery on its own 12 AWG leads. The board carries only its own loads, about 7.3 A worst case, so `HighCurrent` (6 mm, zones) is now oversized: should it be resized for F1's rating (about 16.5 A at 15 A, 11 A at 10 A) rather than the 7.3 A load?
-2. **Fuses (resolved, rating open):** one replaceable main fuse F1, a standard ATO/ATC automotive blade in a Littelfuse FLR 178.6165 PCB holder, protects every board load. There are no branch fuses, because the fuse inventory is high-current. Trade-off: a sensor-branch short now opens F1 and drops compute too; U1 and U2 limit their own output current. Rating: 10 A or 15 A, against about 7.3 A worst-case board load (15 A keeps 7.3 to 7.8 A under 75 % of the rating; a 10 A fuse sits at 73 to 78 %). A standard ATO fuse (ISO 8820-3; the 15 A part's melting I²t is about 340 A²s) rides through the board's capacitor inrush, so slow-blow isn't needed; the motor is off-board.
+1. **20 A path (resolved):** the ESC is powered off-board, straight from the battery on its own 12 AWG leads. The board carries only its own loads, about 9 A worst case, so `HighCurrent` (6 mm, zones) is now oversized: should it be resized for F1's rating (about 16.5 A at 15 A, 11 A at 10 A) rather than the 9 A load?
+2. **Fuses (resolved):** one replaceable main fuse F1, a standard 15 A ATO/ATC automotive blade in a Littelfuse FLR 178.6165 PCB holder, protects every board load. There are no branch fuses, because the fuse inventory is high-current. Trade-off: a sensor-branch short now opens F1 and drops compute too; U1 and U2 limit their own output current. With the Mapper lidar the board draws about 8.4 to 9.0 A, which is 56 to 60 % of 15 A; a 10 A fuse would sit near 90 % and could open from heat alone. A standard ATO fuse (ISO 8820-3; melting I²t about 340 A²s) rides through the board's capacitor inrush, so slow-blow isn't needed; the motor is off-board.
 3. **Compute rail and the Pi:** the Pi 5 and ESP32 need about 5.5 A. The Pi takes power through a 2-wire USB-C pigtail, so it keeps its USB-C input protection but gets no USB-PD 5 A offer: it limits its USB ports to about 0.6 A total unless set in `config.txt`. Is that acceptable?
-4. **Regulator U1:** the D36V50F5 outputs 5.0 V ± 4 % (not the Pi's preferred 5.1 V) and is rated 5.5 A typical. What is its dropout at 5.5 A with the battery near 6.0 V? Its VRP output is deliberately unused (the sensor buck stays on `VBAT`, because VRP would push about 7.3 A through U1's 6 A-rated VIN pin pair).
+4. **Regulator U1:** the D36V50F5 outputs 5.0 V ± 4 % (not the Pi's preferred 5.1 V) and is rated 5.5 A typical. What is its dropout at 5.5 A with the battery near 6.0 V? Its VRP output is deliberately unused (the sensor buck stays on `VBAT`, because VRP would push about 9 A through U1's 6 A-rated VIN pin pair).
 5. **IMU noise:** is the LDO's noise rejection enough at the sensor buck's switching frequency, or should the ferrite-bead filter in front of it stay?
-6. **Protection:** U1 has its own reverse protection to 40 V, and so does the proposed U2 (D24V50F5). The rest (C1, D1) is exposed. The PR proposes Q1 (P-FET) + R4 between F1 and `VBAT`; it is not drawn yet. Adopt it for rev A? TVS proposed: SMBJ10A.
+6. **Protection:** U1 has its own reverse protection to 40 V; the proposed U2's (Pololu D24V60F5) is TBD. The rest (C1, D1) is exposed. The PR proposes Q1 (P-FET) + R4 between F1 and `VBAT`; it is not drawn yet. Adopt it for rev A? TVS proposed: SMBJ10A.
 7. **Low battery:** the ESC's low-voltage cutoff stops the motor, but the regulators keep draining the pack. Add a resistor divider from `VBAT` to an ESP32 ADC pin so firmware can warn or shut down? A 100k / 33k divider gives about 2.1 V at 8.4 V.
 8. **ESP32 back-feed:** the ESP32 gets 5 V on its left USB-C port (J7) and may also be connected by USB on its right COM port (to the laptop now, the Pi later). Does the dev board keep the two USB power inputs apart, or is a diode or a data-only cable needed?
 9. **Cameras:** cameras plugged into the Pi draw from `+5V_CPU`. Move them to a powered USB hub on `+5V_SENS` (J9)?

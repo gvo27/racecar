@@ -6,7 +6,7 @@ Draft KiCad project for the car's power board. A 2S LiPo comes in; the board put
 | --- | --- |
 | `design_overview.md` | The design meeting summary: one short entry per feature, the power budget and the decisions wanted. |
 | `bom.md` | Standalone BOM for the schematic parts: proposed MPNs, links, key specs, estimated cost, fuse notes. |
-| `fab_handoff.md` | Layout and fab checklist for KiCad 10: net-class widths, IPC-2221 table, pours, export, sign-off, open items. |
+| `fab_handoff.md` | Rev A CNC-milling handoff (Makera Carvera) plus later-revision fab checklist: DRC/net classes, rivets, holes, IPC-2221 table, connector table, export, sign-off. |
 | `power_board_plan.md` | The build guide and background: rails, power budget, trace widths, a step-by-step KiCad guide and open questions. Exported from the live doc linked at its top. |
 | `power_architecture.png` | Block diagram used by the plan. |
 | `rc_power_board.kicad_pro` / `.kicad_sch` | KiCad project and the one-sheet A3 schematic (regions A to E plus notes). |
@@ -26,17 +26,36 @@ Previous revision: the meeting-cleanup revision was generated in KiCad 7 format,
 
 ## ATO fuse, JST-XH convention, Garmin I2C (current revision)
 
-- **F1** is a standard ATO/ATC blade fuse in a Littelfuse FLR 178.6165.0001 holder (`Fuse:FuseHolder_Blade_ATO_Littelfuse_FLR_178.6165`); value `TBD ATO/ATC blade 10-15A`. Proposed fuse: Littelfuse 0257015.PXPV (15 A). Details in `bom.md`.
+- **F1** is a standard ATO/ATC blade fuse in a Littelfuse FLR 178.6165.0001 holder (`Fuse:FuseHolder_Blade_ATO_Littelfuse_FLR_178.6165`); value `TBD ATO/ATC blade 15A` (15 A decided by the Mapper load, see the Mapper revision below). Proposed fuse: Littelfuse 0257015.PXPV (15 A). Details in `bom.md`.
 - **JST-XH (2.5 mm) is the connector convention** for sensors and low-power parts (single Dupont jumper sockets push onto the XH pins for breadboard debugging; 2.54 mm multi-pin housings do not fit; parts in lab stock). Exceptions: J1 (battery T-plug pads), J6/J7 (USB-C pigtail screw terminals, over 3 A).
-- **J3, J4:** 3-pin XH, pins 1 GND, 2 +6V_BEC, 3 signal (follows the ESC/servo lead; XH 2.50 mm does not mate with stock 2.54 mm plugs: re-terminate only 22 AWG leads, else an adapter lead). **J5:** 6-pin XH: 1 `U1_PG` (GPIO TBD), 2 `THROTTLE_PWM` GPIO5, 3 `STEER_PWM` GPIO4, 4 `I2C_SDA` GPIO8, 5 `I2C_SCL` GPIO9, 6 GND. **J8:** Garmin LIDAR-Lite v4, 4-pin XH, pin order = Garmin 1-4 (+5V_SENS, GND, SDA, SCL); no external I2C pull-ups. J9, J11-J14 stay 2-pin XH (1 V+, 2 GND). Pin order convention and crimp table: `fab_handoff.md`.
-- **Netlist: 39 parts, 21 nets** (adds `I2C_SDA`, `I2C_SCL`); pending the owner's KiCad 10 ERC.
-- **Power5A** track width is 1.6 mm. Computed IPC-2221 widths and the 2 oz recommendation are in `fab_handoff.md`.
+- **J3, J4:** 3-pin XH, pins 1 GND, 2 +6V_BEC, 3 signal (follows the ESC/servo lead; XH 2.50 mm does not mate with stock 2.54 mm plugs: re-terminate only 22 AWG leads, else an adapter lead). **J5:** 6-pin XH: 1 `U1_PG` (GPIO TBD), 2 `THROTTLE_PWM` GPIO5, 3 `STEER_PWM` GPIO4, 4 `I2C_SDA` GPIO8, 5 `I2C_SCL` GPIO9, 6 GND. **J8:** Garmin LIDAR-Lite v4, 4-pin XH, pin order = Garmin 1-4 (+5V_SENS, GND, SDA, SCL); no external I2C pull-ups. J9, J11-J14 stay 2-pin XH (1 V+, 2 GND); J11 now hosts the Slamtec Mapper (see below). Pin order convention and crimp table: `fab_handoff.md`.
+- **Netlist then: 39 parts, 21 nets** (adds `I2C_SDA`, `I2C_SCL`); now 40 parts, 21 nets (see the Mapper revision).
+- **Power5A** track width is 1.6 mm (now also `+5V_SENS`, see below). Computed IPC-2221 widths are in `fab_handoff.md` (2 oz stock).
 - **Owner steps:** close KiCad, pull, open, Update Symbols from Library, save in KiCad 10, run ERC, Assign Footprints check (XH and ATO footprints), re-plot the PDF, push.
+
+## Slamtec Mapper on `+5V_SENS` (current revision)
+
+- **J11** (was `Spare 5V`) now hosts the Slamtec Mapper M2M1 lidar. Harness: J11 2-pin XH, XHP-2 housing, 22 AWG 3 A USB-A male 2-wire pigtail (pin 1 `+5V_SENS` to red/VBUS, pin 2 GND to black). Mapper supply 4.8 V min / 5 V typ / 12 V max; running 0.75 A typ, 1.3 A max; startup 1.4-1.6 A for a few seconds; ripple 20 mV typ, 50 mV max (from its datasheet on branch `lidar`). Not powered from Pi USB or straight from the pack.
+- **C9** (`Device:C_Polarized`, `TBD >=100uF low-ESR >=10V`, footprint `CP_Radial_D8.0mm_P3.50mm`) added on `+5V_SENS` / GND at J11 for the startup surge and ripple.
+- **Budget (computed):** `+5V_SENS` 3.3 A -> 4.6 A worst case running, 4.9 A at Mapper startup. U2 must now be >= 6 A: proposal Pololu D24V60F5 (5 V, 6 A) replaces D24V50F5; its input range and dropout near the 6.0 V cutoff are TBD (check the Pololu dropout curve). U2 input 3.99 A at 6.4 V, 4.26 A at 6.0 V; U1 input 4.43 A / 4.72 A. Board `VBAT` load about 8.4 A at 6.4 V, 9.0 A at 6.0 V, about 9.3 A briefly at startup (was 7.3 / 7.8 A).
+- **F1 = 15 A** (10 A would run at 84-93 % of rating, over the ~75 % rule; 15 A gives 56-62 %). Copper stays sized for 16.5 A. Inrush margin unchanged.
+- **Net classes:** `+5V_SENS` moved from Power3A (1.0 mm) to Power5A (1.6 mm) in `rc_power_board.kicad_pro` (about 4.9 A; IPC-2221 5.0 A row, 2 oz: 1.4 mm at ΔT 10 C). `*+6V_BEC` stays Power3A.
+- **DRC rules** in `rc_power_board.kicad_pro` (board.design_settings.rules) set to match the CNC docs: `min_clearance` 0.4, `min_track_width` 0.5, `min_via_diameter` 2.0, `min_via_annular_width` 0.45, `min_through_hole_diameter` 0.8 (C9 drill; methods TBD).
+- **Schematic:** J3 and its wires/symbols sit 1.27 mm up-left of the generator's old position, ported from the owner's 53ac275 save. Netlist: 40 parts, 21 nets; everything but C9 is identical to the previous revision. Notes box updated (budget, F1, U2, `+5V_SENS` class, new note 14 for the Mapper).
+- **Owner steps:** open in KiCad 10, Update Symbols, save, run ERC, re-plot; choose C9 and U2 parts.
+
+## CNC-milled prototype (Makera Carvera)
+
+Rev A is milled in-house from Kepro P22-365G 2 oz double-sided FR-4 (3" x 6"); no fab house, no plated holes, vias are soldered copper rivets.
+
+- **`rc_power_board.kicad_pro`:** all four net classes clearance 0.2 -> 0.4 mm; Default track 0.25 -> 0.5 mm; via diameter/drill for all classes -> 2.0 / 1.1 mm (rivet, provisional). DRC rules set: clearance 0.4, track 0.5, via 2.0/1.1, annular 0.45, min hole 0.8; plan's net-class table updated.
+- **Docs:** `fab_handoff.md` restructured (A: CNC prototype, B: fab house later) with a JST header table for every external connection; `bom.md` adds stock, rivets, dowels, bits and optional VH/XH rows, no PCB fab cost (total about 89.0 USD, about 49.1 excluding U1); `design_overview.md` and `.claude/rules/schematics.md` updated.
+- **Owner steps:** pull; open Board Setup in KiCad 10 and verify the preloaded design-rule minimums (clearance 0.4, track 0.5, via 2.0, annular 0.45, min hole 0.8); the net-class values are provisional; confirm the bit list and rivet size with the lab tech; decide the U3 footprint option. (The DRC minimums are now set in `rc_power_board.kicad_pro`, see the Mapper revision; the Mapper question is decided.)
 
 ## Meeting-cleanup revision (what changed)
 
 - **Wiring for traceability.** Each region's local nets (`VBAT_RAW`, `LDO_IN`, the rail outputs; `VIN_CPU`/`VIN_SENS` were merged into `VBAT`, see below) run as one bus from source to load, with no crossings. Each bus carries a single net label so the net keeps its name. GND is still drawn as symbols.
-- **ESC power is off-board.** The battery feeds the ESC directly on its own 12 AWG leads, carrying up to 20 A of motor current. J2, F2 and `VBAT_ESC` are removed. On the board, the ESC is now only the J3 3-wire receiver lead: throttle PWM plus the 6 V BEC. Board load on `VBAT` is about 7.3 A worst case (about 7.8 A at the 6.0 V cutoff), so F1 is TBD (10-15 A; see the single-fuse revision). A note on the sheet records the ESC draw.
+- **ESC power is off-board.** The battery feeds the ESC directly on its own 12 AWG leads, carrying up to 20 A of motor current. J2, F2 and `VBAT_ESC` are removed. On the board, the ESC is now only the J3 3-wire receiver lead: throttle PWM plus the 6 V BEC. Board load on `VBAT` was then about 7.3 A worst case (about 7.8 A at the 6.0 V cutoff; now 8.4 / 9.0 A with the Mapper, F1 = 15 A). A note on the sheet records the ESC draw.
 - **U1 EN is left unconnected (feature archived).** The module's internal pull-up keeps U1 always on. Q1, R4, `ESP_SHDN` and region F are removed. U1 PG still goes to the ESP32.
 - **The radar header (J10) is removed.** The gap in reference numbers is deliberate, so J11 keeps its name.
 - **`+6V_BEC`** now uses a project rail symbol, like the other rails.
@@ -48,7 +67,7 @@ Previous revision: the meeting-cleanup revision was generated in KiCad 7 format,
 - **Nets `VIN_CPU` and `VIN_SENS` are gone**, merged into `VBAT` (class HighCurrent). U1 VIN and U2 VIN sit directly on `VBAT`.
 - **F1** was a Mini (ATM) blade fuse in a Keystone 3568 holder (superseded by the ATO/ATC revision above). Rating discussion is in `bom.md`.
 - **Trade-off:** a sensor-branch short now opens F1 and drops compute too. U1 and U2 have their own output current limiting.
-- **Netlist then: 39 parts, 19 nets (now 21, see the current revision).** Net classes: HighCurrent = `*VBAT*`, GND; Power5A = `+5V_CPU`; Power3A = `+5V_SENS`, `*+6V_BEC`.
+- **Netlist then: 39 parts, 19 nets (now 40 parts, 21 nets, see the Mapper revision).** Net classes then: HighCurrent = `*VBAT*`, GND; Power5A = `+5V_CPU`; Power3A = `+5V_SENS`, `*+6V_BEC` (now `+5V_SENS` is Power5A).
 - **U1 EN** stays unconnected until the rev 2 prototype board. U1 is in hand; U2 is not bought yet.
 - **New docs:** `bom.md` and `fab_handoff.md`.
 
@@ -77,7 +96,7 @@ Previous revision: the meeting-cleanup revision was generated in KiCad 7 format,
 
 ## Verification so far
 
-The current revision: **39 parts, 21 nets**, per the regenerated netlist; the owner's KiCad 10 ERC is pending. The figures below are from the previous (41 parts, 21 nets) revision.
+The current revision (Mapper on J11): **40 parts, 21 nets**, per the regenerated netlist (KiCad 7.0.11 `kicad-cli`); the only netlist change vs the previous revision is C9 added to `+5V_SENS` / GND. The kicad-happy analyzer finds 40 parts, 21 nets, 4 no-connects and the same findings as before. The owner's KiCad 10 ERC on this revision is pending (the previous save, 53ac275, was clean). The figures below are from the earlier (41 parts, 21 nets) revision.
 
 The previous revision was checked with KiCad 7.0.11 `kicad-cli`, the kicad-happy analyzer and the owner's KiCad 10 ERC:
 
