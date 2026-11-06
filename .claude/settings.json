@@ -8,6 +8,9 @@
     },
     "ros2-engineering-skills": {
       "source": { "source": "github", "repo": "dbwls99706/ros2-engineering-skills", "ref": "v1.7.2" }
+    },
+    "kicad-happy": {
+      "source": { "source": "github", "repo": "aklofas/kicad-happy", "ref": "v2.3.2" }
     }
   },
   "enabledPlugins": {
@@ -15,7 +18,8 @@
     "pyright-lsp@claude-plugins-official": true,
     "clangd-lsp@claude-plugins-official": true,
     "embedded-skills@embedded-skills": true,
-    "ros2-engineering@ros2-engineering-skills": true
+    "ros2-engineering@ros2-engineering-skills": true,
+    "kicad-happy@kicad-happy": true
   },
   "enabledMcpjsonServers": ["context7"]
 }

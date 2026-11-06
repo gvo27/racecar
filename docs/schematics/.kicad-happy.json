@@ -1,0 +1,20 @@
+// kicad-happy project config (https://github.com/aklofas/kicad-happy, plugin ref v2.3.2).
+// Read by the kicad / spice / emc skills for every analysis run in this folder.
+{
+  "version": 1,
+  "project": {
+    "name": "RC Car Power Distribution Board"
+  },
+  "analysis": {
+    "output_dir": "analysis",
+    "retention": 5,
+    "auto_diff": true,
+    "track_in_git": false
+  },
+  "design_intent": {
+    "product_class": "prototype",
+    "ipc_class": 2,
+    "target_market": "hobby",
+    "preferred_passive_size": "0805"
+  }
+}

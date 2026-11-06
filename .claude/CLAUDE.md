@@ -13,8 +13,8 @@ hw: {steer: ds3225mg@gpio4, throttle: thw1060_esc@gpio5, battery: 2s_lipo}
 usb_ports: {left_USB: native, planned regulated power input; right_COM: ch343 uart0, flashing + host link}
 layout: .claude/layout.yaml
 cmd: make help
-plugins: .claude/settings.json  # superpowers, pyright-lsp, clangd-lsp, embedded-skills, ros2-engineering; mcp: .mcp.json (context7)
-rules: .claude/rules/{firmware,dependencies,deploy,models,repos,claude-tooling}.md  # path-scoped, see paths: frontmatter
+plugins: .claude/settings.json  # superpowers, pyright-lsp, clangd-lsp, embedded-skills, ros2-engineering, kicad-happy; mcp: .mcp.json (context7)
+rules: .claude/rules/{firmware,dependencies,deploy,models,repos,claude-tooling,schematics}.md  # path-scoped, see paths: frontmatter
 invariants:
   - esp32 role: actuator pwm + host comms only; powers nothing
   - sensors on separate power rail, common ground, <=3.3v signals

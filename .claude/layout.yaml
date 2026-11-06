@@ -21,6 +21,7 @@ paths:
   logs/: {role: session jsonl, gitignored, colcon_ignore: true}
   docs/: {role: setup.md, docker_ros_plan.md, esp32-firmware-proposal.md, tuning-notes.txt, colcon_ignore: true}
   docs/datasheets/: {role: archived datasheets + components_list.xlsx (ground truth inventory)}
+  docs/schematics/: {role: power distribution board kicad project + plan doc (power_board_plan.md = spec), rules: .claude/rules/schematics.md, phase: 1}
   .github/workflows/firmware.yml: {role: ci firmware build in container + firmware.bin artifact, phase: 1}
   .claude/: {role: CLAUDE.md, layout.yaml, rules/*.md, settings.json}
   .claude/settings.json: {role: project claude plugins + mcp enablement, rules: [.claude/rules/dependencies.md, .claude/rules/claude-tooling.md], phase: 1}
