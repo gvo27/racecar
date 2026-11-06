@@ -26,6 +26,13 @@ Every service:
 - header comment `# <svc> — <role>` + `# Notes: .claude/rules/deploy.md`
 - serial: `devices: [${ESP32_DEVICE}]` (udev symlink /dev/rccar-esp32) + `group_add: [dialout gid]`
 
+## drivers service (phase 4, lidar)
+- `drivers` runs `rccar_bringup drivers.launch.py` (mapper_driver + robot_state_publisher). No `devices`, no `cap_add`; same hardening/logging anchors as core. Mounts only the repo read-only (`${REPO_DIR}:/ws/src/racecar:ro`), NOT `*ros-mounts`: no rw tuning.toml, no logs/. Talks to the Mapper over wlan0 (host network).
+- healthcheck = heartbeat file, touched only while scans flow; unhealthy when the Mapper is off is expected and does not affect core/mcu-agent.
+- `MAPPER_HOST` env override (default 192.168.11.1) for the Ethernet fallback; not in `.env`; address bench-confirmed, `mapper_host` may move to tuning.toml [platform.pi5] in a later change.
+
+- `make drivers-stop` / `drivers-start` / `lidar-hw-test`: see `.claude/rules/hw-testing.md`; `make ros-image` refuses while `drivers` runs.
+
 ## Host files (installed by `make install-host`, prints each step)
 - `deploy/car/99-rccar.rules` -> /etc/udev/rules.d (CH343 1a86:55d3 -> /dev/rccar-esp32, group dialout, 0660)
 - `deploy/car/rccar.service` -> /etc/systemd/system with @REPO_DIR@ and @USER@ substituted; oneshot `compose up -d` at boot, `down` at stop. Does not pull or build.

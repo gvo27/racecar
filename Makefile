@@ -24,8 +24,8 @@ COMPOSE  := docker compose -f deploy/car/compose.yaml --env-file deploy/car/.env
 .DEFAULT_GOAL := help
 .PHONY: help setup clean build flash monitor fw-image config models compiledb unit check-dev \
         ros-image ros-test ros-test-image ros-test-run ros-shell car-up car-down car-ps car-logs car-pull \
-        car-shutdown install-host teleop calibrate tune test rangefinder mcu unit-run \
-        _clean-build _need-config _need-stack _need-stack-down
+        car-shutdown install-host teleop calibrate tune test rangefinder viz lidar-imu lidar-snapshot lidar-record mcu unit-run \
+        drivers-stop drivers-start lidar-hw-test _clean-build _need-config _need-stack _need-stack-down _need-drivers-down
 
 help:            ## list targets (grouped in README.md)
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-21s %s\n", $$1, $$2}'
@@ -61,7 +61,7 @@ install-host:    ## sudo: install udev rule (/dev/rccar-esp32) + systemd unit rc
 	@echo "install-host: done. The stack now starts at boot. Start it now: make car-up. Unplug/replug the USB cable once for the udev symlink."
 
 # ---- car stack (ROS 2 in docker) ------------------------------------------------------------
-ros-image:       ## build the ROS 2 image (docker/ros.Dockerfile -> rccar-ros:local)
+ros-image: _need-drivers-down  ## build the ROS 2 image (docker/ros.Dockerfile -> rccar-ros:local)
 	docker build -f docker/ros.Dockerfile $(ROS_BUILD_ARGS) -t $(ROS_IMAGE) .
 
 ros-test-image:  ## build the ROS test image (target test: colcon build, all test deps)
@@ -73,7 +73,7 @@ ros-test-run:    ## run colcon test in an already built test image; results in b
 
 ros-test: ros-test-image ros-test-run  ## build the test image + colcon test + test-result (no hardware)
 
-car-up: config   ## render config, start mcu-agent + core (docker compose up -d)
+car-up: config   ## render config, start mcu-agent + core + drivers (docker compose up -d)
 	$(COMPOSE) up -d
 	@echo "car-up: check health with: make car-ps   logs: make car-logs"
 
@@ -112,6 +112,26 @@ _need-stack-down:
 	@if $(COMPOSE) ps --status running -q 2>/dev/null | grep -q .; then \
 	  echo "car stack is running and holds the serial port: make car-down first"; exit 1; fi
 
+# lidar driver container: stop before editing/rebuilding rccar_drivers (guard hook: .claude/hooks/hw_guard.py)
+drivers-stop: _need-config  ## stop only the lidar driver container (safe; required before editing/rebuilding rccar_drivers)
+	$(COMPOSE) stop drivers
+
+drivers-start: _need-config  ## start the lidar driver container (hardware restart: humans/explicitly approved only)
+	$(COMPOSE) up -d drivers
+
+# no-op without a rendered config or a usable compose (CI, laptops)
+_need-drivers-down:
+	@if [ -f deploy/car/.env.generated ] && [ -n "$$($(COMPOSE) ps --status running -q drivers 2>/dev/null)" ]; then \
+	  echo "lidar driver container is running: make drivers-stop first (before editing/rebuilding rccar_drivers)"; exit 1; fi
+
+# Physical-Mapper acceptance (launch_testing, rccar_drivers/test_hw; criteria rccar_drivers/hw_criteria.py).
+# Runs its own driver instance, so the compose service must be stopped. Never starts anything afterwards.
+lidar-hw-test: _need-config _need-drivers-down  ## automated launch_testing against the PHYSICAL Mapper (read-only; car stationary); JSON report in logs/
+	@echo "lidar-hw-test: car stationary, ESC power OFF. Read-only (getters only). Report: logs/hw_test_lidar_<UTC>.json"
+	@rc=0; $(COMPOSE) run --rm -e MAPPER_HOST=$${MAPPER_HOST:-192.168.11.1} -e RCCAR_GIT_SHA=$(shell git rev-parse --short HEAD 2>/dev/null) \
+	  -e RCCAR_HW_TEST=1 tools launch_test /ws/install/share/rccar_drivers/test_hw/test_mapper_hw.py || rc=$$?; \
+	  echo "drivers left stopped; restarting it is a hardware restart: ask the user (make drivers-start)"; exit $$rc
+
 # ---- ROS tools (need: make car-up) ----------------------------------------------------------
 teleop: _need-stack  ## SSH keyboard driving via the supervisor (arrows, space=brake, d=disarm, a=arm, q/x=quit)
 	$(COMPOSE) run --rm tools ros2 run rccar_teleop keyboard
@@ -127,6 +147,21 @@ test: _need-stack  ## steering sweep + failsafe check (motor stays off, never ar
 
 rangefinder: _need-stack  ## live rangefinder feed: MCU timestamp, Pi time, range (Ctrl+C to exit)
 	$(COMPOSE) run --rm tools ros2 run rccar_calibration rangefinder_monitor
+
+viz: _need-stack  ## live websocket feed for Foxglove/Lichtblick on localhost:8765 (VS Code forwards it; Ctrl+C to exit)
+	@echo "viz: open ws://localhost:8765 in Foxglove or Lichtblick (VS Code Remote-SSH forwards port 8765)"
+	$(COMPOSE) run --rm tools ros2 launch rccar_bringup viz.launch.py
+
+lidar-imu: _need-stack  ## live Mapper IMU feed (heading, yaw rate, horizontal accel, speed) + logs/lidar_imu_*.jsonl (Ctrl+C to exit)
+	$(COMPOSE) run --rm tools ros2 run rccar_calibration lidar_imu_monitor
+
+lidar-snapshot: _need-stack  ## one lidar capture -> logs/lidar_snapshot_<UTC>/ (map.png + scan, pose, summary; read-only)
+	$(COMPOSE) run --rm tools ros2 run rccar_calibration lidar_snapshot
+
+SECS ?= 30
+lidar-record: _need-stack  ## record the lidar topics for SECS (default 30) -> logs/lidar_bag_<UTC>/ (mcap; read-only)
+	@case '$(SECS)' in ''|*[!0-9]*) echo "SECS must be a whole number of seconds (1..600), got '$(SECS)'"; exit 1;; esac
+	$(COMPOSE) run --rm tools ros2 run rccar_calibration lidar_record --secs $(SECS)
 
 mcu: _need-stack  ## one McuCommand to the ESP32, e.g. make mcu CMD="GET" (stack up; CMD: GET INFO PING SET ...; ARM refused)
 	@test -n "$(CMD)" || { echo 'usage: make mcu CMD="GET"'; exit 1; }

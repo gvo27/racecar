@@ -17,5 +17,26 @@
     "embedded-skills@embedded-skills": true,
     "ros2-engineering@ros2-engineering-skills": true
   },
-  "enabledMcpjsonServers": ["context7"]
+  "enabledMcpjsonServers": ["context7"],
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [{ "type": "command", "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/hw_guard.py\"" }]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit|NotebookEdit",
+        "hooks": [{ "type": "command", "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/hw_guard.py\"" }]
+      }
+    ]
+  },
+  "permissions": {
+    "ask": [
+      "Bash(make car-up*)",
+      "Bash(make drivers-start*)",
+      "Bash(make install-host*)",
+      "Bash(make flash*)",
+      "Bash(make car-shutdown*)"
+    ]
+  }
 }

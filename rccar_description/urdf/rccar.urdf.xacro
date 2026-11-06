@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<!-- rccar frames (data only). base_link = rear axle center on the ground plane
+     (REP-105 car convention). Add visuals/collisions only once measured. -->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="rccar">
+
+  <!-- !!! UNMEASURED !!! user measures the lidar mount offset on the car before merge.
+       base_link = rear axle center on the ground plane (REP-105 car convention).
+       lidar_x/y/z in meters (+x forward, +y left, +z up) of the Mapper lidar frame
+       relative to base_link; lidar_yaw in radians (+ = counter-clockwise from above).
+       0 is a placeholder, NOT a measurement. -->
+  <xacro:property name="lidar_x" value="0.0"/>
+  <xacro:property name="lidar_y" value="0.0"/>
+  <xacro:property name="lidar_z" value="0.0"/>
+  <xacro:property name="lidar_yaw" value="0.0"/>
+
+  <link name="base_link"/>
+
+  <link name="lidar_link"/>
+  <joint name="base_to_lidar" type="fixed">
+    <parent link="base_link"/>
+    <child link="lidar_link"/>
+    <origin xyz="${lidar_x} ${lidar_y} ${lidar_z}" rpy="0 0 ${lidar_yaw}"/>
+  </joint>
+
+  <!-- The IMU lives in the Mapper data-processing unit; the Mapper returns it
+       already in robot coordinates (datasheet), so zero offset from lidar_link. -->
+  <link name="lidar_imu_link"/>
+  <joint name="lidar_to_imu" type="fixed">
+    <parent link="lidar_link"/>
+    <child link="lidar_imu_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+</robot>

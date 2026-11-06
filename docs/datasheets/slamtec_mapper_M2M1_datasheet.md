@@ -60,14 +60,14 @@ Modulated pulsed IR rejects ambient light. Works indoors and outdoors, but avoid
 | Current, 5 V, running | – | 750 mA | 1300 mA | ≈ 3.75 W typ |
 | PoE | IEEE 802.3at Type 2 (Pro kit) | | | |
 
-Kit power cable: 1.5 m, **USB‑A male → 2‑pin wire‑to‑board housing** [DS fig 2‑6]. A USB port must supply ≥ 1.5 A at startup, so use a ≥ 2 A USB charger rather than a PC port.
+Kit power cable: 1.5 m, **USB‑A male (into the Mapper) ↔ 2‑pin housing (supply side)** [DS fig 2‑6]; direction inferred from fig 2‑5 (the Mapper's 5V DC port is USB‑A) [INF]. Second-hand units may lack it; a USB‑A male pigtail works (see `docs/setup.md` Lidar). A USB port must supply ≥ 1.5 A at startup, so use a ≥ 2 A USB charger rather than a PC port.
 
 ## 5. Interfaces & pinouts
 
 ### 5.1 External connectors (on the Data Processing Unit) [DS fig 2‑5]
 | Connector | Function | Notes |
 |---|---|---|
-| "5V DC" | Power in | 2‑pin wire‑to‑board receptacle that mates with the kit cable. Standard colors: red = +V, black = GND [INF]. 4.8–12 V |
+| "5V DC" | Power in | Standard USB‑A receptacle beside the RJ45 [DS fig 2‑5 label; user-observed]. Power input only: VBUS (pin 1) = +V, GND (pin 4); D+/D− unused. 4.8–12 V (feed 5 V only) |
 | RJ45 "Ethernet" | 10/100BASE‑TX (802.3/802.3u), PoE 802.3at Type 2 | standard pinout below |
 | "Connection" (side) | Internal link to the lidar head | 0.3 m multi‑wire jumper; see 5.3 |
 | Wi‑Fi (internal) | 802.11 a/b/g/n/ac, dual‑mode AP/Station | |
@@ -108,7 +108,7 @@ The M2M1's ranging specs match the **RPLIDAR S1** core exactly (40 m, 9200 Hz, 9
 | Device IP in AP mode | **192.168.11.1** | [QS] |
 | Control/data port | **TCP 1445** | [QS], [OSW] |
 | Ethernet | PC set as **DHCP client** when cabled directly | [QS] (M1M1) |
-| `opensw` default host | 192.168.11.11 | [OSW] (if 192.168.11.1 fails, try this) |
+| `opensw` default host | 192.168.11.11 | [OSW] (bench: 192.168.11.1 confirmed for AP mode; .11 does not apply) |
 | Station (client) mode | configurable via RoboStudio / SDK | [RET] |
 | Boot | spins up ≈ 20 s (M1M1) / ≈ 40 s (M2M3) after power. M1M1 dev kit has power switch SW1 and LED D1 | [QS] |
 
@@ -146,7 +146,8 @@ Operating −5 °C … +45 °C (typ 25 °C). Storage TBD. Pre‑heating improves
 ## 11. Wire protocol (reverse‑engineered, [OSW])
 - **Transport:** TCP to port 1445. Each message is a single JSON object terminated by the delimiter **`"\n\r\n\r\n"`**. Request/response is synchronous and matched by `request_id` (int 1–99999999).
 - **Simple request:** `{"command":"<cmd>","request_id":12345}`
-- **Response envelope:** `{"command":"<cmd>","request_id":12345,"result":{"code":<int>,"timestamp":<int>, ...}}`
+- **Response envelope:** `{"command":"<cmd>","request_id":12345,"result":{"code":<int>,"timestamp":<int>, ...}}`. **Bench (firmware 2.6.0_dev, 2019-12-12): `code` is `1` on every successful getter, not 0.** The value used for failures has not been observed.
+- **Key casing (bench):** `getrobothealth` returns camelCase (`hasError`, `hasWarning`, `hasFatal`, `hasLidarDisconnected`, `hasSdpDisconnected`, `hasDepthCameraDisconnected`, `hasSystemEmergencyStop`, plus `baseError: []`), not the snake_case in the table below. `getsdpversion` returns `sdp_version`; `getsystemresource` returns snake_case as listed. `getimuinrobotcoordinate` also returns `availibilityBitMap` (sic, 131) and `optional`. At rest `raw_acc`, `gyro`, `raw_gyro`, `compass` were exactly 0 and `acc` about 0.003 (no gravity), quaternion valid.
 
 | command | args | result fields |
 |---|---|---|
@@ -160,7 +161,9 @@ Operating −5 °C … +45 °C (typ 25 °C). Storage TBD. Pre‑heating improves
 | `getsystemresource` | – | `battery_percentage`, `board_temperature10` (°C × 10), `dcin_connected`, `is_charging`, `on_dock` |
 | `getsdpversion` | – | `sdp_version` (firmware string) |
 
+- **IMU availability bitmap (INFERRED, not confirmed by Slamtec):** the SDK enum `ImuBitMap` ([docs](https://developer.slamtec.com/docs/slamware/cpp-sdk-en/2.8.2_rtm/imu_bitmap/)) lists NO_IMU_READY, QUATERNION_READY, CALIBRATED_ACC_READY, CALIBRATED_GYRO_READY, CALIBRATED_COMPASS_READY, RAW_ACC_READY, RAW_GYRO_READY, RAW_COMPASS_READY, FUSION_6DOF_READY, FUSION_9DOF_READY but gives no numeric values. Assuming sequential flags in that order (NO_IMU_READY = 0, QUATERNION = 1<<0 ... FUSION_9DOF = 1<<8), the bench value 131 = QUATERNION + CALIBRATED_ACC + FUSION_6DOF, which matches the observed data (valid quaternion, acc ~0.003, every other field exactly 0). Consequence on firmware 2.6.0_dev: **orientation only; no rates** (gyro, raw_*, compass not exported); `acc` looks gravity-removed with unverified units. hatchbed/opensw `client.h` agrees: `getImuData`/`getRawImuData` carry the note "currently only the orientation fields appear to be filled in" (both send the same `getimuinrobotcoordinate`). The driver's `ImuBit` (`slamtec/protocol.py`) encodes this layout; bench-verify before relying on other bits.
 - **MapType:** 0 Bitmap8Bit, 1 Pointmap, 2 ImageFeaturesMap, 3 RectangleAreaMap.
+- **Bitmap8Bit cell encoding (bench-confirmed 2026-11-02):** 0 unknown, 1..127 free, 128..255 occupied (driver: `map_free_is_high=false`).
 - **MapKind:** 0 EXPLORERMAP, 5 COSTMAP, 10 SWEEPERMAP, 20 UWBMAP, 30 SLAMMAP, 40 LOCALSLAMMAP, 50 DBOWMAP, 60 OPTIMALOPERATIONALMAP, 70 MARKERMAP, 80 RECTANGLEAREAMAP, 90 DISCREPANCYRECORDMAP. Use 0 (explorer) for the live occupancy map.
 
 **Binary payload encoding** (`laser_points`, `map_data`): base64‑decode, then apply custom RLE.
@@ -251,6 +254,7 @@ Validated: `parse_scan` reproduces opensw's expected output exactly on all 24 ca
 4. After ~1 h of continuous mapping, graph optimization stops. Save the map and restart for large sessions.
 5. Mapping tolerates only ±3° of tilt, and speeds up to 2 m/s.
 6. The datasheet's 20 m figure is a copy error. The spec table (40 m) is authoritative for M2M1.
+7. The USB‑A "5V DC" port is a power input, not a USB host/data port. Never connect a PC or Pi to it for data, and check with a multimeter that it does not source voltage before first connecting a supply.
 
 ## 13. Sources
 - M2M1 datasheet rev 1.1: https://cdn.sparkfun.com/assets/0/5/8/f/a/DS-15871-Slamtec_Mapper_Pro.pdf
