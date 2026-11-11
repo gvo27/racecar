@@ -31,7 +31,7 @@ Strict applies every rule in the plugin. STE-flavored applies the structural rul
 4. Do not change code blocks, inline code, commands or tables of measured values.
 5. Use one name for one thing in a document. Examples: "ESP32" (not a mix of "MCU", "board" and "micro"), "Pi" for the Raspberry Pi 5, "ESC".
 6. Domain terms are permitted (ROS 2, micro-ROS, PWM, ESC, I2C, LiDAR, IMU, TF). Define a term one time if it is not common.
-7. The terse `key: value` notation in `.claude/CLAUDE.md` and `.claude/layout.yaml` stays terse. Apply the rules to the prose fragments only. Do not expand the notation into sentences.
+7. The terse `key: value` notation in `.claude/CLAUDE.md` and `.claude/layout.yaml` stays terse. Apply the rules to the prose fragments only. Do not expand the notation into sentences. In this notation a semicolon separates items. Keep it. A comma in its place joins two items into one list.
 8. Use simple tenses. Keep a compound tense only when it carries information, for example "may have failed".
 
 ## Check

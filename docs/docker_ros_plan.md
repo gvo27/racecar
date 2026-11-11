@@ -95,7 +95,7 @@ rccar/                            ← repo root; colcon finds packages directly
 
 - **Every actuator interaction goes through ROS 2 via micro-ROS** (phase 2, bench-verified). The cleanup after the bench parity test deleted the legacy ASCII path (the `esp32s3_ascii` firmware env, the host CLI, `.venv`).
 - **Firmware micro-ROS interfaces** (contract: `rccar_msgs`, bounded strings only):
-  - subscription `/rccar/mcu/drive` (`DriveCmd`: `heading_rad`, dimensionless `throttle` [-1, 1], `source`, in REP-103 SI units). The supervisor is the only publisher.
+  - subscription `/rccar/mcu/drive` (`DriveCmd`: `heading_rad`, dimensionless `throttle` [-1, 1], `source`). All values use REP-103 SI units. The supervisor is the only publisher.
   - publishers `/rccar/mcu/telemetry` (best effort) and `/rccar/mcu/event` (reliable).
   - one service `/rccar/mcu/command` (`McuCommand`) that reuses the firmware's ASCII parser. Because of this, every clamp and safety check stays in one place, and the entity count fits the micro-ROS defaults. Typed services (`set_param`, `cal_point`, `raw_pwm`, `save`, `get`, `info`) wrap it on the Pi in `rccar_mcu_bridge`.
   - `rmw_uros_sync_session` replaces `TIME`. A reconnect state machine handles agent loss.
