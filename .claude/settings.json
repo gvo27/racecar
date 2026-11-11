@@ -10,7 +10,7 @@
       "source": { "source": "github", "repo": "dbwls99706/ros2-engineering-skills", "ref": "v1.7.2" }
     },
     "asd-ste100-skill": {
-      "source": { "source": "github", "repo": "danyuchn/asd-ste100-skill", "ref": "main" }
+      "source": { "source": "github", "repo": "danyuchn/asd-ste100-skill", "ref": "master" }
     }
   },
   "enabledPlugins": {
@@ -19,7 +19,8 @@
     "clangd-lsp@claude-plugins-official": true,
     "embedded-skills@embedded-skills": true,
     "ros2-engineering@ros2-engineering-skills": true,
-    "asd-ste100@asd-ste100-skill": true
+    "asd-ste100@asd-ste100-skill": true,
+    "claude-md-management@claude-plugins-official": true
   },
   "hooks": {
     "PreToolUse": [

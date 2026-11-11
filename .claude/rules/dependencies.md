@@ -29,9 +29,9 @@ paths:
 - Third-party ROS sources without an apt binary go in `repos/rccar.repos` (see `.claude/rules/repos.md`).
 
 ## Claude plugins (.claude/settings.json, usage: .claude/rules/claude-tooling.md)
-- claude-plugins-official (anthropics/claude-plugins-official): superpowers, pyright-lsp, clangd-lsp. The LSP binaries (pyright-langserver, clangd) are optional host dev tools. They are the one allowed host install (not runtime deps). See `make check-dev`.
+- claude-plugins-official (anthropics/claude-plugins-official): superpowers, pyright-lsp, clangd-lsp, claude-md-management (commands + claude-md-improver skill, no hooks). The LSP binaries (pyright-langserver, clangd) are optional host dev tools. They are the one allowed host install (not runtime deps). See `make check-dev`.
 - embedded-skills@embedded-skills: github rovinax/embedded-skills, ref master (no tags upstream). Topics: firmware arch, driver layering, rtos, isr.
 - ros2-engineering@ros2-engineering-skills: github dbwls99706/ros2-engineering-skills, ref v1.7.2. Topics: micro-ros, ros2_control, nav2, perception.
-- asd-ste100@asd-ste100-skill: github danyuchn/asd-ste100-skill, ref main (no tags upstream, marketplace sources take ref only, no sha, reviewed at a4905d922500dd7530ca8a0eb9e4940494255709). Skill + lint script only, no hooks.
+- asd-ste100@asd-ste100-skill: github danyuchn/asd-ste100-skill, ref master (the default branch; upstream has no `main` branch and no tags; marketplace sources take ref only, no sha; reviewed at a4905d922500dd7530ca8a0eb9e4940494255709). Skill + lint script only, no hooks.
 - ros2-engineering ships advisory hooks (PreToolUse edit/bash validator, Stop advisory, never blocks). To opt out, set ROS2_SKILL_DISABLE_HOOKS=all.
 - To bump a plugin, change the ref to a tag. Never track a moving branch when a tag exists.
