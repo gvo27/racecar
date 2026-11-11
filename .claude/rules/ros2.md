@@ -14,22 +14,22 @@ paths:
 | /rccar/mcu/event | McuEvent | esp32 | reliable depth 10 | supervisor, mcu_bridge |
 | /rccar/rangefinder/range | sensor_msgs/Range | esp32 (fake_mcu in tests) | best_effort | rangefinder_monitor, any |
 | /rccar/supervisor/state | SupervisorState | supervisor | reliable + transient_local depth 1 | teleop, UIs |
-- services: /supervisor/{arm,disarm,brake}; /mcu_bridge/{set_param,cal_point,raw_pwm,save,get,info,push_tuning}; /rccar/mcu/command (McuCommand, esp32).
-- names: `/rccar/<area>/<stream>`, snake_case, no hardcoded absolute names inside libraries. Standard msgs before custom ones; units SI/REP-103 (rad, + = left).
-- freshness beats delivery for commands (best effort, timeout at consumer); events/state must not be lost (reliable).
+- services: /supervisor/{arm,disarm,brake}, /mcu_bridge/{set_param,cal_point,raw_pwm,save,get,info,push_tuning}, /rccar/mcu/command (McuCommand, esp32).
+- names: `/rccar/<area>/<stream>`, snake_case. Do not hardcode absolute names inside libraries. Use standard msgs before custom ones. Units are SI/REP-103 (rad, + = left).
+- For commands, freshness is more important than delivery (best effort, timeout at the consumer). Events and state must not be lost (reliable).
 
 ## Structure
-- thin node, fat library: logic in plain python modules (arbiter, teleop_state, tuning, commands, helpers) tested with pytest without rclpy; node = wiring only.
-- launch_testing with the fake MCU (rccar_bringup/test/fake_mcu.py) for wiring; it is the seed of the sim adapter.
-- lifecycle for resource owners (mcu_bridge is managed; car.launch.py configures + activates it). Every parameter via `declare_parameter`.
-- never name instance attributes like rclpy.Node internals (`_services`, `_clients`, `_publishers`, `_subscriptions`, `_timers`, `_executor`, `_context`, `_clock`): it silently kills lifecycle services (regression test in rccar_mcu_bridge/test).
-- no blocking `spin_until_future_complete` inside callbacks; coroutine callbacks + ReentrantCallbackGroup.
-- `use_sim_time` accepted by every launch file and passed to every node; `sim:=` arg reserved in rccar_bringup.
-- hardware boundary = supervisor output `/rccar/mcu/drive` + telemetry/sensor topics; nothing above imports ESP32/serial/Gazebo specifics. sim-only branch in autonomy code = boundary leak.
-- ament lint must pass (flake8, pep257, xmllint; copyright off). `<buildtool_depend>ament_python</buildtool_depend>` is NOT a rosdep key: never add it (breaks rosdep install).
+- thin node, fat library: put logic in plain python modules (arbiter, teleop_state, tuning, commands, helpers) and test them with pytest without rclpy. The node only does wiring.
+- launch_testing with the fake ESP32 (rccar_bringup/test/fake_mcu.py) tests the wiring. It is the seed of the sim adapter.
+- Resource owners use lifecycle (mcu_bridge is managed, and car.launch.py configures + activates it). Every parameter uses `declare_parameter`.
+- Never give instance attributes the names of rclpy.Node internals (`_services`, `_clients`, `_publishers`, `_subscriptions`, `_timers`, `_executor`, `_context`, `_clock`). Such names silently break the lifecycle services (regression test in rccar_mcu_bridge/test).
+- Do not use a blocking `spin_until_future_complete` inside callbacks. Use coroutine callbacks + ReentrantCallbackGroup.
+- Every launch file accepts `use_sim_time` and passes it to every node. The `sim:=` arg is reserved in rccar_bringup.
+- The hardware boundary is the supervisor output `/rccar/mcu/drive` + the telemetry/sensor topics. Nothing above it imports ESP32/serial/Gazebo specifics. A sim-only branch in autonomy code = boundary leak.
+- ament lint must pass (flake8, pep257, xmllint, copyright off). `<buildtool_depend>ament_python</buildtool_depend>` is NOT a rosdep key. Never add it (it breaks rosdep install).
 
 ## Skip
-VDA 5050, Nav2 BT plugin scaffolding, gz-sim ECS/plugin tooling, mandatory 4-layer clean-architecture split per package, ros2_control (esp32 owns pwm; revisit with ackermann_steering_controller for captain/nav2).
+VDA 5050, Nav2 BT plugin scaffolding, gz-sim ECS/plugin tooling, mandatory 4-layer clean-architecture split per package, ros2_control (esp32 owns pwm, revisit with ackermann_steering_controller for captain/nav2).
 
 ## Verify
-`make ros-test` (colcon test in docker). CI .github/workflows/ros.yml also runs advisory ros2-engineering validators (qos_audit, launch_validator, skill_validate_hook). Hardware behavior = user bench only.
+`make ros-test` (colcon test in docker). CI .github/workflows/ros.yml also runs the advisory ros2-engineering validators (qos_audit, launch_validator, skill_validate_hook). Hardware behavior = user bench only.
