@@ -4,7 +4,7 @@ paths:
   - "rccar_teleop/**"
 ---
 
-# rccar_calibration + rccar_teleop (run via `make calibrate|tune|test|teleop`, stack up)
+# rccar_calibration + rccar_teleop (run with `make calibrate|tune|test|teleop`, stack up)
 
 - `bench_test` NEVER arms and never commands throttle (motor stays off): steering sweep + failsafe check only. There is no ROS throttle test.
 - `calibrate`: prompts for physical steps, jogs with raw_pwm/cal_point, on `save` writes the ESP32 flash (mcu_bridge save) and `tuning.toml` via `update_tuning_file` (in place, bind mount rw). Only `[steering.calibration]` / `[throttle.calibration]` keys that exist; no new keys.

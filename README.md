@@ -1,6 +1,6 @@
 # racecar
 
-A 1:10 Tamiya TT-02 built into a self-driving research platform on a two-layer compute stack: a Raspberry Pi 5 for perception, sensor fusion, semantic SLAM and racing-line optimization, and an ESP32-S3 for hard-real-time control. This repo holds everything that runs on the car: PWM actuation, failsafes, the host-to-MCU protocol, runtime tuning, logging and the Docker/ROS 2 deployment. Setup: [docs/setup.md](docs/setup.md).
+This project turns a 1:10 Tamiya TT-02 into a self-driving research platform. It has a two-layer compute stack. A Raspberry Pi 5 does perception, sensor fusion, semantic SLAM and racing-line optimization. An ESP32-S3 does hard-real-time control. This repo holds everything that runs on the car: PWM actuation, failsafes, the host-to-ESP32 protocol, runtime tuning, logging and the Docker/ROS 2 deployment. Setup: [docs/setup.md](docs/setup.md).
 
 ## Compute stack
 
@@ -70,7 +70,7 @@ Source of truth: [`firmware/esp32/include/pins.h`](firmware/esp32/include/pins.h
 | 3, 13, 14 | RST, 3, 46 | ~~reset / strapping pins~~ | ~~do not use~~ |
 | 22 | G | common ground | power |
 
-Wire colours: signal = yellow/white, power = red, ground = black; rangefinder I2C: SDA = white, SCL = green. Put a tape flag on the two active signal wires.
+Wire colours: signal = yellow/white, power = red, ground = black. Rangefinder I2C: SDA = white, SCL = green. Put a tape flag on the two active signal wires.
 
 ## Make commands
 
@@ -137,9 +137,9 @@ Nickname: *rangefinder*. Datasheet: [archived PDF](docs/datasheets/LIDAR-Lite%20
 ## Power-up sequence
 
 1. ESC **off**. Wheels off the ground.
-2. USB cable into **COM**. The ESP32 boots and sends neutral (1500 µs) on both channels. Then `make car-up`.
+2. Connect the USB cable to **COM**. The ESP32 boots and sends neutral (1500 µs) on both channels. Then run `make car-up`.
 3. ESC **on**. It beeps and learns neutral.
-4. Power down in reverse: ESC off first. **Always switch the ESC off before `make flash`.**
+4. To power down, do the steps in reverse order. Switch the ESC off first. **Always switch the ESC off before `make flash`.**
 
 ## Repo layout
 
@@ -164,4 +164,4 @@ docs/              setup.md, docker_ros_plan.md, proposal, datasheets/
 Makefile           every command (make help)
 ```
 
-Bench checklist (the procedure used to verify phase 2): [docs/setup.md](docs/setup.md#phase-2-bench-checklist-user-run). Roadmap: [docs/docker_ros_plan.md](docs/docker_ros_plan.md). Firmware design: [docs/esp32-firmware-proposal.md](docs/esp32-firmware-proposal.md).
+Bench checklist (the procedure that verified phase 2): [docs/setup.md](docs/setup.md#phase-2-bench-checklist-user-run). Roadmap: [docs/docker_ros_plan.md](docs/docker_ros_plan.md). Firmware design: [docs/esp32-firmware-proposal.md](docs/esp32-firmware-proposal.md).
