@@ -16,6 +16,5 @@
     "clangd-lsp@claude-plugins-official": true,
     "embedded-skills@embedded-skills": true,
     "ros2-engineering@ros2-engineering-skills": true
-  },
-  "enabledMcpjsonServers": ["context7"]
+  }
 }
