@@ -17,7 +17,6 @@
     "embedded-skills@embedded-skills": true,
     "ros2-engineering@ros2-engineering-skills": true
   },
-  "enabledMcpjsonServers": ["context7"],
   "hooks": {
     "PreToolUse": [
       {

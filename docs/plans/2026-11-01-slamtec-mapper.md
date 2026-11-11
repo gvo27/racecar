@@ -140,7 +140,7 @@ The real Wi‑Fi costs are latency jitter (5–50 ms spikes) and dropouts. Mitig
 - Delegation:
   - **Sonnet** subagents (`model: "sonnet"`) do steps 1+5 (protocol/convert/tests), 1 (node), 2–3, 4 and 6 in sequence.
   - **Opus** reviews: the `ros2-reviewer` agent plus my own review of each diff before the next task.
-- Fetch rclpy lifecycle, LaserScan and tf2 Jazzy docs with context7 before the node code is written.
+- Check the upstream rclpy lifecycle, LaserScan and tf2 Jazzy docs before the node code is written.
 - Commit and push to `lidar`, then open the draft PR.
 
 ## Verification
