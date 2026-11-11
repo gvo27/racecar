@@ -23,6 +23,9 @@ setup(
             'bench_test = rccar_calibration.bench_test:main',
             'tune = rccar_calibration.tune:main',
             'rangefinder_monitor = rccar_calibration.rangefinder_monitor:main',
+            'lidar_imu_monitor = rccar_calibration.lidar_imu_monitor:main',
+            'lidar_snapshot = rccar_calibration.lidar_snapshot:main',
+            'lidar_record = rccar_calibration.lidar_record:main',
         ],
     },
 )

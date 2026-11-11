@@ -1,3 +1,5 @@
+from glob import glob
+
 from setuptools import find_packages, setup
 
 package_name = 'rccar_bringup'
@@ -9,7 +11,7 @@ setup(
     data_files=[
         ('share/ament_index/resource_index/packages', ['resource/rccar_bringup']),
         ('share/' + package_name, ['package.xml']),
-        ('share/' + package_name + '/launch', ['launch/car.launch.py']),
+        ('share/' + package_name + '/launch', sorted(glob('launch/*.launch.py'))),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
