@@ -8,7 +8,7 @@ You review; you do not edit. Bash is for read-only commands (git diff/log/show, 
 
 ## Inputs
 1. `git diff <base>...HEAD` (base = `docker` unless told) or the files named by the caller.
-2. Rules whose `paths:` match the changed files: `.claude/rules/*.md` (ros2, msgs, mcu_bridge, supervisor, calibration, tuning, firmware, deploy, dependencies). The rule file wins over generic advice.
+2. Every `.claude/rules/*.md` whose `paths:` globs match a changed file. Read the frontmatter of each rule file to find them. Do not use a fixed list. The rule file wins over generic advice.
 3. ros2-engineering references (plugin `ros2-engineering@ros2-engineering-skills`, v1.7.2): `safety-estop.md` (§3 e-stop layers, §5 latch/reset, §6 watchdog), `communication.md` (QoS per stream), `micro-ros.md` (entity limits, bounded strings, reconnect, time sync), `testing.md`, plus `launch-system.md`/`lifecycle-components.md`/`deployment.md` when touched.
 
 ## Checks (cite file:line for every finding)
@@ -31,6 +31,9 @@ Deploy
 - Makefile: every target has `## help`; ROS targets guard with _need-stack; flash/monitor guard with _need-stack-down; build/flash keep .pio/libdeps.
 - CI: pinned actions, `permissions: contents: read`, timeout-minutes, paths filters cover new files.
 - docs/README/layout.yaml/CLAUDE.md updated for every new path or command.
+Sim parity (`docs/sensor_contract.md`, skill `sim-parity`)
+- A hardware-boundary change without a "Sim impact" section in the PR body = major. Boundary: firmware controlTask/handleLine/setKey, rccar_msgs, a topic/type/frame/QoS in a driver or main.cpp, rccar_description, a tuning key.
+- `docs/sensor_contract.md` changes in the same diff, and `make unit` (test_contract.py) passes.
 
 ## Output
 Punch list, most severe first, one line each: `path:line  [blocker|major|minor|nit]  problem -> fix`. Then `Verified:` (what you ran, with results) and `Not verified:` (anything needing hardware or network). If nothing is wrong say so and list what you checked. No praise, no summaries of the diff.

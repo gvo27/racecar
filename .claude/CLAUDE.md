@@ -6,6 +6,7 @@ compute: {high_level: raspberry_pi_5 (ros2 jazzy in docker, deploy/car), real_ti
 phase: 2 complete (ros2 actuator path, bench-verified); phase 4 lidar in progress (branch lidar: rccar_drivers mapper_driver + drivers container, compile/CI only, bench pending); phase 4 started: rangefinder driver (compile-only, awaiting bench)  # pi: mcu-agent+core(supervisor,mcu_bridge) -usb/micro-ros-> esp32 -pwm-> servo+esc; legacy ascii path removed
 next: phase 4 lidar bench (power from +5V_SENS, wlan0 on SLAMWARE AP, make viz checks), then phase 3 recorder/backup, phase 4 sensors (imu/encoder/battery, camera)
 plan: docs/docker_ros_plan.md
+sim: {repo: gvo27/racecar-sim (pins this repo via .repos), contract: docs/sensor_contract.md, skill: sim-parity, car.launch sim:=true = same nodes (mcu_bridge pushes tuning to the virtual esp32)}
 stack:
   mcu: {build: platformio in docker (docker/firmware.Dockerfile, image rccar-fw, make build/flash/monitor, FW_ENV=esp32s3), platform: espressif32@6.9.0, framework: arduino-esp32-2.0.17, comms: micro_ros_platformio jazzy serial uart0 (libdeps cached in .pio/libdeps), lang: c++gnu11}
   ros: {distro: jazzy, image: docker/ros.Dockerfile (ros:jazzy-ros-base by digest, rosdep+colcon, target test/runtime), stack: deploy/car/compose.yaml (mcu-agent, core, drivers, tools), pkgs: [rccar_msgs, rccar_supervisor, rccar_mcu_bridge, rccar_teleop, rccar_calibration, rccar_bringup, rccar_drivers, rccar_description], make: [config, ros-image, car-up, car-down, drivers-stop, drivers-start, lidar-hw-test, ros-test, unit, teleop, calibrate, tune, test, mcu, rangefinder, viz, lidar-imu, lidar-snapshot, lidar-record]}
@@ -15,7 +16,7 @@ usb_ports: {left_USB: native, planned regulated power input; right_COM: ch343 ua
 layout: .claude/layout.yaml
 cmd: make help
 hooks: .claude/hooks/hw_guard.py  # PreToolUse guard (python3 on host): asks before hardware (re)starts, denies driver edits/rebuilds while drivers runs
-plugins: .claude/settings.json  # superpowers, pyright-lsp, clangd-lsp, embedded-skills, ros2-engineering, asd-ste100; no project mcp servers
+plugins: .claude/settings.json  # superpowers, pyright-lsp, clangd-lsp, embedded-skills, ros2-engineering, asd-ste100, claude-md-management, code-simplifier, caveman; no project mcp servers
 rules: .claude/rules/{hw-testing,drivers,firmware,dependencies,deploy,models,repos,claude-tooling,ros2,msgs,mcu_bridge,supervisor,calibration,tuning,rangefinder,writing}.md  # path-scoped, see paths: frontmatter
 agents: .claude/agents/ros2-reviewer.md  # review diffs vs rules + ros2-engineering refs + stop-path checklist
 invariants:

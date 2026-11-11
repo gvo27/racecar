@@ -1,7 +1,6 @@
 ---
 paths:
   - ".claude/**"
-  - ".mcp.json"
   - "pyrightconfig.json"
   - "**/.clangd"
   - "deploy/tests/**"
@@ -19,6 +18,8 @@ paths:
 - clangd-lsp@claude-plugins-official needs `clangd` on PATH + firmware/esp32/compile_commands.json (`make compiledb`). firmware/esp32/.clangd removes xtensa-only gcc flags. Known gap: there is no --query-driver, so xtensa libstdc++ system headers may show false errors. For std headers, trust `make build` more than clangd.
 - embedded-skills@embedded-skills, ros2-engineering@ros2-engineering-skills: domain skills (see dependencies.md).
 - asd-ste100@asd-ste100-skill: ASD-STE100 Simplified Technical English rewrite skill + `scripts/ste-lint.py` (stdlib, advisory). Project convention: .claude/rules/writing.md.
+- code-simplifier@claude-plugins-official: the `code-simplifier` agent. It simplifies recently changed code and keeps the behavior. Its prompt lists JS/React standards. Do not apply them. Apply the project rules: Python 3.12 and ruff, C++ gnu++11 and `.claude/rules/firmware.md`. Do not use it on safety paths (stop path, failsafe, supervisor latch) without tests that cover the change. Run the tests after each change.
+- caveman@caveman: terse chat replies (skill `caveman`; stop with "stop caveman" or "normal mode"). Caveman applies only to chat. Text that persists (code, comments, commits, docs, PRs, memory) stays in STE (`.claude/rules/writing.md`). The caveman skill also states this rule. Do not use `caveman-commit` or `caveman-compress` on project text. The hooks need node on the host. Without node, start the mode by hand with `/caveman`.
 - `make check-dev` reports missing LSP binaries.
 - hooks: .claude/hooks/hw_guard.py is a PreToolUse hook for Bash and Edit|Write|MultiEdit|NotebookEdit. It is registered in settings.json. It uses python3 (stdlib) on the dev host (Ubuntu ships it). Tests: deploy/tests/test_hw_guard.py, run with `make unit`. Output: `{"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "ask|deny", "permissionDecisionReason": ...}}`, exit 0. Rules: .claude/rules/hw-testing.md. The `permissions.ask` list in settings.json repeats the restart targets as a second layer.
 

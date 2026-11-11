@@ -2,6 +2,26 @@
 
 This project turns a 1:10 Tamiya TT-02 into a self-driving research platform. It has a two-layer compute stack. A Raspberry Pi 5 does perception, sensor fusion, semantic SLAM and racing-line optimization. An ESP32-S3 does hard-real-time control. This repo holds everything that runs on the car: PWM actuation, failsafes, the host-to-ESP32 protocol, runtime tuning, logging and the Docker/ROS 2 deployment. Setup: [docs/setup.md](docs/setup.md).
 
+## Quick reference
+
+| Task | Commands |
+| --- | --- |
+| One-time setup (Pi) | `cp .env.example .env`, `make setup`, `make install-host`, `make flash` (ESC off) |
+| Start / check / stop | `make car-up`, `make car-ps`, `make car-down` (or `make car-shutdown`) |
+| Drive | `make teleop` |
+| Sensors | `make viz`, `make rangefinder`, `make lidar-snapshot`, `make lidar-record SECS=30` |
+| Tests (no hardware) | `make ros-test`, `make unit`, `make build` |
+| Simulation and training | separate repo [racecar-sim](https://github.com/gvo27/racecar-sim). The sim uses the topics in [docs/sensor_contract.md](docs/sensor_contract.md) |
+| All targets | `make help` |
+
+**Claude Code plugins.** `.claude/settings.json` lists the project plugins: superpowers, pyright-lsp, clangd-lsp, embedded-skills, ros2-engineering, asd-ste100, claude-md-management, code-simplifier and caveman. Accept the trust prompt, or install each one by hand. Then run `/reload-plugins`:
+
+```bash
+claude plugin marketplace add danyuchn/asd-ste100-skill
+claude plugin marketplace add JuliusBrussee/caveman@v4.1.0
+claude plugin install <plugin>@<marketplace> --scope project
+```
+
 ## Compute stack
 
 | Layer | Hardware | Role | Status |
