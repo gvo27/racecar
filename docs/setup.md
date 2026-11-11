@@ -21,12 +21,11 @@ make fw-image ros-image config          # build both images, then render deploy/
 - `make config` (runs `deploy/render_env.py` inside the ROS image, so it needs `make ros-image` first) reads `.env` and `tuning.toml [platform.$PLATFORM]` (today: `esp32_device`, `arch`) and writes the gitignored `deploy/car/.env.generated`. It fails with a hint if `.env` is missing.
 - `make ros-image` runs `rosdep` against `package.xml`, so it needs `packages.ros.org` and `raw.githubusercontent.com`.
 
-**Claude Code (optional):** open the repo in Claude Code and trust the folder. It then asks you to install the plugins in `.claude/settings.json` and to approve the Context7 MCP server in `.mcp.json`.
+**Claude Code (optional):** open the repo in Claude Code and trust the folder. It then asks you to install the plugins in `.claude/settings.json`.
 
 | Plugin / server | Use |
 | --- | --- |
 | `superpowers` | brainstorm → plan → TDD → review workflow |
-| Context7 (MCP) | current library docs (ROS 2, ESP-IDF, arduino-esp32, PlatformIO) |
 | `pyright-lsp` | Python diagnostics, needs `pyright-langserver` on PATH |
 | `clangd-lsp` | firmware C/C++ diagnostics, needs `clangd` on PATH + `make compiledb` |
 | `embedded-skills` | firmware architecture, RTOS, ISR design |
