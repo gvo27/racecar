@@ -8,6 +8,9 @@
     },
     "ros2-engineering-skills": {
       "source": { "source": "github", "repo": "dbwls99706/ros2-engineering-skills", "ref": "v1.7.2" }
+    },
+    "asd-ste100-skill": {
+      "source": { "source": "github", "repo": "danyuchn/asd-ste100-skill", "ref": "main" }
     }
   },
   "enabledPlugins": {
@@ -15,6 +18,7 @@
     "pyright-lsp@claude-plugins-official": true,
     "clangd-lsp@claude-plugins-official": true,
     "embedded-skills@embedded-skills": true,
-    "ros2-engineering@ros2-engineering-skills": true
+    "ros2-engineering@ros2-engineering-skills": true,
+    "asd-ste100@asd-ste100-skill": true
   }
 }

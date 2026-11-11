@@ -24,7 +24,7 @@ COMPOSE  := docker compose -f deploy/car/compose.yaml --env-file deploy/car/.env
 .DEFAULT_GOAL := help
 .PHONY: help setup clean build flash monitor fw-image config models compiledb unit check-dev \
         ros-image ros-test ros-test-image ros-test-run ros-shell car-up car-down car-ps car-logs car-pull \
-        car-shutdown install-host teleop calibrate tune test mcu unit-run \
+        car-shutdown install-host teleop calibrate tune test rangefinder mcu unit-run \
         _clean-build _need-config _need-stack _need-stack-down
 
 help:            ## list targets (grouped in README.md)
@@ -124,6 +124,9 @@ tune: _need-stack  ## push tuning.toml to the ESP32 and save it to flash
 
 test: _need-stack  ## steering sweep + failsafe check (motor stays off, never arms)
 	$(COMPOSE) run --rm tools ros2 run rccar_calibration bench_test
+
+rangefinder: _need-stack  ## live rangefinder feed: MCU timestamp, Pi time, range (Ctrl+C to exit)
+	$(COMPOSE) run --rm tools ros2 run rccar_calibration rangefinder_monitor
 
 mcu: _need-stack  ## one McuCommand to the ESP32, e.g. make mcu CMD="GET" (stack up; CMD: GET INFO PING SET ...; ARM refused)
 	@test -n "$(CMD)" || { echo 'usage: make mcu CMD="GET"'; exit 1; }

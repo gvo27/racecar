@@ -9,6 +9,7 @@ from rccar_msgs.srv import McuCommand
 import rclpy
 from rclpy.node import Node
 from rclpy.qos import DurabilityPolicy, QoSProfile, ReliabilityPolicy
+from sensor_msgs.msg import Range
 from std_msgs.msg import String
 
 
@@ -27,6 +28,23 @@ class FakeMcu(Node):
             String, '/fake_mcu/log',
             QoSProfile(depth=200, reliability=ReliabilityPolicy.RELIABLE,
                        durability=DurabilityPolicy.TRANSIENT_LOCAL))
+        # sim/real topic parity with the firmware rangefinder (no return = +inf)
+        self._range_pub = self.create_publisher(
+            Range, '/rccar/rangefinder/range',
+            QoSProfile(depth=10, reliability=ReliabilityPolicy.BEST_EFFORT))
+        self.create_timer(0.1, self._publish_range)
+
+    def _publish_range(self):
+        msg = Range()
+        # constants below mirror tuning.toml [rangefinder]
+        msg.header.stamp = self.get_clock().now().to_msg()
+        msg.header.frame_id = 'rangefinder_link'
+        msg.radiation_type = Range.INFRARED
+        msg.field_of_view = 0.0833
+        msg.min_range = 0.05
+        msg.max_range = 10.0
+        msg.range = float('inf')
+        self._range_pub.publish(msg)
 
     def _on_drive(self, msg):
         self.drive_count += 1

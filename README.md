@@ -1,13 +1,13 @@
 # racecar
 
-A 1:10 Tamiya TT-02 built into a self-driving research platform on a two-layer compute stack: a Raspberry Pi 5 for perception, sensor fusion, semantic SLAM and racing-line optimization, and an ESP32-S3 for hard-real-time control. This repo holds everything that runs on the car: PWM actuation, failsafes, the host-to-MCU protocol, runtime tuning, logging and the Docker/ROS 2 deployment. Setup: [docs/setup.md](docs/setup.md).
+This project turns a 1:10 Tamiya TT-02 into a self-driving research platform. It has a two-layer compute stack. A Raspberry Pi 5 does perception, sensor fusion, semantic SLAM and racing-line optimization. An ESP32-S3 does hard-real-time control. This repo holds everything that runs on the car: PWM actuation, failsafes, the host-to-ESP32 protocol, runtime tuning, logging and the Docker/ROS 2 deployment. Setup: [docs/setup.md](docs/setup.md).
 
 ## Compute stack
 
 | Layer | Hardware | Role | Status |
 | --- | --- | --- | --- |
-| High level | Raspberry Pi 5 | autonomy stack: ROS 2 Jazzy in Docker (`deploy/car/`), supervisor + micro-ROS agent, sends `DriveCmd` (heading, throttle) | phase 2 complete (bench-verified) |
-| Real time | ESP32-S3-N16R8 | hardware PWM to servo/ESC, failsafe, telemetry; micro-ROS client over UART0 | this repo, `firmware/esp32/` (env `esp32s3`, micro-ROS) |
+| High level | Raspberry Pi 5 | autonomy stack: ROS 2 Jazzy in Docker (`deploy/car/`), supervisor + micro-ROS agent, sends `DriveCmd` (heading, throttle) | phase 2 complete (bench-verified), phase 4 rangefinder: compile-only, not bench-verified |
+| Real time | ESP32-S3-N16R8 | hardware PWM to servo/ESC, failsafe, telemetry, micro-ROS client over UART0 | this repo, `firmware/esp32/` (env `esp32s3`, micro-ROS) |
 
 ## Current inventory
 
@@ -20,7 +20,7 @@ Source: [`docs/datasheets/components_list.xlsx`](docs/datasheets/components_list
 | battery | 2S 7.4V 80C 5200mAh LiPo Battery Pack | — |
 | computer | Raspberry Pi 5 | needs 5V, 5A |
 | voltage regulator for rpi | Pololu D36V50F5 (5V 5.5A, 6-50V in) | [pololu.com/product/4091](https://www.pololu.com/product/4091), [archived](docs/datasheets/Pololu%20-%205V%2C%205.5A%20Step-Down%20Voltage%20Regulator%20D36V50F5.htm) |
-| lidar | Garmin LIDAR-Lite v4 LED, part number 010-02022-00 | [instructions](https://static.garmin.com/pumac/LIDAR-Lite%20LED%20v4%20Instructions_EN-US.pdf) |
+| lidar | Garmin LIDAR-Lite v4 LED, part number 010-02022-00 | [archived PDF](docs/datasheets/LIDAR-Lite%20LED%20v4%20Instructions_EN-US.pdf), [summary](docs/datasheets/rangefinder_lidar_lite_v4.md), [instructions](https://static.garmin.com/pumac/LIDAR-Lite%20LED%20v4%20Instructions_EN-US.pdf) (software name: rangefinder) |
 | motor controller | THW-1060-BRUSHED | [thw-1060-brushed-esc.md](docs/datasheets/thw-1060-brushed-esc.md) |
 | steering servo | DS3225MG | [ds3225_servo.md](docs/datasheets/ds3225_servo.md) |
 
@@ -31,7 +31,7 @@ Source: [`docs/datasheets/components_list.xlsx`](docs/datasheets/components_list
 | **COM** | right | CH343 USB-UART → UART0 (GPIO43/44) | **flashing** + host link (laptop now, Raspberry Pi later) |
 | **USB** | left | native USB (GPIO19/20) | planned regulated power input. Not used for data |
 
-Flash and talk to the board **only through COM**.
+Flash the board and talk to it **only through COM**.
 
 ## Pin map (left header P1 only)
 
@@ -52,12 +52,12 @@ Source of truth: [`firmware/esp32/include/pins.h`](firmware/esp32/include/pins.h
   GPIO16│  9  │ ○ ENC_B                      │
   GPIO17│ 10  │ · spare (UART1 TX)           │
   GPIO18│ 11  │ · spare (UART1 RX)           │
-  GPIO8 │ 12  │ ○ I2C SDA                    │
+  GPIO8 │ 12  │ ● I2C SDA → rangefinder 3    │
   GPIO3 │ 13  │ ✗ strapping                  │
   GPIO46│ 14  │ ✗ strapping                  │
-  GPIO9 │ 15  │ ○ I2C SCL                    │
-  GPIO10│ 16  │ ○ DIST_TRIG                  │
-  GPIO11│ 17  │ ○ DIST_ECHO (≤3.3V!)         │
+  GPIO9 │ 15  │ ● I2C SCL → rangefinder 4    │
+  GPIO10│ 16  │ · spare                      │
+  GPIO11│ 17  │ · spare                      │
   GPIO12│ 18  │ · spare                      │
   GPIO13│ 19  │ · spare                      │
   GPIO14│ 20  │ · spare                      │
@@ -75,30 +75,54 @@ Source of truth: [`firmware/esp32/include/pins.h`](firmware/esp32/include/pins.h
 | 6 | 6 | *BATT_LOW* (hi/low input) | *reserved* |
 | 7 | 7 | *IMU_INT* | *reserved* |
 | 8 / 9 | 15 / 16 | *ENC_A / ENC_B* (shaft encoder) | *reserved* |
-| 12 / 15 | 8 / 9 | *I2C SDA / SCL* (IMU, LIDAR) | *reserved* |
-| 16 / 17 | 10 / 11 | *DIST_TRIG / DIST_ECHO* (distance sensor) | *reserved* |
-| 10, 11, 18-20 | 17, 18, 12-14 | spare | spare |
+| 12 / 15 | 8 / 9 | **I2C SDA / SCL** → rangefinder (Garmin pin 3 / 4) | **active** |
+| 10, 11, 16-20 | 17, 18, 10, 11, 12-14 | spare | spare |
 | 3, 13, 14 | RST, 3, 46 | ~~reset / strapping pins~~ | ~~do not use~~ |
 | 22 | G | common ground | power |
 
-Wire colours: signal = yellow/white, power = red, ground = black. Put a tape flag on the two active signal wires.
+Wire colours: signal = yellow/white, power = red, ground = black. Rangefinder I2C: SDA = white, SCL = green. Put a tape flag on the two active signal wires.
+
+## Rangefinder wiring (Garmin LIDAR-Lite v4 LED)
+
+The software name is *rangefinder*. Datasheet: [archived PDF](docs/datasheets/LIDAR-Lite%20LED%20v4%20Instructions_EN-US.pdf), [summary](docs/datasheets/rangefinder_lidar_lite_v4.md). Power off while wiring.
+
+| Garmin pin | Name | Wire | Connect to |
+| --- | --- | --- | --- |
+| 1 | VIN (5 V, 4.75-5.25 V) | red | regulated 5 V **sensor rail** (never ESP32 5V/3V3) |
+| 2 | GND | black | common ground (P1-22) |
+| 3 | I2C SDA | **white** | GPIO8 (P1-12) |
+| 4 | I2C SCL | **green** | GPIO9 (P1-15) |
+| 5-10 | GPIOA, GPIOB, nRF debug | n/a | leave unconnected |
+
+- The sensor has internal 13 kOhm pull-ups to 3.3 V. Do not use a level shifter or external pull-ups. Signals are 3.3 V max.
+- Leave GPIOB (pin 6) unconnected. If it is low at power-up, the sensor starts the BLE bootloader.
+- Schematic net list (confirmed wire colours):
+
+  | Net | Garmin pin | Wire | ESP32 / rail |
+  | --- | --- | --- | --- |
+  | `RF_5V` | 1 VIN | red | 5 V sensor rail |
+  | `GND` | 2 GND | black | common ground, P1-22 |
+  | `I2C_SDA` | 3 SDA | white | GPIO8, P1-12 |
+  | `I2C_SCL` | 4 SCL | green | GPIO9, P1-15 |
+
+- Status: compile pending CI, not bench-verified. Publishing is on by default (`driver = 1`). To watch the output, run `make rangefinder`. `make mcu CMD="SENS rangefinder"` is a read-only status/config query. To disable the sensor, run `make mcu CMD="SET rf_driver 0"`, or set `[rangefinder] driver = 0` in `tuning.toml` and run `make tune`.
 
 ## Make commands
 
-Run `make help` for the live list. Setup: [docs/setup.md](docs/setup.md). ROS tools (`teleop`, `calibrate`, `tune`, `test`, `mcu`) need the stack running (`make car-up`).
+Run `make help` for the live list. Setup: [docs/setup.md](docs/setup.md). The ROS tools (`teleop`, `calibrate`, `tune`, `test`, `mcu`, `rangefinder`) need the stack to run (`make car-up`).
 
 **Car stack (ROS 2 + micro-ROS in Docker)**
 
 | Target | What it does |
 | --- | --- |
-| `config` | render `deploy/car/.env.generated` from `.env` + `tuning.toml [platform.$PLATFORM]` (runs in the firmware image; needs `make fw-image` first) |
+| `config` | render `deploy/car/.env.generated` from `.env` + `tuning.toml [platform.$PLATFORM]` (runs in the firmware image, needs `make fw-image` first) |
 | `install-host` | sudo: install the udev rule (`/dev/rccar-esp32`) and the `rccar.service` systemd unit |
 | `ros-image` | build the ROS 2 image (`docker/ros.Dockerfile` → `rccar-ros:local`) |
-| `ros-test` | build the test image, `colcon test` + `test-result` (no hardware); `ros-test-image` / `ros-test-run` are its two halves (`unit-run` runs `deploy/tests` in the same image) |
+| `ros-test` | build the test image, run `colcon test` + `test-result` (no hardware). `ros-test-image` / `ros-test-run` are its two halves (`unit-run` runs `deploy/tests` in the same image) |
 | `car-up` / `car-down` | start / stop `mcu-agent` + `core` (docker compose) |
 | `car-ps` / `car-logs` | health / follow logs |
 | `car-pull` | pull the pinned third-party images |
-| `car-shutdown` | disarm via the supervisor, stop the stack, then `sudo poweroff` (asks first) |
+| `car-shutdown` | disarm through the supervisor, stop the stack, then `sudo poweroff` (asks first) |
 | `ros-shell` | shell in the tools container (ROS sourced) |
 
 **ROS tools (stack running)**
@@ -109,6 +133,7 @@ Run `make help` for the live list. Setup: [docs/setup.md](docs/setup.md). ROS to
 | `calibrate` | interactive servo center/left/right calibration, writes `tuning.toml` |
 | `tune` | push `tuning.toml` to the ESP32 and save it to flash |
 | `test` | steering sweep + failsafe check (motor stays off, never arms) |
+| `rangefinder` | live terminal feed of `/rccar/rangefinder/range` (ESP32 timestamp, Pi receive time, range m/cm, rate). `make mcu CMD="SENS rangefinder"` prints the sensor status and config (read-only) |
 | `mcu CMD="GET"` | send one `McuCommand` to the ESP32 (`GET`, `INFO`, `PING`, `SET key val`, ...) and print the reply |
 
 **Firmware (Docker; `FW_ENV=esp32s3`)**
@@ -116,9 +141,9 @@ Run `make help` for the live list. Setup: [docs/setup.md](docs/setup.md). ROS to
 | Target | What it does |
 | --- | --- |
 | `fw-image` | build the firmware toolchain image |
-| `build` | clean `.pio/build` (keeps the slow micro-ROS `libdeps` cache) + compile |
-| `flash` | compile + upload over COM (stack must be down, ESC off) |
-| `monitor` | raw serial monitor (stack must be down) |
+| `build` | clean `.pio/build` (keeps the slow micro-ROS `libdeps` cache), then compile |
+| `flash` | compile + upload over COM (the stack must be down, the ESC must be off) |
+| `monitor` | raw serial monitor (the stack must be down) |
 | `clean` | delete all of `firmware/esp32/.pio` (incl. `libdeps`) |
 | `compiledb` | `compile_commands.json` for clangd |
 
@@ -133,16 +158,16 @@ Run `make help` for the live list. Setup: [docs/setup.md](docs/setup.md). ROS to
 
 ## Power rules
 
-1. **The ESP32 powers nothing.** It only outputs actuator signals and talks to the host. Sensors run from a separate regulated rail that shares ground with the ESP32 and keeps all signals at ≤ 3.3 V.
-2. Servo power comes from the ESC's built-in 6 V / 3 A BEC (red wire of the throttle lead), connected by Y-harness. **Never connect it to the ESP32**, and don't run servo current through the breadboard.
-3. The ESP32, ESC and servo grounds must all be connected (P1-22).
+1. **The ESP32 powers nothing.** It only outputs actuator signals and talks to the host. Sensors use a separate regulated rail. The rail shares ground with the ESP32, and all signals stay at ≤ 3.3 V.
+2. Servo power comes from the built-in 6 V / 3 A BEC of the ESC (red wire of the throttle lead), connected with a Y-harness. **Never connect it to the ESP32.** Do not run servo current through the breadboard.
+3. You must connect the grounds of the ESP32, ESC and servo (P1-22).
 
 ## Power-up sequence
 
 1. ESC **off**. Wheels off the ground.
-2. USB cable into **COM**. The ESP32 boots and sends neutral (1500 µs) on both channels. Then `make car-up`.
+2. Connect the USB cable to **COM**. The ESP32 boots and sends neutral (1500 µs) on both channels. Then run `make car-up`.
 3. ESC **on**. It beeps and learns neutral.
-4. Power down in reverse: ESC off first. **Always switch the ESC off before `make flash`.**
+4. To power down, do the steps in reverse order. Switch the ESC off first. **Always switch the ESC off before `make flash`.**
 
 ## Repo layout
 
@@ -167,4 +192,4 @@ docs/              setup.md, docker_ros_plan.md, proposal, datasheets/
 Makefile           every command (make help)
 ```
 
-Bench checklist (the procedure used to verify phase 2): [docs/setup.md](docs/setup.md#phase-2-bench-checklist-user-run). Roadmap: [docs/docker_ros_plan.md](docs/docker_ros_plan.md). Firmware design: [docs/esp32-firmware-proposal.md](docs/esp32-firmware-proposal.md).
+Bench checklist (the procedure that verified phase 2): [docs/setup.md](docs/setup.md#phase-2-bench-checklist-user-run). Roadmap: [docs/docker_ros_plan.md](docs/docker_ros_plan.md). Firmware design: [docs/esp32-firmware-proposal.md](docs/esp32-firmware-proposal.md).
