@@ -28,6 +28,8 @@ paths:
   logs/: {role: runtime data (jsonl logs, snapshots, bags), fully gitignored except .gitkeep + COLCON_IGNORE (maps = private floor plans; public repo), mounted rw into core/tools, colcon_ignore: true}
   build/: {role: make ros-test output (log + xml), gitignored}
   docs/: {role: setup.md, docker_ros_plan.md, esp32-firmware-proposal.md, tuning-notes.txt, colcon_ignore: true}
+  docs/sensor_contract.md: {role: "hardware-boundary ssot: topics, types, frames, qos, tf, device facts; racecar-sim copies it", rules: .claude/skills/sim-parity/SKILL.md, invariants: ["active rows == code (deploy/tests/test_contract.py)", "boundary change => contract + Sim impact PR section"]}
+  .claude/skills/sim-parity/: {role: project skill; boundary change -> contract rows + racecar-sim artifacts + Sim impact}
   docs/datasheets/: {role: "archived datasheets + summaries (ds3225_servo.md, thw-1060-brushed-esc.md, rangefinder_lidar_lite_v4.md) + components_list.xlsx (ground truth inventory)", rules: .claude/rules/rangefinder.md}
   .github/pull_request_template.md: {role: PR body template incl. user-run bench checklist (deploy + feature checks), rules: .claude/rules/claude-tooling.md, phase: 4}
   .github/workflows/firmware.yml: {role: ci firmware build env esp32s3 in container, libdeps cache, firmware.bin artifact, phase: 1}
@@ -37,7 +39,7 @@ paths:
   .claude/settings.json: {role: project claude plugins + mcp enablement, rules: [.claude/rules/dependencies.md, .claude/rules/claude-tooling.md], phase: 1}
   pyrightconfig.json: {role: pyright-lsp config (include rccar_* + deploy; missing imports = warning since rclpy/rccar_msgs only exist in the ROS image), location: repo root (required), rules: .claude/rules/claude-tooling.md, phase: 1}
   firmware/esp32/.clangd: {role: clangd flags for xtensa; db from make compiledb (gitignored compile_commands.json, .pio-core/), rules: .claude/rules/claude-tooling.md, phase: 1}
-  deploy/tests/: {role: pytest for deploy/render_env.py (make unit: ros test image; ci ros.yml), rules: .claude/rules/claude-tooling.md, phase: 2}
+  deploy/tests/: {role: "pytest for deploy/render_env.py, hw_guard, test_contract (sensor_contract.md vs code), test_rules_paths (every rule has paths: and each glob matches) (make unit: ros test image; ci ros.yml)", rules: .claude/rules/claude-tooling.md, phase: 2}
   .github/workflows/ros.yml: {role: ci ros image build + colcon test + deploy/tests (build-test), advisory ros2-engineering validators (ros2-static), rccar_msgs sync check (interfaces-sync), rules: .claude/rules/ros2.md, phase: 2}
   docs/plans/: {role: superpowers writing-plans output, rules: .claude/rules/claude-tooling.md}
   deploy/: {role: deploy files + render_env.py (make config, runs in ros image) + tests/, colcon_ignore: true, rules: .claude/rules/deploy.md, phase: 2}
@@ -54,7 +56,7 @@ paths:
   rccar_calibration/: {role: calibrate, bench_test, tune, rangefinder_monitor + lidar_imu_monitor + lidar_snapshot + lidar_record clis (ros2 run; make rangefinder, make lidar-imu, make lidar-snapshot, make lidar-record), rules: [.claude/rules/calibration.md, .claude/rules/ros2.md], phase: 2}
   rccar_description/: {role: "urdf/xacro base_link, lidar_link, lidar_imu_link for rsp; mount offsets UNMEASURED until user measures", rules: [.claude/rules/drivers.md, .claude/rules/ros2.md], phase: 4}
   rccar_drivers/: {role: "lifecycle node mapper_driver (Slamtec Mapper M2M1 over TCP 1445) + slamtec/* protocol/convert library; exists now (branch lidar, bench pending)", rules: [.claude/rules/drivers.md, .claude/rules/ros2.md], phase: 4}
-  rccar_bringup/launch/drivers.launch.py: {role: robot_state_publisher + mapper_driver (auto configure/activate), used by compose service drivers, rules: .claude/rules/drivers.md, phase: 4}
+  rccar_bringup/launch/drivers.launch.py: {role: "robot_state_publisher + mapper_driver (auto configure/activate), used by compose service drivers; urdf_file:= (sim wrapper xacro)", rules: .claude/rules/drivers.md, phase: 4}
   rccar_bringup/launch/viz.launch.py: {role: foxglove_bridge websocket, 127.0.0.1:8765 default, topic whitelist; make viz, rules: .claude/rules/drivers.md, phase: 4}
   rccar_drivers/test_hw/: {role: "hardware acceptance launch_testing vs the PHYSICAL lidar (make lidar-hw-test); NOT collected by colcon test (conftest needs RCCAR_HW_TEST=1); installed to share/rccar_drivers/test_hw", rules: .claude/rules/hw-testing.md, phase: 4}
   rccar_drivers/rccar_drivers/hw_criteria.py: {role: pass/fail thresholds + eval functions for the hw test (pure, pytest test/test_hw_criteria.py), rules: .claude/rules/hw-testing.md, phase: 4}
