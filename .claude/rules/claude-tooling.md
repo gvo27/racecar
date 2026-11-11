@@ -1,7 +1,6 @@
 ---
 paths:
   - ".claude/**"
-  - ".mcp.json"
   - "pyrightconfig.json"
   - "**/.clangd"
   - "deploy/tests/**"
