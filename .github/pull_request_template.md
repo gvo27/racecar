@@ -21,7 +21,7 @@ Deploy:
 - [ ] `make car-up && make car-ps` (all services healthy)
 
 Feature checks:
-- [ ] <!-- feature-specific hardware checks, one per box, with the expected output; sensor PRs: paste the `make lidar-hw-test` report table -->
+- [ ] <!-- feature-specific hardware checks, one per box, with the expected output. For a sensor PR, paste the `make lidar-hw-test` report table. -->
 
 Regression:
 - [ ] `make test` passes

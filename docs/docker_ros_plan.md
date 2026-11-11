@@ -240,8 +240,17 @@ captain / perception / planning / supervisor      ← identical in sim and on th
    - **Cleanup: done.** The cleanup removed `tools/`, `.venv`, `requirements.txt`, the `esp32s3_ascii` env, the `legacy-*`/`session`/`check` make targets and the python CI workflow. `make config` runs in the firmware image. `make unit` runs in the ROS test image. The FIRMWARE_KEYS drift test now checks `tuning.toml` and the `main.cpp` `setKey` names.
    - **New invariant:** "protocol/interface change => rccar_msgs + firmware/esp32/extra_packages + main.cpp + rccar_mcu_bridge + docs". The supervisor is the sole publisher of `/rccar/mcu/drive`. Agents never run hardware fault-injection tests.
    - **Conventions:** add `.claude/rules/ros2.md`. Make the supervisor output the hardware boundary, and have every launch file accept `use_sim_time` (see "Sim/real parity").
-3. **Recorder + backup.** MCAP bags to `/data`; upload only when disarmed and idle, to the destination set in `.env`.
-4. **Sensors.** **Status: started early with the lidar, before phase 3** (branch `lidar`, compile/CI only, bench pending): Slamtec Mapper M2M1 over Wi-Fi/TCP, own driver `rccar_drivers` (`mapper_driver`) + `rccar_description` URDF/TF + `drivers.launch.py` + new `drivers` container (no devices, heartbeat when scans flow) + `make viz` (foxglove_bridge on localhost) + `make lidar-imu` + `make lidar-snapshot` / `make lidar-record` (read-only debug captures to gitignored `logs/`); see docs/setup.md "Lidar". Also started: rangefinder (Garmin LIDAR-Lite v4 LED) on ESP32 I2C: driver + `/rccar/rangefinder/range` + `make rangefinder` (PR `rangefinder`, compile-only; bench pending); e-brake after bench data. `rccar_drivers`, `rccar_description` TF, sensor calibration, time sync (chrony). `rccar_description` is the single URDF for car and sim; sensor topics/frames are defined once so the sim adapter can publish the same ones.
+3. **Recorder + backup.** Write MCAP bags to `/data`. Upload only when the car is disarmed and idle, to the destination set in `.env`.
+4. **Sensors.** **Status: the lidar started early, before phase 3** (branch `lidar`, compile/CI only, bench pending). It is a Slamtec Mapper M2M1 that connects over Wi-Fi/TCP. The work so far:
+   - Own driver `rccar_drivers` (`mapper_driver`).
+   - `rccar_description` URDF/TF.
+   - `drivers.launch.py`.
+   - New `drivers` container (no devices, heartbeat when scans flow).
+   - `make viz` (foxglove_bridge on localhost).
+   - `make lidar-imu`.
+   - `make lidar-snapshot` and `make lidar-record` (read-only debug captures to the gitignored `logs/`).
+
+   See docs/setup.md "Lidar". The rangefinder (Garmin LIDAR-Lite v4 LED) on ESP32 I2C also started: driver + `/rccar/rangefinder/range` + `make rangefinder` (PR `rangefinder`, compile-only, bench pending). The e-brake follows after bench data exists. The phase also covers `rccar_drivers`, `rccar_description` TF, sensor calibration, time sync (chrony). `rccar_description` is the single URDF for car and sim. Sensor topics and frames are defined one time, so that the sim adapter can publish the same ones.
 5. **Captain, perception, inference, admin-link failsafe.** Per the notes above.
 6. **Sim adapter (sim repo).** Gazebo world + `ros_gz_bridge` below the supervisor, and a `sim:=true` arg in `rccar_bringup`. Verify that the captain/perception stack runs unchanged in sim and on the car.
 

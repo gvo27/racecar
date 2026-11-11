@@ -14,15 +14,15 @@ paths:
 | /rccar/mcu/event | McuEvent | esp32 | reliable depth 10 | supervisor, mcu_bridge |
 | /rccar/rangefinder/range | sensor_msgs/Range | esp32 (fake_mcu in tests) | best_effort | rangefinder_monitor, any |
 | /rccar/lidar/scan | sensor_msgs/LaserScan (frame lidar_link, ~10 Hz) | rccar_drivers mapper_driver | best_effort (sensor_data) | viz, lidar_snapshot, lidar_record, any |
-| /rccar/lidar/imu | sensor_msgs/Imu (frame lidar_imu_link, ~50 Hz; orientation only on fw 2.6.0_dev; rate/accel covariance[0]=-1 (not provided), values raw) | mapper_driver | best_effort | lidar_imu_monitor, lidar_snapshot, lidar_record, any |
+| /rccar/lidar/imu | sensor_msgs/Imu (frame lidar_imu_link, ~50 Hz). On fw 2.6.0_dev only the orientation is provided. Rate and acceleration have covariance[0]=-1 (not provided) and raw values | mapper_driver | best_effort | lidar_imu_monitor, lidar_snapshot, lidar_record, any |
 | /rccar/mapper/pose | geometry_msgs/PoseStamped (pose of lidar_link in map, ~10 Hz) | mapper_driver | best_effort | lidar_imu_monitor, lidar_snapshot, lidar_record, any |
 | /rccar/mapper/map | nav_msgs/OccupancyGrid (~0.5 Hz, map_period_s 2.0) | mapper_driver | reliable + transient_local depth 1 | viz, lidar_snapshot, lidar_record, any |
 | /diagnostics | diagnostic_msgs/DiagnosticArray (status 'mapper_driver: link') | mapper_driver | default | any |
 | /rccar/supervisor/state | SupervisorState | supervisor | reliable + transient_local depth 1 | teleop, UIs |
-- TF: map->odom identity (static); odom->base_link from the Mapper SLAM pose (REP-105 deviation: it can jump on relocalization/loop closure until a continuous odom source (wheel encoder/IMU) exists; then the driver should publish map->odom instead); robot_state_publisher publishes base_link->lidar_link->lidar_imu_link (rccar_description).
-- services: /supervisor/{arm,disarm,brake}; /mcu_bridge/{set_param,cal_point,raw_pwm,save,get,info,push_tuning}; /rccar/mcu/command (McuCommand, esp32).
-- names: `/rccar/<area>/<stream>`, snake_case, no hardcoded absolute names inside libraries. Standard msgs before custom ones; units SI/REP-103 (rad, + = left).
-- freshness beats delivery for commands (best effort, timeout at consumer); events/state must not be lost (reliable).
+- TF: map->odom is an identity (static). odom->base_link comes from the Mapper SLAM pose. This deviates from REP-105: the pose can jump on relocalization or loop closure until a continuous odom source (wheel encoder/IMU) exists. After that, the driver should publish map->odom instead. robot_state_publisher publishes base_link->lidar_link->lidar_imu_link (rccar_description).
+- services: /supervisor/{arm,disarm,brake}, /mcu_bridge/{set_param,cal_point,raw_pwm,save,get,info,push_tuning}, /rccar/mcu/command (McuCommand, esp32).
+- names: `/rccar/<area>/<stream>`, snake_case. Do not hardcode absolute names inside libraries. Use standard msgs before custom ones. Units are SI/REP-103 (rad, + = left).
+- For commands, freshness is more important than delivery (best effort, timeout at the consumer). Events and state must not be lost (reliable).
 
 ## Structure
 - thin node, fat library: put logic in plain python modules (arbiter, teleop_state, tuning, commands, helpers) and test them with pytest without rclpy. The node only does wiring.

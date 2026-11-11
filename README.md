@@ -19,7 +19,7 @@ This project turns a 1:10 Tamiya TT-02 into a self-driving research platform. It
 | edge compute | Raspberry Pi 5 | 5V 5A |
 | voltage regulator for compute rail | Pololu D36V50F5 (5V 5.5A, 6-50V in) | [pololu.com/product/4091](https://www.pololu.com/product/4091), [archived](docs/datasheets/Pololu%20-%205V%2C%205.5A%20Step-Down%20Voltage%20Regulator%20D36V50F5.htm) |
 | rangefinder | Garmin LIDAR-Lite v4 LED, part number 010-02022-00 | [archived PDF](docs/datasheets/LIDAR-Lite%20LED%20v4%20Instructions_EN-US.pdf), [summary](docs/datasheets/rangefinder_lidar_lite_v4.md), [instructions](https://static.garmin.com/pumac/LIDAR-Lite%20LED%20v4%20Instructions_EN-US.pdf) (software name: rangefinder) |
-| lidar | | |
+| lidar | Slamtec Mapper M2M1 | [datasheet digest](docs/datasheets/slamtec_mapper_M2M1_datasheet.md) |
 | motor controller | THW-1060-BRUSHED | [thw-1060-brushed-esc.md](docs/datasheets/thw-1060-brushed-esc.md) |
 | steering servo | DS3225MG | [ds3225_servo.md](docs/datasheets/ds3225_servo.md) |
 
@@ -74,37 +74,37 @@ Wire colours: signal = yellow/white, power = red, ground = black. Rangefinder I2
 
 ## Make commands
 
-Day-to-day commands only, in the order you'll use them. `make help` lists everything (dev, CI and firmware tools too); [docs/setup.md](docs/setup.md) has the details.
+This section lists day-to-day commands only, in the order you use them. `make help` lists everything (dev, CI and firmware tools too). [docs/setup.md](docs/setup.md) has the details.
 
-**Once per Pi** (first, `cp .env.example .env` and add yourself to the `docker` and `dialout` groups: docs/setup.md §1)
+**Once per Pi.** First, run `cp .env.example .env` and add yourself to the `docker` and `dialout` groups (docs/setup.md §1).
 
 | # | Command | What it does |
 | --- | --- | --- |
-| 1 | `make setup` | checks git/make/docker and builds both Docker images (it runs `fw-image` + `ros-image` for you) |
-| 2 | `make install-host` | sudo: names the ESP32 `/dev/rccar-esp32` and starts the car stack automatically at every boot. Replug USB once afterwards |
-| 3 | `make flash` | ESC off: uploads the firmware to the ESP32 (again only when `firmware/` changes) |
+| 1 | `make setup` | Checks git, make and docker. Builds both Docker images (it runs `fw-image` and `ros-image`) |
+| 2 | `make install-host` | Needs sudo. Names the ESP32 `/dev/rccar-esp32` and starts the car stack at every boot. Afterwards, unplug the USB cable and plug it in again one time |
+| 3 | `make flash` | Switch the ESC off first. Uploads the firmware to the ESP32. Run it again only when `firmware/` changes |
 
-You never run `make config` by hand: `car-up` and the boot service run it for you.
+You do not need to run `make config` by hand. `car-up` and the boot service run it.
 
 **Every session**
 
 | # | Command | What it does |
 | --- | --- | --- |
-| 1 | `make car-up` | starts the stack (micro-ROS agent, supervisor, lidar driver). Already running after a boot if you did `install-host`; running it again is harmless |
-| 2 | `make car-ps` | every service shows `healthy`, then switch the ESC on |
-| 3 | `make teleop` | drive over SSH (arrows, space = brake, `x` = disarm + quit) |
-| 4 | `make car-shutdown` | disarm, stop the stack, offer to power off the Pi. Then ESC off |
+| 1 | `make car-up` | Starts the stack (micro-ROS agent, supervisor, lidar driver). After a boot it already runs if you did `install-host`. Running it again is harmless |
+| 2 | `make car-ps` | Wait until every service shows `healthy`. Then switch the ESC on |
+| 3 | `make teleop` | Drives the car over SSH (arrows, space = brake, `x` = disarm + quit) |
+| 4 | `make car-shutdown` | Disarms, stops the stack and offers to power off the Pi. Then switch the ESC off |
 
 **Sensors** (stack running)
 
 | Command | Sensor | What it does |
 | --- | --- | --- |
-| `make rangefinder` | rangefinder (Garmin LIDAR-Lite v4) | live distance feed in the terminal |
-| `make viz` | lidar (Slamtec Mapper) | scan, map and pose on `localhost:8765` for Foxglove; forward the port with VS Code SSH |
-| `make lidar-imu` | lidar (Slamtec Mapper) | live heading, yaw rate, speed and acceleration; also saved to `logs/` |
-| `make lidar-snapshot` | lidar (Slamtec Mapper) | one capture to `logs/`: `map.png` (map + scan + pose) and a text summary; Claude Code can read both |
-| `make lidar-record SECS=30` | lidar (Slamtec Mapper) | records the lidar topics to a rosbag (`.mcap`, opens in Foxglove) in `logs/` |
-| `make lidar-hw-test` | lidar (Slamtec Mapper) | automated PASS/FAIL check of the real unit, car still. Run `make drivers-stop` first and `make car-up` afterwards |
+| `make rangefinder` | rangefinder (Garmin LIDAR-Lite v4) | Shows a live distance feed in the terminal |
+| `make viz` | lidar (Slamtec Mapper) | Shows scan, map and pose on `localhost:8765` for Foxglove. Forward the port with VS Code SSH |
+| `make lidar-imu` | lidar (Slamtec Mapper) | Shows live heading, yaw rate, speed and acceleration. Also saves them to `logs/` |
+| `make lidar-snapshot` | lidar (Slamtec Mapper) | Makes one capture to `logs/`: `map.png` (map + scan + pose) and a text summary. Claude Code can read both |
+| `make lidar-record SECS=30` | lidar (Slamtec Mapper) | Records the lidar topics to a rosbag (`.mcap`, opens in Foxglove) in `logs/` |
+| `make lidar-hw-test` | lidar (Slamtec Mapper) | Automated PASS/FAIL check of the real unit with the car still. Run `make drivers-stop` first and `make car-up` afterwards |
 
 **When needed**
 
@@ -118,7 +118,7 @@ You never run `make config` by hand: `car-up` and the boot service run it for yo
 
 ## Wiring: Rangefinder (Garmin LIDAR-Lite v4 LED)
 
-Nickname: *rangefinder*. Datasheet: [archived PDF](docs/datasheets/LIDAR-Lite%20LED%20v4%20Instructions_EN-US.pdf), [summary](docs/datasheets/rangefinder_lidar_lite_v4.md). Power off while wiring.
+The software name is *rangefinder*. Datasheet: [archived PDF](docs/datasheets/LIDAR-Lite%20LED%20v4%20Instructions_EN-US.pdf), [summary](docs/datasheets/rangefinder_lidar_lite_v4.md). Power off while wiring.
 
 | Garmin pin | Name | Wire | Connect to |
 | --- | --- | --- | --- |
@@ -130,9 +130,9 @@ Nickname: *rangefinder*. Datasheet: [archived PDF](docs/datasheets/LIDAR-Lite%20
 
 ## Power rules
 
-1. **The ESP32 powers nothing.** It only outputs actuator signals and communications. Sensors are powered from a separate regulated power rail that shares ground with the ESP32 and keeps all signals at ≤ 3.3 V.
-2. Servo power comes from the ESC's built-in 6 V / 3 A BEC (red wire of the throttle lead), connected by Y-harness. 
-3. COMMON GROUND.
+1. **The ESP32 powers nothing.** It outputs only actuator signals and communications. A separate regulated power rail powers the sensors. This rail shares ground with the ESP32. All signals stay at ≤ 3.3 V.
+2. Servo power comes from the built-in 6 V / 3 A BEC of the ESC (red wire of the throttle lead). Connect it with a Y-harness.
+3. Connect the grounds of the ESP32, ESC and servo (P1-22).
 
 ## Power-up sequence
 
