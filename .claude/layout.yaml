@@ -31,7 +31,6 @@ paths:
   .claude/: {role: CLAUDE.md, layout.yaml, rules/*.md, agents/*.md, settings.json}
   .claude/agents/ros2-reviewer.md: {role: project subagent; reviews diffs vs rules + ros2-engineering refs + stop-path checklist, phase: 2}
   .claude/settings.json: {role: project claude plugins + mcp enablement, rules: [.claude/rules/dependencies.md, .claude/rules/claude-tooling.md], phase: 1}
-  .mcp.json: {role: project mcp servers (context7), location: repo root (required), rules: .claude/rules/claude-tooling.md, phase: 1}
   pyrightconfig.json: {role: pyright-lsp config (include rccar_* + deploy; missing imports = warning since rclpy/rccar_msgs only exist in the ROS image), location: repo root (required), rules: .claude/rules/claude-tooling.md, phase: 1}
   firmware/esp32/.clangd: {role: clangd flags for xtensa; db from make compiledb (gitignored compile_commands.json, .pio-core/), rules: .claude/rules/claude-tooling.md, phase: 1}
   deploy/tests/: {role: pytest for deploy/render_env.py (make unit: ros test image; ci ros.yml), rules: .claude/rules/claude-tooling.md, phase: 2}
