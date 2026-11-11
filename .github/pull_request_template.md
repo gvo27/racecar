@@ -1,3 +1,5 @@
+<!-- Write this PR in ASD-STE100 style (STE-flavored): see .claude/rules/writing.md. -->
+
 ## Summary
 <!-- What and why, in a few sentences. -->
 

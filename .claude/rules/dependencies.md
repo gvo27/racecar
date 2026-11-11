@@ -32,5 +32,6 @@ paths:
 - claude-plugins-official (anthropics/claude-plugins-official): superpowers, pyright-lsp, clangd-lsp. LSP binaries (pyright-langserver, clangd) = optional host dev tools, the one allowed host install (not runtime deps); `make check-dev`.
 - embedded-skills@embedded-skills: github rovinax/embedded-skills, ref master (no tags upstream); firmware arch, driver layering, rtos, isr.
 - ros2-engineering@ros2-engineering-skills: github dbwls99706/ros2-engineering-skills, ref v1.7.2; micro-ros, ros2_control, nav2, perception.
+- asd-ste100@asd-ste100-skill: github danyuchn/asd-ste100-skill, ref main (no tags upstream; marketplace sources take ref only, no sha; reviewed at a4905d922500dd7530ca8a0eb9e4940494255709). Skill + lint script only, no hooks.
 - ros2-engineering ships advisory hooks (PreToolUse edit/bash validator, Stop advisory; never blocks). opt out: ROS2_SKILL_DISABLE_HOOKS=all.
 - bump plugin = change ref to a tag; never track a moving branch when a tag exists.

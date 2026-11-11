@@ -29,6 +29,7 @@ make fw-image ros-image config          # build both images, then render deploy/
 | `pyright-lsp` | Python diagnostics, needs `pyright-langserver` on PATH |
 | `clangd-lsp` | firmware C/C++ diagnostics, needs `clangd` on PATH + `make compiledb` |
 | `embedded-skills` | firmware architecture, RTOS, ISR design |
+| `asd-ste100` | Simplified Technical English rewrites for docs and PR text (`.claude/rules/writing.md`) |
 | `ros2-engineering` | micro-ROS, ros2_control, Nav2, perception; advisory hooks (`ROS2_SKILL_DISABLE_HOOKS=all` turns them off) |
 
 ```sh

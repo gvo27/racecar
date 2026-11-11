@@ -14,8 +14,8 @@ hw: {steer: ds3225mg@gpio4, throttle: thw1060_esc@gpio5, battery: 2s_lipo, range
 usb_ports: {left_USB: native, planned regulated power input; right_COM: ch343 uart0, flashing + host link}
 layout: .claude/layout.yaml
 cmd: make help
-plugins: .claude/settings.json  # superpowers, pyright-lsp, clangd-lsp, embedded-skills, ros2-engineering; no project mcp servers
-rules: .claude/rules/{firmware,dependencies,deploy,models,repos,claude-tooling,ros2,msgs,mcu_bridge,supervisor,calibration,tuning,rangefinder}.md  # path-scoped, see paths: frontmatter
+plugins: .claude/settings.json  # superpowers, pyright-lsp, clangd-lsp, embedded-skills, ros2-engineering, asd-ste100; no project mcp servers
+rules: .claude/rules/{firmware,dependencies,deploy,models,repos,claude-tooling,ros2,msgs,mcu_bridge,supervisor,calibration,tuning,rangefinder,writing}.md  # path-scoped, see paths: frontmatter
 agents: .claude/agents/ros2-reviewer.md  # review diffs vs rules + ros2-engineering refs + stop-path checklist
 invariants:
   - esp32 role: actuator pwm + host comms only; powers nothing
@@ -37,4 +37,5 @@ workflow:  # details: .claude/rules/claude-tooling.md
   - bug => superpowers systematic-debugging first
   - tests: no host python; deploy/ python => make unit (ros test image); ros => make ros-test (colcon test in docker); firmware => make build (compile, CI) + bench make test (hardware, user-run; never claim without output)
   - every PR body = .github/pull_request_template.md with user-run bench checklist (deploy + deps + feature checks)
+  - all project text (docs, .claude/*, PR/commit/review text, user-facing strings) => asd-ste100 STE: strict for .claude/procedures/errors, ste-flavored for prose; keep facts+hedges; .claude/rules/writing.md
   - after code edits => check lsp diagnostics (pyright, clangd; make compiledb for firmware)
