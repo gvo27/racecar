@@ -1,10 +1,10 @@
 # SLAMTEC Mapper Pro — Model M2M1 — Consolidated Datasheet (LLM context)
 
-> Distilled from: SLAMTEC Mapper M2M1 datasheet rev 1.1 (2019‑11‑29), SLAMTEC Mapper quick‑start (M1M1/M2M3),
+> Sources: SLAMTEC Mapper M2M1 datasheet rev 1.1 (2019‑11‑29), SLAMTEC Mapper quick‑start (M1M1/M2M3),
 > RPLIDAR S1 user manual v1.1, the open‑source `hatchbed/opensw` + `opensw_ros` drivers, and retailer listings.
 > Provenance tags: **[DS]** = official M2M1 datasheet · **[QS]** = official Mapper quick‑start (sister model) ·
 > **[S1]** = RPLIDAR S1 manual (internal core, inferred) · **[OSW]** = opensw reverse‑engineered driver ·
-> **[RET]** = retailer/third party · **[INF]** = inferred, not documented — verify before relying on it.
+> **[RET]** = retailer/third party · **[INF]** = inferred, not documented. Verify before you rely on it.
 
 ## 0. Unit identity
 | Field | Value |
@@ -17,16 +17,16 @@
 | Status | Discontinued at several retailers; no firmware updates reported [RET] |
 
 ## 1. What it is
-- 2D 360° time‑of‑flight lidar **plus** an onboard computer ("Data Processing Unit") running SLAMTEC's SLAMWARE SLAM 3.0 engine with SharpEdge mapping and active loop closure [DS].
-- Built‑in 9‑DOF IMU (accelerometer, gyroscope, magnetometer) for tilt compensation, so it can map handheld [DS].
-- Output: raw laser scan, real‑time occupancy map, pose (x, y, θ), localization quality [DS]. It needs no external odometry.
-- Communicates over **Ethernet or Wi‑Fi using a JSON‑over‑TCP protocol**. The serial protocol of the standalone RPLIDARs (`rplidar`, `pyrplidar`, `rplidar_ros`) does **not** apply to the external ports [OSW].
+- A 2D 360° time‑of‑flight lidar **plus** an onboard computer ("Data Processing Unit"). The computer runs SLAMTEC's SLAMWARE SLAM 3.0 engine with SharpEdge mapping and active loop closure [DS].
+- A built‑in 9‑DOF IMU (accelerometer, gyroscope, magnetometer) gives tilt compensation, so the unit can map when held in the hand [DS].
+- Output: raw laser scan, real‑time occupancy map, pose (x, y, θ), localization quality [DS]. The unit needs no external odometry.
+- The unit communicates over **Ethernet or Wi‑Fi with a JSON‑over‑TCP protocol**. The serial protocol of the standalone RPLIDARs (`rplidar`, `pyrplidar`, `rplidar_ros`) does **not** apply to the external ports [OSW].
 - Architecture: `[RPLIDAR ranging core (S1‑class)] --UART cable--> [Data Processing Unit: SLAM + IMU + Wi‑Fi/Ethernet] --TCP:1445--> host`.
 
 ## 2. Measurement performance [DS]
 | Parameter | Value | Note |
 |---|---|---|
-| Distance range | 40 m | at 92 % reflectivity (white target). The datasheet "Mechanism" text says 20 m (copied from M1M1); the spec table says 40 m |
+| Distance range | 40 m | at 92 % reflectivity (white target). The datasheet "Mechanism" text says 20 m (copied from M1M1). The spec table says 40 m |
 | Sample rate | 9200 Hz | |
 | Scan direction / FOV | clockwise, 360° | |
 | Max mapping area | 300 m × 300 m (≈100,000 m²) | |
@@ -35,7 +35,7 @@
 | Max linear speed while mapping | 2 m/s | |
 | Max angular speed | TBD | |
 | Max inclination while mapping | ±3° | |
-| Graph‑optimization working time | ~1 h | after that it falls back to non‑graph‑optimized mapping |
+| Graph‑optimization working time | ~1 h | after that time, the unit changes to non‑graph‑optimized mapping |
 | Data / pose refresh | 10 Hz | |
 | Map fusion rate | > 10 Hz | |
 
@@ -48,19 +48,19 @@
 | Duty ratio | – | 0.0092 | – |
 | Safety class | IEC‑60825 **Class 1** | | |
 
-Modulated pulsed IR rejects ambient light. Works indoors and outdoors, but avoid direct sun into the window.
+The modulated pulsed IR rejects ambient light. The unit works indoors and outdoors. Do not let direct sun shine into the window.
 
 ## 4. Electrical — power [DS]
 | Parameter | Min | Typ | Max | Remark |
 |---|---|---|---|---|
-| Supply voltage | 4.8 V | 5 V | **12 V** | above max may damage the core |
-| Ripple | – | 20 mV | 50 mV | high ripple → core failure |
+| Supply voltage | 4.8 V | 5 V | **12 V** | a voltage above the maximum may damage the core |
+| Ripple | – | 20 mV | 50 mV | high ripple causes core failure |
 | Startup current | 1400 mA | 1500 mA | 1600 mA | **size the supply for ≥ 1.6 A** |
 | Current, 5 V, "power off" (standby) | – | 40 mA | 50 mA | |
 | Current, 5 V, running | – | 750 mA | 1300 mA | ≈ 3.75 W typ |
 | PoE | IEEE 802.3at Type 2 (Pro kit) | | | |
 
-Kit power cable: 1.5 m, **USB‑A male (into the Mapper) ↔ 2‑pin housing (supply side)** [DS fig 2‑6]; direction inferred from fig 2‑5 (the Mapper's 5V DC port is USB‑A) [INF]. Second-hand units may lack it; a USB‑A male pigtail works (see `docs/setup.md` Lidar). A USB port must supply ≥ 1.5 A at startup, so use a ≥ 2 A USB charger rather than a PC port.
+Kit power cable: 1.5 m, **USB‑A male (into the Mapper) ↔ 2‑pin housing (supply side)** [DS fig 2‑6]. The direction is inferred from fig 2‑5 (the Mapper's 5V DC port is USB‑A) [INF]. Second-hand units may not have this cable. A USB‑A male pigtail works (see `docs/setup.md` Lidar). A USB port must supply ≥ 1.5 A at startup, so use a ≥ 2 A USB charger and not a PC port.
 
 ## 5. Interfaces & pinouts
 
@@ -83,10 +83,10 @@ Kit power cable: 1.5 m, **USB‑A male (into the Mapper) ↔ 2‑pin housing (su
 | 6 | green | RX− | V− (or V+) | – |
 | 7 | white/brown | unused | – | V− |
 | 8 | brown | unused | – | V− |
-Auto‑MDIX support is not documented; use a switch, or a crossover cable if a direct link fails. The datasheet doesn't say which PoE mode (A/B) it uses. A standards‑compliant 802.3at PSE/injector negotiates this automatically.
+Auto‑MDIX support is not documented. Use a switch, or use a crossover cable if a direct link fails. The datasheet does not say which PoE mode (A/B) the unit uses. A standards‑compliant 802.3at PSE/injector negotiates the mode automatically.
 
 ### 5.3 Internal lidar‑core link (head ↔ processing unit) — [S1] + [INF]
-The M2M1's ranging specs match the **RPLIDAR S1** core exactly (40 m, 9200 Hz, 905 nm, Class 1). The 0.3 m jumper in DS fig 2‑6 is a fine‑pitch 6‑wire lead, consistent with the S1's **SH1.0‑6P** (JST‑SH, 1.0 mm pitch) interface. S1 pinout:
+The ranging specs of the M2M1 match the **RPLIDAR S1** core exactly (40 m, 9200 Hz, 905 nm, Class 1). The 0.3 m jumper in DS fig 2‑6 is a fine‑pitch 6‑wire lead. This agrees with the **SH1.0‑6P** (JST‑SH, 1.0 mm pitch) interface of the S1. S1 pinout:
 
 | Pin (as drawn, L→R) | Wire color | Signal | Type | Min | Typ | Max |
 |---|---|---|---|---|---|---|
@@ -98,8 +98,8 @@ The M2M1's ranging specs match the **RPLIDAR S1** core exactly (40 m, 9200 Hz, 9
 | 6 | Brown | VCC | power | 4.8 V | 5 V | 5.5 V |
 
 - UART: **256000 baud, 8N1**, standard RPLIDAR serial protocol (works with `rplidar_sdk`, `pyrplidar`, and ROS `rplidar_ros` with the `s1` profile) [S1].
-- VCC is 5 V **max 5.5 V**. Never feed the 12 V the processing unit accepts into this connector.
-- Pin order is read from the S1 manual drawing. Confirm wire colors and continuity with a multimeter before tapping this link. Using it bypasses the onboard SLAM.
+- VCC is 5 V, **maximum 5.5 V**. Never feed this connector with the 12 V that the processing unit accepts.
+- The pin order is read from the S1 manual drawing. Use a multimeter to confirm the wire colors and continuity before you tap this link. If you use this link, you bypass the onboard SLAM.
 
 ## 6. Network defaults
 | Item | Value | Source |
@@ -110,7 +110,7 @@ The M2M1's ranging specs match the **RPLIDAR S1** core exactly (40 m, 9200 Hz, 9
 | Ethernet | PC set as **DHCP client** when cabled directly | [QS] (M1M1) |
 | `opensw` default host | 192.168.11.11 | [OSW] (bench: 192.168.11.1 confirmed for AP mode; .11 does not apply) |
 | Station (client) mode | configurable via RoboStudio / SDK | [RET] |
-| Boot | spins up ≈ 20 s (M1M1) / ≈ 40 s (M2M3) after power. M1M1 dev kit has power switch SW1 and LED D1 | [QS] |
+| Boot | spin-up takes ≈ 20 s (M1M1) / ≈ 40 s (M2M3) after power. The M1M1 dev kit has power switch SW1 and LED D1 | [QS] |
 
 ## 7. Coordinate frame [DS]
 - Right‑handed. **+X = sensor front** (the ▷ arrow on the lidar cap points along +X). +Y = left. +Z = up.
@@ -141,13 +141,13 @@ Operating −5 °C … +45 °C (typ 25 °C). Storage TBD. Pre‑heating improves
 | **SLAMWARE SDK** (C++, closed source; x86 Win/Linux, ARM Linux) | official API |
 | **slamware_ros_sdk** (ROS 1) | `roslaunch slamware_ros_sdk slamware_ros_sdk_server_node.launch ip_address:=192.168.11.1` |
 | **hatchbed/opensw** (C++, BSD) + **opensw_ros** (ROS 1/2) | open reimplementation. Nodes: `laser_driver` → `scan` (sensor_msgs/LaserScan, frame `laser`, 20 Hz, range 0–40 m); `imu_driver` → `imu` (sensor_msgs/Imu, frame `imu`, 50 Hz). Params: `host`, `port`=1445 |
-| SDK health interface | reports faults. Restart the unit to recover [DS] |
+| SDK health interface | reports faults. To recover, restart the unit [DS] |
 
 ## 11. Wire protocol (reverse‑engineered, [OSW])
-- **Transport:** TCP to port 1445. Each message is a single JSON object terminated by the delimiter **`"\n\r\n\r\n"`**. Request/response is synchronous and matched by `request_id` (int 1–99999999).
+- **Transport:** TCP to port 1445. Each message is one JSON object that ends with the delimiter **`"\n\r\n\r\n"`**. Request/response is synchronous. The `request_id` matches each response to its request (int 1–99999999).
 - **Simple request:** `{"command":"<cmd>","request_id":12345}`
-- **Response envelope:** `{"command":"<cmd>","request_id":12345,"result":{"code":<int>,"timestamp":<int>, ...}}`. **Bench (firmware 2.6.0_dev, 2019-12-12): `code` is `1` on every successful getter, not 0.** The value used for failures has not been observed.
-- **Key casing (bench):** `getrobothealth` returns camelCase (`hasError`, `hasWarning`, `hasFatal`, `hasLidarDisconnected`, `hasSdpDisconnected`, `hasDepthCameraDisconnected`, `hasSystemEmergencyStop`, plus `baseError: []`), not the snake_case in the table below. `getsdpversion` returns `sdp_version`; `getsystemresource` returns snake_case as listed. `getimuinrobotcoordinate` also returns `availibilityBitMap` (sic, 131) and `optional`. At rest `raw_acc`, `gyro`, `raw_gyro`, `compass` were exactly 0 and `acc` about 0.003 (no gravity), quaternion valid.
+- **Response envelope:** `{"command":"<cmd>","request_id":12345,"result":{"code":<int>,"timestamp":<int>, ...}}`. **Bench (firmware 2.6.0_dev, 2019-12-12): `code` is `1` on every successful getter, not 0.** The value for a failure has not been observed.
+- **Key casing (bench):** `getrobothealth` returns camelCase (`hasError`, `hasWarning`, `hasFatal`, `hasLidarDisconnected`, `hasSdpDisconnected`, `hasDepthCameraDisconnected`, `hasSystemEmergencyStop`, plus `baseError: []`), not the snake_case in the table below. `getsdpversion` returns `sdp_version`. `getsystemresource` returns snake_case as listed. `getimuinrobotcoordinate` also returns `availibilityBitMap` (sic, 131) and `optional`. At rest `raw_acc`, `gyro`, `raw_gyro`, `compass` were exactly 0 and `acc` about 0.003 (no gravity), quaternion valid.
 
 | command | args | result fields |
 |---|---|---|
@@ -161,15 +161,15 @@ Operating −5 °C … +45 °C (typ 25 °C). Storage TBD. Pre‑heating improves
 | `getsystemresource` | – | `battery_percentage`, `board_temperature10` (°C × 10), `dcin_connected`, `is_charging`, `on_dock` |
 | `getsdpversion` | – | `sdp_version` (firmware string) |
 
-- **IMU availability bitmap (INFERRED, not confirmed by Slamtec):** the SDK enum `ImuBitMap` ([docs](https://developer.slamtec.com/docs/slamware/cpp-sdk-en/2.8.2_rtm/imu_bitmap/)) lists NO_IMU_READY, QUATERNION_READY, CALIBRATED_ACC_READY, CALIBRATED_GYRO_READY, CALIBRATED_COMPASS_READY, RAW_ACC_READY, RAW_GYRO_READY, RAW_COMPASS_READY, FUSION_6DOF_READY, FUSION_9DOF_READY but gives no numeric values. Assuming sequential flags in that order (NO_IMU_READY = 0, QUATERNION = 1<<0 ... FUSION_9DOF = 1<<8), the bench value 131 = QUATERNION + CALIBRATED_ACC + FUSION_6DOF, which matches the observed data (valid quaternion, acc ~0.003, every other field exactly 0). Consequence on firmware 2.6.0_dev: **orientation only; no rates** (gyro, raw_*, compass not exported); `acc` looks gravity-removed with unverified units. hatchbed/opensw `client.h` agrees: `getImuData`/`getRawImuData` carry the note "currently only the orientation fields appear to be filled in" (both send the same `getimuinrobotcoordinate`). The driver's `ImuBit` (`slamtec/protocol.py`) encodes this layout; bench-verify before relying on other bits.
+- **IMU availability bitmap (INFERRED, not confirmed by Slamtec):** the SDK enum `ImuBitMap` ([docs](https://developer.slamtec.com/docs/slamware/cpp-sdk-en/2.8.2_rtm/imu_bitmap/)) lists NO_IMU_READY, QUATERNION_READY, CALIBRATED_ACC_READY, CALIBRATED_GYRO_READY, CALIBRATED_COMPASS_READY, RAW_ACC_READY, RAW_GYRO_READY, RAW_COMPASS_READY, FUSION_6DOF_READY, FUSION_9DOF_READY. It gives no numeric values. If the flags are sequential in that order (NO_IMU_READY = 0, QUATERNION = 1<<0 ... FUSION_9DOF = 1<<8), the bench value 131 = QUATERNION + CALIBRATED_ACC + FUSION_6DOF. This matches the observed data (valid quaternion, acc ~0.003, every other field exactly 0). Result on firmware 2.6.0_dev: **orientation only; no rates** (gyro, raw_*, compass not exported); `acc` looks gravity-removed, with unverified units. hatchbed/opensw `client.h` agrees: `getImuData` and `getRawImuData` carry the note "currently only the orientation fields appear to be filled in" (both send the same `getimuinrobotcoordinate`). The driver `ImuBit` (`slamtec/protocol.py`) encodes this layout. Bench-verify before you rely on other bits.
 - **MapType:** 0 Bitmap8Bit, 1 Pointmap, 2 ImageFeaturesMap, 3 RectangleAreaMap.
 - **Bitmap8Bit cell encoding (bench-confirmed 2026-11-02):** 0 unknown, 1..127 free, 128..255 occupied (driver: `map_free_is_high=false`).
-- **MapKind:** 0 EXPLORERMAP, 5 COSTMAP, 10 SWEEPERMAP, 20 UWBMAP, 30 SLAMMAP, 40 LOCALSLAMMAP, 50 DBOWMAP, 60 OPTIMALOPERATIONALMAP, 70 MARKERMAP, 80 RECTANGLEAREAMAP, 90 DISCREPANCYRECORDMAP. Use 0 (explorer) for the live occupancy map.
+- **MapKind:** 0 EXPLORERMAP, 5 COSTMAP, 10 SWEEPERMAP, 20 UWBMAP, 30 SLAMMAP, 40 LOCALSLAMMAP, 50 DBOWMAP, 60 OPTIMALOPERATIONALMAP, 70 MARKERMAP, 80 RECTANGLEAREAMAP, 90 DISCREPANCYRECORDMAP. For the live occupancy map, use 0 (explorer).
 
-**Binary payload encoding** (`laser_points`, `map_data`): base64‑decode, then apply custom RLE.
+**Binary payload encoding** (`laser_points`, `map_data`): decode the base64, then apply custom RLE.
 - 9‑byte header: `'R' 'L' 'E'`, sentinel `s1` (usually 0x81), sentinel `s2` (usually 0x7F), then uint32 LE decoded length.
-- Body: when a byte equals `s1`, the next two bytes are `count, value`. Emit `value` `count` times. Exception: the sequence `s1, 0x00, s2` means "swap s1 and s2", with nothing emitted. Every other byte is copied literally.
-- Decoded laser data: 12 bytes per point, little‑endian: `float32 distance_m`, `float32 angle_rad`, `uint8 valid`, 3 bytes padding. Base64 arrives **without padding**. Decoded scans contain stray bytes, so parse **backwards from the end** in 12‑byte steps and resync on invalid records (as opensw does). `distance == 100000` means no return. Sort points by angle.
+- Body: when a byte equals `s1`, the next two bytes are `count, value`. Emit `value` `count` times. Exception: the sequence `s1, 0x00, s2` means "swap s1 and s2", and emits nothing. Copy every other byte as it is.
+- Decoded laser data: 12 bytes per point, little‑endian: `float32 distance_m`, `float32 angle_rad`, `uint8 valid`, 3 bytes padding. The base64 arrives **without padding**. Decoded scans contain stray bytes, so parse **backwards from the end** in 12‑byte steps and resync on invalid records (as opensw does). `distance == 100000` means no return. Sort the points by angle.
 
 ### Minimal Python client (stdlib only)
 ```python
@@ -245,16 +245,16 @@ def parse_scan(b64: str):
 #        "type": 0, "kind": 0, "partially": False})
 # import numpy as np; grid = np.frombuffer(rle_inflate(mp["map_data"]), np.uint8)  # reshape per dimension_x/y
 ```
-Validated: `parse_scan` reproduces opensw's expected output exactly on all 24 captured M2M1 scans, which have about 915–931 points each (≈ 9200 Hz ÷ 10 Hz). `rle_inflate` decodes the captured 40 × 40 map to its declared `size`. The grid layout is ambiguous: opensw builds `cv::Mat(rows=dimension_x, cols=dimension_y)`. Verify the orientation against RoboStudio.
+Validated: on all 24 captured M2M1 scans, `parse_scan` gives exactly the output that opensw expects. Each scan has about 915–931 points (≈ 9200 Hz ÷ 10 Hz). `rle_inflate` decodes the captured 40 × 40 map to its declared `size`. The grid layout is ambiguous: opensw builds `cv::Mat(rows=dimension_x, cols=dimension_y)`. Verify the orientation against RoboStudio.
 
 ## 12. Gotchas
-1. The external ports don't speak the RPLIDAR serial protocol. Use JSON/TCP (§11), the SLAMWARE SDK, or a ROS driver.
+1. The external ports do not use the RPLIDAR serial protocol. Use JSON/TCP (§11), the SLAMWARE SDK, or a ROS driver.
 2. Startup draws up to 1.6 A. Weak USB ports cause boot loops.
 3. Keep M2.5 bottom screws ≤ 6 mm.
-4. After ~1 h of continuous mapping, graph optimization stops. Save the map and restart for large sessions.
-5. Mapping tolerates only ±3° of tilt, and speeds up to 2 m/s.
-6. The datasheet's 20 m figure is a copy error. The spec table (40 m) is authoritative for M2M1.
-7. The USB‑A "5V DC" port is a power input, not a USB host/data port. Never connect a PC or Pi to it for data, and check with a multimeter that it does not source voltage before first connecting a supply.
+4. After ~1 h of continuous mapping, graph optimization stops. For large sessions, save the map and restart.
+5. Mapping allows only ±3° of tilt and speeds up to 2 m/s.
+6. The 20 m figure in the datasheet is a copy error. The spec table (40 m) is correct for the M2M1.
+7. The USB‑A "5V DC" port is a power input. It is not a USB host/data port. Never connect a PC or Pi to it for data. Before you connect a supply for the first time, use a multimeter to check that the port does not source voltage.
 
 ## 13. Sources
 - M2M1 datasheet rev 1.1: https://cdn.sparkfun.com/assets/0/5/8/f/a/DS-15871-Slamtec_Mapper_Pro.pdf
