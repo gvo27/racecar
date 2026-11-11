@@ -34,7 +34,7 @@ The real Wi‑Fi costs are latency jitter (5–50 ms spikes) and dropouts. These
 **Power and wiring:**
 - The Mapper accepts 4.8–12 V. It draws up to 1.6 A at start and about 0.75 A typical when it runs. Ripple must stay at 50 mV or less.
 - The only wire it needs is power to its "5V DC" input. This input is a standard USB‑A socket beside the RJ45 port (corrected: earlier drafts said a 2‑pin receptacle). Data goes over Wi‑Fi. Nothing connects to the ESP32 or the GPIO header.
-- **Do not power it from the Pi 5 USB ports.** Without a USB‑PD 5 A supply (the Pololu is not PD), the Pi limits USB to 600 mA total. Even with `usb_max_current_enable=1`, the limit is 1.6 A shared. The 5 A of the Pi already uses most of the Pololu D36V50F5 (5.5 A).
+- **Do not power it from the Pi 5 USB ports.** Without a USB‑PD 5 A supply (the Pololu is not PD), the Pi limits USB to 600 mA total. Even with `usb_max_current_enable=1`, the limit is 1.6 A shared. The 5 A of the Pi already uses all of the Pololu D36V50F5 (5.5 A) capacity.
 - The invariant "sensors on separate rail, common ground" applies. Add a **second regulator** from the 2S LiPo as the sensor rail. For example, use a second Pololu D36V50F5 or a smaller 5 V ≥3 A buck. Connect `+5V_SENS` to the Mapper through the USB‑A male pigtail (below), and tie the grounds together.
 - A direct 2S battery (6–8.4 V) is inside the voltage range. But ESC and motor noise exceeds the 50 mV ripple limit. Use a regulator.
 - **The 1 ft 22AWG 3 A pigtail is electrically sufficient.**
