@@ -1,6 +1,6 @@
 # Layout and fab handoff (Rev A, KiCad 10)
 
-For the owner doing layout. Parts: `bom.md`. Design intent: `design_overview.md`. Widths come from the IPC tables in `power_board_plan.md`; nothing here is a verified machine or fab limit. **Provisional** = derived from the tool geometry below, not yet confirmed with the lab tech. Repo rule: unconfirmed => `TBD`.
+For the owner doing layout. Parts: `bom.csv` and `bom_offboard.csv` (made by `make bom`; notes in `bom.md`). Design intent: `design_overview.md`. Widths come from the IPC tables in `power_board_plan.md`; nothing here is a verified machine or fab limit. **Provisional** = derived from the tool geometry below, not yet confirmed with the lab tech. Repo rule: unconfirmed => `TBD`.
 
 # A. Prototype rev A: in-house CNC (Makera Carvera)
 
@@ -212,7 +212,7 @@ Not the rev A path. Essentials if the board goes to a fab house:
 - [ ] DRC clean (rev A: table above)
 - [ ] 3D view check
 - [ ] Footprints vs real parts: U2 dimension drawing, J1 drill (12 AWG), F1 holder (FLR 178.6165) pins, XH header footprints
-- [ ] BOM reviewed (`bom.md`)
+- [ ] BOM reviewed (`bom.csv`, `bom_offboard.csv`)
 
 # Open items before publish
 

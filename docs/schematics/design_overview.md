@@ -1,6 +1,6 @@
 # Power distribution board: design overview (Rev A draft)
 
-Netlist: 40 parts, 21 nets. Schematic: `rc_power_board.kicad_sch` / `.pdf` (KiCad 10 project). Background: `power_board_plan.md`. Parts: `bom.md`. Milling/layout: `fab_handoff.md`.
+Netlist: 40 parts, 21 nets. Schematic: `rc_power_board.kicad_sch` / `.pdf` (KiCad 10 project). Background: `power_board_plan.md`. Parts: `bom.csv` (made by `make bom`). Milling/layout: `fab_handoff.md`.
 
 **Architecture:** 2S LiPo (6.0–8.4 V) → J1 → F1 → `VBAT` (U1, U2 inputs sit on it) → three branches: U1 → `+5V_CPU` (Pi 5 + ESP32); U2 → `+5V_SENS`; U3 LDO from `+5V_SENS` → `+3V3_SENS`. One common GND. ESC and motor are powered off-board.
 

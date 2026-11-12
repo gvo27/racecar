@@ -7,7 +7,7 @@ paths:
 
 ## Sources of truth
 - Spec / build guide: `docs/schematics/power_board_plan.md` (exported from the live Claude Doc linked at its top). Schematic changes that contradict it => update the plan in the same change, or ask.
-- Parts: `docs/schematics/bom.md`. CNC-milling (rev A) and later fab checklist: `docs/schematics/fab_handoff.md`.
+- Parts: symbol fields in the schematic (MPN, Manufacturer, Status, Unit cost USD, Supplier link, BOM Comments), exported by `make bom` to `docs/schematics/bom.csv` (commit it); off-board items in `bom_offboard.csv`; notes in `docs/schematics/bom.md`. CNC-milling (rev A) and later fab checklist: `docs/schematics/fab_handoff.md`.
 - Meeting summary: `docs/schematics/design_overview.md` (concise, < 2 pages). Keep it in step with the schematic.
 - Inventory and part facts: `docs/datasheets/` (components_list.xlsx, ESC manual, servo datasheet, Pololu D36V50F5 (U1), Pololu D24V90F5 (U2, `regulator_pololu_d24v90f5.md`)). Never invent a part value: unknown => `TBD` (repo rule: no unconfirmed parameters).
 - Project KiCad version: 10.0. Do not save the project with an older KiCad; do not downgrade the file format (the schematic is KiCad 10 format since the U2 footprint change; see docs/schematics/README.md).
@@ -38,7 +38,7 @@ paths:
 - ERC/DRC results count only when run in KiCad 10 (user-run, or kicad-cli 10 if installed); never claim ERC passed without its output.
 
 ## Rev A PCB (review only; Gerber and CAM wait for the lab tech)
-- Board: `docs/schematics/rc_power_board.kicad_pcb`, built by `tools/build_pcb.py` and routed by `tools/route_pcb.py` in the pinned KiCad 10.0.8 image (`docker/kicad.Dockerfile`) and Freerouting 2.5.0 (digest in the Makefile). Make targets: `kicad-image erc pcb-build pcb-route pcb-check pcb-mill-check pcb-review pcb-test`. No host Python for the tools. After the first build the `.kicad_pcb` is the owner's file: `pcb-build` refuses to overwrite it without `--force`.
+- Board: `docs/schematics/rc_power_board.kicad_pcb`, built by `tools/build_pcb.py` and routed by `tools/route_pcb.py` in the pinned KiCad 10.0.8 image (`docker/kicad.Dockerfile`) and Freerouting 2.5.0 (digest in the Makefile). Make targets: `kicad-image erc pcb-build pcb-route pcb-check pcb-mill-check pcb-review pcb-test bom`. No host Python for the tools. After the first build the `.kicad_pcb` is the owner's file: `pcb-build` refuses to overwrite it without `--force`.
 - Rivet via (assumed): 1.2 mm drill / 2.1 mm pad, annular 0.45 mm, in every net class. Assumed drill set: 0.8, 1.0, 1.2, 1.5 mm; larger holes are milled (the list is `MILLED_HOLES` in `tools/placement.py`). Limits and their status: `docs/schematics/milling.toml`.
 - After every board change run `make pcb-check pcb-mill-check` (skill `pcb-milling-check`). DRC clean does not mean millable. MILL-DEPTH is a finding about the assumed depth range (owner and lab tech), not a board error.
 - Never put F.Cu copper on a THT pad. Never put a via inside a part courtyard. VBAT, VBAT_RAW and GND are B.Cu zones, not tracks.

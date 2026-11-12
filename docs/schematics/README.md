@@ -5,7 +5,9 @@ Draft KiCad project for the car's power board. A 2S LiPo comes in; the board put
 | File | What it is |
 | --- | --- |
 | `design_overview.md` | The design meeting summary: one short entry per feature, the power budget and the decisions wanted. |
-| `bom.md` | Standalone BOM for the schematic parts: proposed MPNs, links, key specs, estimated cost, fuse notes. |
+| `bom.md` | How the BOM is made (`make bom`, symbol fields), fuse notes, stock notes. |
+| `bom.csv` | BOM exported from the schematic fields by `make bom` (generated; commit it). |
+| `bom_offboard.csv` | Hand-kept BOM of parts with no symbol (XH housings, crimps, stock, J6/J7 options). |
 | `fab_handoff.md` | Rev A CNC-milling handoff (Makera Carvera) plus later-revision fab checklist: DRC/net classes, rivets, holes, IPC-2221 table, connector table, export, sign-off. |
 | `power_board_plan.md` | The build guide and background: rails, power budget, trace widths, a step-by-step KiCad guide and open questions. Exported from the live doc linked at its top. |
 | `power_architecture.png` | Block diagram used by the plan. |
