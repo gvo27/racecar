@@ -205,7 +205,7 @@ Not the rev A path. Essentials if the board goes to a fab house:
 
 1. F1: 15 A decided by the load (ATO/ATC blade in FLR holder assumed).
 2. Reverse-polarity decision: the proposal (P-FET) is in the PR, not on the board.
-3. U2 selection and footprint (D24V60F5, 5 V 6 A proposed; check input range, dropout near 6.0 V and reverse protection (TBD); none in schematic yet). Pin count and current per pin from the D24V60F5 drawing (+5V_SENS 4.9 A vs about 3 A per 0.1" header pin); update the REG_MODULE symbol/footprint if it has multiple VOUT/GND pins. Verify >= 4.8 V at the Mapper during startup (U2 tolerance TBD, about 0.03-0.05 V pigtail drop at 1.6 A).
+3. U2 = Pololu D24V90F5 (assumed, owner 2026-11-11; the D24V60F5 is discontinued). Footprint `rc_power:Pololu_D24VxF5` from the Pololu drawing: VIN, VOUT and GND each use a pin pair (about 2.45 A per VOUT pin at 4.9 A), so the `REG_MODULE` symbol stays 4-pin. Dropout about 1.0 V at 5 A: the output can fall below 5 V near the 6.0 V cutoff. Check the footprint against the real module (1:1 print) before milling. Details: `docs/datasheets/regulator_pololu_d24v90f5.md`. Verify >= 4.8 V at the Mapper during startup (U2 tolerance TBD, about 0.03-0.05 V pigtail drop at 1.6 A).
 4. All `TBD` values in the schematic.
 5. U1 EN stays unconnected until the rev 2 prototype board.
 6. I2C pull-ups: bus is pulled up only by the Garmin's internal 13 kΩ; consider two DNP 0805 4.7-10 kΩ pull-up footprints to `+3V3_SENS` for a future IMU. Not drawn.

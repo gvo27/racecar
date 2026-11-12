@@ -120,7 +120,7 @@ Worst case, the board's battery input carries about **8.4 A** into the two switc
 | +5V\_SENS | Slamtec Mapper M2M1 lidar (J11) | 0.75 A typ, 1.3 A max; 1.4 to 1.6 A for a few seconds at startup (datasheet) | Ripple 50 mV max: C9 bulk cap right at J11; USB-A pigtail harness |
 | `+5V_SENS` | Radar (removed from scope) | TBD | Model not chosen |
 | `+5V_SENS` | 3.3 V LDO input | 0.3 A | An LDO draws the same current it delivers |
-| `+5V_SENS` | **Rail total** | **4.6 A (4.9 A at Mapper startup)** | Pick a buck rated 6 A (proposed: Pololu D24V60F5) |
+| `+5V_SENS` | **Rail total** | **4.6 A (4.9 A at Mapper startup)** | Pick a buck rated 6 A (assumed: Pololu D24V90F5, 9 A; the D24V60F5 is discontinued) |
 | `+3V3_SENS` | IMU | < 0.02 A (approx.) | Noise-sensitive; the reason for the LDO |
 | `+3V3_SENS` | Shaft encoder | < 0.05 A (approx.) |  |
 | `+3V3_SENS` | **Rail total** | **0.3 A (TBD)** | LDO heat at 0.3 A: (5 − 3.3) × 0.3 ≈ 0.5 W |
@@ -402,7 +402,7 @@ Put these in your hand-off message, numbered, so the reviewer can answer by numb
 3. **Compute rail and the Pi:** the Pi 5 and ESP32 need about 5.5 A. The Pi takes power through a 2-wire USB-C pigtail, so it keeps its USB-C input protection but gets no USB-PD 5 A offer: it limits its USB ports to about 0.6 A total unless set in `config.txt`. Is that acceptable?
 4. **Regulator U1:** the D36V50F5 outputs 5.0 V ± 4 % (not the Pi's preferred 5.1 V) and is rated 5.5 A typical. What is its dropout at 5.5 A with the battery near 6.0 V? Its VRP output is deliberately unused (the sensor buck stays on `VBAT`, because VRP would push about 9 A through U1's 6 A-rated VIN pin pair).
 5. **IMU noise:** is the LDO's noise rejection enough at the sensor buck's switching frequency, or should the ferrite-bead filter in front of it stay?
-6. **Protection:** U1 has its own reverse protection to 40 V; the proposed U2's (Pololu D24V60F5) is TBD. The rest (C1, D1) is exposed. The PR proposes Q1 (P-FET) + R4 between F1 and `VBAT`; it is not drawn yet. Adopt it for rev A? TVS proposed: SMBJ10A.
+6. **Protection:** U1 has its own reverse protection to 40 V; U2 (Pololu D24V90F5, assumed) has built-in reverse-voltage protection. The rest (C1, D1) is exposed. The PR proposed Q1 (P-FET) + R4 between F1 and `VBAT`; owner decision 2026-11-11: not on rev A. TVS proposed: SMBJ10A.
 7. **Low battery:** the ESC's low-voltage cutoff stops the motor, but the regulators keep draining the pack. Add a resistor divider from `VBAT` to an ESP32 ADC pin so firmware can warn or shut down? A 100k / 33k divider gives about 2.1 V at 8.4 V.
 8. **ESP32 back-feed:** the ESP32 gets 5 V on its left USB-C port (J7) and may also be connected by USB on its right COM port (to the laptop now, the Pi later). Does the dev board keep the two USB power inputs apart, or is a diode or a data-only cable needed?
 9. **Cameras:** cameras plugged into the Pi draw from `+5V_CPU`. Move them to a powered USB hub on `+5V_SENS` (J9)?

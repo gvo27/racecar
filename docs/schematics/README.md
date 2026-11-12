@@ -24,7 +24,15 @@ The single-fuse revision is regenerated in KiCad 7 format again. Owner steps: cl
 
 Previous revision: the meeting-cleanup revision was generated in KiCad 7 format, then opened, symbol-updated (D2–D4) and saved in KiCad 10.0 by the owner (94ccd72), with label positions tidied in dd946f3. Edit the KiCad 10 files from here on; close KiCad before pulling. `rc_power_board.kicad_pro` (net classes, ERC severities) is the owner's KiCad 10 file.
 
-## ATO fuse, JST-XH convention, Garmin I2C (current revision)
+## U2 = Pololu D24V90F5 (current revision, documentation only)
+
+- **U2** is assumed to be the Pololu D24V90F5 (#2866, 5 V, 9 A; owner, 2026-11-11). The proposed D24V60F5 (#2865) is discontinued; Pololu names the D24V90F5 as its replacement. Both use the same PCB and drawing. Not bought yet.
+- Facts, archived drawing, graphs and the footprint hole table: `docs/datasheets/regulator_pololu_d24v90f5.md`.
+- **Flag:** dropout is about 1.0 V at 5 A (Pololu graph). Near the 6.0 V cutoff the output can fall below 5 V, and the Mapper needs at least 4.8 V. Bench check at J11 during Mapper startup.
+- Decisions on 2026-11-11 (owner): no reverse-polarity protection on rev A (U1 and U2 have their own); U3 keeps the stock SOT-23-5 footprint with the `U3_fine` DRC rule.
+- The schematic and footprint change for U2 comes with the PCB work (plan: `docs/plans/2026-11-11-power-board-pcb-rev-a.md`).
+
+## ATO fuse, JST-XH convention, Garmin I2C (earlier revision)
 
 - **F1** is a standard ATO/ATC blade fuse in a Littelfuse FLR 178.6165.0001 holder (`Fuse:FuseHolder_Blade_ATO_Littelfuse_FLR_178.6165`); value `TBD ATO/ATC blade 15A` (15 A decided by the Mapper load, see the Mapper revision below). Proposed fuse: Littelfuse 0257015.PXPV (15 A). Details in `bom.md`.
 - **JST-XH (2.5 mm) is the connector convention** for sensors and low-power parts (single Dupont jumper sockets push onto the XH pins for breadboard debugging; 2.54 mm multi-pin housings do not fit; parts in lab stock). Exceptions: J1 (battery T-plug pads), J6/J7 (USB-C pigtail screw terminals, over 3 A).
@@ -33,7 +41,7 @@ Previous revision: the meeting-cleanup revision was generated in KiCad 7 format,
 - **Power5A** track width is 1.6 mm (now also `+5V_SENS`, see below). Computed IPC-2221 widths are in `fab_handoff.md` (2 oz stock).
 - **Owner steps:** close KiCad, pull, open, Update Symbols from Library, save in KiCad 10, run ERC, Assign Footprints check (XH and ATO footprints), re-plot the PDF, push.
 
-## Slamtec Mapper on `+5V_SENS` (current revision)
+## Slamtec Mapper on `+5V_SENS` (earlier revision)
 
 - **J11** (was `Spare 5V`) now hosts the Slamtec Mapper M2M1 lidar. Harness: J11 2-pin XH, XHP-2 housing, 22 AWG 3 A USB-A male 2-wire pigtail (pin 1 `+5V_SENS` to red/VBUS, pin 2 GND to black). Mapper supply 4.8 V min / 5 V typ / 12 V max; running 0.75 A typ, 1.3 A max; startup 1.4-1.6 A for a few seconds; ripple 20 mV typ, 50 mV max (from its datasheet on branch `lidar`). Not powered from Pi USB or straight from the pack.
 - **C9** (`Device:C_Polarized`, `TBD >=100uF low-ESR >=10V`, footprint `CP_Radial_D8.0mm_P3.50mm`) added on `+5V_SENS` / GND at J11 for the startup surge and ripple.

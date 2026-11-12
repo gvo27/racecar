@@ -9,7 +9,7 @@ Prices/stock as checked 2026-10-30; confirm before ordering.
 | F1 | 1 | Single main fuse, all board loads | `TBD ATO/ATC blade 15A` | Littelfuse 0257015.PXPV (ATO 257, 15 A, 32 V) | via F1 holder | ATO/ATC 257: 32 VDC, 1000 A interrupting at 32 VDC, ISO 8820-3 / SAE J1284; melting I2t about 340 A2s (15 A, Littelfuse catalog); see fuse notes. 0257015.L is obsolete; DigiKey lists 0287015.PXCN (ATOF) as direct substitute | — | est. 0.40 (buy spares) |
 | F1 holder | 1 | PCB holder for F1 | n/a (part of F1 symbol) | Littelfuse FLR 178.6165.0001 | `Fuse:FuseHolder_Blade_ATO_Littelfuse_FLR_178.6165` | Takes standard ATO/ATC blade fuses; 22.5 A continuous / 30 A max per the Littelfuse FLR datasheet; 32 V fuse system; either exceeds F1 | — | est. 3.00 (unverified) |
 | U1 | 1 | Compute 5 V buck (Pi 5 + ESP32) | `Pololu D36V50F5 buck (req 5.1V >=6A TBD)` | Pololu D36V50F5 (in hand) | `PinHeader_2x06_P2.54mm_Vertical` | 5.0 V, 5.5 A typ; reverse protection to 40 V; 3 A per header pin | [Pololu 4091](https://www.pololu.com/product/4091) | 39.95 (in hand) |
-| U2 | 1 | Sensor 5 V buck | `5V buck >=6A module, TBD` | Pololu D24V60F5 (5 V, 6 A; proposed; not bought; replaces the D24V50F5 proposal, which is too small for the Mapper load) | TBD: needs Pololu dimension drawing (none in schematic yet) | 5 V, 6 A; +5V_SENS needs 4.6 A running, 4.9 A at Mapper startup. Input range, protections (reverse protection TBD) and dropout: **TBD, check the Pololu product page and dropout curve** near the 6.0 V battery cutoff (flag, verify at load). Pin count and current per pin from the D24V60F5 drawing (+5V_SENS 4.9 A vs about 3 A per 0.1" header pin); update the REG_MODULE symbol/footprint if it has multiple VOUT/GND pins | [Pololu 2865](https://www.pololu.com/product/2865) | TBD (placeholder 32.95 = D24V50F5 price; update) |
+| U2 | 1 | Sensor 5 V buck | `5V buck >=6A module, TBD` | Pololu D24V90F5 (5 V, 9 A; assumed, owner 2026-11-11; not bought). Replaces the D24V60F5 proposal (#2865, discontinued; Pololu names the D24V90F5 as its replacement) | `rc_power:Pololu_D24VxF5` (project footprint from the Pololu drawing; 12 pins on a 0.1" grid, VIN/VOUT/GND each a pin pair) | 5-38 V in, 5 V ±4 %, reverse protection built in. +5V_SENS needs 4.6 A running, 4.9 A at Mapper startup. **Flag:** dropout about 1.0 V at 5 A (graph), so at the 6.0 V cutoff the output can fall below 5 V: bench check at J11. Ripple not published: TBD. Details: [`regulator_pololu_d24v90f5.md`](../datasheets/regulator_pololu_d24v90f5.md) | [Pololu 2866](https://www.pololu.com/product/2866) | 36.82 |
 | D1 | 1 | TVS on VBAT | `TVS >=9V TBD` | Littelfuse SMBJ10A | SMB | Unidirectional; 10 V standoff, 11.1 V min breakdown, 17.0 V max clamp at 35.3 A; 600 W | [DigiKey](https://www.digikey.com/en/products/detail/littelfuse-inc/SMBJ10A/285966) | 0.43 |
 | C1 | 1 | VBAT bulk | `TBD uF >=16V` | Panasonic EEU-FR1E471 | `CP_Radial_D10.0mm_P5.00mm` | 470 uF, 25 V, 10 mm dia, 5 mm pitch, 105 C; footprint matches | [DigiKey](https://www.digikey.com/en/products/detail/panasonic-industry/EEU-FR1E471/2433553) | est. 0.70 |
 | C9 | 1 | Bulk cap at J11 (Mapper startup surge, ripple) | `TBD >=100uF low-ESR >=10V` | TBD: >=100 uF, >=10 V low-ESR radial electrolytic or polymer; MPN TBD | `CP_Radial_D8.0mm_P3.50mm` (exists in KiCad; confirm vs the chosen part) | Mapper ripple limit 50 mV max (20 mV typ); startup 1.4-1.6 A for a few seconds. Place at J11 | — | est. 0.50 |
@@ -48,14 +48,14 @@ Prices/stock as checked 2026-10-30; confirm before ordering.
 | --- | --- |
 | F1 fuse 0.40 + holder 3.00 | 3.40 |
 | U1 (in hand) | 39.95 |
-| U2 (proposed D24V60F5; price TBD, placeholder = D24V50F5 price) | 32.95 |
+| U2 (D24V90F5, assumed) | 36.82 |
 | D1, C1-C9, FB1, U3, R1-R3, D2-D4 | 4.32 |
 | J6/J7 | 1.60 |
 | XH: 9 headers (4 x 0.15 + 5 x 0.10 = 1.10) + 9 housings (1.10) + 26 crimps (2.60) | 4.80 |
 | Stock, rivets (EasyContac kit), dowels, bits: lab stock | 0.00 |
-| **Total** | **about 87.0** |
+| **Total** | **about 90.9** |
 
-Excluding U1 (already owned): about 47.1. (Check: 3.40 + 39.95 + 32.95 + 4.32 + 1.60 + 4.80 + 0.00 = 87.02; minus 39.95 = 47.07.) The U2 figure is a placeholder until the D24V60F5 price is checked. No PCB fab cost: rev A is milled in-house. J6/J7 JST options are not included. Buy spare fuses and a few spare passives.
+Excluding U1 (already owned): about 50.9. (Check: 3.40 + 39.95 + 36.82 + 4.32 + 1.60 + 4.80 + 0.00 = 90.89; minus 39.95 = 50.94.) U2 price is the Pololu price on 2026-11-11 (qty 1). No PCB fab cost: rev A is milled in-house. J6/J7 JST options are not included. Buy spare fuses and a few spare passives.
 
 ## Out of stock / backorder (as checked)
 
