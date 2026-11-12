@@ -22,8 +22,8 @@ KiCad DRC checks the numbers in `rc_power_board.kicad_pro` and `.kicad_dru`. It 
 | MILL-ANNULAR | Annular ring >= the configured minimum on every THT pad and via | error |
 | MILL-FCU-THT | No F.Cu track or zone fill touches a THT pad (holes are not plated; the joint is on B.Cu) | error |
 | MILL-VIA | Every via has the rivet drill and pad from the config | error |
-| MILL-SLIVER | Copper narrower than the min track width, made by zone fill | warning |
-| MILL-ISLAND | Zone islands with no net connection | warning |
+| MILL-SLIVER | Copper narrower than the min track width, made by zone fill (zero-width slits from the zone filler are closed first) | warning |
+| MILL-ISLAND | Zone islands with no net connection. The check joins the fills of all zones of one net on one layer (and their tracks and pads) first, so overlapping bus zones are not islands | warning |
 | MILL-EDGE | Copper-to-board-edge distance >= the configured edge clearance | error |
 | MILL-RIVET-ACCESS | A rivet via must be solderable on both sides: no via inside the courtyard of an F-side part (its body covers the top joint) or of a B-side part | error |
 | MILL-CONN-EDGE | Each connector (J*) courtyard is within the configured distance of the board edge (wire entry outward) | warning |
