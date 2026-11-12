@@ -42,14 +42,16 @@ Rebuild: `make kicad-image pcb-review`. All tools run in the pinned KiCad 10.0.8
 | `make erc` | 0 errors, 3 warnings (`lib_symbol_mismatch`, D2 to D4: owner GUI step "Update Symbols") |
 | DRC with schematic parity | 0 errors, 0 unconnected items, parity clean; 14 `lib_footprint_mismatch` warnings (see below) |
 | `make pcb-check` (`check_board.py`) | 0 problems: no F.Cu copper on a THT pad, every hole in the bit set or in `MILLED_HOLES`, all vias 1.2/2.1 mm, no narrow HighCurrent track |
-| `make pcb-mill-check` | 0 unwaived errors, 0 waived, 0 MILL-GAP-BIT areas, 8 MILL-SLIVER and 4 MILL-ISLAND warnings, 1 owner/lab-tech question (MILL-DEPTH) |
-| `make pcb-test` | 73 tests pass |
+| `make pcb-mill-check` | 0 unwaived errors, 0 waived, 0 MILL-GAP-BIT areas, 2 MILL-SLIVER warnings, 0 MILL-ISLAND warnings, 1 owner/lab-tech question (MILL-DEPTH) |
+| `make pcb-test` | 78 tests pass |
 
 **MILL-DEPTH (question for the owner and the lab tech).** With the assumed depth range 0.10 to 0.15 mm and a depth error of +-0.05 mm, the minimum depth is 0.05 mm. This is below the copper thickness of 0.070 mm, so a shallow cut may not go through the copper. The minimum depth must be at least 0.12 mm. The check keeps this as an error. It is a finding about the limits, not about the board. Exit code of `make pcb-mill-check` is 1 because of this finding.
 
 **DRC warnings.** 14 x `lib_footprint_mismatch` (C9, F1, J3 to J9, J11 to J14, U1; J6 and J7): the board copies of these footprints have snapped drills and grown pads (annular ring 0.45 mm). The stock libraries are not changed.
 
-**Milling warnings.** 8 x MILL-SLIVER (3 on the F.Cu pour beside THT pads, 2 on the B.Cu pour at U3, 2 on `+5V_SENS` and 1 on `VBAT` where a zone edge meets a pad). 4 x MILL-ISLAND: parts of the overlapping bus zones of `+5V_CPU` (1), `+5V_SENS` (2) and `VBAT` (1) that touch no pad or track. The check does not join overlapping zones, so these are not real islands. Pour pieces smaller than 200 mm2 are dropped.
+**Milling warnings.** 2 x MILL-SLIVER, both on the B.Cu GND pour at U3 (SOT-23-5, pitch 0.95 mm). Cause: the 0.4 mm pad clearance leaves GND necks between the U3 pads (pad 1/3 on one side, pad 4/5 on the other) toward the GND pad U3.2. The necks are 0.44 to 0.50 mm wide (they survive an opening of 0.22 mm radius, not 0.25 mm), 0.5 and 0.4 mm2 removed by the test. Harmless for function (GND of a 3.3 V LDO, low current; the pour reaches U3.2 through two necks, one on each side). For milling the copper stays, but a neck this narrow may lift: the lab tech decides. Not waived: the copper is narrower than the minimum track width. Not removable without moving U3 or changing its footprint (rule `U3_fine`).
+
+Earlier warnings, now removed: 3 F.Cu GND "slivers" and 4 MILL-ISLAND were false positives of the check (zero-width slits of the filler outline; same-net bus zones that overlap and were tested one by one). The check is fixed (`milling_check.py`, with tests). 3 real slivers were removed by changing bus-zone outlines in `placement.py` (`BUS_ZONES`) and refilling the zones on the existing board with `build_pcb.py --sync-zones` (parts and tracks unchanged, no re-route): a 0.2 mm step between two `+5V_SENS` rectangles at U2.3, a 0.5 mm notch beside the J8.1/J11.1 bar, and a 0.45 mm step where the `VBAT` trunk meets the U1 VIN neck. Pour pieces smaller than 200 mm2 are dropped.
 
 ## Assumptions (all "assumed": lab tech to confirm)
 

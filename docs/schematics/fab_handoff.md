@@ -49,10 +49,10 @@ The project DRC rules in `rc_power_board.kicad_pro` are set to match: `min_clear
 
 - **Via (assumed):** the EasyContac 0.8 rivet (1.0 mm OD) needs a 1.1 mm hole and the assumed bit set has no 1.1 mm bit, so the via is **1.2 mm drill / 2.1 mm pad** (annular 0.45 mm) in every net class. The rivet sits loose by about 0.1 mm before soldering. This replaces the 2.0 / 1.1 mm value in the tables below.
 - **Bit set (assumed, lab tech to confirm):** drill 0.8, 1.0, 1.2, 1.5 mm. A hole larger than 1.5 mm is milled with an end mill (smallest end mill assumed 1.0 mm). Footprint holes are snapped up to the next size in the board copies (XH 0.95 to 1.0, MKDS 1.3 to 1.5, F1 pins 1.4 to 1.5); pads grow to keep the 0.45 mm annular ring.
-- **Hole list from the board:** 0.8 mm x 2 (C9); 1.0 mm x 52 (U1, U2, C1, J3, J4, J5, J8, J9, J11 to J14); 1.2 mm x 5 (rivet vias); 1.5 mm x 12 (F1 pins, J6, J7); milled: 2.4 mm x 1 (F1 peg), 3.0 mm x 2 (J1 wire pads), 3.2 mm x 4 (H1 to H4).
+- **Hole list from the board:** 0.8 mm x 2 (C9); 1.0 mm x 52 (U1, U2, C1, J3, J4, J5, J8, J9, J11 to J14); 1.2 mm x 3 (rivet vias); 1.5 mm x 12 (F1 pins, J6, J7); milled: 2.4 mm x 1 (F1 peg), 3.0 mm x 2 (J1 wire pads), 3.2 mm x 4 (H1 to H4).
 - **Outline:** 66 x 140 mm, drill/place origin at the lower-left corner. Stackup: 2 layers, 0.070 mm copper, 1.57 mm total.
-- **Layers:** SMD parts on B.Cu, THT parts on F.Cu. Routing on B.Cu. `VBAT_RAW`, `VBAT` and GND are B.Cu zones. The F.Cu GND pour has pad connection "none" and joins B.Cu GND through one rivet via. F.Cu has two short jumper tracks (`I2C_SDA`, `I2C_SCL`) on four rivet vias. No F.Cu copper touches a THT pad (check in `make pcb-check`).
-- **Rivet vias: 5** (4 for the two jumpers, 1 GND stitching). No via is inside a part courtyard (a rivet needs both sides soldered).
+- **Layers:** SMD parts on B.Cu, THT parts on F.Cu. Routing on B.Cu. `VBAT_RAW`, `VBAT` and GND are B.Cu zones. The F.Cu GND pour has pad connection "none" and joins B.Cu GND through one rivet via. F.Cu has one jumper track (`U1_PG`, U1.1 to J5.1, about 75 mm) on two rivet vias. The I2C jumpers of the first layout are removed. No F.Cu copper touches a THT pad (check in `make pcb-check`).
+- **Rivet vias: 3** (2 for the `U1_PG` jumper, 1 GND stitching). No via is inside a part courtyard (a rivet needs both sides soldered).
 - **Make targets:** `make kicad-image erc pcb-build pcb-route pcb-check pcb-mill-check pcb-review pcb-test`. Details: `review/README.md`.
 - **U3 rule:** `rc_power_board.kicad_dru` rule `U3_fine` sets 0.3 mm clearance for U3 pads against pads, tracks and vias. The pour keeps 0.4 mm.
 
@@ -178,6 +178,8 @@ Verified against the kicad-cli netlist of `rc_power_board.kicad_sch`. J3/J4 curr
 4. After crimping, plug each lead into the marked header and buzz pin-to-wire with a multimeter.
 
 **Layout rule:** place XH headers on the board edge, wire entry facing outward, pin 1 at the same end for all headers; leave slack in harness lengths until layout fixes positions.
+
+**Rev A exception (pending owner approval):** the B.Cu routing without rivets needs other turns. On the left edge, pin 1 is at the bottom, except J4 and J8 (pin 1 at the top). J6 and J7 are on the right edge with pin 1 at the top. J1 is turned 180 degrees (GND on the left, BAT+ on the right). The pin numbers of each connector and the crimp table are unchanged; only the orientation on the board changed. Header pin N still mates with housing cavity N, so crimping is not affected. J8 turned means the Garmin pins 1 to 4 run from the top to the bottom of the board.
 
 ## External connections: JST PCB headers
 
