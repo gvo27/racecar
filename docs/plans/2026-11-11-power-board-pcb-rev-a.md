@@ -12,6 +12,11 @@
 
 **Spec:** `docs/plans/2026-11-11-power-board-pcb-rev-a-design.md`
 
+**Execution and review (owner, 2026-11-11):**
+1. A Sonnet agent builds the baseline board: Tasks 2–7 (Step 4b excluded). It commits locally and does not push.
+2. The main session (Opus) reviews the baseline and reports to the owner.
+3. After the owner confirms, a Fable agent does the final review with full context. The main session fixes the findings, then pushes and comments on PR #3.
+
 ## Global Constraints
 
 - KiCad 10 format only; never save a project file in an older format.
@@ -152,7 +157,7 @@ No Gerbers, drill files or CAM files in this plan (scope above).
 - [ ] **Step 2:** Run `make pcb-review pcb-test`. Expected: PASS.
 - [ ] **Step 3:** Update the docs; run the STE lint on the changed prose.
 - [ ] **Step 4:** Run `make pcb-mill-check` and the kicad-happy `kicad` skill (PCB review) and `emc` skill on the board. Treat their findings as claims: verify each against the board, then fix it or list it in `review/README.md`.
-- [ ] **Step 4b:** Review (main session): a Sonnet reviewer, fix the findings, then an Opus reviewer, fix the findings.
+- [ ] **Step 4b:** Review (not the builder): the main session (Opus) reviews and reports to the owner. After the owner confirms, a Fable agent does the final review. See "Execution and review" above.
 - [ ] **Step 5:** Commit `pcb: rev A review package and docs`, push to `schematic`, comment on PR #3 (owner GUI checks: Update Symbols, 3D view, 1:1 print, U2 footprint vs the real module).
 
 ### Task 8 (later, separate): KiRI visual diff trial
