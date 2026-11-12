@@ -71,7 +71,7 @@
 The skill entry `.claude/skills/pcb-milling-check/SKILL.md` exists (written by the main session). It defines the rule ids, the severities, the exit codes and the agent rules. This task builds what the skill runs. DRC-clean does not mean CNC-millable.
 
 **Files:**
-- Create: `docs/schematics/milling.toml`, `docs/schematics/tools/milling_check.py`, `docs/schematics/tools/test_milling_check.py`
+- Create: `docs/schematics/milling.toml`, `docs/schematics/milling_waivers.toml` (empty list), `docs/schematics/tools/milling_check.py`, `docs/schematics/tools/test_milling_check.py`
 - Modify: `Makefile` (target `pcb-mill-check`; add the tests to `pcb-test`)
 
 **`milling.toml`** (each value carries `status = "assumed"` or `"confirmed"` and a `source`):
@@ -85,7 +85,7 @@ The skill entry `.claude/skills/pcb-milling-check/SKILL.md` exists (written by t
 
 **Numbers to pin in tests:** worst-case depth = 0.15 + 0.05 = 0.20 mm. `cut_width(0.2, 30, 0.20)` = 0.307 mm; `cut_width(0.1, 60, 0.20)` = 0.331 mm. MILL-GAP: a gap is an error when it is < the narrowest bit's cut width at worst-case depth (0.307 mm); MILL-GAP-BIT (warning): gaps where only some bits fit, listing the bits that fit (here, gaps from 0.307 to < 0.331 mm fit only the 30° bit). MILL-DEPTH: 0.10 - 0.05 = 0.05 mm < 0.070 mm => **error with the assumed limits.** Do not hide it: report it to the owner as a finding about the assumed depth range (the min depth must be at least 0.12 mm with ±0.05 error).
 
-- [ ] **Step 1:** Write `test_milling_check.py` (stdlib `unittest`, image `python3`): the `cut_width` values above; a synthetic board made in the test with `pcbnew`: two tracks of different nets 0.30 mm apart => MILL-GAP error; 0.32 mm => MILL-GAP-BIT warning (30° only); 0.45 mm => none; a 1.1 mm hole => MILL-DRILL error; a 2.4 mm hole => none (milled); an F.Cu track on a THT pad => MILL-FCU-THT error; a 2.0/1.1 via => MILL-VIA error. `load_limits` rejects a value with no `status`.
+- [ ] **Step 1:** Write `test_milling_check.py` (stdlib `unittest`, image `python3`): the `cut_width` values above; a via inside an F-side footprint courtyard => MILL-RIVET-ACCESS error; a waiver in a temp `milling_waivers.toml` moves its finding to the waived group (and a waiver for MILL-FCU-THT is rejected); a synthetic board made in the test with `pcbnew`: two tracks of different nets 0.30 mm apart => MILL-GAP error; 0.32 mm => MILL-GAP-BIT warning (30° only); 0.45 mm => none; a 1.1 mm hole => MILL-DRILL error; a 2.4 mm hole => none (milled); an F.Cu track on a THT pad => MILL-FCU-THT error; a 2.0/1.1 via => MILL-VIA error. `load_limits` rejects a value with no `status`.
 - [ ] **Step 2:** Run `make pcb-test`. Expected: FAIL (module missing).
 - [ ] **Step 3:** Implement. For gaps, use the KiCad shape API (`GetEffectiveShape()` / `SHAPE_POLY_SET` distance) per copper layer, between items of different nets, pads in one footprint included.
 - [ ] **Step 4:** Run `make pcb-test`. Expected: PASS.
@@ -139,9 +139,9 @@ Fab layer: 40.6 x 20.3 mm outline. Courtyard: outline + 0.5 mm. The terminal-blo
 - Create: `docs/schematics/tools/route_pcb.py` (`main(argv) -> int`: export DSN, run the Freerouting image, import SES, refill zones, save)
 - Modify: `docs/schematics/tools/test_board.py`
 
-**Approach:** Before the DSN export, set F.Cu to "not routable" in the DSN (only B.Cu is a signal layer). Route `VBAT_RAW` and `VBAT` by hand in the script as 6.0 mm B.Cu tracks along the input chain (pad-to-pad on the placement), and let the B.Cu GND zone carry GND; Freerouting routes the rest, with net-class widths from the DSN. Allow vias only if B.Cu-only routing can't finish; then each via is a rivet and the count goes in the report.
+**Approach:** Route in priority order: HighCurrent first (scripted 6 mm tracks/zones), then Power5A, Power3A, then signals (I2C_SDA/I2C_SCL together). If an area gets tangled, rip up and re-route that whole area, or re-place parts there, rather than add rivets. Before the DSN export, set F.Cu to "not routable" in the DSN (only B.Cu is a signal layer). Route `VBAT_RAW` and `VBAT` by hand in the script as 6.0 mm B.Cu tracks along the input chain (pad-to-pad on the placement), and let the B.Cu GND zone carry GND; Freerouting routes the rest, with net-class widths from the DSN. Allow vias only if B.Cu-only routing can't finish; then each via is a rivet and the count goes in the report.
 
-- [ ] **Step 1:** Add tests: `kicad-cli pcb drc --schematic-parity --severity-all --format json` gives 0 errors and 0 unconnected items; `check_board()` is []; every `VBAT_RAW`/`VBAT` track is ≥ 6.0 mm; the via count is printed.
+- [ ] **Step 1:** Add tests: `kicad-cli pcb drc --schematic-parity --severity-all --format json` gives 0 errors and 0 unconnected items; `check_board()` is [] (milling check: 0 unwaived errors); every `VBAT_RAW`/`VBAT` track is ≥ 6.0 mm; the via count is printed.
 - [ ] **Step 2:** Run `make pcb-route pcb-test`, then iterate on placement (Task 5 table) until it passes. Stop condition (spec): if it can't reach 0 unrouted with DRC clean, commit the best board with the DRC report and stop.
 - [ ] **Step 3:** Commit `pcb: route rev A (B.Cu, N rivet vias)`.
 
