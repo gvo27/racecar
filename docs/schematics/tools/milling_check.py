@@ -357,8 +357,13 @@ def check_zones(ctx, out):
                 continue
             lname = ctx.b.GetLayerName(layer)
             # slivers: copper that an opening with half the min track width removes
-            a = pcbnew.SHAPE_POLY_SET(fill)
-            o = pcbnew.SHAPE_POLY_SET(fill)
+            # the filler can leave zero-width slits (an outline that touches itself); they are no gap in the copper,
+            # so close gaps of up to 2 um first or the opening test would count the copper beside the slit as a strip
+            healed = pcbnew.SHAPE_POLY_SET(fill)
+            healed.Inflate(FromMM(0.001), pcbnew.CORNER_STRATEGY_ROUND_ALL_CORNERS, me)
+            healed.Deflate(FromMM(0.001), pcbnew.CORNER_STRATEGY_ROUND_ALL_CORNERS, me)
+            a = pcbnew.SHAPE_POLY_SET(healed)
+            o = pcbnew.SHAPE_POLY_SET(healed)
             o.Deflate(r, pcbnew.CORNER_STRATEGY_ROUND_ALL_CORNERS, me)
             o.Inflate(r, pcbnew.CORNER_STRATEGY_ROUND_ALL_CORNERS, me)
             a.BooleanSubtract(o)

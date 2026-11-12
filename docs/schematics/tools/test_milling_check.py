@@ -286,6 +286,34 @@ class TestIsland(unittest.TestCase):
         self.assertEqual([r for r in rules(mc.check(s.b, limits())) if r == "MILL-ISLAND"], ["MILL-ISLAND"])
 
 
+class TestSliver(unittest.TestCase):
+    def slit_board(self, slit):
+        s = Synth()
+        z = add_zone(s, "A", 0, 0, 20, 10)
+        if slit:
+            ol = pcbnew.SHAPE_LINE_CHAIN()
+            for x, y in ((0, 0), (20, 0), (20, 10), (0, 10), (0, 9.62), (18, 9.62), (0, 9.62)):
+                ol.Append(FromMM(x), FromMM(y))
+            ol.SetClosed(True)
+            fill = pcbnew.SHAPE_POLY_SET()
+            fill.AddOutline(ol)
+            z.SetFilledPolysList(pcbnew.B_Cu, fill)
+        f = s.fp("J1", 10, 5)
+        s.pad(f, 10, 5, 1.0, 2.0, "A")
+        return s
+
+    def test_zero_width_slit_is_no_sliver(self):
+        # the copper above the slit is 0.38 mm high but joins the rest: the slit is no gap
+        self.assertNotIn("MILL-SLIVER", rules(mc.check(self.slit_board(True).b, limits())))
+
+    def test_real_strip_is_sliver(self):
+        s = Synth()
+        add_zone(s, "A", 0, 0, 20, 0.4)  # 0.4 mm strip
+        f = s.fp("J1", 10, 0.2)
+        s.pad(f, 10, 0.2, 0.3, 0.4, "A", attr=pcbnew.PAD_ATTRIB_SMD)
+        self.assertIn("MILL-SLIVER", rules(mc.check(s.b, limits())))
+
+
 class TestWaivers(unittest.TestCase):
     def write(self, text):
         d = tempfile.mkdtemp()
