@@ -28,7 +28,7 @@ Netlist: 40 parts, 21 nets. Schematic: `rc_power_board.kicad_sch` / `.pdf` (KiCa
 
 ## Sensor 5 V (D)
 
-- **U2, 5 V buck ≥ 6 A** (Pololu D24V90F5, assumed, not bought; the D24V60F5 is discontinued; dropout about 1.0 V at 5 A, so the output can sag below 5 V near the 6.0 V cutoff: bench check; `bom.md`). Feeds Mapper, LIDAR-Lite v4, camera hub, LDO.
+- **U2, 5 V buck ≥ 6 A** (Pololu D36V50F5, same part as U1, owner 2026-11-12; about 7.4 A at 6 V in, about 8 A at 8.4 V in; dropout about 1.0 V at 5 A, so the output can sag below 5 V near the 6.0 V cutoff: bench check; `bom.md`). Feeds Mapper, LIDAR-Lite v4, camera hub, LDO.
 - **J11 Slamtec Mapper M2M1.** Harness: XH to 22 AWG 3 A USB-A pigtail (pin 1 `+5V_SENS` red, 2 GND black); never from Pi USB or the pack. 0.75 A typ, 1.3 A max, 1.4–1.6 A startup; ripple ≤ 50 mV. C9 (≥ 100 µF low-ESR, TBD) sits right at J11.
 - **J8 Garmin LIDAR-Lite v4, one 4-pin XH header.** Pins match Garmin 1–4: 1 `+5V_SENS` (red; 4.75–5.25 V, 85 mA acquiring), 2 GND (black), 3 `I2C_SDA` (white), 4 `I2C_SCL` (green); address 0x62. Internal 13 kΩ pull-ups to 3.3 V: no external pull-ups. One keyed header (not 2×2-pin) so it can't be cross-plugged; harness is straight-through.
 

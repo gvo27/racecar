@@ -49,8 +49,8 @@ The project DRC rules in `rc_power_board.kicad_pro` are set to match: `min_clear
 
 - **Via (assumed):** the EasyContac 0.8 rivet (1.0 mm OD) needs a 1.1 mm hole and the assumed bit set has no 1.1 mm bit, so the via is **1.2 mm drill / 2.1 mm pad** (annular 0.45 mm) in every net class. The rivet sits loose by about 0.1 mm before soldering. This replaces the 2.0 / 1.1 mm value in the tables below.
 - **Bit set (assumed, lab tech to confirm):** drill 0.8, 1.0, 1.2, 1.5 mm. A hole larger than 1.5 mm is milled with an end mill (smallest end mill assumed 1.0 mm). Footprint holes are snapped up to the next size in the board copies (XH 0.95 to 1.0, MKDS 1.3 to 1.5, F1 pins 1.4 to 1.5); pads grow to keep the 0.45 mm annular ring.
-- **Hole list from the board:** 0.8 mm x 2 (C9); 1.0 mm x 52 (U1, U2, C1, J3, J4, J5, J8, J9, J11 to J14); 1.2 mm x 3 (rivet vias); 1.5 mm x 12 (F1 pins, J6, J7); milled: 2.4 mm x 1 (F1 peg), 3.0 mm x 2 (J1 wire pads), 3.2 mm x 4 (H1 to H4).
-- **Outline:** 66 x 140 mm, drill/place origin at the lower-left corner. Stackup: 2 layers, 0.070 mm copper, 1.57 mm total.
+- **Hole list from the board:** 0.8 mm x 2 (C9); 1.0 mm x 52 (U1, U2 (12 each), C1, J3, J4, J5, J8, J9, J11 to J14); 1.2 mm x 3 (rivet vias); 1.5 mm x 12 (F1 pins, J6, J7); milled: 2.4 mm x 1 (F1 peg), 3.0 mm x 2 (J1 wire pads), 3.2 mm x 4 (H1 to H4).
+- **Outline:** 66 x 140 mm, drill/place origin at the lower-left corner. The U1 and U2 bodies (25.4 x 25.4 mm) lie inside it: U2 x 8.0 to 33.4, y 22.3 to 47.7; U1 x 34.2 to 59.6, y 22.3 to 47.7 (mm from the origin). Stackup: 2 layers, 0.070 mm copper, 1.57 mm total.
 - **Layers:** SMD parts on B.Cu, THT parts on F.Cu. Routing on B.Cu. `VBAT_RAW`, `VBAT` and GND are B.Cu zones. The F.Cu GND pour has pad connection "none" and joins B.Cu GND through one rivet via. F.Cu has one jumper track (`U1_PG`, U1.1 to J5.1, about 75 mm) on two rivet vias. The I2C jumpers of the first layout are removed. No F.Cu copper touches a THT pad (check in `make pcb-check`).
 - **Rivet vias: 3** (2 for the `U1_PG` jumper, 1 GND stitching). No via is inside a part courtyard (a rivet needs both sides soldered).
 - **Make targets:** `make kicad-image erc pcb-build pcb-route pcb-check pcb-mill-check pcb-review pcb-test`. Details: `review/README.md`.
@@ -78,7 +78,7 @@ Rule of thumb: drill = outer diameter + 0.1 mm.
 | Feature | Hole | Method |
 | --- | --- | --- |
 | Rivet vias (EasyContac 0.8) | 1.1 mm | drill if a 1.1 mm bit exists, else mill; TBD |
-| U1 header | 1.0 mm | drill, TBD |
+| U1 and U2 headers (D36V50F5) | 1.0 mm | drill, TBD. The 3 module mounting holes (2.18 mm) are not drilled: the header holds the module |
 | JST XH pins | B2B 1.0 mm; B3B/B4B/B6B 0.95 mm (or drill all at 1.0 mm) | drill, TBD |
 | C9 (CP_Radial_D8.0mm_P3.50mm) | 0.8 mm | drill, TBD |
 | C1 (CP_Radial_D10.0mm_P5.00mm) | 1.0 mm | drill, TBD |
@@ -213,14 +213,14 @@ Not the rev A path. Essentials if the board goes to a fab house:
 - [ ] ERC clean (KiCad 10, owner-run)
 - [ ] DRC clean (rev A: table above)
 - [ ] 3D view check
-- [ ] Footprints vs real parts: U2 dimension drawing, J1 drill (12 AWG), F1 holder (FLR 178.6165) pins, XH header footprints
+- [ ] Footprints vs real parts: U1 and U2 (D36V50F5 body 25.4 x 25.4 mm on the 1:1 print, standoff over the F.Cu pour, 1.8 mm parts under the module), J1 drill (12 AWG), F1 holder (FLR 178.6165) pins, XH header footprints
 - [ ] BOM reviewed (`bom.csv`, `bom_offboard.csv`)
 
 # Open items before publish
 
 1. F1: 15 A decided by the load (ATO/ATC blade in FLR holder assumed).
 2. Reverse-polarity decision: the proposal (P-FET) is in the PR, not on the board.
-3. U2 = Pololu D24V90F5 (assumed, owner 2026-11-11; the D24V60F5 is discontinued). Footprint `rc_power:Pololu_D24VxF5` from the Pololu drawing: VIN, VOUT and GND each use a pin pair (about 2.45 A per VOUT pin at 4.9 A), so the `REG_MODULE` symbol stays 4-pin. Dropout about 1.0 V at 5 A: the output can fall below 5 V near the 6.0 V cutoff. Check the footprint against the real module (1:1 print) before milling. Details: `docs/datasheets/regulator_pololu_d24v90f5.md`. Verify >= 4.8 V at the Mapper during startup (U2 tolerance TBD, about 0.03-0.05 V pigtail drop at 1.6 A).
+3. U2 = Pololu D36V50F5, the same part as U1 (owner 2026-11-12; two modules owned). Footprint `rc_power:Pololu_D36V50Fx` from the Pololu drawing: VIN, VOUT and GND each use a pin pair (about 2.45 A per VOUT pin at 4.9 A). About 7.4 A at 6 V in (Pololu graph), so the 6 A need is met. Dropout about 1.0 V at 5 A: the output can fall below 5 V near the 6.0 V cutoff. Check the footprint against the real module (1:1 print) before milling. Details: `docs/datasheets/regulator_pololu_d36v50f5.md`. Verify >= 4.8 V at the Mapper during startup (U2 tolerance TBD, about 0.03-0.05 V pigtail drop at 1.6 A).
 4. All `TBD` values in the schematic.
 5. U1 EN stays unconnected until the rev 2 prototype board.
 6. I2C pull-ups: bus is pulled up only by the Garmin's internal 13 kΩ; consider two DNP 0805 4.7-10 kΩ pull-up footprints to `+3V3_SENS` for a future IMU. Not drawn.

@@ -1,4 +1,4 @@
 (fp_lib_table
   (version 7)
-  (lib (name "rc_power")(type "KiCad")(uri "${KIPRJMOD}/rc_power.pretty")(options "")(descr "Project footprints: Pololu D24VxF5 module (U2)"))
+  (lib (name "rc_power")(type "KiCad")(uri "${KIPRJMOD}/rc_power.pretty")(options "")(descr "Project footprints: Pololu D36V50Fx module (U1, U2)"))
 )

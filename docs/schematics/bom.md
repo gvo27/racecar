@@ -9,7 +9,7 @@ The BOM comes from the schematic. Each symbol carries part fields. `make bom` ex
 - To edit a field in KiCad 10: Schematic Editor > Tools > Edit Symbol Fields (Symbol Fields Table). Edit the cells, save, then run `make bom` and commit `bom.csv` with the schematic. Do not change `Value`, `Footprint` or `Datasheet` for BOM reasons. F1 `MPN` lists the fuse and the holder (comma-separated); its cost is fuse plus holder.
 - `make pcb-test` fails if `bom.csv` is not equal to a fresh export, if a symbol has no MPN or an invalid Status, or if the totals change. After a field change, KiCad "Update PCB from Schematic" copies the fields to the footprints; DRC parity warns until then.
 - Parts with no schematic symbol (XH housings, crimps, board blank, rivets, dowels, bits, J6/J7 options, Mapper pigtail) are in `bom_offboard.csv`. Same columns plus `In total` (`yes` or `no`). It is kept by hand.
-- Total for one board (2026-11-11): about 90.9 USD. Without U1 (already owned): about 50.9. U2 price is the Pololu price on 2026-11-11 (qty 1). No PCB fab cost: rev A is milled in-house. The J6/J7 JST options are not in the total. Buy spare fuses and a few spare passives.
+- Total for one board (2026-11-12): about 94.0 USD. Without the parts already owned (U1 and U2, two Pololu D36V50F5 at 39.95 USD each, qty 1): about 14.1. No PCB fab cost: rev A is milled in-house. The J6/J7 JST options are not in the total. Buy spare fuses and a few spare passives.
 
 ## Out of stock / backorder (as checked)
 

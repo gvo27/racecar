@@ -120,7 +120,7 @@ Worst case, the board's battery input carries about **8.4 A** into the two switc
 | +5V\_SENS | Slamtec Mapper M2M1 lidar (J11) | 0.75 A typ, 1.3 A max; 1.4 to 1.6 A for a few seconds at startup (datasheet) | Ripple 50 mV max: C9 bulk cap right at J11; USB-A pigtail harness |
 | `+5V_SENS` | Radar (removed from scope) | TBD | Model not chosen |
 | `+5V_SENS` | 3.3 V LDO input | 0.3 A | An LDO draws the same current it delivers |
-| `+5V_SENS` | **Rail total** | **4.6 A (4.9 A at Mapper startup)** | Pick a buck rated 6 A (assumed: Pololu D24V90F5, 9 A; the D24V60F5 is discontinued) |
+| `+5V_SENS` | **Rail total** | **4.6 A (4.9 A at Mapper startup)** | Pick a buck rated 6 A (Pololu D36V50F5, owner 2026-11-12: about 7.4 A at 6 V in) |
 | `+3V3_SENS` | IMU | < 0.02 A (approx.) | Noise-sensitive; the reason for the LDO |
 | `+3V3_SENS` | Shaft encoder | < 0.05 A (approx.) |  |
 | `+3V3_SENS` | **Rail total** | **0.3 A (TBD)** | LDO heat at 0.3 A: (5 − 3.3) × 0.3 ≈ 0.5 W |
@@ -273,14 +273,14 @@ Press **A**, type the symbol name in the search box, pick it, click to place. Th
 
 Same pattern as region C:
 
-1. **U2** `REG_MODULE` value `5 V buck rated 6 A, TBD`, input on `VBAT` (no branch fuse), input cap **C4**, output cap **C5**.
+1. **U2** `D36V50F5` (same symbol as U1; was `REG_MODULE` until 2026-11-12), value `Pololu D36V50F5`, input on `VBAT` (no branch fuse), input cap **C4**, output cap **C5**.
 2. VOUT to a `+5V_SENS` power symbol. LED **R2** + **D3**, test point **TP2**.
 3. Output headers, all JST-XH (the project convention for sensors and low-power parts: single Dupont jumper sockets push onto the XH pins for breadboard debugging, and they are lab stock). **J8** `LIDAR-Lite v4` is a 4-pin XH whose pins match the Garmin's: 1 `+5V_SENS` (red), 2 `GND` (black), 3 `I2C_SDA` (white), 4 `I2C_SCL` (green); I2C address 0x62, no external pull-ups (13 kΩ to 3.3 V inside the sensor). **J9** `Camera USB hub` and **J11** `Slamtec Mapper (5V)` are 2-pin XH (pin 1 `+5V_SENS`, pin 2 `GND`); the radar header J10 was removed from scope. J11 feeds the Slamtec Mapper M2M1 lidar (0.75 A typ, 1.3 A max, 1.6 A at startup, ripple 50 mV max) through a 22 AWG USB-A male pigtail (pin 1 red to VBUS, pin 2 black to GND); place C9 (Device:C\_Polarized, at least 100 µF low-ESR, TBD) right at J11.
 4. `+5V_SENS` also feeds the 3.3 V LDO in region E. A net with the same name joins them; no wire across the sheet is needed.
 
 ### Step 9: region E, sensor 3.3 V
 
-The 3.3 V rail is a **linear regulator (LDO)** fed from `+5V_SENS`, not a buck from the battery. KiCad has real symbols for common LDOs, so you don't need the custom `REG_MODULE` here.
+The 3.3 V rail is a **linear regulator (LDO)** fed from `+5V_SENS`, not a buck from the battery. KiCad has real symbols for common LDOs, so you don't need the custom `REG_MODULE` here (`REG_MODULE` is no longer used on the board; U2 uses `D36V50F5`).
 
 1. Put a `+5V_SENS` power symbol at the left of region E. That is the LDO's supply; no separate fuse is needed because the main fuse F1 already protects this branch.
 2. Optional noise filter: **FB1** `Device:FerriteBead` in series from `+5V_SENS` to the LDO input, plus **C6** `Device:C` to `GND`, values `TBD`. Leave it in so the reviewer can decide.
@@ -339,8 +339,8 @@ A **symbol** is the logical drawing; a **footprint** is the copper pads and hole
 | --- | --- | --- |
 | J1 battery (T-plug pigtail) | `SolderWire` (wire pads) | 12 AWG is 3.3 mm²; KiCad's largest stock pad is the 2.5 mm² one (3.0 mm hole, 4.4 mm pad, for 2.4 mm conductors); 12 AWG's conductor likely fits, but its current rating and thin copper ring need checking, so the final pad is TBD |
 | F1 | `Fuse:FuseHolder_Blade_ATO_Littelfuse_FLR_178.6165` (standard ATO/ATC blade, replaceable) | Holder current rating (Littelfuse FLR 178.6165: 22.5 A continuous, 30 A max; F1 is 10 to 15 A) |
-| U1 D36V50F5 | `PinHeader_2x06_P2.54mm` (pin numbering in Step 7) | Check against Pololu's dimension drawing; header pins are 3 A each |
-| U2 module | Matches the chosen module | Pin order and spacing from the module drawing |
+| U1 D36V50F5 | `rc_power:Pololu_D36V50Fx` (pin numbering in Step 7; was the plain `PinHeader_2x06_P2.54mm`, which has no body outline) | Drawn from Pololu's dimension drawing, with the 25.4 mm body; header pins are 3 A each |
+| U2 D36V50F5 | `rc_power:Pololu_D36V50Fx` | Same module and footprint as U1 (owner 2026-11-12) |
 | U3 LDO | The footprint its symbol suggests (SOT-23-5) |  |
 | Q1 (only if the PR's reverse-polarity proposal is adopted) | PowerPAK SO-8 (P-FET) |  |
 | J3, J4 servo/ESC | `JST_XH_B3B-XH-A_1x03_P2.50mm_Vertical` | 2.5 mm XH: does not mate with stock 2.54 mm servo plugs; XHP-3 re-termination or an adapter lead, 22 AWG (BEC pin at the 3 A XH limit) |
@@ -402,7 +402,7 @@ Put these in your hand-off message, numbered, so the reviewer can answer by numb
 3. **Compute rail and the Pi:** the Pi 5 and ESP32 need about 5.5 A. The Pi takes power through a 2-wire USB-C pigtail, so it keeps its USB-C input protection but gets no USB-PD 5 A offer: it limits its USB ports to about 0.6 A total unless set in `config.txt`. Is that acceptable?
 4. **Regulator U1:** the D36V50F5 outputs 5.0 V ± 4 % (not the Pi's preferred 5.1 V) and is rated 5.5 A typical. What is its dropout at 5.5 A with the battery near 6.0 V? Its VRP output is deliberately unused (the sensor buck stays on `VBAT`, because VRP would push about 9 A through U1's 6 A-rated VIN pin pair).
 5. **IMU noise:** is the LDO's noise rejection enough at the sensor buck's switching frequency, or should the ferrite-bead filter in front of it stay?
-6. **Protection:** U1 has its own reverse protection to 40 V; U2 (Pololu D24V90F5, assumed) has built-in reverse-voltage protection. The rest (C1, D1) is exposed. The PR proposed Q1 (P-FET) + R4 between F1 and `VBAT`; owner decision 2026-11-11: not on rev A. TVS proposed: SMBJ10A.
+6. **Protection:** U1 has its own reverse protection to 40 V; U2 (Pololu D36V50F5) has built-in reverse-voltage protection. The rest (C1, D1) is exposed. The PR proposed Q1 (P-FET) + R4 between F1 and `VBAT`; owner decision 2026-11-11: not on rev A. TVS proposed: SMBJ10A.
 7. **Low battery:** the ESC's low-voltage cutoff stops the motor, but the regulators keep draining the pack. Add a resistor divider from `VBAT` to an ESP32 ADC pin so firmware can warn or shut down? A 100k / 33k divider gives about 2.1 V at 8.4 V.
 8. **ESP32 back-feed:** the ESP32 gets 5 V on its left USB-C port (J7) and may also be connected by USB on its right COM port (to the laptop now, the Pi later). Does the dev board keep the two USB power inputs apart, or is a diode or a data-only cable needed?
 9. **Cameras:** cameras plugged into the Pi draw from `+5V_CPU`. Move them to a powered USB hub on `+5V_SENS` (J9)?

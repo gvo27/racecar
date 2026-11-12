@@ -12,9 +12,9 @@ Draft KiCad project for the car's power board. A 2S LiPo comes in; the board put
 | `power_board_plan.md` | The build guide and background: rails, power budget, trace widths, a step-by-step KiCad guide and open questions. Exported from the live doc linked at its top. |
 | `power_architecture.png` | Block diagram used by the plan. |
 | `rc_power_board.kicad_pro` / `.kicad_sch` | KiCad project and the one-sheet A3 schematic (regions A to E plus notes). |
-| `rc_power.kicad_sym` + `sym-lib-table` | Project symbol library: `D36V50F5` (all 12 module pins), `REG_MODULE` (generic VIN/GND/VOUT/EN, used by U2) and one power symbol per rail. |
+| `rc_power.kicad_sym` + `sym-lib-table` | Project symbol library: `D36V50F5` (all 12 module pins, used by U1 and U2), `REG_MODULE` (generic VIN/GND/VOUT/EN, no longer used on the board) and one power symbol per rail. |
 | `rc_power_board.kicad_pcb` / `.kicad_dru` | Rev A board, routed, for review only (no Gerber or CAM files). The `.kicad_dru` holds rule `U3_fine`. |
-| `rc_power.pretty/` + `fp-lib-table` | Project footprint library: `Pololu_D24VxF5` (U2, from Pololu's drawing; hole table in `docs/datasheets/regulator_pololu_d24v90f5.md`). |
+| `rc_power.pretty/` + `fp-lib-table` | Project footprint library: `Pololu_D36V50Fx` (U1 and U2: 12 pads and the full 25.4 x 25.4 mm body, from Pololu's drawing; facts in `docs/datasheets/regulator_pololu_d36v50f5.md`). |
 | `milling.toml`, `milling_waivers.toml` | Milling limits (each value `assumed` or `confirmed`) and the waiver list for the milling check. |
 | `tools/` | Python tools and tests that run in the KiCad image: `build_pcb.py`, `placement.py`, `route_pcb.py`, `check_board.py`, `milling_check.py`, `review_plots.py`. |
 | `review/` | Review package: DRC report, milling check, layer PDF, 1:1 PDF, `README.md`. |
@@ -31,13 +31,14 @@ The single-fuse revision is regenerated in KiCad 7 format again. Owner steps: cl
 
 Previous revision: the meeting-cleanup revision was generated in KiCad 7 format, then opened, symbol-updated (D2–D4) and saved in KiCad 10.0 by the owner (94ccd72), with label positions tidied in dd946f3. Edit the KiCad 10 files from here on; close KiCad before pulling. `rc_power_board.kicad_pro` (net classes, ERC severities) is the owner's KiCad 10 file.
 
-## U2 = Pololu D24V90F5 (current revision, documentation only)
+## U1 and U2 = Pololu D36V50F5 (current revision)
 
-- **U2** is assumed to be the Pololu D24V90F5 (#2866, 5 V, 9 A; owner, 2026-11-11). The proposed D24V60F5 (#2865) is discontinued; Pololu names the D24V90F5 as its replacement. Both use the same PCB and drawing. Not bought yet.
-- Facts, archived drawing, graphs and the footprint hole table: `docs/datasheets/regulator_pololu_d24v90f5.md`.
-- **Flag:** dropout is about 1.0 V at 5 A (Pololu graph). Near the 6.0 V cutoff the output can fall below 5 V, and the Mapper needs at least 4.8 V. Bench check at J11 during Mapper startup.
-- Decisions on 2026-11-11 (owner): no reverse-polarity protection on rev A (U1 and U2 have their own); U3 keeps the stock SOT-23-5 footprint with the `U3_fine` DRC rule.
-- The schematic and footprint change for U2 is done (U2 Value `Pololu D24V90F5 (assumed)`, Footprint `rc_power:Pololu_D24VxF5`). Plan: `docs/plans/2026-11-11-power-board-pcb-rev-a.md`.
+- **U1 and U2** are both the Pololu D36V50F5 (#4091, 5 V, 5.5 A typical). Owner decision 2026-11-12: the owner has two modules, and the same part on both rails gives a swap spare. This replaces the D24V90F5 assumption for U2 (2026-11-11).
+- Facts, archived drawing and graphs: `docs/datasheets/regulator_pololu_d36v50f5.md`. The D24V90F5 note stays as history (`regulator_pololu_d24v90f5.md`, superseded).
+- Both modules use the symbol `rc_power:D36V50F5` and the footprint `rc_power:Pololu_D36V50Fx`. The footprint shows the real 25.4 x 25.4 mm body (the first rev A layout used a plain pin header and put the body over J6 and J7). U2 EN, VRP and PG have no-connect flags, as U1 EN and VRP.
+- **Flag:** dropout is about 1.0 V at 5 A (Pololu graph). Near the 6.0 V cutoff the +5V_SENS output can fall below 5 V, and the Mapper needs at least 4.8 V. Bench check at J11 during Mapper startup.
+- Decisions on 2026-11-11 (owner): no reverse-polarity protection on rev A (the modules have their own); U3 keeps the stock SOT-23-5 footprint with the `U3_fine` DRC rule.
+- Plan: `docs/plans/2026-11-11-power-board-pcb-rev-a.md` (Task 7c).
 
 ## Rev A PCB (review only)
 
@@ -56,7 +57,7 @@ The board is built and routed headless in the pinned KiCad 10.0.8 image: `make k
 
 - **J11** (was `Spare 5V`) now hosts the Slamtec Mapper M2M1 lidar. Harness: J11 2-pin XH, XHP-2 housing, 22 AWG 3 A USB-A male 2-wire pigtail (pin 1 `+5V_SENS` to red/VBUS, pin 2 GND to black). Mapper supply 4.8 V min / 5 V typ / 12 V max; running 0.75 A typ, 1.3 A max; startup 1.4-1.6 A for a few seconds; ripple 20 mV typ, 50 mV max (from its datasheet on branch `lidar`). Not powered from Pi USB or straight from the pack.
 - **C9** (`Device:C_Polarized`, `TBD >=100uF low-ESR >=10V`, footprint `CP_Radial_D8.0mm_P3.50mm`) added on `+5V_SENS` / GND at J11 for the startup surge and ripple.
-- **Budget (computed):** `+5V_SENS` 3.3 A -> 4.6 A worst case running, 4.9 A at Mapper startup. U2 must now be >= 6 A: proposal Pololu D24V60F5 (5 V, 6 A) replaces D24V50F5; its input range and dropout near the 6.0 V cutoff are TBD (check the Pololu dropout curve). U2 input 3.99 A at 6.4 V, 4.26 A at 6.0 V; U1 input 4.43 A / 4.72 A. Board `VBAT` load about 8.4 A at 6.4 V, 9.0 A at 6.0 V, about 9.3 A briefly at startup (was 7.3 / 7.8 A).
+- **Budget (computed):** `+5V_SENS` 3.3 A -> 4.6 A worst case running, 4.9 A at Mapper startup. U2 must now be >= 6 A: the Pololu D36V50F5 (owner 2026-11-12) gives about 7.4 A at 6 V in and about 8 A at 8.4 V in (Pololu graph); dropout near the 6.0 V cutoff is a bench check. U2 input 3.99 A at 6.4 V, 4.26 A at 6.0 V; U1 input 4.43 A / 4.72 A. Board `VBAT` load about 8.4 A at 6.4 V, 9.0 A at 6.0 V, about 9.3 A briefly at startup (was 7.3 / 7.8 A).
 - **F1 = 15 A** (10 A would run at 84-93 % of rating, over the ~75 % rule; 15 A gives 56-62 %). Copper stays sized for 16.5 A. Inrush margin unchanged.
 - **Net classes:** `+5V_SENS` moved from Power3A (1.0 mm) to Power5A (1.6 mm) in `rc_power_board.kicad_pro` (about 4.9 A; IPC-2221 5.0 A row, 2 oz: 1.4 mm at ΔT 10 C). `*+6V_BEC` stays Power3A.
 - **DRC rules** in `rc_power_board.kicad_pro` (board.design_settings.rules) set to match the CNC docs: `min_clearance` 0.4, `min_track_width` 0.5, `min_via_diameter` 2.0, `min_via_annular_width` 0.45, `min_through_hole_diameter` 0.8 (C9 drill; methods TBD).

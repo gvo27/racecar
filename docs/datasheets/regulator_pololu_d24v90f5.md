@@ -7,7 +7,7 @@ Sources (read 2026-11-11):
 - Photos from the product page: [top view with labeled pinout](pololu_d24v90f5_pinout_top.jpg), [bottom view with labels](pololu_d24v90f5_bottom.jpg).
 - Not archived (link only): drill guide DXF https://www.pololu.com/file/0J915/reg15b02-drill.dxf, STEP model (5 MB) https://www.pololu.com/file/0J1582/step-down-voltage-regulator-d24vxf5.step.
 
-Status: **assumed U2 part** (owner, 2026-11-11), not bought. It replaces the proposed D24V60F5 (#2865), which Pololu marks discontinued and names the D24V90F5 as its replacement. Both use the same PCB (reg15b) and the same drawing.
+Status: **SUPERSEDED on 2026-11-12.** The owner decided that U2 is the Pololu D36V50F5 (two modules in inventory). See `regulator_pololu_d36v50f5.md`. This file stays as history. Former status: **assumed U2 part** (owner, 2026-11-11), not bought. It replaces the proposed D24V60F5 (#2865), which Pololu marks discontinued and names the D24V90F5 as its replacement. Both use the same PCB (reg15b) and the same drawing.
 
 ## identity
 - manufacturer: Pololu
