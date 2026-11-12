@@ -12,12 +12,13 @@ Take the KiCad schematic (40 parts, 21 nets) to a `.kicad_pcb` that the owner ca
 2. A first placement by schematic region that follows the PR rules: SMD parts on the bottom (B.Cu), THT parts on top, connectors on the board edge with the wire entry facing out and pin 1 at the same end, a short and wide J1 -> F1 -> D1/C1 -> U1/U2 path, regulator caps at the module pins, C9 at J11, U3/FB1/C6-C8 away from the bucks, H1-H4 at the corners.
 3. Routing on B.Cu with the fewest possible rivet vias. The F.Cu GND pour connects to no pads (pad connection: none) and joins bottom GND only through rivet vias. The bottom also gets a GND fill, so the mill removes less copper.
 4. Holes that match the assumed bit set (below).
-5. A scripted export to `docs/schematics/fab/rev-A/`: Gerbers for F.Cu, B.Cu and Edge.Cuts on the drill/place origin, Excellon drill files in mm with PTH and NPTH in separate files, a DRC report and a 1:1 print PDF.
-6. `make` targets for build, DRC and fab export, so the owner and CI run the same commands.
+5. A review package in `docs/schematics/review/`: DRC report, layer plots and a 1:1 print PDF. (Scope, owner 2026-11-11: a valid KiCad PCB for review only. Gerber/drill/CAM export waits for the lab tech's instructions.)
+6. `make` targets for build, routing, checks and the review package, so the owner and CI run the same commands.
 7. The docs are updated in the same change: README, `fab_handoff.md`, `bom.md`, `design_overview.md`, the plan, and `.claude/rules/schematics.md` where they change.
 
 ## Non-goals
 
+- Gerber/drill/CAM export and machine setup (lab tech instructions come later).
 - Fab-house revisions, solder mask, silkscreen and assembly files.
 - Reverse-polarity protection (owner decision 2026-11-11: skip; no Q1/R4).
 - Buying parts.
@@ -75,6 +76,6 @@ Take the KiCad schematic (40 parts, 21 nets) to a `.kicad_pcb` that the owner ca
 - `kicad-cli sch erc`: 0 errors (the 3 known LED warnings allowed until the owner's GUI update).
 - `kicad-cli pcb drc --schematic-parity --severity-all`: 0 errors, 0 unconnected, parity clean; every warning listed in the report.
 - Netlist from the PCB vs the schematic: same 40 footprints (H1-H4 and TP1-TP3 included) and 21 nets.
-- Every drill in the Excellon files is in {0.8, 1.0, 1.2, 1.5} mm, or is listed as a milled hole.
+- Every hole on the board is in {0.8, 1.0, 1.2, 1.5} mm, or is listed as a milled hole.
 - No F.Cu copper on any THT pad of J3-J9, J11-J14, F1 or U1 (script check).
 - Owner, in the GUI (user-run): 3D view (pin 1, fuse access, no collisions), 1:1 paper print with real parts, then MakeraCAM import.

@@ -2,9 +2,11 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build a DRC-clean, routed `rc_power_board.kicad_pcb` for the CNC-milled rev A, plus Gerber/drill outputs, from the existing schematic with U2 = Pololu D24V90F5.
+**Goal:** Build a DRC-clean, routed `rc_power_board.kicad_pcb` for owner review, from the existing schematic with U2 = Pololu D24V90F5.
 
-**Architecture:** All KiCad work runs headless in the pinned KiCad 10.0.8 image (`kicad-cli` plus `pcbnew` Python). Python scripts in `docs/schematics/tools/` build the board, route it through Freerouting (pinned image, Specctra DSN/SES), check it, and export it. `make` targets wrap each step. Tests are stdlib `unittest` files that run with the image's `python3`. After the bootstrap, the `.kicad_pcb` is the owner's file: the scripts are for the first build and for re-checks, not a generator the owner must keep using.
+**Scope (owner, 2026-11-11):** a valid KiCad PCB for review only. Gerber/drill export, CAM and machine setup are out of scope: the lab tech will give separate instructions for the path from the KiCad file to the milling machine. The milling rules already in the project (clearance, hole sizes, B.Cu routing, unplated holes) still apply to the board, so that it does not need a redesign later.
+
+**Architecture:** All KiCad work runs headless in the pinned KiCad 10.0.8 image (`kicad-cli` plus `pcbnew` Python). Python scripts in `docs/schematics/tools/` build the board, route it through Freerouting (pinned image, Specctra DSN/SES), check it, and plot review files. `make` targets wrap each step. Tests are stdlib `unittest` files that run with the image's `python3`. After the bootstrap, the `.kicad_pcb` is the owner's file: the scripts are for the first build and for re-checks, not a generator the owner must keep using.
 
 **Tech Stack:** KiCad 10.0.8 (`kicad/kicad:10.0.8@sha256:3f4a01786dfbe803a65f345c3342b765db9add913f5e9448f8356793714ddc34`), Freerouting 2.5.0 (`ghcr.io/freerouting/freerouting:2.5.0`, pin by digest at Task 2), GNU make, Docker.
 
@@ -49,7 +51,7 @@
 
 **Files:**
 - Create: `docker/kicad.Dockerfile` (`FROM kicad/kicad:10.0.8@sha256:3f4a…ddc34`; nothing else)
-- Modify: `Makefile` (variables `KICAD_IMAGE ?= rccar-kicad:local`, `FREEROUTING_IMAGE := ghcr.io/freerouting/freerouting:2.5.0@sha256:<digest>`, `SCH_DIR := docs/schematics`; targets `kicad-image`, `erc`, `pcb-build`, `pcb-route`, `pcb-check`, `pcb-fab`, `pcb-test`)
+- Modify: `Makefile` (variables `KICAD_IMAGE ?= rccar-kicad:local`, `FREEROUTING_IMAGE := ghcr.io/freerouting/freerouting:2.5.0@sha256:<digest>`, `SCH_DIR := docs/schematics`; targets `kicad-image`, `erc`, `pcb-build`, `pcb-route`, `pcb-check`, `pcb-review`, `pcb-test`)
 - Modify: `.claude/rules/dependencies.md` (toolchain image entry), `.claude/CLAUDE.md` (`make:` list)
 
 **Interfaces:** Produces `KICAD_RUN = docker run --rm --user $(id -u):$(id -g) -e HOME=/tmp -v $(CURDIR):$(CURDIR) -w $(CURDIR)/$(SCH_DIR) $(KICAD_IMAGE)`; every later target uses it.
@@ -113,14 +115,16 @@ Fab layer: 40.6 x 20.3 mm outline. Courtyard: outline + 0.5 mm. The terminal-blo
 - [ ] **Step 2:** Run `make pcb-route pcb-test`, then iterate on placement (Task 4 table) until it passes. Stop condition (spec): if it can't reach 0 unrouted with DRC clean, commit the best board with the DRC report and stop.
 - [ ] **Step 3:** Commit `pcb: route rev A (B.Cu, N rivet vias)`.
 
-### Task 6: Fab outputs and docs
+### Task 6: Review package and docs
 
 **Files:**
-- Create: `docs/schematics/tools/fab_export.py`, `docs/schematics/fab/rev-A/` (Gerbers F.Cu, B.Cu, Edge.Cuts; Excellon mm, PTH/NPTH separate, drill-origin; `drc.json`; `rc_power_board_1to1.pdf`; `README.md` with the assumptions to confirm before milling: bit set, rivet fit, U2 bought and checked against the footprint)
-- Modify: `docs/schematics/README.md`, `fab_handoff.md` (hole table from the real drill file, via size, assumed bit set, make targets), `.claude/rules/schematics.md` (via 2.1/1.2, bit set, scripts, make targets), `.claude/CLAUDE.md` (`next:` / `make:`)
+- Create: `docs/schematics/tools/review_plots.py` (`main(argv) -> int`), `docs/schematics/review/` (`drc.json`, `rc_power_board_layers.pdf` with F.Cu, B.Cu, Edge.Cuts, F.Fab, B.Fab, `rc_power_board_1to1.pdf` at scale 1 for the paper check, `README.md` with the via count, the assumptions and the owner GUI checks)
+- Modify: `docs/schematics/README.md`, `fab_handoff.md` (via size, assumed bit set, hole list from the board, make targets; Gerber/CAM steps marked "pending lab tech instructions"), `.claude/rules/schematics.md` (via 2.1/1.2, bit set, scripts, make targets), `.claude/CLAUDE.md` (`next:` / `make:`)
 
-- [ ] **Step 1:** Add a test: the export dir has the 3 Gerbers and the drill files; every Excellon tool diameter is in {0.8, 1.0, 1.2, 1.5} or is in `MILLED_HOLES`.
-- [ ] **Step 2:** Run `make pcb-fab pcb-test`. Expected: PASS.
+No Gerbers, drill files or CAM files in this plan (scope above).
+
+- [ ] **Step 1:** Add a test: `make pcb-review` writes the files above; `drc.json` has 0 errors and 0 unconnected items.
+- [ ] **Step 2:** Run `make pcb-review pcb-test`. Expected: PASS.
 - [ ] **Step 3:** Update the docs; run the STE lint on the changed prose.
-- [ ] **Step 4:** Request code review (superpowers:requesting-code-review); fix the findings.
-- [ ] **Step 5:** Commit `pcb: rev A fab outputs and docs`; update the PR #3 body test plan (owner GUI checks: 3D view, 1:1 print, Update Symbols, MakeraCAM import). Push only after asking the owner.
+- [ ] **Step 4:** Review: a Sonnet reviewer, fix the findings, then an Opus reviewer, fix the findings.
+- [ ] **Step 5:** Commit `pcb: rev A review package and docs`, push to `schematic`, comment on PR #3 (owner GUI checks: Update Symbols, 3D view, 1:1 print, U2 footprint vs the real module).
