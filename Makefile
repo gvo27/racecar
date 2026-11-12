@@ -19,13 +19,22 @@ ROS_IMAGE      ?= rccar-ros:local
 ROS_TEST_IMAGE ?= rccar-ros-test:local
 ROS_TEST_OUT   ?= build/ros-test
 ROS_BUILD_ARGS ?=
+# KiCad 10 + Freerouting for the power board (docs/schematics); images pinned by digest
+KICAD_IMAGE      ?= rccar-kicad:local
+FREEROUTING_IMAGE := ghcr.io/freerouting/freerouting:2.5.0@sha256:6c195891c9b1d62620c140784ab91285b9350d12d905693defe0162eb128cf8e
+SCH_DIR          := docs/schematics
+# global lib tables: kicad-cli in a bare container finds no stock libraries (false ERC warnings), so copy the templates
+KICAD_CFG        := $(CURDIR)/build/kicad-cfg
+KICAD_RUN        = docker run --rm --user $(shell id -u):$(shell id -g) -e HOME=/tmp -e XDG_CONFIG_HOME=$(KICAD_CFG) \
+                   -v "$(CURDIR)":"$(CURDIR)" -w "$(CURDIR)/$(SCH_DIR)" $(KICAD_IMAGE)
 COMPOSE  := docker compose -f deploy/car/compose.yaml --env-file deploy/car/.env.generated
 
 .DEFAULT_GOAL := help
 .PHONY: help setup clean build flash monitor fw-image config models compiledb unit check-dev \
         ros-image ros-test ros-test-image ros-test-run ros-shell car-up car-down car-ps car-logs car-pull \
         car-shutdown install-host teleop calibrate tune test rangefinder viz lidar-imu lidar-snapshot lidar-record mcu unit-run \
-        drivers-stop drivers-start lidar-hw-test _clean-build _need-config _need-stack _need-stack-down _need-drivers-down
+        drivers-stop drivers-start lidar-hw-test kicad-image erc pcb-build pcb-route pcb-check pcb-mill-check pcb-review pcb-test \
+        _kicad-cfg _clean-build _need-config _need-stack _need-stack-down _need-drivers-down
 
 help:            ## list targets (grouped in README.md)
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-21s %s\n", $$1, $$2}'
@@ -131,6 +140,25 @@ lidar-hw-test: _need-config _need-drivers-down  ## automated launch_testing agai
 	@rc=0; $(COMPOSE) run --rm -e MAPPER_HOST=$${MAPPER_HOST:-192.168.11.1} -e RCCAR_GIT_SHA=$(shell git rev-parse --short HEAD 2>/dev/null) \
 	  -e RCCAR_HW_TEST=1 tools launch_test /ws/install/share/rccar_drivers/test_hw/test_mapper_hw.py || rc=$$?; \
 	  echo "drivers left stopped; restarting it is a hardware restart: ask the user (make drivers-start)"; exit $$rc
+
+# ---- power board (KiCad 10 in docker, docs/schematics; no hardware) ------------------------
+kicad-image:     ## build the KiCad 10 image (docker/kicad.Dockerfile -> rccar-kicad:local)
+	docker build -f docker/kicad.Dockerfile -t $(KICAD_IMAGE) .
+
+_kicad-cfg:
+	@test -f $(KICAD_CFG)/kicad/10.0/sym-lib-table || { mkdir -p $(KICAD_CFG)/kicad/10.0 && \
+	  docker run --rm --user $(shell id -u):$(shell id -g) -v "$(KICAD_CFG)":/cfg $(KICAD_IMAGE) \
+	  sh -c 'cp /usr/share/kicad/template/sym-lib-table /usr/share/kicad/template/fp-lib-table /cfg/kicad/10.0/'; }
+
+erc: _kicad-cfg  ## KiCad ERC on the power board schematic (0 errors required; warnings are printed)
+	@mkdir -p "$(CURDIR)/build/erc"
+	$(KICAD_RUN) kicad-cli sch erc --format json --severity-all \
+	  -o "$(CURDIR)/build/erc/erc.json" rc_power_board.kicad_sch > "$(CURDIR)/build/erc/erc.txt"; rc=$$?; cat "$(CURDIR)/build/erc/erc.txt"; \
+	  $(KICAD_RUN) python3 tools/erc_summary.py "$(CURDIR)/build/erc/erc.json"; s=$$?; \
+	  if [ $$s -ne 0 ]; then echo "erc: FAIL"; exit 1; fi; echo "erc: PASS (0 errors)"
+
+pcb-test: _kicad-cfg  ## unit tests for the PCB tools (stdlib unittest, image python3)
+	$(KICAD_RUN) python3 -m unittest discover -s tools -p 'test_*.py' -v
 
 # ---- ROS tools (need: make car-up) ----------------------------------------------------------
 teleop: _need-stack  ## SSH keyboard driving via the supervisor (arrows, space=brake, d=disarm, a=arm, q/x=quit)
