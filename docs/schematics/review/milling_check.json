@@ -45,36 +45,12 @@
    "zone fill has copper narrower than 0.50 mm (0.53 mm2 removed by an opening test)"
   ],
   [
-   "MILL-ISLAND",
-   "warning",
-   "zone fill B.Cu net +5V_CPU at (57.05, -42.45)",
-   23.7384978144895,
-   null,
-   "zone island touches no item of net +5V_CPU"
-  ],
-  [
-   "MILL-ISLAND",
-   "warning",
-   "zone fill B.Cu net +5V_SENS at (6.20, -93.50)",
-   21.16544195306,
-   null,
-   "zone island touches no item of net +5V_SENS"
-  ],
-  [
    "MILL-SLIVER",
    "warning",
    "zone fill B.Cu net +5V_SENS at (5.05, -87.75)",
    0.154035593874,
    0.5,
    "zone fill has copper narrower than 0.50 mm (0.15 mm2 removed by an opening test)"
-  ],
-  [
-   "MILL-ISLAND",
-   "warning",
-   "zone fill B.Cu net +5V_SENS at (14.00, -86.50)",
-   53.5000005,
-   null,
-   "zone island touches no item of net +5V_SENS"
   ],
   [
    "MILL-SLIVER",
@@ -99,14 +75,6 @@
    0.2282069987785,
    0.5,
    "zone fill has copper narrower than 0.50 mm (0.23 mm2 removed by an opening test)"
-  ],
-  [
-   "MILL-ISLAND",
-   "warning",
-   "zone fill B.Cu net VBAT at (36.25, -27.40)",
-   86.47090510612,
-   null,
-   "zone island touches no item of net VBAT"
   ]
  ],
  "waived": []

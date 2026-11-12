@@ -369,16 +369,36 @@ def check_zones(ctx, out):
                 if area >= SLIVER_MIN_AREA_MM2:
                     out.append(("MILL-SLIVER", "warning", "zone fill %s net %s at %s" % (lname, z.GetNetname(), ctx.xy(one.BBox().Centre())),
                                 area, lim.track_min, "zone fill has copper narrower than %.2f mm (%.2f mm2 removed by an opening test)" % (lim.track_min, area)))
-            # islands: fill pieces that touch no item of the zone net
-            same = [it for it in collect(ctx, layer) if it.net == z.GetNetCode() and it.kind != "zone"]
-            for i in range(fill.OutlineCount()):
+
+
+def check_islands(ctx, out):
+    """Per layer and net: union the fills of all same-net zones, then report
+    each connected piece that touches no pad, track or via of the net."""
+    for layer in copper_layers(ctx.b):
+        lname = ctx.b.GetLayerName(layer)
+        union = {}
+        for z in ctx.b.Zones():
+            if z.GetIsRuleArea() or not z.IsOnLayer(layer) or not z.IsFilled():
+                continue
+            fill = z.GetFilledPolysList(layer)
+            if fill.OutlineCount() == 0:
+                continue
+            u = union.setdefault(z.GetNetCode(), (z.GetNetname(), pcbnew.SHAPE_POLY_SET()))[1]
+            u.BooleanAdd(fill)
+        if not union:
+            continue
+        items = [it for it in collect(ctx, layer) if it.kind != "zone"]
+        for code, (name, u) in union.items():
+            u.Simplify()
+            same = [it for it in items if it.net == code]
+            for i in range(u.OutlineCount()):
                 isl = pcbnew.SHAPE_POLY_SET()
-                isl.AddOutline(fill.COutline(i))
-                for h in range(fill.HoleCount(i)):
-                    isl.AddHole(fill.CHole(i, h))
+                isl.AddOutline(u.COutline(i))
+                for h in range(u.HoleCount(i)):
+                    isl.AddHole(u.CHole(i, h))
                 if not any(isl.Collide(it.shape, EPS) or isl.Contains(it.pos) for it in same):
-                    out.append(("MILL-ISLAND", "warning", "zone fill %s net %s at %s" % (lname, z.GetNetname(), ctx.xy(isl.BBox().Centre())),
-                                abs(isl.Area()) / 1e12, None, "zone island touches no item of net %s" % z.GetNetname()))
+                    out.append(("MILL-ISLAND", "warning", "zone fill %s net %s at %s" % (lname, name, ctx.xy(isl.BBox().Centre())),
+                                abs(isl.Area()) / 1e12, None, "zone island touches no item of net %s" % name))
 
 
 def check(board, limits):
@@ -392,6 +412,7 @@ def check(board, limits):
     check_rivet_access(ctx, out)
     check_edges(ctx, out)
     check_zones(ctx, out)
+    check_islands(ctx, out)
     return out
 
 

@@ -250,6 +250,42 @@ class TestEdge(unittest.TestCase):
         self.assertNotIn("MILL-CONN-EDGE", rules(mc.check(s.b, limits())))
 
 
+def add_zone(s, net, x1, y1, x2, y2, layer=pcbnew.B_Cu):
+    """Zone with a hand-set fill (no filler run)."""
+    z = pcbnew.ZONE(s.b)
+    z.SetLayer(layer)
+    z.SetNet(s.net(net))
+    ol = pcbnew.SHAPE_LINE_CHAIN()
+    for x, y in ((x1, y1), (x2, y1), (x2, y2), (x1, y2)):
+        ol.Append(FromMM(x), FromMM(y))
+    ol.SetClosed(True)
+    z.Outline().AddOutline(ol)
+    fill = pcbnew.SHAPE_POLY_SET()
+    fill.AddOutline(ol)
+    z.SetFilledPolysList(layer, fill)
+    z.SetIsFilled(True)
+    s.b.Add(z)
+    return z
+
+
+class TestIsland(unittest.TestCase):
+    def test_overlapping_same_net_zones_one_pad(self):
+        s = Synth()
+        add_zone(s, "A", 0, 0, 10, 10)
+        add_zone(s, "A", 8, 0, 20, 10)  # overlaps the first, touches no pad itself
+        f = s.fp("J1", 2, 5)
+        s.pad(f, 2, 5, 1.0, 2.0, "A")
+        self.assertNotIn("MILL-ISLAND", rules(mc.check(s.b, limits())))
+
+    def test_isolated_same_net_piece(self):
+        s = Synth()
+        add_zone(s, "A", 0, 0, 10, 10)
+        add_zone(s, "A", 30, 0, 40, 10)  # apart, no item of net A
+        f = s.fp("J1", 2, 5)
+        s.pad(f, 2, 5, 1.0, 2.0, "A")
+        self.assertEqual([r for r in rules(mc.check(s.b, limits())) if r == "MILL-ISLAND"], ["MILL-ISLAND"])
+
+
 class TestWaivers(unittest.TestCase):
     def write(self, text):
         d = tempfile.mkdtemp()
