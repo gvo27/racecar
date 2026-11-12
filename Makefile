@@ -157,6 +157,11 @@ erc: _kicad-cfg  ## KiCad ERC on the power board schematic (0 errors required; w
 	  $(KICAD_RUN) python3 tools/erc_summary.py "$(CURDIR)/build/erc/erc.json"; s=$$?; \
 	  if [ $$s -ne 0 ]; then echo "erc: FAIL"; exit 1; fi; echo "erc: PASS (0 errors)"
 
+pcb-mill-check: _kicad-cfg  ## milling check of the board vs the Carvera limits (milling.toml, waivers); exit 1 = unwaived errors
+	@mkdir -p "$(CURDIR)/$(SCH_DIR)/review"
+	$(KICAD_RUN) python3 tools/milling_check.py rc_power_board.kicad_pcb --limits milling.toml \
+	  --waivers milling_waivers.toml --json review/milling_check.json
+
 pcb-test: _kicad-cfg  ## unit tests for the PCB tools (stdlib unittest, image python3)
 	$(KICAD_RUN) python3 -m unittest discover -s tools -p 'test_*.py' -v
 

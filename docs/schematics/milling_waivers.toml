@@ -1,0 +1,10 @@
+# Waivers for tools/milling_check.py. A waived finding is shown in its own group and is never hidden.
+# Never waive MILL-FCU-THT or MILL-RIVET-ACCESS (the loader rejects them).
+# Entry format (one [[waiver]] table per waiver; all fields are required):
+#   [[waiver]]
+#   rule     = "MILL-GAP-BIT"
+#   location = "U3"                      # text that must occur in the finding location (ref, net or xy)
+#   reason   = "One sentence."
+#   who      = "name"
+#   date     = "2026-11-11"
+waiver = []

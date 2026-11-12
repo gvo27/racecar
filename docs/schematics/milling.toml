@@ -1,0 +1,91 @@
+# Milling limits for rev A (Makera Carvera, in-house isolation milling).
+# Every value has status = "confirmed" or "assumed" and a source.
+# Assumed values stay assumed until the lab tech confirms them. Do not change a limit to make a board pass.
+# Checked by tools/milling_check.py (make pcb-mill-check). Skill: .claude/skills/pcb-milling-check/SKILL.md
+
+[copper_thickness]
+value = 0.070
+unit = "mm"
+status = "confirmed"
+source = "Kepro P22-365G, 2 oz (fab_handoff.md)"
+
+# Isolation bits: cut width at depth d = tip + 2 * d * tan(angle / 2)
+[[isolation_bit]]
+name = "30deg/0.2"
+angle_deg = 30.0
+tip_mm = 0.2
+status = "confirmed"
+source = "Makera PCB bit pack"
+
+[[isolation_bit]]
+name = "60deg/0.1"
+angle_deg = 60.0
+tip_mm = 0.1
+status = "confirmed"
+source = "Makera PCB bit pack"
+
+[cut_depth_min]
+value = 0.10
+unit = "mm"
+status = "assumed"
+source = "fab_handoff.md; lab tech to confirm"
+
+[cut_depth_max]
+value = 0.15
+unit = "mm"
+status = "assumed"
+source = "fab_handoff.md; lab tech to confirm"
+
+[cut_depth_error]
+value = 0.05
+unit = "mm"
+status = "assumed"
+source = "probe auto-levelling; lab tech to confirm"
+
+[drill_set]
+value = [0.8, 1.0, 1.2, 1.5]
+unit = "mm"
+status = "assumed"
+source = "owner 2026-11-11: assume 4 common sizes; lab tech to confirm"
+
+[endmill_min]
+value = 1.0
+unit = "mm"
+status = "assumed"
+source = "smallest end mill for milled holes; a milled hole must be larger than the largest drill"
+
+[via_drill]
+value = 1.2
+unit = "mm"
+status = "assumed"
+source = "EasyContac 0.8 rivet (1.0 mm OD) in the 1.2 mm bit; design spec 2026-11-11"
+
+[via_pad]
+value = 2.1
+unit = "mm"
+status = "assumed"
+source = "1.2 mm drill + 2 x 0.45 mm annular ring"
+
+[annular_min]
+value = 0.45
+unit = "mm"
+status = "assumed"
+source = "rc_power_board.kicad_pro min_via_annular_width"
+
+[track_min]
+value = 0.5
+unit = "mm"
+status = "assumed"
+source = "rc_power_board.kicad_pro min_track_width"
+
+[edge_clearance]
+value = 0.5
+unit = "mm"
+status = "assumed"
+source = "rc_power_board.kicad_pro min_copper_edge_clearance"
+
+[connector_edge_distance]
+value = 1.0
+unit = "mm"
+status = "assumed"
+source = "owner/main session 2026-11-11: each J* courtyard within 1.0 mm of the board edge (wire entry outward)"
