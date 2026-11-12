@@ -236,5 +236,42 @@ class TestRoutedBoard(unittest.TestCase):
         self.assertGreater(sum(1 for t in self.b.GetTracks() if t.Type() != pcbnew.PCB_VIA_T), 50)
 
 
+class TestReviewPackage(unittest.TestCase):
+    """make pcb-review writes the review files (Task 7)."""
+
+    @classmethod
+    def setUpClass(cls):
+        import review_plots
+        cls.out = tempfile.mkdtemp(prefix="review-")
+        cls.rc = review_plots.main(["--out", cls.out])
+
+    def test_files_exist(self):
+        for name in ("drc.json", "rc_power_board_layers.pdf", "rc_power_board_1to1.pdf", "milling_check.json"):
+            path = os.path.join(self.out, name)
+            self.assertTrue(os.path.getsize(path) > 100, name)
+
+    def test_pdfs_are_pdfs(self):
+        for name in ("rc_power_board_layers.pdf", "rc_power_board_1to1.pdf"):
+            with open(os.path.join(self.out, name), "rb") as fh:
+                self.assertEqual(fh.read(5), b"%PDF-")
+
+    def test_drc_clean(self):
+        with open(os.path.join(self.out, "drc.json"), encoding="utf-8") as fh:
+            drc = json.load(fh)
+        self.assertEqual([v for v in drc["violations"] if v["severity"] == "error"], [])
+        self.assertEqual(drc["unconnected_items"], [])
+
+    def test_milling_json_has_groups(self):
+        with open(os.path.join(self.out, "milling_check.json"), encoding="utf-8") as fh:
+            m = json.load(fh)
+        for k in ("errors", "waived", "questions", "bits", "warnings"):
+            self.assertIn(k, m)
+        self.assertEqual(m["errors"], [])
+        self.assertEqual([f[0] for f in m["questions"]], ["MILL-DEPTH"])
+
+    def test_exit_code_is_zero(self):
+        self.assertEqual(self.rc, 0)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -1,0 +1,73 @@
+{
+ "errors": [],
+ "questions": [
+  [
+   "MILL-DEPTH",
+   "error",
+   "limits (milling.toml)",
+   0.05,
+   0.07,
+   "min depth 0.050 mm (0.10 - 0.05) is below the copper thickness 0.070 mm: a shallow cut may not go through. The min depth must be at least 0.12 mm. Question for the owner and the lab tech (assumed depth range)."
+  ]
+ ],
+ "bits": [],
+ "warnings": [
+  [
+   "MILL-SLIVER",
+   "warning",
+   "zone fill F.Cu net GND at (28.48, -20.64)",
+   0.0685127932355,
+   0.5,
+   "zone fill has copper narrower than 0.50 mm (0.07 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-SLIVER",
+   "warning",
+   "zone fill F.Cu net GND at (27.44, -36.86)",
+   0.0568824954905,
+   0.5,
+   "zone fill has copper narrower than 0.50 mm (0.06 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-SLIVER",
+   "warning",
+   "zone fill F.Cu net GND at (3.40, -108.07)",
+   0.1062367939995,
+   0.5,
+   "zone fill has copper narrower than 0.50 mm (0.11 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-SLIVER",
+   "warning",
+   "zone fill F.Cu net GND at (4.49, -116.53)",
+   0.0637482420005,
+   0.5,
+   "zone fill has copper narrower than 0.50 mm (0.06 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-SLIVER",
+   "warning",
+   "zone fill F.Cu net GND at (3.40, -126.09)",
+   0.4287261432555,
+   0.5,
+   "zone fill has copper narrower than 0.50 mm (0.43 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-SLIVER",
+   "warning",
+   "zone fill B.Cu net GND at (47.20, -110.00)",
+   0.499766263772,
+   0.5,
+   "zone fill has copper narrower than 0.50 mm (0.50 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-SLIVER",
+   "warning",
+   "zone fill B.Cu net GND at (44.86, -110.00)",
+   0.371097926917,
+   0.5,
+   "zone fill has copper narrower than 0.50 mm (0.37 mm2 removed by an opening test)"
+  ]
+ ],
+ "waived": []
+}

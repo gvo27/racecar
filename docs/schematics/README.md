@@ -11,6 +11,11 @@ Draft KiCad project for the car's power board. A 2S LiPo comes in; the board put
 | `power_architecture.png` | Block diagram used by the plan. |
 | `rc_power_board.kicad_pro` / `.kicad_sch` | KiCad project and the one-sheet A3 schematic (regions A to E plus notes). |
 | `rc_power.kicad_sym` + `sym-lib-table` | Project symbol library: `D36V50F5` (all 12 module pins), `REG_MODULE` (generic VIN/GND/VOUT/EN, used by U2) and one power symbol per rail. |
+| `rc_power_board.kicad_pcb` / `.kicad_dru` | Rev A board, routed, for review only (no Gerber or CAM files). The `.kicad_dru` holds rule `U3_fine`. |
+| `rc_power.pretty/` + `fp-lib-table` | Project footprint library: `Pololu_D24VxF5` (U2, from Pololu's drawing; hole table in `docs/datasheets/regulator_pololu_d24v90f5.md`). |
+| `milling.toml`, `milling_waivers.toml` | Milling limits (each value `assumed` or `confirmed`) and the waiver list for the milling check. |
+| `tools/` | Python tools and tests that run in the KiCad image: `build_pcb.py`, `placement.py`, `route_pcb.py`, `check_board.py`, `milling_check.py`, `review_plots.py`. |
+| `review/` | Review package: DRC report, milling check, layer PDF, 1:1 PDF, `README.md`. |
 | `rc_power_board.pdf` | Plot of the sheet, for review without KiCad. |
 | `.kicad-happy.json` | Config for the kicad-happy Claude plugin (analysis output in `analysis/`, gitignored except the manifest). |
 
@@ -18,7 +23,7 @@ Draft KiCad project for the car's power board. A 2S LiPo comes in; the board put
 
 The project version is **KiCad 10.0**; KiCad 9 or older cannot open a KiCad 10 save.
 
-The committed `.kicad_sch` is KiCad 7 format until the owner re-saves it in KiCad 10; merge is gated on that re-save plus the owner's KiCad 10 ERC.
+The committed `.kicad_sch` is now KiCad 10 format: `kicad-cli sch upgrade` (10.0.8) saved it with the U2 footprint change. The owner's GUI steps stay open: Update Symbols from Library (the 3 `lib_symbol_mismatch` warnings, D2 to D4), a re-plot of the PDF, and the owner's KiCad 10 ERC.
 
 The single-fuse revision is regenerated in KiCad 7 format again. Owner steps: close KiCad, pull, open, Update Symbols from Library, save, run ERC, re-plot the PDF, push.
 
@@ -30,7 +35,11 @@ Previous revision: the meeting-cleanup revision was generated in KiCad 7 format,
 - Facts, archived drawing, graphs and the footprint hole table: `docs/datasheets/regulator_pololu_d24v90f5.md`.
 - **Flag:** dropout is about 1.0 V at 5 A (Pololu graph). Near the 6.0 V cutoff the output can fall below 5 V, and the Mapper needs at least 4.8 V. Bench check at J11 during Mapper startup.
 - Decisions on 2026-11-11 (owner): no reverse-polarity protection on rev A (U1 and U2 have their own); U3 keeps the stock SOT-23-5 footprint with the `U3_fine` DRC rule.
-- The schematic and footprint change for U2 comes with the PCB work (plan: `docs/plans/2026-11-11-power-board-pcb-rev-a.md`).
+- The schematic and footprint change for U2 is done (U2 Value `Pololu D24V90F5 (assumed)`, Footprint `rc_power:Pololu_D24VxF5`). Plan: `docs/plans/2026-11-11-power-board-pcb-rev-a.md`.
+
+## Rev A PCB (review only)
+
+The board is built and routed headless in the pinned KiCad 10.0.8 image: `make kicad-image`, then `make erc pcb-build pcb-route pcb-check pcb-mill-check pcb-review pcb-test`. Freerouting 2.5.0 (pinned by digest) routes it. `pcb-build` refuses to overwrite an existing board without `--force`: after the first build the `.kicad_pcb` is the owner's file. Results, assumptions and the owner's GUI checks are in `review/README.md`. Gerber, drill and CAM export wait for the lab tech.
 
 ## ATO fuse, JST-XH convention, Garmin I2C (earlier revision)
 

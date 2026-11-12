@@ -10,7 +10,7 @@ paths:
 - Parts: `docs/schematics/bom.md`. CNC-milling (rev A) and later fab checklist: `docs/schematics/fab_handoff.md`.
 - Meeting summary: `docs/schematics/design_overview.md` (concise, < 2 pages). Keep it in step with the schematic.
 - Inventory and part facts: `docs/datasheets/` (components_list.xlsx, ESC manual, servo datasheet, Pololu D36V50F5 (U1), Pololu D24V90F5 (U2, `regulator_pololu_d24v90f5.md`)). Never invent a part value: unknown => `TBD` (repo rule: no unconfirmed parameters).
-- Project KiCad version: 10.0. Do not save the project with an older KiCad; do not downgrade the file format (exception: generator output in KiCad 7 format is allowed until the owner re-saves it in KiCad 10; see docs/schematics/README.md).
+- Project KiCad version: 10.0. Do not save the project with an older KiCad; do not downgrade the file format (the schematic is KiCad 10 format since the U2 footprint change; see docs/schematics/README.md).
 
 ## Invariants
 - Rails: `VBAT`, `+5V_CPU` (Pi 5 + ESP32 only), `+5V_SENS`, `+3V3_SENS` (LDO from `+5V_SENS`), `+6V_BEC` (ESC BEC, servo only, never joined to a 5 V rail). One common `GND`; never `GNDA`/`GNDD`/`GNDPWR`.
@@ -28,11 +28,19 @@ paths:
 - J3/J4 XH current: 3 A/pin with 22 AWG only; BEC pin up to 3 A = 100 % of rating. Never claim it "fits" or is "within" rating.
 - Garmin LIDAR-Lite v4 on J8 (4-pin XH, pin order = Garmin 1–4); I2C_SDA GPIO8, I2C_SCL GPIO9 via J5; no external pull-ups (13 kΩ internal to 3.3 V).
 - Power to the Pi 5 and ESP32 leaves through 2-wire USB-C pigtails (J6/J7) so their own USB-C input protection stays in the path.
-- Rev A prototype is milled in-house on a Makera Carvera from 2 oz double-sided FR-4 (3"×6"): no plated holes; vias are LPKF EasyContac 0.8 mm rivets (drill 1.1 / pad 2.0 mm; 1.2 mm optional for high current); DRC clearance ≥0.4 mm; route THT connector pins on the bottom; board outline fits the stock.
-- Net classes live in `rc_power_board.kicad_pro`; clearance 0.4 mm all classes; HighCurrent 6.0, Power5A (`+5V_CPU`, `+5V_SENS`) 1.6, Power3A (`*+6V_BEC`) 1.0, Default 0.5 mm; DRC rules min clearance 0.4, track 0.5, via 2.0, annular 0.45, min hole 0.8; via 2.0/1.1 mm (EasyContac 0.8 mm rivet). `fab_handoff.md` matches the plan's net-class table for rev A; fab-house revisions restore the plan values.
+- Rev A prototype is milled in-house on a Makera Carvera from 2 oz double-sided FR-4 (3"×6"): no plated holes; vias are LPKF EasyContac 0.8 mm rivets (assumed drill 1.2 / pad 2.1 mm because the bit set has no 1.1 mm bit; see `fab_handoff.md`); DRC clearance ≥0.4 mm; route THT connector pins on the bottom; board outline fits the stock.
+- Net classes live in `rc_power_board.kicad_pro`; clearance 0.4 mm all classes; HighCurrent 6.0, Power5A (`+5V_CPU`, `+5V_SENS`) 1.6, Power3A (`*+6V_BEC`) 1.0, Default 0.5 mm; DRC rules min clearance 0.4, track 0.5, via 2.0, annular 0.45, min hole 0.8; via 2.1/1.2 mm (assumed, EasyContac 0.8 mm rivet). `fab_handoff.md` matches the plan's net-class table for rev A; fab-house revisions restore the plan values.
 
 ## Tooling (kicad-happy@kicad-happy)
 - Review/analysis => `kicad` skill; subcircuit checks => `spice` skill (needs ngspice); EMC once a PCB exists => `emc`.
 - Analyzer output goes to `docs/schematics/analysis/` (config `.kicad-happy.json`; per-run JSON gitignored, manifest tracked).
-- Treat analyzer findings as claims to verify against the raw `.kicad_sch` and datasheets; known false positives on this board: "U3 missing input capacitor" (C7 is its input cap), "U3 EN missing pull-up" (EN tied to VIN per AP2112 datasheet).
+- Treat analyzer findings as claims to verify against the raw `.kicad_sch` and datasheets; known false positives on this board: "U3 missing input capacitor" (C7 is its input cap), "U3 EN missing pull-up" (EN tied to VIN per AP2112 datasheet), "U1 PG missing pull-up" (ESP32 input pull-up), "VBAT plane split" (overlapping bus zones merge into one piece). More in `docs/schematics/review/README.md`.
 - ERC/DRC results count only when run in KiCad 10 (user-run, or kicad-cli 10 if installed); never claim ERC passed without its output.
+
+## Rev A PCB (review only; Gerber and CAM wait for the lab tech)
+- Board: `docs/schematics/rc_power_board.kicad_pcb`, built by `tools/build_pcb.py` and routed by `tools/route_pcb.py` in the pinned KiCad 10.0.8 image (`docker/kicad.Dockerfile`) and Freerouting 2.5.0 (digest in the Makefile). Make targets: `kicad-image erc pcb-build pcb-route pcb-check pcb-mill-check pcb-review pcb-test`. No host Python for the tools. After the first build the `.kicad_pcb` is the owner's file: `pcb-build` refuses to overwrite it without `--force`.
+- Rivet via (assumed): 1.2 mm drill / 2.1 mm pad, annular 0.45 mm, in every net class. Assumed drill set: 0.8, 1.0, 1.2, 1.5 mm; larger holes are milled (the list is `MILLED_HOLES` in `tools/placement.py`). Limits and their status: `docs/schematics/milling.toml`.
+- After every board change run `make pcb-check pcb-mill-check` (skill `pcb-milling-check`). DRC clean does not mean millable. MILL-DEPTH is a finding about the assumed depth range (owner and lab tech), not a board error.
+- Never put F.Cu copper on a THT pad. Never put a via inside a part courtyard. VBAT, VBAT_RAW and GND are B.Cu zones, not tracks.
+- Connector pin order decides if a net can be routed on one layer: do not change a J3/J4/J5/J8 orientation without a new `make pcb-route`. Rule `U3_fine` is in `rc_power_board.kicad_dru`.
+

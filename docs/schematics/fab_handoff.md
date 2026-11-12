@@ -43,6 +43,19 @@ The project DRC rules in `rc_power_board.kicad_pro` are set to match: `min_clear
 
 **U3 flag (owner decides).** AP2112K SOT-23-5 pads are 0.6 mm wide at 0.95 mm pitch, so the gap is 0.35 mm, below 0.4 mm. Options: (1) custom U3 footprint with pads about 0.5 mm wide (gap about 0.45 mm); (2) accept a local DRC exception: Board Setup > Design Rules > Custom Rules, `(version 1) (rule U3_fine (condition "A.memberOfFootprint('U3') || B.memberOfFootprint('U3')") (constraint clearance (min 0.3mm)))`. Either way, mill U3 with the 60°/0.1 mm bit. 0805 passives are fine. XH pads (1.7 x 2.0 mm at 2.5 mm pitch) leave a 0.8 mm gap.
 
+## Rev A KiCad board (review only, 2026-11-11)
+
+`rc_power_board.kicad_pcb` is built and routed headless in the pinned KiCad 10.0.8 image. It is for owner review. **No Gerber, drill or CAM files exist yet: those steps are pending lab tech instructions.** The sections below that describe plots and MakeraCAM are plans, not done work. Values marked "assumed" wait for the lab tech.
+
+- **Via (assumed):** the EasyContac 0.8 rivet (1.0 mm OD) needs a 1.1 mm hole and the assumed bit set has no 1.1 mm bit, so the via is **1.2 mm drill / 2.1 mm pad** (annular 0.45 mm) in every net class. The rivet sits loose by about 0.1 mm before soldering. This replaces the 2.0 / 1.1 mm value in the tables below.
+- **Bit set (assumed, lab tech to confirm):** drill 0.8, 1.0, 1.2, 1.5 mm. A hole larger than 1.5 mm is milled with an end mill (smallest end mill assumed 1.0 mm). Footprint holes are snapped up to the next size in the board copies (XH 0.95 to 1.0, MKDS 1.3 to 1.5, F1 pins 1.4 to 1.5); pads grow to keep the 0.45 mm annular ring.
+- **Hole list from the board:** 0.8 mm x 2 (C9); 1.0 mm x 52 (U1, U2, C1, J3, J4, J5, J8, J9, J11 to J14); 1.2 mm x 5 (rivet vias); 1.5 mm x 12 (F1 pins, J6, J7); milled: 2.4 mm x 1 (F1 peg), 3.0 mm x 2 (J1 wire pads), 3.2 mm x 4 (H1 to H4).
+- **Outline:** 66 x 140 mm, drill/place origin at the lower-left corner. Stackup: 2 layers, 0.070 mm copper, 1.57 mm total.
+- **Layers:** SMD parts on B.Cu, THT parts on F.Cu. Routing on B.Cu. `VBAT_RAW`, `VBAT` and GND are B.Cu zones. The F.Cu GND pour has pad connection "none" and joins B.Cu GND through one rivet via. F.Cu has two short jumper tracks (`I2C_SDA`, `I2C_SCL`) on four rivet vias. No F.Cu copper touches a THT pad (check in `make pcb-check`).
+- **Rivet vias: 5** (4 for the two jumpers, 1 GND stitching). No via is inside a part courtyard (a rivet needs both sides soldered).
+- **Make targets:** `make kicad-image erc pcb-build pcb-route pcb-check pcb-mill-check pcb-review pcb-test`. Details: `review/README.md`.
+- **U3 rule:** `rc_power_board.kicad_dru` rule `U3_fine` sets 0.3 mm clearance for U3 pads against pads, tracks and vias. The pour keeps 0.4 mm.
+
 ## Vias: LPKF EasyContac rivets
 
 No plated through-holes. Vias are **LPKF EasyContac** through-hole rivets from the lab kit (sizes 0.6 / 0.8 / 1.0 / 1.2 mm, label = inner diameter, with a press tool). Press each rivet with the kit's setting tool, then **solder both sides**. Max board thickness for rivets is 1.6 mm (stock 1.57 mm OK). Sizes from the Vanderbilt design-guide table for LPKF EasyContac (https://my.vanderbilt.edu/daniel/?p=200); the LPKF US store lists outer diameters 0.8 / 1.0 / 1.4 / 1.6 mm, inner 0.2-0.4 mm smaller. **Unverified:** confirm against the LPKF EasyContac manual.
@@ -87,8 +100,8 @@ Solder each THT pin on every layer where it has copper. JST XH shrouds and screw
 
 ## Export and CAM
 
-- [ ] Plot (KiCad 10) to `docs/schematics/fab/rev-A/`: F.Cu, B.Cu, Edge.Cuts as Gerber. Drill: Excellon. No mask/silk/paste layers.
-- [ ] MakeraCAM: set stock size, import Gerbers and Excellon, mirrored bottom for the flip (handled in MakeraCAM, not in the plot).
+- [ ] Pending lab tech instructions: plot (KiCad 10) F.Cu, B.Cu, Edge.Cuts as Gerber, and drill as Excellon. No mask/silk/paste layers. Not done in the rev A PCB work.
+- [ ] Pending lab tech instructions. MakeraCAM: set stock size, import Gerbers and Excellon, mirrored bottom for the flip (handled in MakeraCAM, not in the plot).
 - [ ] Isolation with the 30°/0.2 mm bit (about 0.25 mm per pass at 0.1 mm depth); 60°/0.1 mm for fine areas (U3). Depth at least 0.1 mm for 70 µm copper. Use the Carvera's probe auto-levelling (mesh); isolation depth 0.1-0.15 mm for 2 oz; depth error changes cut width (±0.05 mm at 30°, ±0.12 mm at 60° per ±0.1 mm). Drilling and outline with the pack bits, TBD.
 
 ## Finishing and checks

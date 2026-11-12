@@ -1,0 +1,248 @@
+{
+    "$schema": "https://schemas.kicad.org/drc.v1.json",
+    "coordinate_units": "mm",
+    "date": "2026-11-12T05:18:57",
+    "ignored_checks": [
+        {
+            "description": "Footprint has no courtyard defined",
+            "key": "missing_courtyard"
+        },
+        {
+            "description": "Track endpoint not centered on via",
+            "key": "track_not_centered_on_via"
+        },
+        {
+            "description": "Tuning profile track geometries",
+            "key": "tuning_profile_track_geometries"
+        },
+        {
+            "description": "Footprint doesn't match symbol's footprint filters",
+            "key": "footprint_filters_mismatch"
+        },
+        {
+            "description": "Footprint component type doesn't match footprint pads",
+            "key": "footprint_type_mismatch"
+        }
+    ],
+    "included_severities": [
+        "error",
+        "warning",
+        "exclusion"
+    ],
+    "kicad_version": "10.0.8",
+    "schematic_parity": [],
+    "source": "rc_power_board.kicad_pcb",
+    "unconnected_items": [],
+    "violations": [
+        {
+            "description": "Footprint 'JST_XH_B2B-XH-A_1x02_P2.50mm_Vertical' does not match copy in library 'Connector_JST'",
+            "items": [
+                {
+                    "description": "Footprint J9",
+                    "pos": {
+                        "x": 63.4,
+                        "y": 57.8
+                    },
+                    "uuid": "2041c28e-ef7e-4d08-a054-80fd9f444748"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_mismatch"
+        },
+        {
+            "description": "Footprint 'JST_XH_B2B-XH-A_1x02_P2.50mm_Vertical' does not match copy in library 'Connector_JST'",
+            "items": [
+                {
+                    "description": "Footprint J11",
+                    "pos": {
+                        "x": 63.4,
+                        "y": 66.9
+                    },
+                    "uuid": "31a27ad2-9688-40b8-8a4c-6114b6673aa2"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_mismatch"
+        },
+        {
+            "description": "Footprint 'JST_XH_B3B-XH-A_1x03_P2.50mm_Vertical' does not match copy in library 'Connector_JST'",
+            "items": [
+                {
+                    "description": "Footprint J4",
+                    "pos": {
+                        "x": 64.5,
+                        "y": 99.2
+                    },
+                    "uuid": "4f623bcb-3e97-4543-85cc-0450335cead4"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_mismatch"
+        },
+        {
+            "description": "Footprint 'JST_XH_B4B-XH-A_1x04_P2.50mm_Vertical' does not match copy in library 'Connector_JST'",
+            "items": [
+                {
+                    "description": "Footprint J8",
+                    "pos": {
+                        "x": 63.4,
+                        "y": 81.0
+                    },
+                    "uuid": "63545216-62db-40db-846b-07b4efa3dc39"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_mismatch"
+        },
+        {
+            "description": "Footprint 'JST_XH_B6B-XH-A_1x06_P2.50mm_Vertical' does not match copy in library 'Connector_JST'",
+            "items": [
+                {
+                    "description": "Footprint J5",
+                    "pos": {
+                        "x": 63.4,
+                        "y": 123.3
+                    },
+                    "uuid": "658a4da1-c94a-4acc-a648-65118e505d0b"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_mismatch"
+        },
+        {
+            "description": "Footprint 'JST_XH_B3B-XH-A_1x03_P2.50mm_Vertical' does not match copy in library 'Connector_JST'",
+            "items": [
+                {
+                    "description": "Footprint J3",
+                    "pos": {
+                        "x": 63.4,
+                        "y": 92.6
+                    },
+                    "uuid": "7ebfcada-c51b-4c62-a2d8-9e87712d405f"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_mismatch"
+        },
+        {
+            "description": "Footprint 'FuseHolder_Blade_ATO_Littelfuse_FLR_178.6165' does not match copy in library 'Fuse'",
+            "items": [
+                {
+                    "description": "Footprint F1",
+                    "pos": {
+                        "x": 74.5,
+                        "y": 160.5
+                    },
+                    "uuid": "85e763e1-321a-4b9b-a914-dd64723816da"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_mismatch"
+        },
+        {
+            "description": "Footprint 'TerminalBlock_Phoenix_MKDS-1,5-2-5.08_1x02_P5.08mm_Horizontal' does not match copy in library 'TerminalBlock_Phoenix'",
+            "items": [
+                {
+                    "description": "Footprint J6",
+                    "pos": {
+                        "x": 66.25,
+                        "y": 146.9
+                    },
+                    "uuid": "a0725f4a-d10f-4aa5-beed-386cd0c7c6f4"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_mismatch"
+        },
+        {
+            "description": "Footprint 'CP_Radial_D8.0mm_P3.50mm' does not match copy in library 'Capacitor_THT'",
+            "items": [
+                {
+                    "description": "Footprint C9",
+                    "pos": {
+                        "x": 73.0,
+                        "y": 66.9
+                    },
+                    "uuid": "a25bce33-ed41-42cb-9d14-e69496ada287"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_mismatch"
+        },
+        {
+            "description": "Footprint 'JST_XH_B2B-XH-A_1x02_P2.50mm_Vertical' does not match copy in library 'Connector_JST'",
+            "items": [
+                {
+                    "description": "Footprint J14",
+                    "pos": {
+                        "x": 121.1,
+                        "y": 54.4
+                    },
+                    "uuid": "aac048c8-77e2-49ea-a580-3cbaeeb38ce1"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_mismatch"
+        },
+        {
+            "description": "Footprint 'JST_XH_B2B-XH-A_1x02_P2.50mm_Vertical' does not match copy in library 'Connector_JST'",
+            "items": [
+                {
+                    "description": "Footprint J13",
+                    "pos": {
+                        "x": 121.1,
+                        "y": 63.4
+                    },
+                    "uuid": "cc67aaff-38a0-4058-a93b-623b9e9a1586"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_mismatch"
+        },
+        {
+            "description": "Footprint 'JST_XH_B2B-XH-A_1x02_P2.50mm_Vertical' does not match copy in library 'Connector_JST'",
+            "items": [
+                {
+                    "description": "Footprint J12",
+                    "pos": {
+                        "x": 121.1,
+                        "y": 72.4
+                    },
+                    "uuid": "d78f9211-3251-4622-b46c-8c14ffc70954"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_mismatch"
+        },
+        {
+            "description": "Footprint 'PinHeader_2x06_P2.54mm_Vertical' does not match copy in library 'Connector_PinHeader_2.54mm'",
+            "items": [
+                {
+                    "description": "Footprint U1",
+                    "pos": {
+                        "x": 107.5,
+                        "y": 156.1
+                    },
+                    "uuid": "f6424521-918c-4ce6-bf5f-7234f68ce326"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_mismatch"
+        },
+        {
+            "description": "Footprint 'TerminalBlock_Phoenix_MKDS-1,5-2-5.08_1x02_P5.08mm_Horizontal' does not match copy in library 'TerminalBlock_Phoenix'",
+            "items": [
+                {
+                    "description": "Footprint J7",
+                    "pos": {
+                        "x": 66.25,
+                        "y": 135.1
+                    },
+                    "uuid": "fada2988-fcde-45ab-a23f-8ff6f920c4b0"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_mismatch"
+        }
+    ]
+}
