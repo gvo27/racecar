@@ -3207,7 +3207,7 @@
 					)
 				)
 			)
-			(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_2x06_P2.54mm_Vertical"
+			(property "Footprint" "rc_power:Pololu_D36V50Fx"
 				(at 0 0 0)
 				(show_name no)
 				(do_not_autoplace no)
@@ -3911,7 +3911,7 @@
 		)
 		(uuid "9966b91d-b9c4-5394-9b61-ad25704d056a")
 	)
-	(text "1. Battery: 2S LiPo, 6.0-8.4 V (ESC LVC cuts at 6.0 V).\n   T-plug pigtail (12 AWG bare ends) soldered to J1 pads;\n   pad size TBD (footprint is the 2.5 mm2 placeholder).\n2. ESC is powered OFF-BOARD: battery -> ESC on its own\n   12 AWG leads (up to 20 A). This board carries only its\n   own loads (about 8.4 A worst case at 6.4 V, 9.0 A at 6.0 V,\n   9.3 A briefly at Mapper startup), so F1 is sized for that,\n   not for the motor.\n3. F1 is the single replaceable main fuse (standard ATO/ATC\n   blade in a Littelfuse FLR 178.6165 PCB holder)\n   protecting compute and both sensor rails;\n   no branch fuses. 15 A: a 10 A fuse would run at\n   84-93 % of its rating.\n   Trade-off: a sensor-branch short opens F1 and drops\n   compute too (U1/U2 limit their own output current).\n   All protection values TBD.\n4. Single common GND; star point at J1 in layout.\n5. +6V_BEC is ESC-supplied (servo only), never joined\n   to a 5 V rail.\n6. Signals are 3.3 V logic or lower.\n7. U1 Pololu D36V50F5: all 12 pins drawn (2x VIN, 2x VOUT,\n   4x GND, 2x VRP, EN, PG). VRP unused (sensor buck fed\n   from VBAT). EN left unconnected: the module's\n   internal pull-up keeps it on (ESP32 EN control\n   archived). PG: open-drain, to ESP32 via J5 (ESP32\n   INPUT_PULLUP, non-strapping GPIO TBD).\n   J5 (JST-XH 6-pin) to ESP32: 1 U1_PG (GPIO TBD),\n   2 THROTTLE_PWM GPIO5, 3 STEER_PWM GPIO4,\n   4 I2C_SDA GPIO8, 5 I2C_SCL GPIO9, 6 GND.\n8. U2 Pololu D24V90F5 (assumed; footprint\n   rc_power:Pololu_D24VxF5). EN unconnected (internal\n   pull-up). U2 must be >=6 A: +5V_SENS is 4.6 A worst case\n   running, 4.9 A at Mapper startup. Dropout is about 1.0 V\n   at 5 A: check the output near the 6.0 V cutoff (bench).\n9. Rails are project power symbols (rc_power lib):\n   pin name = Value = net name.\n10. PWR_FLAG = ERC marker only (no part, not on the PCB):\n    tells ERC where power enters VBAT_RAW, GND, VBAT,\n    LDO_IN, +6V_BEC.\n11. Net classes (kicad_pro): HighCurrent = *VBAT*, GND;\n    Power5A = +5V_CPU, +5V_SENS;\n    Power3A = *+6V_BEC.\n12. J6/J7: 2-wire USB-C pigtails (20 AWG, 30 cm, about\n    0.10 V drop at 5 A; trim to 10-15 cm) into the Pi 5\n    and ESP32 USB-C inputs, keeping their own input\n    protection. Pi 5 gets no USB-PD 5 A offer (USB ports\n    limited to 600 mA unless set in config.txt).\n13. J8 Garmin LIDAR-Lite v4: 1 VIN red +5V_SENS,\n    2 GND black, 3 SDA white, 4 SCL green; I2C addr\n    0x62; no external pull-ups (13k to 3.3 V inside\n    the sensor); 3.3 V logic.\n14. J11 Slamtec Mapper M2M1 (5 V USB-A socket): harness\n   J11 XH -> 22 AWG 3 A USB-A male pigtail, pin 1 +5V_SENS\n   red/VBUS, pin 2 GND black. Supply 4.8-12 V, 0.75 A typ,\n   1.3 A max running, 1.4-1.6 A startup for a few seconds;\n   ripple <=50 mV (20 mV typ). Never from Pi USB or straight\n   from the pack. C9 (bulk, TBD >=100 uF low-ESR) sits at\n   J11 to carry the startup surge and hold ripple down.\n15. Connectors: JST-XH (2.5 mm) is the convention for\n    sensors and low-power parts; exceptions J1 (battery\n    T-plug pigtail pads) and J6/J7 (USB-C pigtail\n    screw terminals, 5 A).\n16. Spec: power_board_plan.md; meeting summary:\n    design_overview.md; parts: bom.md; layout/fab:\n    fab_handoff.md. TBD values are unconfirmed."
+	(text "1. Battery: 2S LiPo, 6.0-8.4 V (ESC LVC cuts at 6.0 V).\n   T-plug pigtail (12 AWG bare ends) soldered to J1 pads;\n   pad size TBD (footprint is the 2.5 mm2 placeholder).\n2. ESC is powered OFF-BOARD: battery -> ESC on its own\n   12 AWG leads (up to 20 A). This board carries only its\n   own loads (about 8.4 A worst case at 6.4 V, 9.0 A at 6.0 V,\n   9.3 A briefly at Mapper startup), so F1 is sized for that,\n   not for the motor.\n3. F1 is the single replaceable main fuse (standard ATO/ATC\n   blade in a Littelfuse FLR 178.6165 PCB holder)\n   protecting compute and both sensor rails;\n   no branch fuses. 15 A: a 10 A fuse would run at\n   84-93 % of its rating.\n   Trade-off: a sensor-branch short opens F1 and drops\n   compute too (U1/U2 limit their own output current).\n   All protection values TBD.\n4. Single common GND; star point at J1 in layout.\n5. +6V_BEC is ESC-supplied (servo only), never joined\n   to a 5 V rail.\n6. Signals are 3.3 V logic or lower.\n7. U1 Pololu D36V50F5: all 12 pins drawn (2x VIN, 2x VOUT,\n   4x GND, 2x VRP, EN, PG). VRP unused (sensor buck fed\n   from VBAT). EN left unconnected: the module's\n   internal pull-up keeps it on (ESP32 EN control\n   archived). PG: open-drain, to ESP32 via J5 (ESP32\n   INPUT_PULLUP, non-strapping GPIO TBD).\n   J5 (JST-XH 6-pin) to ESP32: 1 U1_PG (GPIO TBD),\n   2 THROTTLE_PWM GPIO5, 3 STEER_PWM GPIO4,\n   4 I2C_SDA GPIO8, 5 I2C_SCL GPIO9, 6 GND.\n8. U2 Pololu D36V50F5 (same part as U1, owner 2026-11-12;\n   footprint rc_power:Pololu_D36V50Fx). EN, VRP and PG not\n   connected (EN has an internal pull-up). U2 must be >=6 A:\n   +5V_SENS is 4.6 A worst case running, 4.9 A at Mapper\n   startup; the module gives about 7.4 A at 6 V in (graph).\n   Dropout is about 1.0 V at 5 A: check the output near the\n   6.0 V cutoff (bench).\n9. Rails are project power symbols (rc_power lib):\n   pin name = Value = net name.\n10. PWR_FLAG = ERC marker only (no part, not on the PCB):\n    tells ERC where power enters VBAT_RAW, GND, VBAT,\n    LDO_IN, +6V_BEC.\n11. Net classes (kicad_pro): HighCurrent = *VBAT*, GND;\n    Power5A = +5V_CPU, +5V_SENS;\n    Power3A = *+6V_BEC.\n12. J6/J7: 2-wire USB-C pigtails (20 AWG, 30 cm, about\n    0.10 V drop at 5 A; trim to 10-15 cm) into the Pi 5\n    and ESP32 USB-C inputs, keeping their own input\n    protection. Pi 5 gets no USB-PD 5 A offer (USB ports\n    limited to 600 mA unless set in config.txt).\n13. J8 Garmin LIDAR-Lite v4: 1 VIN red +5V_SENS,\n    2 GND black, 3 SDA white, 4 SCL green; I2C addr\n    0x62; no external pull-ups (13k to 3.3 V inside\n    the sensor); 3.3 V logic.\n14. J11 Slamtec Mapper M2M1 (5 V USB-A socket): harness\n   J11 XH -> 22 AWG 3 A USB-A male pigtail, pin 1 +5V_SENS\n   red/VBUS, pin 2 GND black. Supply 4.8-12 V, 0.75 A typ,\n   1.3 A max running, 1.4-1.6 A startup for a few seconds;\n   ripple <=50 mV (20 mV typ). Never from Pi USB or straight\n   from the pack. C9 (bulk, TBD >=100 uF low-ESR) sits at\n   J11 to carry the startup surge and hold ripple down.\n15. Connectors: JST-XH (2.5 mm) is the convention for\n    sensors and low-power parts; exceptions J1 (battery\n    T-plug pigtail pads) and J6/J7 (USB-C pigtail\n    screw terminals, 5 A).\n16. Spec: power_board_plan.md; meeting summary:\n    design_overview.md; parts: bom.md; layout/fab:\n    fab_handoff.md. TBD values are unconfirmed."
 		(exclude_from_sim no)
 		(at 320.04 30.48 0)
 		(effects
@@ -4145,10 +4145,6 @@
 		(uuid "f8e38210-8692-584f-97c9-121444315746")
 	)
 	(no_connect
-		(at 54.61 172.72)
-		(uuid "87c99ffd-1d6b-59a1-8415-bb2163d6ddc4")
-	)
-	(no_connect
 		(at 238.76 55.88)
 		(uuid "d3f1c293-7241-59e8-b5cc-7edd5e4718a4")
 	)
@@ -4159,6 +4155,22 @@
 	(no_connect
 		(at 227.33 68.58)
 		(uuid "fbe8a9fd-cc2b-5201-b24f-ece75d1d5eb9")
+	)
+	(no_connect
+		(at 52.07 172.72)
+		(uuid "ff1ac740-7d51-4cce-930f-9217107b3872")
+	)
+	(no_connect
+		(at 77.47 172.72)
+		(uuid "0988a7e2-3e33-42d0-8818-d937cfc18793")
+	)
+	(no_connect
+		(at 63.5 160.02)
+		(uuid "14940af2-5f97-4448-b3b1-52260ef2b1f9")
+	)
+	(no_connect
+		(at 66.04 160.02)
+		(uuid "e62f2f72-9f88-4d22-9385-73d25adbc455")
 	)
 	(wire
 		(pts
@@ -4512,13 +4524,41 @@
 	)
 	(wire
 		(pts
-			(xy 64.77 177.8) (xy 64.77 182.88)
+			(xy 64.77 180.34) (xy 64.77 182.88)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "5b8ff5a6-10d0-5efb-9090-37528af018aa")
+		(uuid "0eaf8139-34db-4cd7-87a8-bf9795f68c1d")
+	)
+	(wire
+		(pts
+			(xy 60.96 180.34) (xy 68.58 180.34)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4b38bdd5-dd83-4d2b-b0ed-c5da03f58d18")
+	)
+	(junction
+		(at 63.5 180.34)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "7a887a3f-03a2-4ab6-86c3-5bdc74382257")
+	)
+	(junction
+		(at 64.77 180.34)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "ad8cbbd0-04a3-46fc-b128-7e42ec1a9eac")
+	)
+	(junction
+		(at 66.04 180.34)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "f657b958-b58a-44e4-82b7-5f6e696ce6ca")
 	)
 	(wire
 		(pts
@@ -5162,13 +5202,29 @@
 	)
 	(wire
 		(pts
-			(xy 43.18 167.64) (xy 54.61 167.64)
+			(xy 43.18 167.64) (xy 52.07 167.64)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "e1b0ce0e-e40a-5c15-820c-0d6aa19e1ac5")
+		(uuid "162d9938-16dd-40d9-b8be-5686b164c87a")
+	)
+	(wire
+		(pts
+			(xy 52.07 165.1) (xy 52.07 167.64)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "cc189863-c53c-43e1-be57-73ed74620de8")
+	)
+	(junction
+		(at 52.07 167.64)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "60ab3233-7c07-4235-beef-a23712ed0893")
 	)
 	(wire
 		(pts
@@ -5332,13 +5388,29 @@
 	)
 	(wire
 		(pts
-			(xy 74.93 167.64) (xy 78.74 167.64)
+			(xy 77.47 167.64) (xy 78.74 167.64)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "f8f36310-3e25-5bd5-b7e1-fec6c703023c")
+		(uuid "548f470c-1956-4713-9072-33131356b518")
+	)
+	(wire
+		(pts
+			(xy 77.47 165.1) (xy 77.47 167.64)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e2d99497-1525-4217-9504-d99d4eaba2f6")
+	)
+	(junction
+		(at 77.47 167.64)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "d31de466-1140-412f-8fd4-90dfae30b961")
 	)
 	(wire
 		(pts
@@ -10821,7 +10893,7 @@
 		)
 	)
 	(symbol
-		(lib_id "rc_power:REG_MODULE")
+		(lib_id "rc_power:D36V50F5")
 		(at 64.77 170.18 0)
 		(unit 1)
 		(body_style 1)
@@ -10832,7 +10904,7 @@
 		(dnp no)
 		(uuid "9cac832b-da6d-55a6-b8d5-a2d1f3d40be7")
 		(property "Reference" "U2"
-			(at 62.992 161.29 0)
+			(at 62.992 151.13 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -10842,8 +10914,8 @@
 				(justify left)
 			)
 		)
-		(property "Value" "Pololu D24V90F5 (assumed)"
-			(at 52.07 156.21 0)
+		(property "Value" "Pololu D36V50F5"
+			(at 52.07 147.32 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -10853,7 +10925,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "rc_power:Pololu_D24VxF5"
+		(property "Footprint" "rc_power:Pololu_D36V50Fx"
 			(at 64.77 170.18 0)
 			(hide yes)
 			(show_name no)
@@ -10885,7 +10957,7 @@
 				)
 			)
 		)
-		(property "BOM Comments" "5 V, 9 A; assumed (owner 2026-11-11), not bought. Replaces the D24V60F5 proposal (#2865, discontinued; Pololu names the D24V90F5 as its replacement). 5-38 V in, 5 V +-4 %, reverse protection built in. +5V_SENS needs 4.6 A running, 4.9 A at Mapper startup. FLAG: dropout about 1.0 V at 5 A (graph), so at the 6.0 V cutoff the output can fall below 5 V: bench check at J11. Ripple not published: TBD. Price: Pololu, 2026-11-11, qty 1. Details: docs/datasheets/regulator_pololu_d24v90f5.md" (at 0 0 0)
+		(property "BOM Comments" "5.0 V, 5.5 A typ; reverse protection to 40 V; 3 A per header pin. In hand: 2 owned, the same part for U1 (+5V_CPU) and U2 (+5V_SENS), so each is the other's spare. Owner 2026-11-12: replaces the D24V90F5 assumption for U2. +5V_SENS needs 4.6 A running, 4.9 A at Mapper startup; the module gives about 7.4 A at 6 V in and about 8 A at 8.4 V in (Pololu graph). FLAG: dropout about 1.0 V at 5 A (graph), so at the 6.0 V cutoff the +5V_SENS output can fall below 5 V: bench check at J11. EN and VRP not connected (PG used on U1 only). Details: docs/datasheets/regulator_pololu_d36v50f5.md" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10893,7 +10965,7 @@
 				(hide yes)
 			)
 		)
-		(property "Supplier link" "https://www.pololu.com/product/2866" (at 0 0 0)
+		(property "Supplier link" "https://www.pololu.com/product/4091" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10901,7 +10973,7 @@
 				(hide yes)
 			)
 		)
-		(property "Unit cost USD" "36.82" (at 0 0 0)
+		(property "Unit cost USD" "39.95" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10909,7 +10981,7 @@
 				(hide yes)
 			)
 		)
-		(property "Status" "assumed" (at 0 0 0)
+		(property "Status" "in hand" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10925,7 +10997,7 @@
 				(hide yes)
 			)
 		)
-		(property "MPN" "Pololu D24V90F5" (at 0 0 0)
+		(property "MPN" "Pololu D36V50F5" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10933,17 +11005,41 @@
 				(hide yes)
 			)
 		)
-		(pin "1"
-			(uuid "73bbbb4a-2636-554d-ad95-0b782d45110a")
+		(pin "5"
+			(uuid "6c7cfea2-cf7d-4e72-8bb5-47a53b81c624")
+		)
+		(pin "6"
+			(uuid "45d46510-2d24-4349-9e88-e4b9bbd62a90")
 		)
 		(pin "2"
-			(uuid "215bf045-3e8c-5188-8366-88c8f40a546e")
+			(uuid "15a5a408-732b-450e-a08a-8f9dc35d7640")
 		)
 		(pin "3"
-			(uuid "6616f2d1-e767-5cdd-bf0f-6a03516845f8")
+			(uuid "c497d2a7-60bf-46a5-bc20-2a411b03e583")
 		)
 		(pin "4"
-			(uuid "4562ea62-0885-5daf-a322-cb5df6757cd5")
+			(uuid "d974348a-5342-4d3f-9d43-623c1d101ab5")
+		)
+		(pin "11"
+			(uuid "15ce1075-bf0d-4349-844a-fd59842949ab")
+		)
+		(pin "12"
+			(uuid "b7b19f13-88e9-4e69-878f-7db0507090d0")
+		)
+		(pin "1"
+			(uuid "ba4757e6-1eec-4f9c-ab12-7859a658905e")
+		)
+		(pin "7"
+			(uuid "864d69fe-7cc4-4357-bacc-af39ac35f9e9")
+		)
+		(pin "8"
+			(uuid "1aa5a936-e2ff-43d8-a510-f2d9ef97b272")
+		)
+		(pin "9"
+			(uuid "2c0a1698-d392-4f8c-8690-d5e8194893a3")
+		)
+		(pin "10"
+			(uuid "69719f68-581b-447e-a4b2-2503456c470e")
 		)
 		(instances
 			(project "rc_power_board"
@@ -13072,7 +13168,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "Pololu D36V50F5 buck (req 5.1V >=6A TBD)"
+		(property "Value" "Pololu D36V50F5"
 			(at 221.234 50.8 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -13083,7 +13179,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_2x06_P2.54mm_Vertical"
+		(property "Footprint" "rc_power:Pololu_D36V50Fx"
 			(at 240.03 66.04 0)
 			(hide yes)
 			(show_name no)
@@ -13115,7 +13211,7 @@
 				)
 			)
 		)
-		(property "BOM Comments" "5.0 V, 5.5 A typ; reverse protection to 40 V; 3 A per header pin. In hand" (at 0 0 0)
+		(property "BOM Comments" "5.0 V, 5.5 A typ; reverse protection to 40 V; 3 A per header pin. In hand: 2 owned, the same part for U1 (+5V_CPU) and U2 (+5V_SENS), so each is the other's spare. Owner 2026-11-12: replaces the D24V90F5 assumption for U2. +5V_SENS needs 4.6 A running, 4.9 A at Mapper startup; the module gives about 7.4 A at 6 V in and about 8 A at 8.4 V in (Pololu graph). FLAG: dropout about 1.0 V at 5 A (graph), so at the 6.0 V cutoff the +5V_SENS output can fall below 5 V: bench check at J11. EN and VRP not connected (PG used on U1 only). Details: docs/datasheets/regulator_pololu_d36v50f5.md" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)

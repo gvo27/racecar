@@ -20,8 +20,8 @@ ALLOWED_STATUS = {"proposed", "assumed", "in hand", "TBD"}
 EXEMPT = re.compile(r"^(TP\d+|H\d+|J1)$")
 
 # Expected totals from the old bom.md (Subtotal section), USD.
-EXPECTED_TOTAL = 90.89
-EXPECTED_WITHOUT_IN_HAND = 50.94
+EXPECTED_TOTAL = 94.02
+EXPECTED_WITHOUT_IN_HAND = 14.12
 
 
 def expand_refs(field):
