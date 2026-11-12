@@ -61,7 +61,7 @@ class TestBootstrap(unittest.TestCase):
         self.assertEqual(len(self.b.GetFootprints()), 40)
         refs = {fp.GetReference() for fp in self.b.GetFootprints()}
         self.assertTrue({"H1", "H2", "H3", "H4", "TP1", "TP2", "TP3"} <= refs)
-        self.assertEqual(self.b.GetNetCount() - 1, 21)  # net 0 is "no net"
+        self.assertEqual(self.b.GetNetCount() - 1, 24)  # net 0 is "no net"
 
     def test_sides(self):
         for fp in self.b.GetFootprints():
@@ -174,6 +174,22 @@ class TestCheckBoardCatches(unittest.TestCase):
         t.SetNet(self.b.FindNet("VBAT"))
         self.b.Add(t)
         self.assertTrue([p for p in check_board.check(self.b, self.lim) if "HighCurrent minimum" in p])
+
+    def _move(self, ref, dx_mm, dy_mm):
+        fp = [f for f in self.b.GetFootprints() if f.GetReference() == ref][0]
+        fp.SetPosition(fp.GetPosition() + pcbnew.VECTOR2I(pcbnew.FromMM(dx_mm), pcbnew.FromMM(dy_mm)))
+
+    def test_courtyard_overlap_same_side(self):
+        # U1 (module) pushed onto U2 (module): both top-side courtyards overlap
+        self._move("U1", -15.0, 0.0)
+        self.assertTrue([p for p in check_board.check(self.b, self.lim) if "courtyard" in p and "overlap" in p])
+
+    def test_courtyard_crosses_board_edge(self):
+        self._move("U1", 20.0, 0.0)
+        self.assertTrue([p for p in check_board.check(self.b, self.lim) if "courtyard" in p and "board edge" in p])
+
+    def test_courtyards_of_the_built_board_are_clean(self):
+        self.assertEqual([p for p in check_board.check(self.b, self.lim) if "courtyard" in p], [])
 
 
 class TestNoOverwrite(unittest.TestCase):

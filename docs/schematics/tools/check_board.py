@@ -41,14 +41,14 @@ def holes(board):
 
 # Copper width along the current paths (Task 7b). Opening test on B.Cu: deflate the copper of the net by w/2 and
 # inflate it by w/2; the listed pads must stay in one piece. (net, label, pads, width mm). A pad is "REF.PIN";
-# "U2.GND_IN" / "U2.GND_OUT" are the U2 GND pads at the VIN end / the VOUT end.
+# "U2.GND_IN" / "U2.GND_OUT" are the two U2 GND pads (7, 8) next to VIN / the two (9, 10) next to VOUT.
 STUB_MM = 2.5  # copper within this distance of a pad that is narrower than the opening counts at its own width
 PATH_ROWS = [
     ("GND", "GND trunk J1 - U2 input - U1", ["J1.2", "U2.GND_IN", "U1.7", "U1.8", "U1.9", "U1.10"], 6.0),
     ("GND", "GND J6/J7 - U1", ["J6.2", "J7.2", "U1.7", "U1.8", "U1.9", "U1.10"], 1.6),
     ("GND", "GND U2 output - J8/J9/J11/C9", ["U2.GND_OUT", "J8.2", "J9.2", "J11.2", "C9.2"], 1.6),
     ("/VBAT_RAW", "VBAT_RAW J1 - F1", ["J1.1", "F1.1"], 6.0),
-    ("VBAT", "VBAT F1 - U2 VIN - U1 VIN", ["F1.2", "U2.1", "U1.5", "U1.6"], 6.0),
+    ("VBAT", "VBAT F1 - U2 VIN - U1 VIN", ["F1.2", "U2.5", "U2.6", "U1.5", "U1.6"], 6.0),
     ("+5V_CPU", "+5V_CPU all pads", None, 1.6),
     ("+5V_SENS", "+5V_SENS all pads", None, 1.6),
 ]
@@ -76,12 +76,12 @@ def _net_copper(board, net, layer):
 
 
 def _u2_gnd_ends(board):
-    """Split the U2 pad-2 (GND) pads into the VIN end and the VOUT end (nearest pad 1 = VIN end)."""
+    """Split the U2 GND pads (7-10) into the pair nearest the VIN pads (5, 6) and the pair nearest VOUT (11, 12)."""
     fp = board.FindFootprintByReference("U2")
-    vin = [p.GetPosition() for p in fp.Pads() if p.GetNumber() == "1"]
+    vin = [p.GetPosition() for p in fp.Pads() if p.GetNumber() in ("5", "6")]
     cx = sum(v.x for v in vin) / len(vin)
     cy = sum(v.y for v in vin) / len(vin)
-    gnd = [p for p in fp.Pads() if p.GetNumber() == "2"]
+    gnd = [p for p in fp.Pads() if p.GetNumber() in ("7", "8", "9", "10")]
     gnd.sort(key=lambda p: (p.GetPosition().x - cx) ** 2 + (p.GetPosition().y - cy) ** 2)
     return gnd[:2], gnd[2:]
 
@@ -161,6 +161,37 @@ def check_paths(board):
     return problems
 
 
+EDGE_TOL_MM = 0.05  # a courtyard that touches the outline line is inside (the mounting holes sit on it)
+
+
+def check_courtyards(board):
+    """Courtyards of parts on one side must not overlap each other and must not cross the board edge.
+    KiCad DRC reports the overlap (courtyards_overlap) once the footprints have real courtyards; the edge crossing
+    it does not report, and a module whose body sticks out of the board is a fab and fit problem."""
+    problems = []
+    edges = [d for d in board.GetDrawings() if d.GetLayer() == pcbnew.Edge_Cuts]
+    out = edges[0].GetBoundingBox()
+    for e in edges[1:]:
+        out.Merge(e.GetBoundingBox())
+    out.Inflate(FromMM(EDGE_TOL_MM))
+    cys = []
+    for fp in board.GetFootprints():
+        fp.BuildCourtyardCaches()
+        side = pcbnew.F_Cu if fp.GetLayer() == pcbnew.F_Cu else pcbnew.B_Cu
+        cy = fp.GetCourtyard(pcbnew.F_CrtYd if side == pcbnew.F_Cu else pcbnew.B_CrtYd)
+        if not cy.OutlineCount():
+            problems.append("courtyard: %s has none" % fp.GetReference())
+            continue
+        if not out.Contains(cy.BBox()):
+            problems.append("courtyard of %s crosses the board edge" % fp.GetReference())
+        cys.append((fp.GetReference(), side, cy))
+    for i, (ra, sa, ca) in enumerate(cys):
+        for rb, sb, cb in cys[i + 1:]:
+            if sa == sb and ca.Collide(cb, 0):
+                problems.append("courtyards overlap on %s: %s and %s" % ("F" if sa == pcbnew.F_Cu else "B", ra, rb))
+    return problems
+
+
 def check(board, limits=None, waivers=None):
     problems = []
     # 1. F.Cu copper on a THT pad (open on an unplated board)
@@ -188,7 +219,9 @@ def check(board, limits=None, waivers=None):
         if t.Type() != pcbnew.PCB_VIA_T and short(t.GetNetname()) in HIGH_CURRENT_NETS + ("GND",):
             if ToMM(t.GetWidth()) < HIGH_CURRENT_MIN_W - 1e-6:
                 problems.append("%s track %.2f mm wide at %s (HighCurrent minimum %.1f mm)" % (short(t.GetNetname()), ToMM(t.GetWidth()), ctx.xy(t.GetStart()), HIGH_CURRENT_MIN_W))
-    # 5. milling check: unwaived errors. MILL-DEPTH is a finding about the assumed limits (owner/lab tech), not the board:
+    # 5. courtyards (overlap per side, board edge)
+    problems += check_courtyards(board)
+    # 6. milling check: unwaived errors. MILL-DEPTH is a finding about the assumed limits (owner/lab tech), not the board:
     #    it is the only rule id left out here, and `make pcb-mill-check` keeps it visible.
     findings = mc.check(board, lim)
     groups = mc.triage(findings, waivers or [])

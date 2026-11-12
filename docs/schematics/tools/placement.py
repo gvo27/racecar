@@ -20,26 +20,26 @@ PLACEMENT = {
     "H3": (3.5, 136.5, 0, "F"),
     "H4": (62.5, 136.5, 0, "F"),
     # input chain at the bottom end: J1 GND on the left (rotated 180 deg), BAT+ on the right, F1 above BAT+
-    "J1": (24.8, 3.5, 180, "F"),
-    "F1": (23.5, 19.5, 0, "F"),
-    "C1": (39.5, 8.5, 0, "F"),
-    "D1": (34.0, 11.0, 180, "B"),
+    "J1": (23.7, 3.5, 0, "F"),
+    "F1": (22.2, 19.5, 0, "F"),
+    "C1": (38.5, 9.0, 0, "F"),
+    "D1": (41.0, 12.5, 180, "B"),
     # buck modules, input end down: U2 (5 V sensors) with GND pair left and VIN pair right, U1 (5 V compute) right of it
-    "U2": (22.5, 53.0, 90, "F"),
-    "C4": (31.0, 36.0, 90, "B"),
+    "U2": (14.35, 43.89, 90, "F"),
+    "C4": (23.1, 34.0, 180, "B"),
     "C5": (29.5, 70.0, 90, "B"),
     "TP2": (29.5, 73.5, 0, "B"),
     "R2": (29.5, 77.0, 90, "B"),
     "D3": (29.5, 80.9, 270, "B"),
-    "U1": (47.5, 23.9, 180, "F"),
-    "C2": (39.5, 33.0, 90, "B"),
-    "C3": (50.5, 41.0, 90, "B"),
-    "TP1": (44.5, 40.5, 0, "B"),
-    "R1": (53.5, 41.5, 90, "B"),
-    "D2": (53.5, 45.4, 270, "B"),
+    "U1": (40.55, 43.89, 90, "F"),
+    "C2": (49.2, 34.0, 180, "B"),
+    "C3": (50.5, 50.0, 0, "B"),
+    "TP1": (50.0, 52.8, 0, "B"),
+    "R1": (51.0, 55.9, 90, "B"),
+    "D2": (51.0, 61.0, 270, "B"),
     # right edge: USB power for the Pi and the ESP32, next to U1 (entry outward)
-    "J6": (59.8, 36.6, 270, "F"),
-    "J7": (59.8, 48.4, 270, "F"),
+    "J6": (59.8, 56.6, 270, "F"),
+    "J7": (59.8, 68.4, 270, "F"),
     # left edge: wiring hub (ESP32 signals, ESC, servo, sensors)
     "J4": (4.5, 36.0, 270, "F"),
     "J3": (3.4, 42.5, 90, "F"),
@@ -69,51 +69,53 @@ def _rect(x0, y0, x1, y1):
 
 
 # Copper buses drawn as B.Cu zones: (net name, [(x, y), ...]) in the same frame as PLACEMENT.
-# Trunks of HighCurrent nets are at least 6.0 mm wide; short stubs reach one pad.
+# Trunks of HighCurrent nets are at least 6.0 mm wide; short stubs (pad-width necks) reach one pad.
+# VBAT is an "E" tree: F1.2 -> arm (y 22.4..28.4) -> prong B up to U2 VIN and prong A up to U1 VIN. Both modules sit
+# with the pin row on the north edge (rot 90), so each prong ends in a pad-width neck at the VIN pads and the GND
+# pads next to them (pad 7-10) reach the pour on both sides of the row.
 BUS_ZONES = [
-    # J1.1 -> F1 input
-    ("/VBAT_RAW", _rect(22.3, 1.9, 28.5, 21.0)),
-    # F1 output -> trunk -> band to U1 and trunk to U2 VIN
-    ("VBAT", _rect(31.5, 15.0, 41.0, 24.5)),
-    ("VBAT", _rect(22.65, 24.4, 42.2, 30.4)),
-    ("VBAT", _rect(22.65, 24.4, 28.9, 38.5)),
-    ("VBAT", _rect(41.8, 28.05, 47.6, 30.4)),          # pad-width neck to the U1 VIN row
-    ("VBAT", _rect(31.0, 11.2, 32.7, 15.2)),            # stub to D1
-    ("VBAT", _rect(38.3, 7.5, 40.7, 15.1)),             # stub to C1
-    ("VBAT", _rect(38.8, 30.0, 40.2, 31.7)),            # stub to C2
-    ("VBAT", _rect(28.8, 34.5, 31.3, 35.6)),            # stub to C4
-    # +5V_CPU: U1 VOUT row -> J6.1 / J7.1 and the small parts above the trunk
-    ("+5V_CPU", _rect(43.9, 35.5, 48.6, 37.7)),
-    ("+5V_CPU", _rect(48.0, 35.4, 60.0, 37.8)),
-    ("+5V_CPU", _rect(56.2, 35.4, 57.9, 49.5)),
-    ("+5V_CPU", _rect(57.8, 47.3, 59.9, 49.4)),
-    ("+5V_CPU", _rect(49.9, 37.5, 51.1, 40.3)),         # C3
-    ("+5V_CPU", _rect(43.9, 37.5, 45.1, 40.3)),         # TP1
-    ("+5V_CPU", _rect(52.9, 37.5, 54.1, 41.0)),         # R1
-    # +5V_SENS: U2 VOUT pair -> trunk north -> tooth to the J8.1/J11.1 bar, branch to J9.1, C9, FB1
-    ("+5V_SENS", _rect(23.0, 66.8, 27.3, 69.6)),
-    ("+5V_SENS", _rect(23.0, 66.8, 27.3, 101.0)),
-    ("+5V_SENS", _rect(4.0, 85.0, 23.2, 88.0)),
+    # J1.1 -> F1.1 input
+    ("/VBAT_RAW", _rect(20.9, 1.9, 27.1, 21.0)),
+    # F1.2 -> arm -> prongs -> necks to the VIN pads
+    ("VBAT", _rect(30.2, 15.0, 40.5, 24.5)),
+    ("VBAT", _rect(16.3, 22.4, 48.8, 28.8)),            # arm
+    ("VBAT", _rect(16.3, 22.4, 22.9, 41.0)),            # prong B (U2 VIN)
+    ("VBAT", _rect(18.48, 40.5, 20.38, 47.4)),          # pad-width neck to U2.5/6
+    ("VBAT", _rect(42.2, 22.4, 48.8, 41.0)),            # prong A (U1 VIN)
+    ("VBAT", _rect(44.68, 40.5, 46.58, 47.4)),          # pad-width neck to U1.5/6
+    ("VBAT", _rect(37.5, 7.9, 39.5, 13.0)),             # stub to C1
+    ("VBAT", _rect(37.5, 11.3, 40.5, 15.2)),            # stub to D1
+    # +5V_CPU: U1 VOUT pads -> north -> J6.1 / J7.1 and the small parts
+    ("+5V_CPU", _rect(52.2, 43.0, 54.2, 57.4)),
+    ("+5V_CPU", _rect(52.2, 55.6, 60.1, 57.6)),
+    ("+5V_CPU", _rect(56.0, 55.6, 58.0, 69.5)),
+    ("+5V_CPU", _rect(57.8, 67.0, 60.1, 69.6)),
+    ("+5V_CPU", _rect(51.0, 49.4, 52.4, 50.6)),         # C3
+    ("+5V_CPU", _rect(50.0, 52.2, 52.4, 53.4)),         # TP1
+    ("+5V_CPU", _rect(50.4, 54.4, 52.4, 55.6)),         # R1
+    # +5V_SENS: U2 VOUT pads -> trunk north -> tooth to the J8.1/J11.1 bar, branch to J9.1, C9, FB1
+    ("+5V_SENS", _rect(26.1, 43.0, 28.0, 100.9)),
+    ("+5V_SENS", _rect(4.0, 85.0, 27.0, 88.0)),
     ("+5V_SENS", _rect(3.5, 82.3, 5.5, 90.5)),        # J8.1 + J11.1 bar
     ("+5V_SENS", _rect(5.3, 87.5, 7.1, 99.5)),
     ("+5V_SENS", _rect(4.0, 98.1, 5.6, 99.7)),          # J9.1
     ("+5V_SENS", _rect(12.2, 87.5, 13.8, 89.9)),        # C9
-    ("+5V_SENS", _rect(27.2, 99.1, 43.0, 100.9)),       # FB1
+    ("+5V_SENS", _rect(26.1, 99.1, 43.0, 100.9)),       # FB1
     ("+5V_SENS", _rect(27.2, 68.5, 29.8, 69.6)),        # C5
     ("+5V_SENS", _rect(27.2, 73.0, 29.5, 74.0)),        # TP2
     ("+5V_SENS", _rect(27.2, 75.6, 29.8, 76.6)),        # R2
 ]
 
-# Areas where the router may not put a track or via (they would fence the GND trunks): (x0, y0, x1, y1).
+# Areas where the router may not put a track or via (they would fence the GND pour): (x0, y0, x1, y1).
 GND_KEEPOUTS = [
-    (10.0, 3.0, 44.0, 53.0),     # left trunk and the corridor from U2 to U1
-    (48.5, 22.0, 65.0, 35.2),    # channel right of U1 to J6.2
+    (22.8, 28.8, 42.2, 47.0),    # pocket between the VBAT prongs
 ]
 
 # Planned F.Cu jumpers on rivets (low-current signals that would cross a GND trunk): net, pad A, via A, F.Cu path, via B, pad B.
 JUMPERS = [
-    {"net": "/U1_PG", "pad_a": ("U1", "1"), "via_a": (52.0, 23.9),
-     "path": [(52.0, 23.9), (52.0, 40.6), (9.5, 40.6), (9.5, 52.1), (3.4, 52.1)],
+    {"net": "/U1_PG", "pad_a": ("U1", "1"), "via_a": (38.6, 49.8),
+     "stub_a": [(38.6, 43.89)],                         # B.Cu stub: pad -> waypoints -> via (keeps 0.4 mm from U1.2)
+     "path": [(38.6, 49.8), (8.0, 49.8), (8.0, 52.1), (3.4, 52.1)],
      "via_b": (3.4, 52.1), "pad_b": ("J5", "1")},
 ]
 

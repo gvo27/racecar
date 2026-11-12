@@ -211,7 +211,9 @@ def add_jumpers(board):
     for j in placement.JUMPERS:
         net = board.FindNet(j["net"])
         va, vb = build_pcb.pt(*j["via_a"]), build_pcb.pt(*j["via_b"])
-        track(pad_pos(*j["pad_a"]), va, pcbnew.B_Cu, net)
+        chain = [pad_pos(*j["pad_a"])] + [build_pcb.pt(*q) for q in j.get("stub_a", [])] + [va]
+        for a, b in zip(chain, chain[1:]):
+            track(a, b, pcbnew.B_Cu, net)
         track(vb, pad_pos(*j["pad_b"]), pcbnew.B_Cu, net)
         pts = [build_pcb.pt(*p) for p in j["path"]]
         for a, b in zip(pts, pts[1:]):
