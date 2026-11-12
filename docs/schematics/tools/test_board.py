@@ -3,6 +3,7 @@ import json
 import os
 import re
 import shutil
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -183,6 +184,56 @@ class TestNoOverwrite(unittest.TestCase):
         self.assertNotEqual(rc, 0)
         self.assertEqual(open(path, "rb").read(), before)
         self.assertEqual(os.path.getmtime(path), mtime)
+
+
+REPO_BOARD = os.path.join(SCH_DIR, "rc_power_board.kicad_pcb")
+
+
+class TestRoutedBoard(unittest.TestCase):
+    """The committed, routed board (Task 6). Needs kicad-cli (KiCad image)."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.out = os.path.join(tempfile.mkdtemp(prefix="drc-"), "drc.json")
+        subprocess.run(["kicad-cli", "pcb", "drc", "--schematic-parity", "--severity-all", "--all-track-errors",
+                        "--format", "json", "-o", cls.out, REPO_BOARD], check=True, stdout=subprocess.DEVNULL, cwd=SCH_DIR)
+        with open(cls.out, encoding="utf-8") as fh:
+            cls.drc = json.load(fh)
+        cls.b = pcbnew.LoadBoard(REPO_BOARD)
+
+    def test_drc_no_errors(self):
+        errors = [v for v in self.drc["violations"] if v["severity"] == "error"]
+        self.assertEqual(errors, [])
+
+    def test_no_unconnected_items(self):
+        self.assertEqual(self.drc["unconnected_items"], [])
+
+    def test_schematic_parity(self):
+        self.assertEqual(self.drc["schematic_parity"], [])
+
+    def test_check_board_clean(self):
+        lim = mc.load_limits(os.path.join(SCH_DIR, "milling.toml"))
+        self.assertEqual(check_board.check(self.b, lim, mc.load_waivers(os.path.join(SCH_DIR, "milling_waivers.toml"))), [])
+
+    def test_high_current_tracks_at_least_6mm(self):
+        for t in self.b.GetTracks():
+            if t.Type() != pcbnew.PCB_VIA_T and t.GetNetname().lstrip("/") in ("VBAT_RAW", "VBAT", "GND"):
+                self.assertGreaterEqual(ToMM(t.GetWidth()), 6.0 - 1e-6, "%s track" % t.GetNetname())
+
+    def test_vias_are_rivets_and_counted(self):
+        vias = [t for t in self.b.GetTracks() if t.Type() == pcbnew.PCB_VIA_T]
+        for v in vias:
+            self.assertAlmostEqual(ToMM(v.GetDrillValue()), 1.2, places=3)
+            self.assertAlmostEqual(ToMM(v.GetWidth(pcbnew.F_Cu)), 2.1, places=3)
+        print("\nrivet vias: %d (%d GND stitching)" % (len(vias), sum(1 for v in vias if v.GetNetname() == "GND")))
+
+    def test_f_cu_tracks_never_touch_tht_pads(self):
+        for p in check_board.check(self.b, mc.load_limits(os.path.join(SCH_DIR, "milling.toml"))):
+            self.assertNotIn("F.Cu on THT pad", p)
+
+    def test_every_net_has_copper(self):
+        # a routed board has tracks (the unrouted bootstrap has none)
+        self.assertGreater(sum(1 for t in self.b.GetTracks() if t.Type() != pcbnew.PCB_VIA_T), 50)
 
 
 if __name__ == "__main__":
