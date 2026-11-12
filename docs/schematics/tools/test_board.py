@@ -186,6 +186,32 @@ class TestNoOverwrite(unittest.TestCase):
         self.assertEqual(os.path.getmtime(path), mtime)
 
 
+class TestSyncFields(unittest.TestCase):
+    def test_new_netlist_field_reaches_footprint_without_other_change(self):
+        tmp = tempfile.mkdtemp(prefix="sync-")
+        dst = os.path.join(tmp, "sch")
+        shutil.copytree(work_dir(), dst, ignore=shutil.ignore_patterns("review", ".history", "*-backups", "fp-info-cache"))
+        sch = os.path.join(dst, "rc_power_board.kicad_sch")
+        text = open(sch, encoding="utf-8").read()
+        text, n = re.subn(r'(\t\t\(property "MPN")', '\t\t(property "Sync Test" "hello"\n\t\t\t(at 0 0 0)\n\t\t\t(show_name no)\n\t\t\t(do_not_autoplace no)\n\t\t\t(effects\n\t\t\t\t(font\n\t\t\t\t\t(size 1.27 1.27)\n\t\t\t\t)\n\t\t\t\t(hide yes)\n\t\t\t)\n\t\t)\n\\1', text)
+        self.assertGreater(n, 0)
+        open(sch, "w", encoding="utf-8").write(text)
+        path = os.path.join(dst, "rc_power_board.kicad_pcb")
+        def snap():
+            b = pcbnew.LoadBoard(path)
+            return ([(f.GetReference(), f.GetPosition().x, f.GetPosition().y, f.GetOrientation().AsDegrees()) for f in b.GetFootprints()],
+                    len(b.GetTracks()), len(b.Zones()))
+        before = snap()
+        self.assertEqual(build_pcb.main(["--out", path, "--sch-dir", dst, "--sync-fields"]), 0)
+        self.assertEqual(snap(), before)
+        b = pcbnew.LoadBoard(path)
+        fps = [f for f in b.GetFootprints() if f.HasField("Sync Test")]
+        self.assertGreater(len(fps), 0)
+        self.assertEqual(fps[0].GetFieldText("Sync Test"), "hello")
+        self.assertFalse(fps[0].GetField("Sync Test").IsVisible())
+        self.assertTrue(all(f.HasField("MPN") for f in b.GetFootprints()))
+
+
 REPO_BOARD = os.path.join(SCH_DIR, "rc_power_board.kicad_pcb")
 
 

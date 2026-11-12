@@ -87,7 +87,8 @@ def parse_netlist(path):
         ref = c.get("ref")
         fpn = c.findtext("footprint") or ""
         tst = c.findtext("tstamps") or (c.find("tstamps").text if c.find("tstamps") is not None else "")
-        comps[ref] = {"value": c.findtext("value") or "", "footprint": fpn, "uuid": tst}
+        fields = {f.get("name"): (f.text or "") for f in (c.find("fields") if c.find("fields") is not None else [])}
+        comps[ref] = {"value": c.findtext("value") or "", "footprint": fpn, "uuid": tst, "fields": fields}
     nets = {}
     for n in root.find("nets"):
         nets[n.get("name")] = [(nd.get("ref"), nd.get("pin")) for nd in n.findall("node")]
@@ -102,6 +103,33 @@ def load_footprint(fpid, sch_dir):
         raise RuntimeError("footprint not found: %s" % fpid)
     fp.SetFPID(pcbnew.LIB_ID(lib, name))
     return fp
+
+
+SKIP_FIELDS = ("Reference", "Value", "Footprint")
+
+
+def set_fields(fp, fields):
+    """Copy every symbol field of the netlist onto the footprint, hidden (schematic parity needs them)."""
+    for name, text in fields.items():
+        if name in SKIP_FIELDS:
+            continue
+        fp.SetField(name, text)
+        fp.GetField(name).SetVisible(False)
+
+
+def sync_fields(board_path, sch_dir=SCH_DIR):
+    """Apply the symbol fields to an existing board in place. No placement, zone or routing change."""
+    tmp = tempfile.mkdtemp()
+    xml = os.path.join(tmp, "net.xml")
+    export_netlist(sch_dir, xml)
+    comps, _ = parse_netlist(xml)
+    board = pcbnew.LoadBoard(board_path)
+    for fp in board.GetFootprints():
+        info = comps.get(fp.GetReference())
+        if info:
+            set_fields(fp, info["fields"])
+    board.Save(board_path)
+    return len(comps)
 
 
 def snap_drill(d_mm):
@@ -227,6 +255,7 @@ def build(out_path, sch_dir=SCH_DIR):
         fp.SetReference(ref)
         fp.SetValue(info["value"])
         fp.SetPath(pcbnew.KIID_PATH("/" + info["uuid"]))
+        set_fields(fp, info["fields"])
         for pad in fp.Pads():
             net = pin_net.get((ref, pad.GetNumber()))
             if net is not None and pad.GetNumber() != "":
@@ -263,8 +292,13 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--out", default=os.path.join(SCH_DIR, BOARD_FILE))
     ap.add_argument("--sch-dir", default=SCH_DIR)
+    ap.add_argument("--sync-fields", action="store_true", help="only copy the symbol fields onto an existing board (in place)")
     ap.add_argument("--force", action="store_true", help="overwrite an existing board (destroys manual edits)")
     args = ap.parse_args(argv)
+    if args.sync_fields:
+        n = sync_fields(args.out, args.sch_dir)
+        print("pcb-build: synced symbol fields of %d parts into %s" % (n, args.out))
+        return 0
     if os.path.exists(args.out) and not args.force:
         print("pcb-build: %s exists. It may hold manual edits. Use --force to overwrite." % args.out, file=sys.stderr)
         return 1
