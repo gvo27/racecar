@@ -161,9 +161,9 @@ pcb-build: _kicad-cfg  ## bootstrap docs/schematics/rc_power_board.kicad_pcb fro
 	$(KICAD_RUN) python3 tools/build_pcb.py $(PCB_BUILD_ARGS)
 
 # Freerouting runs in its own image; pcbnew (DSN export, SES import) runs in the KiCad image
-pcb-route: _kicad-cfg  ## route the board from scratch (Freerouting 2.5.0): B.Cu + F.Cu jumpers on rivet vias, stitching via for the F.Cu pour
+pcb-route: _kicad-cfg  ## route the board from scratch (Freerouting 2.5.0): B.Cu, planned F.Cu jumpers on rivets (placement.py), stitching via for the F.Cu pour
 	@mkdir -p "$(CURDIR)/build/route/user" && rm -f "$(CURDIR)/build/route/in.dsn" "$(CURDIR)/build/route/out.ses"
-	$(KICAD_RUN) python3 tools/route_pcb.py dsn rc_power_board.kicad_pcb --dsn "$(CURDIR)/build/route/in.dsn" --allow-vias
+	$(KICAD_RUN) python3 tools/route_pcb.py dsn rc_power_board.kicad_pcb --dsn "$(CURDIR)/build/route/in.dsn"
 	docker run --rm --user $(shell id -u):$(shell id -g) -v "$(CURDIR)/build/route":/data --entrypoint java $(FREEROUTING_IMAGE) \
 	  -jar /app/freerouting-executable.jar --gui-enabled=false --api_server-enabled=false --user_data_path=/data/user \
 	  -de /data/in.dsn -do /data/out.ses -mp 40 > "$(CURDIR)/build/route/freerouting.log" 2>&1; tail -n 3 "$(CURDIR)/build/route/freerouting.log"

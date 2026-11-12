@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import build_pcb  # noqa: E402
 import placement  # noqa: E402
 
-NOT_ROUTED = ("GND", "VBAT", "/VBAT_RAW")  # carried by zones (HighCurrent class)
+NOT_ROUTED = ("GND", "VBAT", "/VBAT_RAW", "+5V_CPU", "+5V_SENS", "/U1_PG")  # planned zones, the GND pour and planned jumpers (placement.py)
 VIA_DRILL, VIA_PAD = 1.2, 2.1
 EDGE_BAND = float(os.environ.get("ROUTE_EDGE_BAND", "2.0"))
 ROUTER_CLEARANCE_UM = 430  # board clearance is 0.4 mm; the router rounds, so give it 0.03 mm extra
@@ -101,6 +101,44 @@ def prepare(board_path, dsn_path, allow_vias=False):
         for x, y in pts:
             ol.Append(build_pcb.pt(x, y))
         work.Add(z)
+    # GND trunks: no tracks or vias, so that no signal fences the pour (Task 7b)
+    for x0, y0, x1, y1 in placement.GND_KEEPOUTS:
+        z = pcbnew.ZONE(work)
+        z.SetIsRuleArea(True)
+        z.SetLayer(pcbnew.B_Cu)
+        z.SetDoNotAllowTracks(True)
+        z.SetDoNotAllowVias(True)
+        z.SetDoNotAllowPads(False)
+        z.SetDoNotAllowZoneFills(False)
+        z.SetDoNotAllowFootprints(False)
+        ol = z.Outline()
+        ol.NewOutline()
+        for q in tab([(x0, y0), (x1, y0), (x1, y1), (x0, y1)]):
+            ol.Append(q)
+        work.Add(z)
+    # planned jumpers: no router track on F.Cu along the path, no track or via near a rivet
+    def keepout(layer, x0, y0, x1, y1):
+        z = pcbnew.ZONE(work)
+        z.SetIsRuleArea(True)
+        z.SetLayer(layer)
+        z.SetDoNotAllowTracks(True)
+        z.SetDoNotAllowVias(True)
+        z.SetDoNotAllowPads(False)
+        z.SetDoNotAllowZoneFills(False)
+        z.SetDoNotAllowFootprints(False)
+        ol = z.Outline()
+        ol.NewOutline()
+        for q in tab([(x0, y0), (x1, y0), (x1, y1), (x0, y1)]):
+            ol.Append(q)
+        work.Add(z)
+
+    for j in placement.JUMPERS:
+        m = 1.2
+        for (ax, ay), (bx, by) in zip(j["path"], j["path"][1:]):
+            keepout(pcbnew.F_Cu, min(ax, bx) - m, min(ay, by) - m, max(ax, bx) + m, max(ay, by) + m)
+        for vx, vy in (j["via_a"], j["via_b"]):
+            for layer in (pcbnew.F_Cu, pcbnew.B_Cu):
+                keepout(layer, vx - 2.4, vy - 2.4, vx + 2.4, vy + 2.4)
     clear_copper(work)
     # (the copper zones go last: pcbnew Python loses the ZONE type after the last zone is removed)
     for z in list(work.Zones()):
@@ -150,6 +188,44 @@ def widen_tracks(board):
             if box.Intersects(osh.BBox().GetInflated(c)) and shape.Collide(osh, c):
                 t.SetWidth(old)
                 break
+
+
+def add_jumpers(board):
+    """Planned F.Cu jumpers (placement.JUMPERS): B.Cu stub from pad A to a rivet, F.Cu track, rivet, B.Cu stub to pad B."""
+    def pad_pos(ref, num):
+        for p in board.FindFootprintByReference(ref).Pads():
+            if p.GetNumber() == num:
+                return p.GetPosition()
+        raise RuntimeError("no pad %s.%s" % (ref, num))
+
+    def track(a, b, layer, net, width=0.5):
+        t = pcbnew.PCB_TRACK(board)
+        t.SetStart(a)
+        t.SetEnd(b)
+        t.SetLayer(layer)
+        t.SetWidth(FromMM(width))
+        t.SetNet(net)
+        board.Add(t)
+
+    n = 0
+    for j in placement.JUMPERS:
+        net = board.FindNet(j["net"])
+        va, vb = build_pcb.pt(*j["via_a"]), build_pcb.pt(*j["via_b"])
+        track(pad_pos(*j["pad_a"]), va, pcbnew.B_Cu, net)
+        track(vb, pad_pos(*j["pad_b"]), pcbnew.B_Cu, net)
+        pts = [build_pcb.pt(*p) for p in j["path"]]
+        for a, b in zip(pts, pts[1:]):
+            track(a, b, pcbnew.F_Cu, net)
+        for v in (va, vb):
+            via = pcbnew.PCB_VIA(board)
+            via.SetPosition(v)
+            via.SetViaType(pcbnew.VIATYPE_THROUGH)
+            via.SetDrill(FromMM(VIA_DRILL))
+            via.SetWidth(FromMM(VIA_PAD))
+            via.SetNet(net)
+            board.Add(via)
+            n += 1
+    return n
 
 
 def drop_dangling_vias(board):
@@ -267,6 +343,7 @@ def finish(board_path, ses_path, out_path):
     clear_copper(board)
     if not pcbnew.ImportSpecctraSES(board, ses_path):
         raise RuntimeError("SES import failed")
+    n_jump = add_jumpers(board)
     dropped = drop_dangling_vias(board)
     widen_tracks(board)
     build_pcb.fill_zones(board)

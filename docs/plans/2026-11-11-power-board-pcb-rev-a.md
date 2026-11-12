@@ -173,7 +173,7 @@ The baseline board (e0ba889) passes DRC, ERC and the milling check, but these ch
 **Files:**
 - Modify: `docs/schematics/tools/check_board.py` (new check `path_width(board, net, pads, width_mm) -> list[str]`), `test_board.py`, `rc_power.pretty/Pololu_D24VxF5.kicad_mod` (signal VOUT pad number → "", the same as PG and FB), `test_footprint.py`, `placement.py`, `build_pcb.py`, `route_pcb.py`, `review/README.md`
 
-**Required widths (opening test on B.Cu, the pads in each set stay in one piece):**
+**Required widths (opening test on B.Cu, the pads in each set stay in one piece; a pad narrower than the opening is measured at its own width: the copper within 2.5 mm of it counts, `STUB_MM` in `check_board.py`):**
 | Net | Pads | Width |
 | --- | --- | --- |
 | GND | J1.2, U2 GND (input end), U1.7–10 | 6.0 mm |
@@ -182,10 +182,12 @@ The baseline board (e0ba889) passes DRC, ERC and the milling check, but these ch
 | `/VBAT_RAW`, VBAT | J1.1 → F1 → U2.1, U1.5/6 | 6.0 mm (pads narrower than this are measured at their own width) |
 | `+5V_CPU`, `+5V_SENS` | all pads of the net | 1.6 mm |
 
-- [ ] **Step 1:** Add the tests for the table above and for the U2 pad change. Run `make pcb-test`. Expected: FAIL on the e0ba889 board.
-- [ ] **Step 2:** Re-lay the power region; do not stack local patches. Make GND a planned B.Cu trunk zone (as VBAT), from J1.2 past U2 and U1. Keep long low-current signals (U1_PG, the PWM nets) out of the path between J1 and the regulators: route them along an edge, or as F.Cu jumpers on rivets. List each new rivet. Fixes go through the scripts (`make pcb-route` routes from scratch).
-- [ ] **Step 3:** Run `make pcb-build pcb-route pcb-test pcb-check pcb-mill-check pcb-review`. Expected: tests PASS, DRC 0 errors / 0 unconnected / parity clean, 0 unwaived milling errors (MILL-DEPTH stays an owner/lab-tech question).
-- [ ] **Step 4:** Update `review/README.md` (measured widths, rivet count, removed owner questions). Commit `pcb: GND and power path widths (opening-test check, power region re-lay)`.
+- [x] **Step 1:** Add the tests for the table above and for the U2 pad change. Run `make pcb-test`. Expected: FAIL on the e0ba889 board.
+- [x] **Step 2:** Re-lay the power region; do not stack local patches. Make GND a planned B.Cu trunk zone (as VBAT), from J1.2 past U2 and U1. Keep long low-current signals (U1_PG, the PWM nets) out of the path between J1 and the regulators: route them along an edge, or as F.Cu jumpers on rivets. List each new rivet. Fixes go through the scripts (`make pcb-route` routes from scratch).
+- [x] **Step 3:** Run `make pcb-build pcb-route pcb-test pcb-check pcb-mill-check pcb-review`. Expected: tests PASS, DRC 0 errors / 0 unconnected / parity clean, 0 unwaived milling errors (MILL-DEPTH stays an owner/lab-tech question).
+- [x] **Step 4:** Update `review/README.md` (measured widths, rivet count, removed owner questions). Commit `pcb: GND and power path widths (opening-test check, power region re-lay)`.
+
+**Result (builder, 2026-11-12):** all rows pass. Measured widths and the layout changes are in `review/README.md`. The layout has 3 rivets (one `U1_PG` F.Cu jumper, one pour stitching via). `make pcb-route` runs the router without vias; jumpers are planned in `placement.py` (`JUMPERS`). Deviations: J4, J8, J6, J7 have pin 1 at the top, J1 is turned 180 degrees, J11 and J9 sit 0.25 mm further from the edge (all listed as owner questions).
 
 ### Task 8 (later, separate): KiRI visual diff trial
 

@@ -42,6 +42,7 @@ def holes(board):
 # Copper width along the current paths (Task 7b). Opening test on B.Cu: deflate the copper of the net by w/2 and
 # inflate it by w/2; the listed pads must stay in one piece. (net, label, pads, width mm). A pad is "REF.PIN";
 # "U2.GND_IN" / "U2.GND_OUT" are the U2 GND pads at the VIN end / the VOUT end.
+STUB_MM = 2.5  # copper within this distance of a pad that is narrower than the opening counts at its own width
 PATH_ROWS = [
     ("GND", "GND trunk J1 - U2 input - U1", ["J1.2", "U2.GND_IN", "U1.7", "U1.8", "U1.9", "U1.10"], 6.0),
     ("GND", "GND J6/J7 - U1", ["J6.2", "J7.2", "U1.7", "U1.8", "U1.9", "U1.10"], 1.6),
@@ -106,6 +107,12 @@ def _opened_groups(board, net, labels, width_mm):
     for l in labels:
         for _, q in pads.get(l, []):
             o.BooleanAdd(q)
+            # a pad narrower than the opening is measured at its own width: the copper within STUB_MM of it counts
+            near = pcbnew.SHAPE_POLY_SET(q)
+            near.Inflate(FromMM(STUB_MM), pcbnew.CORNER_STRATEGY_ROUND_ALL_CORNERS, FromMM(0.01))
+            hit = pcbnew.SHAPE_POLY_SET()
+            hit.BooleanIntersection(near, s)
+            o.BooleanAdd(hit)
     o.Simplify()
     groups = {}
     for l in labels:
