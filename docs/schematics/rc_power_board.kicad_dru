@@ -1,0 +1,10 @@
+(version 1)
+
+# U3 (AP2112K, SOT-23-5): the gap between its own pads is 0.35 mm, below the 0.4 mm board clearance, and a 0.5 mm
+# track that leaves a pad runs 0.4 mm from the next pad. The rule lowers the clearance to 0.3 mm for U3 pads against
+# pads, tracks and vias. Zone fill is not covered: the pour keeps 0.4 mm from U3 pads (MILL-GAP needs >= 0.307 mm).
+# The area is milled with the 60 deg / 0.1 mm V-bit (see fab_handoff.md, milling.toml).
+(rule U3_fine
+	(condition "A.Type == 'Pad' && A.Reference == 'U3' && B.Type != 'Zone'")
+	(constraint clearance (min 0.3mm))
+)

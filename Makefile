@@ -157,6 +157,28 @@ erc: _kicad-cfg  ## KiCad ERC on the power board schematic (0 errors required; w
 	  $(KICAD_RUN) python3 tools/erc_summary.py "$(CURDIR)/build/erc/erc.json"; s=$$?; \
 	  if [ $$s -ne 0 ]; then echo "erc: FAIL"; exit 1; fi; echo "erc: PASS (0 errors)"
 
+pcb-build: _kicad-cfg  ## bootstrap docs/schematics/rc_power_board.kicad_pcb from the schematic (first build; refuses to overwrite, --force destroys manual edits)
+	$(KICAD_RUN) python3 tools/build_pcb.py $(PCB_BUILD_ARGS)
+
+# Freerouting runs in its own image; pcbnew (DSN export, SES import) runs in the KiCad image
+pcb-route: _kicad-cfg  ## route the board from scratch (Freerouting 2.5.0): B.Cu + F.Cu jumpers on rivet vias, stitching via for the F.Cu pour
+	@mkdir -p "$(CURDIR)/build/route/user" && rm -f "$(CURDIR)/build/route/in.dsn" "$(CURDIR)/build/route/out.ses"
+	$(KICAD_RUN) python3 tools/route_pcb.py dsn rc_power_board.kicad_pcb --dsn "$(CURDIR)/build/route/in.dsn" --allow-vias
+	docker run --rm --user $(shell id -u):$(shell id -g) -v "$(CURDIR)/build/route":/data --entrypoint java $(FREEROUTING_IMAGE) \
+	  -jar /app/freerouting-executable.jar --gui-enabled=false --api_server-enabled=false --user_data_path=/data/user \
+	  -de /data/in.dsn -do /data/out.ses -mp 40 > "$(CURDIR)/build/route/freerouting.log" 2>&1; tail -n 3 "$(CURDIR)/build/route/freerouting.log"
+	$(KICAD_RUN) python3 tools/route_pcb.py ses rc_power_board.kicad_pcb --ses "$(CURDIR)/build/route/out.ses"
+
+pcb-check: _kicad-cfg  ## DRC (with schematic parity) + board checks + milling check; fails on DRC errors, unconnected items, check_board problems
+	@mkdir -p "$(CURDIR)/build/drc"
+	$(KICAD_RUN) kicad-cli pcb drc --schematic-parity --severity-all --all-track-errors --format json \
+	  -o "$(CURDIR)/build/drc/drc.json" rc_power_board.kicad_pcb > /dev/null
+	$(KICAD_RUN) python3 tools/drc_summary.py "$(CURDIR)/build/drc/drc.json"
+	$(KICAD_RUN) python3 tools/check_board.py rc_power_board.kicad_pcb
+
+pcb-review: _kicad-cfg  ## write review/: drc.json, milling_check.json, layer PDF, 1:1 PDF
+	$(KICAD_RUN) python3 tools/review_plots.py
+
 pcb-mill-check: _kicad-cfg  ## milling check of the board vs the Carvera limits (milling.toml, waivers); exit 1 = unwaived errors
 	@mkdir -p "$(CURDIR)/$(SCH_DIR)/review"
 	$(KICAD_RUN) python3 tools/milling_check.py rc_power_board.kicad_pcb --limits milling.toml \
