@@ -1,0 +1,13 @@
+Reference,Qty,Value,Footprint,MPN,Manufacturer,Status,Unit cost USD,Supplier link,BOM Comments,In total
+"J3, J4 mating",2,n/a,n/a,XHP-3,JST,proposed,0.15,,"Price est. XH housing, 3-pos. Mates B3B-XH-A",yes
+"J5 mating",1,n/a,n/a,XHP-6,JST,proposed,0.15,,"Price est. XH housing, 6-pos. Mates B6B-XH-A",yes
+"J8 mating",1,n/a,n/a,XHP-4,JST,proposed,0.15,,"Price est. XH housing, 4-pos. Mates B4B-XH-A",yes
+"J9, J11-J14 mating",5,n/a,n/a,XHP-2,JST,proposed,0.10,https://www.digikey.com/en/products/detail/jst-sales-america-inc/XHP-2/555485,"Price est. XH housing, 2-pos. Mates B2B-XH-A",yes
+"All XH crimps",26,n/a,n/a,SXH-001T-P0.6,JST,proposed,0.10,https://www.digikey.com/en/products/detail/jst-sales-america-inc/SXH-001T-P0-6/527371,"Price est. Crimp contacts, 22-28 AWG; 26 = 3+3+6+4+5x2 pins",yes
+"J11 Mapper pigtail",1,n/a,n/a,"22 AWG 3 A USB-A male 2-wire pigtail (XHP-2 on the board end); lab/owner stock? TBD",TBD,TBD,,,"J11 pin 1 +5V_SENS to red/VBUS, pin 2 GND to black. Non-board item; not in totals. Never power the Mapper from Pi USB or straight from the pack",no
+"Board blank",1,n/a,n/a,"Kepro P22-365G FR-4, 2 oz, double-sided, 3"" x 6"" x 0.062""",Kepro,in hand,0.00,,"76.2 x 152.4 x 1.57 mm; lab stock (5 pcs, dated 1997, unsensitized: scrub oxide before milling)",yes
+"Rivets",20,n/a,n/a,"LPKF EasyContac kit (0.6/0.8/1.0/1.2 mm) + setting tool",LPKF,in hand,0.00,,"Lab stock; use 0.8 mm (about 20): hole 1.1 mm, collar 1.6 mm; max board 1.6 mm; solder both sides; 1.2 mm / 1.0 mm optional, see fab_handoff.md",yes
+"Dowel pins",2,n/a,n/a,"from Makera PCB Fabrication Pack (diameter TBD)",Makera,in hand,0.00,,"Lab stock; 2-3 pins for flip registration",yes
+"V-bits / drill bits",1,n/a,n/a,"Makera pack: 2x 60 deg 0.1 mm, 2x 30 deg 0.2 mm V-bits; 20x milling/drilling bits (diameters TBD)",Makera,in hand,0.00,,"Lab stock; isolation milling, drilling",yes
+"J6 option",1,n/a,JST_VH_B2P-VH_1x02_P3.96mm_Vertical,"JST B2P-VH(LF)(SN) + VHR-2N + 2x SVH-21T-P1.1",JST,TBD,,,"Pi 5 pigtail header (replaces Phoenix 1715721 if chosen). 3.96 mm; rating per JST VH datasheet, confirm; SVH-21T-P1.1 takes 18-22 AWG (confirm). Not in totals",no
+"J7 option",1,n/a,JST_XH_B2B-XH-A_1x02_P2.50mm_Vertical,"JST B2B-XH-A(LF)(SN) + XHP-2 + SXH-001T-P0.6",JST,TBD,,,"ESP32 pigtail header (replaces Phoenix if chosen). 0.5 A ok; 20 AWG pigtail must be trimmed/spliced to 22 AWG. Not in totals",no

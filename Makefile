@@ -33,7 +33,7 @@ COMPOSE  := docker compose -f deploy/car/compose.yaml --env-file deploy/car/.env
 .PHONY: help setup clean build flash monitor fw-image config models compiledb unit check-dev \
         ros-image ros-test ros-test-image ros-test-run ros-shell car-up car-down car-ps car-logs car-pull \
         car-shutdown install-host teleop calibrate tune test rangefinder viz lidar-imu lidar-snapshot lidar-record mcu unit-run \
-        drivers-stop drivers-start lidar-hw-test kicad-image erc pcb-build pcb-route pcb-check pcb-mill-check pcb-review pcb-test \
+        drivers-stop drivers-start lidar-hw-test kicad-image erc pcb-build pcb-route pcb-check pcb-mill-check pcb-review pcb-test bom \
         _kicad-cfg _clean-build _need-config _need-stack _need-stack-down _need-drivers-down
 
 help:            ## list targets (grouped in README.md)
@@ -186,6 +186,9 @@ pcb-mill-check: _kicad-cfg  ## milling check of the board vs the Carvera limits 
 
 pcb-test: _kicad-cfg  ## unit tests for the PCB tools (stdlib unittest, image python3)
 	$(KICAD_RUN) python3 -m unittest discover -s tools -p 'test_*.py' -v
+
+bom: _kicad-cfg  ## export docs/schematics/bom.csv from the schematic fields (kicad-cli) and print the cost total
+	$(KICAD_RUN) python3 tools/bom_total.py --export
 
 # ---- ROS tools (need: make car-up) ----------------------------------------------------------
 teleop: _need-stack  ## SSH keyboard driving via the supervisor (arrows, space=brake, d=disarm, a=arm, q/x=quit)
