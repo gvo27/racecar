@@ -212,6 +212,33 @@ def patch_file(path):
         fh.write(text)
 
 
+def add_power_zones(board, netinfo):
+    """GND pours on both layers and the B.Cu bus zones of placement.BUS_ZONES (netinfo: net name -> NETINFO_ITEM)."""
+    gnd = netinfo["GND"]
+    w, h = placement.OUTLINE_W, placement.OUTLINE_H
+    m = EDGE_INSET  # the pour stops 0.6 mm inside the outline: the fill rounding would leave 0.476 mm from the edge
+    outline = [(m, m), (w - m, m), (w - m, h - m), (m, h - m)]
+    # F.Cu pour: no connection to pads (THT pads are open on an unplated board); B.Cu pour: solid.
+    # F.Cu islands below PIECE_MIN_MM2 are removed (the pour joins B.Cu GND only through rivet vias).
+    add_zone(board, gnd, pcbnew.F_Cu, outline, pcbnew.ZONE_CONNECTION_NONE, prio=0, name="GND_F", island_area_mm2=PIECE_MIN_MM2)
+    add_zone(board, gnd, pcbnew.B_Cu, outline, pcbnew.ZONE_CONNECTION_FULL, prio=0, name="GND_B")
+    for i, (net, pts) in enumerate(placement.BUS_ZONES):
+        add_zone(board, netinfo[net], pcbnew.B_Cu, pts, pcbnew.ZONE_CONNECTION_FULL, prio=10 + i, name="BUS_%s_%d" % (net.lstrip("/"), i))
+
+
+def sync_zones(board_path):
+    """Rebuild all zones of an existing board from placement.py and refill them. Parts, tracks and vias stay."""
+    board = pcbnew.LoadBoard(board_path)
+    old = list(board.Zones())
+    netinfo = {n: board.FindNet(n) for n in {"GND"} | {n for n, _ in placement.BUS_ZONES}}
+    add_power_zones(board, netinfo)
+    for z in old:  # (the old zones go last: pcbnew Python loses the ZONE type after the last zone is removed)
+        board.Remove(z)
+    fill_zones(board)
+    board.Save(board_path)
+    patch_file(board_path)
+
+
 def build(out_path, sch_dir=SCH_DIR):
     tmp = tempfile.mkdtemp()
     xml = os.path.join(tmp, "net.xml")
@@ -272,16 +299,7 @@ def build(out_path, sch_dir=SCH_DIR):
         # no silkscreen on a milled board: the reference designator goes to the fab layer (1:1 print)
         fp.Reference().SetLayer(pcbnew.F_Fab if side == "F" else pcbnew.B_Fab)
 
-    gnd = netinfo["GND"]
-    w, h = placement.OUTLINE_W, placement.OUTLINE_H
-    m = EDGE_INSET  # the pour stops 0.6 mm inside the outline: the fill rounding would leave 0.476 mm from the edge
-    outline = [(m, m), (w - m, m), (w - m, h - m), (m, h - m)]
-    # F.Cu pour: no connection to pads (THT pads are open on an unplated board); B.Cu pour: solid.
-    # F.Cu islands below PIECE_MIN_MM2 are removed (the pour joins B.Cu GND only through rivet vias).
-    add_zone(board, gnd, pcbnew.F_Cu, outline, pcbnew.ZONE_CONNECTION_NONE, prio=0, name="GND_F", island_area_mm2=PIECE_MIN_MM2)
-    add_zone(board, gnd, pcbnew.B_Cu, outline, pcbnew.ZONE_CONNECTION_FULL, prio=0, name="GND_B")
-    for i, (net, pts) in enumerate(placement.BUS_ZONES):
-        add_zone(board, netinfo[net], pcbnew.B_Cu, pts, pcbnew.ZONE_CONNECTION_FULL, prio=10 + i, name="BUS_%s_%d" % (net.lstrip("/"), i))
+    add_power_zones(board, netinfo)
     fill_zones(board)
     board.Save(out_path)
     patch_file(out_path)
@@ -293,11 +311,16 @@ def main(argv=None):
     ap.add_argument("--out", default=os.path.join(SCH_DIR, BOARD_FILE))
     ap.add_argument("--sch-dir", default=SCH_DIR)
     ap.add_argument("--sync-fields", action="store_true", help="only copy the symbol fields onto an existing board (in place)")
+    ap.add_argument("--sync-zones", action="store_true", help="only rebuild and refill the zones of an existing board from placement.py (in place)")
     ap.add_argument("--force", action="store_true", help="overwrite an existing board (destroys manual edits)")
     args = ap.parse_args(argv)
     if args.sync_fields:
         n = sync_fields(args.out, args.sch_dir)
         print("pcb-build: synced symbol fields of %d parts into %s" % (n, args.out))
+        return 0
+    if args.sync_zones:
+        sync_zones(args.out)
+        print("pcb-build: rebuilt and refilled the zones of %s" % args.out)
         return 0
     if os.path.exists(args.out) and not args.force:
         print("pcb-build: %s exists. It may hold manual edits. Use --force to overwrite." % args.out, file=sys.stderr)

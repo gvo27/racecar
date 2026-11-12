@@ -15,22 +15,6 @@
   [
    "MILL-SLIVER",
    "warning",
-   "zone fill B.Cu net +5V_SENS at (22.92, -68.20)",
-   0.531442422667,
-   0.5,
-   "zone fill has copper narrower than 0.50 mm (0.53 mm2 removed by an opening test)"
-  ],
-  [
-   "MILL-SLIVER",
-   "warning",
-   "zone fill B.Cu net +5V_SENS at (5.05, -87.75)",
-   0.1535355706325,
-   0.5,
-   "zone fill has copper narrower than 0.50 mm (0.15 mm2 removed by an opening test)"
-  ],
-  [
-   "MILL-SLIVER",
-   "warning",
    "zone fill B.Cu net GND at (47.20, -110.00)",
    0.5032408807125,
    0.5,
@@ -43,14 +27,6 @@
    0.378047803045,
    0.5,
    "zone fill has copper narrower than 0.50 mm (0.38 mm2 removed by an opening test)"
-  ],
-  [
-   "MILL-SLIVER",
-   "warning",
-   "zone fill B.Cu net VBAT at (43.23, -30.18)",
-   0.227876147669,
-   0.5,
-   "zone fill has copper narrower than 0.50 mm (0.23 mm2 removed by an opening test)"
   ]
  ],
  "waived": []

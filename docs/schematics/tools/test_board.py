@@ -15,6 +15,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 SCH_DIR = os.path.normpath(os.path.join(HERE, ".."))
 sys.path.insert(0, HERE)
 import build_pcb  # noqa: E402
+import placement  # noqa: E402
 import check_board  # noqa: E402
 import milling_check as mc  # noqa: E402
 
@@ -210,6 +211,23 @@ class TestSyncFields(unittest.TestCase):
         self.assertEqual(fps[0].GetFieldText("Sync Test"), "hello")
         self.assertFalse(fps[0].GetField("Sync Test").IsVisible())
         self.assertTrue(all(f.HasField("MPN") for f in b.GetFootprints()))
+
+
+class TestSyncZones(unittest.TestCase):
+    def test_zones_rebuilt_parts_and_tracks_unchanged(self):
+        tmp = tempfile.mkdtemp(prefix="syncz-")
+        path = os.path.join(tmp, "rc_power_board.kicad_pcb")
+        shutil.copyfile(os.path.join(SCH_DIR, "rc_power_board.kicad_pcb"), path)
+
+        def snap():
+            b = pcbnew.LoadBoard(path)
+            return ([(f.GetReference(), f.GetPosition().x, f.GetPosition().y) for f in b.GetFootprints()], len(b.GetTracks()))
+        before = snap()
+        self.assertEqual(build_pcb.main(["--out", path, "--sync-zones"]), 0)
+        self.assertEqual(snap(), before)
+        b = pcbnew.LoadBoard(path)
+        self.assertEqual(len(b.Zones()), 2 + len(placement.BUS_ZONES))
+        self.assertTrue(all(z.IsFilled() for z in b.Zones()))
 
 
 REPO_BOARD = os.path.join(SCH_DIR, "rc_power_board.kicad_pcb")

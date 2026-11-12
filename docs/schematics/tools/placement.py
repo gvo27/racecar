@@ -75,9 +75,9 @@ BUS_ZONES = [
     ("/VBAT_RAW", _rect(22.3, 1.9, 28.5, 21.0)),
     # F1 output -> trunk -> band to U1 and trunk to U2 VIN
     ("VBAT", _rect(31.5, 15.0, 41.0, 24.5)),
-    ("VBAT", _rect(22.65, 24.4, 43.6, 30.4)),
+    ("VBAT", _rect(22.65, 24.4, 42.2, 30.4)),
     ("VBAT", _rect(22.65, 24.4, 28.9, 38.5)),
-    ("VBAT", _rect(43.0, 28.05, 47.6, 29.95)),          # pad-width neck to the U1 VIN row
+    ("VBAT", _rect(41.8, 28.05, 47.6, 30.4)),          # pad-width neck to the U1 VIN row
     ("VBAT", _rect(31.0, 11.2, 32.7, 15.2)),            # stub to D1
     ("VBAT", _rect(38.3, 7.5, 40.7, 15.1)),             # stub to C1
     ("VBAT", _rect(38.8, 30.0, 40.2, 31.7)),            # stub to C2
@@ -91,10 +91,10 @@ BUS_ZONES = [
     ("+5V_CPU", _rect(43.9, 37.5, 45.1, 40.3)),         # TP1
     ("+5V_CPU", _rect(52.9, 37.5, 54.1, 41.0)),         # R1
     # +5V_SENS: U2 VOUT pair -> trunk north -> tooth to the J8.1/J11.1 bar, branch to J9.1, C9, FB1
-    ("+5V_SENS", _rect(22.8, 66.8, 27.3, 69.6)),
+    ("+5V_SENS", _rect(23.0, 66.8, 27.3, 69.6)),
     ("+5V_SENS", _rect(23.0, 66.8, 27.3, 101.0)),
     ("+5V_SENS", _rect(4.0, 85.0, 23.2, 88.0)),
-    ("+5V_SENS", _rect(3.5, 82.3, 4.8, 90.5)),        # J8.1 + J11.1 bar
+    ("+5V_SENS", _rect(3.5, 82.3, 5.5, 90.5)),        # J8.1 + J11.1 bar
     ("+5V_SENS", _rect(5.3, 87.5, 7.1, 99.5)),
     ("+5V_SENS", _rect(4.0, 98.1, 5.6, 99.7)),          # J9.1
     ("+5V_SENS", _rect(12.2, 87.5, 13.8, 89.9)),        # C9
