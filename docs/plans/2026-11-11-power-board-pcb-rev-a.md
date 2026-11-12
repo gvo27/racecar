@@ -27,11 +27,11 @@
 
 ## Review Focus
 
-1. A THT pad that DRC calls connected only through F.Cu copper (open on an unplated board): `check_board.py` fails on any F.Cu track/zone touching a THT pad. Test in Task 4.
-2. A drill outside the bit set that is not in the milled list: `check_board.py` lists every hole. Test in Task 4.
-3. U2 pin map mirrored (footprint drawn as the bottom view): the footprint test pins VIN at the end nearest ENABLE and the signal row on the same long edge as GND. Test in Task 3.
-4. High-current nets autorouted at Default width: the check asserts every `VBAT_RAW`/`VBAT`/GND track is ≥ 6.0 mm. Test in Task 5.
-5. Re-running the build over an owner-edited board destroys the edits: `build_pcb.py` refuses to overwrite an existing `.kicad_pcb` without `--force`. Test in Task 4.
+1. A THT pad that DRC calls connected only through F.Cu copper (open on an unplated board): `check_board.py` fails on any F.Cu track/zone touching a THT pad. Test in Task 5.
+2. A drill outside the bit set that is not in the milled list: `check_board.py` lists every hole. Test in Task 5.
+3. U2 pin map mirrored (footprint drawn as the bottom view): the footprint test pins VIN at the end nearest ENABLE and the signal row on the same long edge as GND. Test in Task 4.
+4. High-current nets autorouted at Default width: the check asserts every `VBAT_RAW`/`VBAT`/GND track is ≥ 6.0 mm. Test in Task 6.
+5. Re-running the build over an owner-edited board destroys the edits: `build_pcb.py` refuses to overwrite an existing `.kicad_pcb` without `--force`. Test in Task 5.
 
 ---
 
@@ -61,7 +61,32 @@
 - [ ] **Step 3:** Run `make kicad-image erc`. Expected: 0 errors, 3 `lib_symbol_mismatch` warnings (D2–D4). The stock lib tables come from `/usr/share/kicad/template`, which the image's KiCad finds without a user config. If it doesn't, copy them into a `-e XDG_CONFIG_HOME` dir in the target.
 - [ ] **Step 4:** Commit `build: pinned KiCad 10 + Freerouting images, make erc/pcb-* targets`.
 
-### Task 3: U2 footprint and schematic assignment
+### Task 3: Milling check (project skill `pcb-milling-check`)
+
+The skill entry `.claude/skills/pcb-milling-check/SKILL.md` exists (written by the main session). It defines the rule ids, the severities, the exit codes and the agent rules. This task builds what the skill runs. DRC-clean does not mean CNC-millable.
+
+**Files:**
+- Create: `docs/schematics/milling.toml`, `docs/schematics/tools/milling_check.py`, `docs/schematics/tools/test_milling_check.py`
+- Modify: `Makefile` (target `pcb-mill-check`; add the tests to `pcb-test`)
+
+**`milling.toml`** (each value carries `status = "assumed"` or `"confirmed"` and a `source`):
+- copper thickness 0.070 mm (Kepro P22-365G, 2 oz; confirmed, `fab_handoff.md`)
+- isolation bits: 30°, tip 0.2 mm; 60°, tip 0.1 mm (Makera PCB pack; confirmed)
+- cut depth 0.10 to 0.15 mm (`fab_handoff.md`; assumed); depth error ±0.05 mm with probe auto-levelling (assumed)
+- drill set 0.8, 1.0, 1.2, 1.5 mm (owner: assume 4 common sizes; assumed); smallest end mill 1.0 mm (assumed); a milled hole must be > 1.5 mm
+- rivet via 1.2 mm drill / 2.1 mm pad; annular min 0.45 mm; track min 0.5 mm; edge clearance 0.5 mm (`min_copper_edge_clearance` in `.kicad_pro`)
+
+**Interfaces:** `load_limits(path: str) -> Limits`; `cut_width(tip: float, angle_deg: float, depth: float) -> float` (`tip + 2 * depth * tan(angle / 2)`); `check(board: pcbnew.BOARD, limits: Limits) -> list[Finding]`, `Finding = (rule_id: str, severity: "error"|"warning", where: str, value: float|None, limit: float|None, message: str)`; CLI `milling_check.py <board> --limits <toml> --json <out>`, exit 0/1/2. Task 5's `check_board.py` calls `check()` and fails on any error.
+
+**Numbers to pin in tests:** worst-case depth = 0.15 + 0.05 = 0.20 mm. `cut_width(0.2, 30, 0.20)` = 0.307 mm; `cut_width(0.1, 60, 0.20)` = 0.331 mm. MILL-GAP: a gap is an error when it is < the narrowest bit's cut width at worst-case depth (0.307 mm); MILL-GAP-BIT (warning): gaps where only some bits fit, listing the bits that fit (here, gaps from 0.307 to < 0.331 mm fit only the 30° bit). MILL-DEPTH: 0.10 - 0.05 = 0.05 mm < 0.070 mm => **error with the assumed limits.** Do not hide it: report it to the owner as a finding about the assumed depth range (the min depth must be at least 0.12 mm with ±0.05 error).
+
+- [ ] **Step 1:** Write `test_milling_check.py` (stdlib `unittest`, image `python3`): the `cut_width` values above; a synthetic board made in the test with `pcbnew`: two tracks of different nets 0.30 mm apart => MILL-GAP error; 0.32 mm => MILL-GAP-BIT warning (30° only); 0.45 mm => none; a 1.1 mm hole => MILL-DRILL error; a 2.4 mm hole => none (milled); an F.Cu track on a THT pad => MILL-FCU-THT error; a 2.0/1.1 via => MILL-VIA error. `load_limits` rejects a value with no `status`.
+- [ ] **Step 2:** Run `make pcb-test`. Expected: FAIL (module missing).
+- [ ] **Step 3:** Implement. For gaps, use the KiCad shape API (`GetEffectiveShape()` / `SHAPE_POLY_SET` distance) per copper layer, between items of different nets, pads in one footprint included.
+- [ ] **Step 4:** Run `make pcb-test`. Expected: PASS.
+- [ ] **Step 5:** Commit `tools: pcb milling check (V-bit width, drills, unplated rules)`.
+
+### Task 4: U2 footprint and schematic assignment
 
 **Files:**
 - Create: `docs/schematics/rc_power.pretty/Pololu_D24VxF5.kicad_mod`, `docs/schematics/fp-lib-table` (`rc_power` -> `${KIPRJMOD}/rc_power.pretty`)
@@ -89,7 +114,7 @@ Fab layer: 40.6 x 20.3 mm outline. Courtyard: outline + 0.5 mm. The terminal-blo
 - [ ] **Step 4:** Run `make pcb-test erc`. Expected: the tests pass; ERC 0 errors. The netlist has 40 components, 21 nets, U2 footprint set.
 - [ ] **Step 5:** Commit `schematic: U2 footprint Pololu_D24VxF5, KiCad 10 format`.
 
-### Task 4: Board bootstrap and checks
+### Task 5: Board bootstrap and checks
 
 **Files:**
 - Create: `docs/schematics/tools/build_pcb.py` (`main(argv) -> int`; `--force`), `docs/schematics/tools/placement.py` (table `PLACEMENT: dict[str, tuple[float, float, float, str]]` = ref -> x, y, rotation, layer `"F"`/`"B"`, in mm from the outline's lower-left corner), `docs/schematics/tools/check_board.py` (`check(board) -> list[str]` returns the problems; CLI exits 1 if there are any), `docs/schematics/tools/test_board.py`, `docs/schematics/rc_power_board.kicad_dru` (`U3_fine`)
@@ -103,7 +128,7 @@ Fab layer: 40.6 x 20.3 mm outline. Courtyard: outline + 0.5 mm. The terminal-blo
 - [ ] **Step 4:** Run `make pcb-build pcb-test`. Expected: PASS. Render `kicad-cli pcb export svg` (F.Cu, B.Cu, Edge.Cuts, F.Fab) and look at it for placement sanity.
 - [ ] **Step 5:** Commit `pcb: bootstrap rev A board (placement, outline, zones, rules)`.
 
-### Task 5: Routing
+### Task 6: Routing
 
 **Files:**
 - Create: `docs/schematics/tools/route_pcb.py` (`main(argv) -> int`: export DSN, run the Freerouting image, import SES, refill zones, save)
@@ -112,10 +137,10 @@ Fab layer: 40.6 x 20.3 mm outline. Courtyard: outline + 0.5 mm. The terminal-blo
 **Approach:** Before the DSN export, set F.Cu to "not routable" in the DSN (only B.Cu is a signal layer). Route `VBAT_RAW` and `VBAT` by hand in the script as 6.0 mm B.Cu tracks along the input chain (pad-to-pad on the placement), and let the B.Cu GND zone carry GND; Freerouting routes the rest, with net-class widths from the DSN. Allow vias only if B.Cu-only routing can't finish; then each via is a rivet and the count goes in the report.
 
 - [ ] **Step 1:** Add tests: `kicad-cli pcb drc --schematic-parity --severity-all --format json` gives 0 errors and 0 unconnected items; `check_board()` is []; every `VBAT_RAW`/`VBAT` track is ≥ 6.0 mm; the via count is printed.
-- [ ] **Step 2:** Run `make pcb-route pcb-test`, then iterate on placement (Task 4 table) until it passes. Stop condition (spec): if it can't reach 0 unrouted with DRC clean, commit the best board with the DRC report and stop.
+- [ ] **Step 2:** Run `make pcb-route pcb-test`, then iterate on placement (Task 5 table) until it passes. Stop condition (spec): if it can't reach 0 unrouted with DRC clean, commit the best board with the DRC report and stop.
 - [ ] **Step 3:** Commit `pcb: route rev A (B.Cu, N rivet vias)`.
 
-### Task 6: Review package and docs
+### Task 7: Review package and docs
 
 **Files:**
 - Create: `docs/schematics/tools/review_plots.py` (`main(argv) -> int`), `docs/schematics/review/` (`drc.json`, `rc_power_board_layers.pdf` with F.Cu, B.Cu, Edge.Cuts, F.Fab, B.Fab, `rc_power_board_1to1.pdf` at scale 1 for the paper check, `README.md` with the via count, the assumptions and the owner GUI checks)
@@ -126,5 +151,10 @@ No Gerbers, drill files or CAM files in this plan (scope above).
 - [ ] **Step 1:** Add a test: `make pcb-review` writes the files above; `drc.json` has 0 errors and 0 unconnected items.
 - [ ] **Step 2:** Run `make pcb-review pcb-test`. Expected: PASS.
 - [ ] **Step 3:** Update the docs; run the STE lint on the changed prose.
-- [ ] **Step 4:** Review: a Sonnet reviewer, fix the findings, then an Opus reviewer, fix the findings.
+- [ ] **Step 4:** Run `make pcb-mill-check` and the kicad-happy `kicad` skill (PCB review) and `emc` skill on the board. Treat their findings as claims: verify each against the board, then fix it or list it in `review/README.md`.
+- [ ] **Step 4b:** Review (main session): a Sonnet reviewer, fix the findings, then an Opus reviewer, fix the findings.
 - [ ] **Step 5:** Commit `pcb: rev A review package and docs`, push to `schematic`, comment on PR #3 (owner GUI checks: Update Symbols, 3D view, 1:1 print, U2 footprint vs the real module).
+
+### Task 8 (later, separate): KiRI visual diff trial
+
+Owner, 2026-11-11: try leoheck/kiri (tag 1.0.0) with KiCad 10. Do not commit anything until it works with KiCad 10. If the setup is too buggy, drop it and record that in the PR. Work in the scratchpad, in a container based on the pinned KiCad image. Pass = `kiri` makes a schematic and layout diff between two commits of `docs/schematics/` with no errors. Only then propose a pinned CI job (kiri-github-action by SHA, after a read of its permissions).
