@@ -1,0 +1,6 @@
+# Set one firmware tuning key (SET <key> <value>), not persisted until save.
+string key
+float32 value
+---
+bool ok
+string message

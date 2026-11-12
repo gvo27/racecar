@@ -1,0 +1,5 @@
+# Clear a latched stop and arm. Result is armed but stationary.
+uint32 incident            # must equal SupervisorState.incident; stale resets are refused
+---
+bool ok
+string message
