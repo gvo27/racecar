@@ -25,6 +25,17 @@ KiCad DRC checks the numbers in `rc_power_board.kicad_pro` and `.kicad_dru`. It 
 | MILL-SLIVER | Copper narrower than the min track width, made by zone fill | warning |
 | MILL-ISLAND | Zone islands with no net connection | warning |
 | MILL-EDGE | Copper-to-board-edge distance >= the configured edge clearance | error |
+| MILL-RIVET-ACCESS | A rivet via must be solderable on both sides: no via inside the courtyard of an F-side part (its body covers the top joint) or of a B-side part | error |
+| MILL-CONN-EDGE | Each connector (J*) courtyard is within the configured distance of the board edge (wire entry outward) | warning |
+
+## Loop: run, triage, fix, run again
+1. **Run** the check.
+2. **Triage** each finding as real or false positive. A false positive needs a waiver in `docs/schematics/milling_waivers.toml`: rule id, location (ref/net/xy), the reason in one sentence, who, date. The check reports waived findings in their own group; it never hides them. Never waive MILL-FCU-THT or MILL-RIVET-ACCESS. MILL-DEPTH is a finding about the limits (the lab tech decides), not about the board.
+3. **Fix** the real findings. First try fixes that do not move parts: neck a track down (never below its net-class width), change a zone clearance, change a pad shape in the board copy. If one region keeps failing, re-lay that whole region, or swap equivalent pins through the schematic. Do not stack local patches or add rivets to escape a crowded area.
+4. **Run again** until there are 0 unwaived errors. A board that is "nearly clean" is not done: report the open errors, not a percentage.
+
+## Report format
+Three groups: **errors** (unwaived), **waived** (with the reason), **owner/lab-tech questions** (limits that are assumed and change the result, for example MILL-DEPTH). Add the MILL-GAP-BIT areas.
 
 ## Rules for agents
 - Run it after every board change and before any review request. Report the counts, every error and the MILL-GAP-BIT areas.
