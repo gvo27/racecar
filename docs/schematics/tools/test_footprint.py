@@ -22,7 +22,7 @@ class TestPololuD24VxF5(unittest.TestCase):
         pads = self.fp.Pads()
         self.assertEqual(len(pads), 12)
         counts = collections.Counter(p.GetNumber() for p in pads)
-        self.assertEqual(dict(counts), {"1": 2, "2": 4, "3": 3, "4": 1, "": 2})
+        self.assertEqual(dict(counts), {"1": 2, "2": 4, "3": 2, "4": 1, "": 3})
 
     def test_drills(self):
         for p in self.fp.Pads():
@@ -47,8 +47,12 @@ class TestPololuD24VxF5(unittest.TestCase):
 
     def test_vout_pairs_at_output_end(self):
         xs = sorted(ToMM(p.GetPosition().x) for p in self.fp.Pads() if p.GetNumber() == "3")
-        self.assertLess(xs[0], 1.0)  # the signal-row VOUT pad
-        self.assertTrue(all(x > 15 for x in xs[1:]))
+        self.assertTrue(all(x > 15 for x in xs))
+
+    def test_signal_row_vout_pad_has_no_number(self):
+        # Pololu: this pin is "not intended to source much current"; it must not get a net
+        row = [p for p in self.fp.Pads() if abs(ToMM(p.GetPosition().x) - 0.02) < 0.01]
+        self.assertEqual([p.GetNumber() for p in row], [""])
 
     def test_pad_clearance(self):
         pads = list(self.fp.Pads())

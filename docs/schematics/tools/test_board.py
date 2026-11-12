@@ -220,6 +220,12 @@ class TestRoutedBoard(unittest.TestCase):
             if t.Type() != pcbnew.PCB_VIA_T and t.GetNetname().lstrip("/") in ("VBAT_RAW", "VBAT", "GND"):
                 self.assertGreaterEqual(ToMM(t.GetWidth()), 6.0 - 1e-6, "%s track" % t.GetNetname())
 
+    def test_path_widths(self):
+        # opening test on B.Cu along the current paths (Task 7b)
+        for net, label, pads, w in check_board.PATH_ROWS:
+            with self.subTest(path=label):
+                self.assertEqual(check_board.path_width(self.b, net, pads, w), [])
+
     def test_vias_are_rivets_and_counted(self):
         vias = [t for t in self.b.GetTracks() if t.Type() == pcbnew.PCB_VIA_T]
         for v in vias:
@@ -234,6 +240,46 @@ class TestRoutedBoard(unittest.TestCase):
     def test_every_net_has_copper(self):
         # a routed board has tracks (the unrouted bootstrap has none)
         self.assertGreater(sum(1 for t in self.b.GetTracks() if t.Type() != pcbnew.PCB_VIA_T), 50)
+
+
+class TestPathWidth(unittest.TestCase):
+    """path_width on a synthetic board: two pads joined by a 2.0 mm track."""
+
+    def board(self):
+        from pcbnew import FromMM, VECTOR2I
+        b = pcbnew.BOARD()
+        n = pcbnew.NETINFO_ITEM(b, "N")
+        b.Add(n)
+        for ref, x in (("A", 0), ("B", 20)):
+            fp = pcbnew.FOOTPRINT(b)
+            fp.SetReference(ref)
+            fp.SetPosition(VECTOR2I(FromMM(x), 0))
+            pad = pcbnew.PAD(fp)
+            pad.SetNumber("1")
+            pad.SetShape(pcbnew.PAD_SHAPE_CIRCLE)
+            pad.SetAttribute(pcbnew.PAD_ATTRIB_SMD)
+            ls = pcbnew.LSET()
+            ls.AddLayer(pcbnew.B_Cu)
+            pad.SetLayerSet(ls)
+            pad.SetSize(VECTOR2I(FromMM(1.0), FromMM(1.0)))
+            pad.SetPosition(VECTOR2I(FromMM(x), 0))
+            pad.SetNet(n)
+            fp.Add(pad)
+            b.Add(fp)
+        t = pcbnew.PCB_TRACK(b)
+        t.SetLayer(pcbnew.B_Cu)
+        t.SetStart(VECTOR2I(0, 0))
+        t.SetEnd(VECTOR2I(FromMM(20), 0))
+        t.SetWidth(FromMM(2.0))
+        t.SetNet(n)
+        b.Add(t)
+        return b
+
+    def test_passes_at_track_width(self):
+        self.assertEqual(check_board.path_width(self.board(), "N", ["A.1", "B.1"], 1.9), [])
+
+    def test_fails_above_track_width(self):
+        self.assertEqual(len(check_board.path_width(self.board(), "N", ["A.1", "B.1"], 3.0)), 1)
 
 
 class TestReviewPackage(unittest.TestCase):
