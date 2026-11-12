@@ -160,6 +160,33 @@ No Gerbers, drill files or CAM files in this plan (scope above).
 - [ ] **Step 4b:** Review (not the builder): the main session (Opus) reviews and reports to the owner. After the owner confirms, a Fable agent does the final review. See "Execution and review" above.
 - [ ] **Step 5:** Commit `pcb: rev A review package and docs`, push to `schematic`, comment on PR #3 (owner GUI checks: Update Symbols, 3D view, 1:1 print, U2 footprint vs the real module).
 
+### Task 7b: Copper width along the current paths (Opus review, 2026-11-11)
+
+The baseline board (e0ba889) passes DRC, ERC and the milling check, but these checks do not measure the copper width along a current path. An opening test (deflate then inflate the B.Cu copper of one net by w/2, then check that the pads stay in one piece) found:
+- U1 GND (pins 7–10, C2, C4) is in a pocket between the `+5V_CPU` track, the VBAT zone and the U1_PG track. The pocket joins the GND pour through a 0.5–0.6 mm neck. Two MILL-SLIVER warnings near U1 mark this neck.
+- J1 GND joins U2 input GND and the J6/J7 GND through 1.2–1.4 mm. The VBAT_RAW/VBAT zones make a wall from the bottom edge up to U2. The U1_PG track (94 mm) and the `+5V_CPU` track cross the board.
+- VBAT from F1 to U1 VIN: 2.35 mm neck. `+5V_CPU`: one 1.03 mm segment.
+- The U2 signal-row VOUT pad has number "3", so the router adds a 25 mm `+5V_SENS` track to it. Pololu: this pin is "not intended to source much current".
+- The F.Cu GND pour joins GND at one rivet only. It does not carry return current.
+- `review/README.md` says the GND trunks are at least 6 mm wide. This is not true.
+
+**Files:**
+- Modify: `docs/schematics/tools/check_board.py` (new check `path_width(board, net, pads, width_mm) -> list[str]`), `test_board.py`, `rc_power.pretty/Pololu_D24VxF5.kicad_mod` (signal VOUT pad number → "", the same as PG and FB), `test_footprint.py`, `placement.py`, `build_pcb.py`, `route_pcb.py`, `review/README.md`
+
+**Required widths (opening test on B.Cu, the pads in each set stay in one piece):**
+| Net | Pads | Width |
+| --- | --- | --- |
+| GND | J1.2, U2 GND (input end), U1.7–10 | 6.0 mm |
+| GND | J6.2, J7.2, U1.7–10 | 1.6 mm |
+| GND | U2 GND (output end), J8.2, J9.2, J11.2, C9.2 | 1.6 mm |
+| `/VBAT_RAW`, VBAT | J1.1 → F1 → U2.1, U1.5/6 | 6.0 mm (pads narrower than this are measured at their own width) |
+| `+5V_CPU`, `+5V_SENS` | all pads of the net | 1.6 mm |
+
+- [ ] **Step 1:** Add the tests for the table above and for the U2 pad change. Run `make pcb-test`. Expected: FAIL on the e0ba889 board.
+- [ ] **Step 2:** Re-lay the power region; do not stack local patches. Make GND a planned B.Cu trunk zone (as VBAT), from J1.2 past U2 and U1. Keep long low-current signals (U1_PG, the PWM nets) out of the path between J1 and the regulators: route them along an edge, or as F.Cu jumpers on rivets. List each new rivet. Fixes go through the scripts (`make pcb-route` routes from scratch).
+- [ ] **Step 3:** Run `make pcb-build pcb-route pcb-test pcb-check pcb-mill-check pcb-review`. Expected: tests PASS, DRC 0 errors / 0 unconnected / parity clean, 0 unwaived milling errors (MILL-DEPTH stays an owner/lab-tech question).
+- [ ] **Step 4:** Update `review/README.md` (measured widths, rivet count, removed owner questions). Commit `pcb: GND and power path widths (opening-test check, power region re-lay)`.
+
 ### Task 8 (later, separate): KiRI visual diff trial
 
 Owner, 2026-11-11: try leoheck/kiri (tag 1.0.0) with KiCad 10. Do not commit anything until it works with KiCad 10. If the setup is too buggy, drop it and record that in the PR. Work in the scratchpad, in a container based on the pinned KiCad image. Pass = `kiri` makes a schematic and layout diff between two commits of `docs/schematics/` with no errors. Only then propose a pinned CI job (kiri-github-action by SHA, after a read of its permissions).
