@@ -75,9 +75,9 @@ No plated through-holes. Vias are **LPKF EasyContac** through-hole rivets from t
 | 1.0 mm | 1.4 mm | 1.5 mm | 2.2 mm |
 | 1.2 mm | 1.6 mm | 1.7 mm | 2.6 mm |
 
-Rule of thumb: drill = outer diameter + 0.1 mm.
+Rule (lab tech 2026-11-13): drill = rivet outer diameter + 0.1 mm. If a rivet does not fit, the lab widens the hole in a second pass.
 
-- **Default via: EasyContac 0.8 mm** (about 20 needed): drill 1.1 mm, pad 2.0 mm (collar 1.6 + margin), annular 0.45 mm. Matches the via settings already in `rc_power_board.kicad_pro` (2.0 / 1.1), so no change there. Rivet size is fixed by lab stock and the drill size by the rivet; the board now uses a 2.1 mm pad (annular 0.5 mm). The 1.1 mm bit is in the owner's set. Open: the rivet fit in the 1.1 mm hole on a test piece.
+- **Default via: EasyContac 0.8 mm** (about 20 needed): drill 1.1 mm, pad 2.0 mm (collar 1.6 + margin), annular 0.45 mm. Matches the via settings already in `rc_power_board.kicad_pro` (2.0 / 1.1), so no change there. Rivet size is fixed by lab stock and the drill size by the rivet; the board now uses a 2.1 mm pad (annular 0.5 mm). The 1.1 mm bit is in the owner's set. If the rivet does not fit, the lab widens the hole in a second pass (lab tech 2026-11-13).
 - **Optional, high current (VBAT / GND layer changes): EasyContac 1.2 mm**, several in parallel: drill 1.7 mm, collar 2.6 mm, pad at least 3.0 mm. If used, define it as a separate via size in Board Setup > Design Rules > Pre-defined Sizes.
 - **Optional, plated THT hole:** an EasyContac 1.0 mm rivet can "plate" a THT hole so a component pin is soldered on one side and still connects both layers. Round leads up to about 0.8 mm fit; 0.64 mm square pins (diagonal about 0.905 mm vs 1.0 mm bore) are a tight fit: test first. The 2.4 mm pad (2.2 mm collar) needs ≥2.8 mm pitch for 0.4 mm clearance, so it does not fit XH (2.5 mm) or 2.54 mm headers; use it only on wider-pitch parts (e.g. C9 3.5 mm, VH 3.96 mm, screw terminals). The footprint hole then becomes 1.5 mm drill with a pad of at least 2.4 mm. Not the default: the default stays "THT pins routed on the bottom".
 

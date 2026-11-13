@@ -224,4 +224,4 @@ Owner, 2026-11-11: try leoheck/kiri (tag 1.0.0) with KiCad 10. Do not commit any
 - [x] **Step 4:** `make pcb-fab` writes 5 files to `docs/schematics/fab/` (see `fab/README.md`). `test_fab.py` checks: file set, one layer per DXF, closed loops, no overlap, copper area against pcbnew (0.5 %), copper inside the outline, holes against `kicad-cli pcb export drill`, dowels at (0, 0) and (145.8468, 0), B.Cu not mirrored, committed files current.
 - [x] **Step 5:** Docs: `example/README.md`, `fab_handoff.md`, `bom.md`, `bom_offboard.csv`, `review/README.md`, this plan, `.claude/CLAUDE.md`, `.claude/rules/schematics.md`.
 
-**Open (owner / lab tech):** F1 peg size; Fusion taper meaning (per side or included); `milled_hole_min` 3.3 mm; rivet 1.1 mm hole on a test piece; the Fusion import of the files in the lab template.
+**Open (owner / lab tech):** F1 peg size; Fusion taper meaning (per side or included); `milled_hole_min` 3.3 mm; the Fusion import of the files in the lab template.

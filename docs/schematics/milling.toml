@@ -92,7 +92,7 @@ source = "end mill 3.175 mm + 0.125 mm; lab tech to confirm. A hole between the 
 value = 1.1
 unit = "mm"
 status = "assumed"
-source = "rivet stock = LPKF EasyContac kit 0.6/0.8/1.0/1.2 mm + setting tool (owner photo 2026-11-13); EasyContac 0.8 rivet (1.0 mm OD, unverified table) in the 1.1 mm bit (drill set, owner photo 2026-11-12)"
+source = "rivet stock = LPKF EasyContac kit 0.6/0.8/1.0/1.2 mm + setting tool (owner photo 2026-11-13); rule drill = rivet OD + 0.1 mm (lab tech 2026-11-13; the lab widens the hole in a second pass if the rivet does not fit); EasyContac 0.8 rivet OD 1.0 mm (unverified table) -> 1.1 mm bit (drill set, owner photo 2026-11-12)"
 
 [via_pad]
 value = 2.1
