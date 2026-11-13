@@ -43,7 +43,7 @@ Rebuild: `make kicad-image pcb-review`. All tools run in the pinned KiCad 10.0.8
 | DRC with schematic parity | 0 errors, 0 unconnected items, parity clean; 13 `lib_footprint_mismatch` warnings (see below) |
 | `make pcb-check` (`check_board.py`) | 0 problems: no F.Cu copper on a THT pad, every hole in the bit set or in `MILLED_HOLES`, all vias 1.2/2.1 mm, no narrow HighCurrent track |
 | `make pcb-mill-check` | 0 unwaived errors, 0 waived, 0 MILL-GAP-BIT areas, 2 MILL-SLIVER warnings, 0 MILL-ISLAND warnings, 1 owner/lab-tech question (MILL-DEPTH) |
-| `make pcb-test` | 81 tests pass |
+| `make pcb-test` | 82 tests pass |
 
 **MILL-DEPTH (question for the owner and the lab tech).** With the assumed depth range 0.10 to 0.15 mm and a depth error of +-0.05 mm, the minimum depth is 0.05 mm. This is below the copper thickness of 0.070 mm, so a shallow cut may not go through the copper. The minimum depth must be at least 0.12 mm. The check keeps this as an error. It is a finding about the limits, not about the board. Exit code of `make pcb-mill-check` is 1 because of this finding.
 
