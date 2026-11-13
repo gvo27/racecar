@@ -91,8 +91,8 @@ source = "end mill 3.175 mm + 0.125 mm; lab tech to confirm. A hole between the 
 [via_drill]
 value = 1.1
 unit = "mm"
-status = "assumed"
-source = "rivet stock = LPKF EasyContac kit 0.6/0.8/1.0/1.2 mm + setting tool (owner photo 2026-11-13); rule drill = rivet OD + 0.1 mm (lab tech 2026-11-13; the lab widens the hole in a second pass if the rivet does not fit); EasyContac 0.8 rivet OD 1.0 mm (unverified table) -> 1.1 mm bit (drill set, owner photo 2026-11-12)"
+status = "confirmed"
+source = "rivet stock = LPKF EasyContac kit 0.6/0.8/1.0/1.2 mm + setting tool (owner photo 2026-11-13); rule drill = rivet OD + 0.1 mm (lab tech 2026-11-13; the lab widens the hole in a second pass if the rivet does not fit); EasyContac 0.8 rivet OD 1.0 mm (owner caliper 2026-11-13, measured on the shaft: 0.8 bag 1.0 mm, 1.0 bag 1.45 mm, 1.2 bag 1.6 mm OD (old caliper, small error possible); bag label = inner diameter) -> 1.1 mm bit (drill set, owner photo 2026-11-12)"
 
 [via_pad]
 value = 2.1

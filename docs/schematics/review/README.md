@@ -59,7 +59,7 @@ Earlier warnings, now removed: 3 F.Cu GND "slivers" and 4 MILL-ISLAND were false
 ## Assumptions (all "assumed": lab tech to confirm)
 
 - Confirmed from the lab file and the owner (Task 9): drill set 0.1 to 2.0 mm in 0.1 mm steps; end mill 3.175 mm; cut depth 0.08 mm; depth error 0; stock 152.4 x 101.6 mm; dowels 4.191 mm.
-- Assumed: bored holes of 3.3 mm or more (tool + 0.125 mm). Rivet via 1.1 mm drill / 2.1 mm pad; the 0.8 mm EasyContac rivet (1.0 mm OD) sits about 0.05 mm loose before soldering.
+- Assumed: bored holes of 3.3 mm or more (tool + 0.125 mm). Confirmed: rivet via 1.1 mm drill / 2.1 mm pad; the 0.8 mm EasyContac rivet (1.0 mm OD, owner caliper 2026-11-13) sits about 0.05 mm loose before soldering.
 - Isolation bit: 0.2 mm tip, Fusion taper 30. Cut width at 0.08 mm depth: 0.243 mm (30 deg included) or 0.292 mm (60 deg included). The smallest copper gap on the board is 0.35 mm (U3 pads), which passes both readings.
 - U1 and U2 are the Pololu D36V50F5 (owner 2026-11-12). The footprint comes from Pololu's drawing (tolerance of drill location +-0.1 mm). The 3 mounting holes are on F.Fab only. The standoff of the module over the F.Cu pour (parts 1.8 mm under the module) is not known: check on the real header.
 - No reverse-polarity protection (owner decision). U3 keeps the stock SOT-23-5 footprint and rule `U3_fine`.
