@@ -214,6 +214,25 @@ class TestSyncDrills(unittest.TestCase):
                 self.assertAlmostEqual(ToMM(t.GetDrillValue()), 1.1, places=3)
         self.assertTrue(all(z.IsFilled() for z in b2.Zones()))
 
+    def test_stock_and_dowels_drawn_on_user_layer_in_board_coordinates(self):
+        d = tempfile.mkdtemp(prefix="syncu-")
+        dst = os.path.join(d, "rc_power_board.kicad_pcb")
+        shutil.copy(board_path(), dst)
+        for ext in (".kicad_pro", ".kicad_dru"):
+            shutil.copy(os.path.join(SCH_DIR, "rc_power_board" + ext), os.path.join(d, "rc_power_board" + ext))
+        build_pcb.sync_drills(dst)
+        build_pcb.sync_drills(dst)  # twice: no duplicates
+        b = pcbnew.LoadBoard(dst)
+        user = [x for x in b.GetDrawings() if x.GetLayer() == pcbnew.Dwgs_User]
+        self.assertEqual(len(user), 3)
+        circles = [x for x in user if x.GetShape() == pcbnew.SHAPE_T_CIRCLE]
+        self.assertEqual(len(circles), 2)
+        o = b.GetDesignSettings().GetAuxOrigin()
+        for c, (sx, sy) in zip(sorted(circles, key=lambda c: c.GetCenter().x), sorted(placement.DOWELS, key=lambda p: placement.stock_to_board(*p)[0])):
+            bx, by = placement.stock_to_board(sx, sy)
+            self.assertAlmostEqual(ToMM(c.GetCenter().x - o.x), bx, places=3)
+            self.assertAlmostEqual(ToMM(o.y - c.GetCenter().y), by, places=3)
+
 
 class TestCheckBoardCatches(unittest.TestCase):
     """check_board must fail on the review-focus defects (see the plan)."""

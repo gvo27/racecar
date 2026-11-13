@@ -1,0 +1,1592 @@
+  0
+SECTION
+  2
+HEADER
+  9
+$ACADVER
+  1
+AC1015
+  9
+$INSUNITS
+ 70
+4
+  9
+$MEASUREMENT
+ 70
+1
+  0
+ENDSEC
+  0
+SECTION
+  2
+TABLES
+  0
+TABLE
+  2
+LTYPE
+  5
+5
+100
+AcDbSymbolTable
+ 70
+1
+  0
+LTYPE
+  5
+6
+100
+AcDbSymbolTableRecord
+100
+AcDbLinetypeTableRecord
+  2
+CONTINUOUS
+ 70
+0
+  3
+Solid line
+ 72
+65
+ 73
+0
+ 40
+0.0
+  0
+ENDTAB
+  0
+TABLE
+  2
+LAYER
+  5
+10
+100
+AcDbSymbolTable
+ 70
+7
+  0
+LAYER
+  5
+11
+100
+AcDbSymbolTableRecord
+100
+AcDbLayerTableRecord
+  2
+DRILL_0.8
+ 70
+0
+ 62
+1
+  6
+CONTINUOUS
+  0
+LAYER
+  5
+12
+100
+AcDbSymbolTableRecord
+100
+AcDbLayerTableRecord
+  2
+DRILL_1
+ 70
+0
+ 62
+2
+  6
+CONTINUOUS
+  0
+LAYER
+  5
+13
+100
+AcDbSymbolTableRecord
+100
+AcDbLayerTableRecord
+  2
+DRILL_1.1
+ 70
+0
+ 62
+3
+  6
+CONTINUOUS
+  0
+LAYER
+  5
+14
+100
+AcDbSymbolTableRecord
+100
+AcDbLayerTableRecord
+  2
+DRILL_1.3
+ 70
+0
+ 62
+4
+  6
+CONTINUOUS
+  0
+LAYER
+  5
+15
+100
+AcDbSymbolTableRecord
+100
+AcDbLayerTableRecord
+  2
+DRILL_1.4
+ 70
+0
+ 62
+5
+  6
+CONTINUOUS
+  0
+LAYER
+  5
+16
+100
+AcDbSymbolTableRecord
+100
+AcDbLayerTableRecord
+  2
+BORE_3.4
+ 70
+0
+ 62
+6
+  6
+CONTINUOUS
+  0
+LAYER
+  5
+17
+100
+AcDbSymbolTableRecord
+100
+AcDbLayerTableRecord
+  2
+DOWEL_4.191
+ 70
+0
+ 62
+7
+  6
+CONTINUOUS
+  0
+ENDTAB
+  0
+ENDSEC
+  0
+SECTION
+  2
+ENTITIES
+  0
+CIRCLE
+  5
+21
+100
+AcDbEntity
+  8
+DRILL_0.8
+100
+AcDbCircle
+ 10
+49.6234
+ 20
+26.9900
+ 30
+0.0
+ 40
+0.4000
+  0
+CIRCLE
+  5
+22
+100
+AcDbEntity
+  8
+DRILL_0.8
+100
+AcDbCircle
+ 10
+53.1234
+ 20
+26.9900
+ 30
+0.0
+ 40
+0.4000
+  0
+CIRCLE
+  5
+23
+100
+AcDbEntity
+  8
+DRILL_1
+100
+AcDbCircle
+ 10
+14.8234
+ 20
+75.0900
+ 30
+0.0
+ 40
+0.5000
+  0
+CIRCLE
+  5
+24
+100
+AcDbEntity
+  8
+DRILL_1
+100
+AcDbCircle
+ 10
+17.3234
+ 20
+75.0900
+ 30
+0.0
+ 40
+0.5000
+  0
+CIRCLE
+  5
+25
+100
+AcDbEntity
+  8
+DRILL_1
+100
+AcDbCircle
+ 10
+23.8234
+ 20
+75.0900
+ 30
+0.0
+ 40
+0.5000
+  0
+CIRCLE
+  5
+26
+100
+AcDbEntity
+  8
+DRILL_1
+100
+AcDbCircle
+ 10
+26.3234
+ 20
+75.0900
+ 30
+0.0
+ 40
+0.5000
+  0
+CIRCLE
+  5
+27
+100
+AcDbEntity
+  8
+DRILL_1
+100
+AcDbCircle
+ 10
+32.8234
+ 20
+75.0900
+ 30
+0.0
+ 40
+0.5000
+  0
+CIRCLE
+  5
+28
+100
+AcDbEntity
+  8
+DRILL_1
+100
+AcDbCircle
+ 10
+35.3234
+ 20
+75.0900
+ 30
+0.0
+ 40
+0.5000
+  0
+CIRCLE
+  5
+29
+100
+AcDbEntity
+  8
+DRILL_1
+100
+AcDbCircle
+ 10
+41.5234
+ 20
+17.6400
+ 30
+0.0
+ 40
+0.5000
+  0
+CIRCLE
+  5
+2A
+100
+AcDbEntity
+  8
+DRILL_1
+100
+AcDbCircle
+ 10
+44.0234
+ 20
+17.6400
+ 30
+0.0
+ 40
+0.5000
+  0
+CIRCLE
+  5
+2B
+100
+AcDbEntity
+  8
+DRILL_1
+100
+AcDbCircle
+ 10
+50.6234
+ 20
+17.6400
+ 30
+0.0
+ 40
+0.5000
+  0
+CIRCLE
+  5
+2C
+100
+AcDbEntity
+  8
+DRILL_1
+100
+AcDbCircle
+ 10
+53.1234
+ 20
+17.6400
+ 30
+0.0
+ 40
+0.5000
+  0
+CIRCLE
+  5
+2D
+100
+AcDbEntity
+  8
+DRILL_1
+100
+AcDbCircle
+ 10
+59.7234
+ 20
+18.4900
+ 30
+0.0
+ 40
+0.5000
+  0
+CIRCLE
+  5
+2E
+100
+AcDbEntity
+  8
+DRILL_1
+100
+AcDbCircle
+ 10
+62.2234
+ 20
+18.4900
+ 30
+0.0
+ 40
+0.5000
+  0
+CIRCLE
+  5
+2F
+100
+AcDbEntity
+  8
+DRILL_1
+100
+AcDbCircle
+ 10
+64.7234
+ 20
+18.4900
+ 30
+0.0
+ 40
+0.5000
+  0
+CIRCLE
+  5
+30
+100
+AcDbEntity
+  8
+DRILL_1
+100
+AcDbCircle
+ 10
+67.2234
+ 20
+18.4900
+ 30
+0.0
+ 40
+0.5000
+  0
+CIRCLE
+  5
+31
+100
+AcDbEntity
+  8
+DRILL_1
+100
+AcDbCircle
+ 10
+73.7234
+ 20
+17.3900
+ 30
+0.0
+ 40
+0.5000
+  0
+CIRCLE
+  5
+32
+100
+AcDbEntity
+  8
+DRILL_1
+100
+AcDbCircle
+ 10
+76.2234
+ 20
+17.3900
+ 30
+0.0
+ 40
+0.5000
+  0
+CIRCLE
+  5
+33
+100
+AcDbEntity
+  8
+DRILL_1
+100
+AcDbCircle
+ 10
+78.7234
+ 20
+17.3900
+ 30
+0.0
+ 40
+0.5000
+  0
+CIRCLE
+  5
+34
+100
+AcDbEntity
+  8
+DRILL_1
+100
+AcDbCircle
+ 10
+81.2234
+ 20
+17.3900
+ 30
+0.0
+ 40
+0.5000
+  0
+CIRCLE
+  5
+35
+100
+AcDbEntity
+  8
+DRILL_1
+100
+AcDbCircle
+ 10
+83.7234
+ 20
+17.3900
+ 30
+0.0
+ 40
+0.5000
+  0
+CIRCLE
+  5
+36
+100
+AcDbEntity
+  8
+DRILL_1
+100
+AcDbCircle
+ 10
+86.2234
+ 20
+17.3900
+ 30
+0.0
+ 40
+0.5000
+  0
+CIRCLE
+  5
+37
+100
+AcDbEntity
+  8
+DRILL_1
+100
+AcDbCircle
+ 10
+95.4234
+ 20
+17.3900
+ 30
+0.0
+ 40
+0.5000
+  0
+CIRCLE
+  5
+38
+100
+AcDbEntity
+  8
+DRILL_1
+100
+AcDbCircle
+ 10
+96.4934
+ 20
+28.3400
+ 30
+0.0
+ 40
+0.5000
+  0
+CIRCLE
+  5
+39
+100
+AcDbEntity
+  8
+DRILL_1
+100
+AcDbCircle
+ 10
+96.4934
+ 20
+30.8800
+ 30
+0.0
+ 40
+0.5000
+  0
+CIRCLE
+  5
+3A
+100
+AcDbEntity
+  8
+DRILL_1
+100
+AcDbCircle
+ 10
+96.4934
+ 20
+33.4200
+ 30
+0.0
+ 40
+0.5000
+  0
+CIRCLE
+  5
+3B
+100
+AcDbEntity
+  8
+DRILL_1
+100
+AcDbCircle
+ 10
+96.4934
+ 20
+35.9600
+ 30
+0.0
+ 40
+0.5000
+  0
+CIRCLE
+  5
+3C
+100
+AcDbEntity
+  8
+DRILL_1
+100
+AcDbCircle
+ 10
+96.4934
+ 20
+38.5000
+ 30
+0.0
+ 40
+0.5000
+  0
+CIRCLE
+  5
+3D
+100
+AcDbEntity
+  8
+DRILL_1
+100
+AcDbCircle
+ 10
+96.4934
+ 20
+41.0400
+ 30
+0.0
+ 40
+0.5000
+  0
+CIRCLE
+  5
+3E
+100
+AcDbEntity
+  8
+DRILL_1
+100
+AcDbCircle
+ 10
+96.4934
+ 20
+56.3400
+ 30
+0.0
+ 40
+0.5000
+  0
+CIRCLE
+  5
+3F
+100
+AcDbEntity
+  8
+DRILL_1
+100
+AcDbCircle
+ 10
+96.4934
+ 20
+58.8800
+ 30
+0.0
+ 40
+0.5000
+  0
+CIRCLE
+  5
+40
+100
+AcDbEntity
+  8
+DRILL_1
+100
+AcDbCircle
+ 10
+96.4934
+ 20
+61.4200
+ 30
+0.0
+ 40
+0.5000
+  0
+CIRCLE
+  5
+41
+100
+AcDbEntity
+  8
+DRILL_1
+100
+AcDbCircle
+ 10
+96.4934
+ 20
+63.9600
+ 30
+0.0
+ 40
+0.5000
+  0
+CIRCLE
+  5
+42
+100
+AcDbEntity
+  8
+DRILL_1
+100
+AcDbCircle
+ 10
+96.4934
+ 20
+66.5000
+ 30
+0.0
+ 40
+0.5000
+  0
+CIRCLE
+  5
+43
+100
+AcDbEntity
+  8
+DRILL_1
+100
+AcDbCircle
+ 10
+96.4934
+ 20
+69.0400
+ 30
+0.0
+ 40
+0.5000
+  0
+CIRCLE
+  5
+44
+100
+AcDbEntity
+  8
+DRILL_1
+100
+AcDbCircle
+ 10
+97.9234
+ 20
+17.3900
+ 30
+0.0
+ 40
+0.5000
+  0
+CIRCLE
+  5
+45
+100
+AcDbEntity
+  8
+DRILL_1
+100
+AcDbCircle
+ 10
+99.0334
+ 20
+28.3400
+ 30
+0.0
+ 40
+0.5000
+  0
+CIRCLE
+  5
+46
+100
+AcDbEntity
+  8
+DRILL_1
+100
+AcDbCircle
+ 10
+99.0334
+ 20
+30.8800
+ 30
+0.0
+ 40
+0.5000
+  0
+CIRCLE
+  5
+47
+100
+AcDbEntity
+  8
+DRILL_1
+100
+AcDbCircle
+ 10
+99.0334
+ 20
+33.4200
+ 30
+0.0
+ 40
+0.5000
+  0
+CIRCLE
+  5
+48
+100
+AcDbEntity
+  8
+DRILL_1
+100
+AcDbCircle
+ 10
+99.0334
+ 20
+35.9600
+ 30
+0.0
+ 40
+0.5000
+  0
+CIRCLE
+  5
+49
+100
+AcDbEntity
+  8
+DRILL_1
+100
+AcDbCircle
+ 10
+99.0334
+ 20
+38.5000
+ 30
+0.0
+ 40
+0.5000
+  0
+CIRCLE
+  5
+4A
+100
+AcDbEntity
+  8
+DRILL_1
+100
+AcDbCircle
+ 10
+99.0334
+ 20
+41.0400
+ 30
+0.0
+ 40
+0.5000
+  0
+CIRCLE
+  5
+4B
+100
+AcDbEntity
+  8
+DRILL_1
+100
+AcDbCircle
+ 10
+99.0334
+ 20
+56.3400
+ 30
+0.0
+ 40
+0.5000
+  0
+CIRCLE
+  5
+4C
+100
+AcDbEntity
+  8
+DRILL_1
+100
+AcDbCircle
+ 10
+99.0334
+ 20
+58.8800
+ 30
+0.0
+ 40
+0.5000
+  0
+CIRCLE
+  5
+4D
+100
+AcDbEntity
+  8
+DRILL_1
+100
+AcDbCircle
+ 10
+99.0334
+ 20
+61.4200
+ 30
+0.0
+ 40
+0.5000
+  0
+CIRCLE
+  5
+4E
+100
+AcDbEntity
+  8
+DRILL_1
+100
+AcDbCircle
+ 10
+99.0334
+ 20
+63.9600
+ 30
+0.0
+ 40
+0.5000
+  0
+CIRCLE
+  5
+4F
+100
+AcDbEntity
+  8
+DRILL_1
+100
+AcDbCircle
+ 10
+99.0334
+ 20
+66.5000
+ 30
+0.0
+ 40
+0.5000
+  0
+CIRCLE
+  5
+50
+100
+AcDbEntity
+  8
+DRILL_1
+100
+AcDbCircle
+ 10
+99.0334
+ 20
+69.0400
+ 30
+0.0
+ 40
+0.5000
+  0
+CIRCLE
+  5
+51
+100
+AcDbEntity
+  8
+DRILL_1
+100
+AcDbCircle
+ 10
+100.4234
+ 20
+17.3900
+ 30
+0.0
+ 40
+0.5000
+  0
+CIRCLE
+  5
+52
+100
+AcDbEntity
+  8
+DRILL_1
+100
+AcDbCircle
+ 10
+106.9234
+ 20
+18.4900
+ 30
+0.0
+ 40
+0.5000
+  0
+CIRCLE
+  5
+53
+100
+AcDbEntity
+  8
+DRILL_1
+100
+AcDbCircle
+ 10
+109.4234
+ 20
+18.4900
+ 30
+0.0
+ 40
+0.5000
+  0
+CIRCLE
+  5
+54
+100
+AcDbEntity
+  8
+DRILL_1
+100
+AcDbCircle
+ 10
+111.9234
+ 20
+18.4900
+ 30
+0.0
+ 40
+0.5000
+  0
+CIRCLE
+  5
+55
+100
+AcDbEntity
+  8
+DRILL_1
+100
+AcDbCircle
+ 10
+133.9234
+ 20
+52.4900
+ 30
+0.0
+ 40
+0.5000
+  0
+CIRCLE
+  5
+56
+100
+AcDbEntity
+  8
+DRILL_1
+100
+AcDbCircle
+ 10
+133.9234
+ 20
+57.4900
+ 30
+0.0
+ 40
+0.5000
+  0
+CIRCLE
+  5
+57
+100
+AcDbEntity
+  8
+DRILL_1.1
+100
+AcDbCircle
+ 10
+5.0234
+ 20
+22.0900
+ 30
+0.0
+ 40
+0.5500
+  0
+CIRCLE
+  5
+58
+100
+AcDbEntity
+  8
+DRILL_1.1
+100
+AcDbCircle
+ 10
+90.8234
+ 20
+17.3900
+ 30
+0.0
+ 40
+0.5500
+  0
+CIRCLE
+  5
+59
+100
+AcDbEntity
+  8
+DRILL_1.1
+100
+AcDbCircle
+ 10
+93.1234
+ 20
+54.3900
+ 30
+0.0
+ 40
+0.5500
+  0
+CIRCLE
+  5
+5A
+100
+AcDbEntity
+  8
+DRILL_1.3
+100
+AcDbCircle
+ 10
+74.5234
+ 20
+73.7900
+ 30
+0.0
+ 40
+0.6500
+  0
+CIRCLE
+  5
+5B
+100
+AcDbEntity
+  8
+DRILL_1.3
+100
+AcDbCircle
+ 10
+79.6034
+ 20
+73.7900
+ 30
+0.0
+ 40
+0.6500
+  0
+CIRCLE
+  5
+5C
+100
+AcDbEntity
+  8
+DRILL_1.3
+100
+AcDbCircle
+ 10
+86.3234
+ 20
+73.7900
+ 30
+0.0
+ 40
+0.6500
+  0
+CIRCLE
+  5
+5D
+100
+AcDbEntity
+  8
+DRILL_1.3
+100
+AcDbCircle
+ 10
+91.4034
+ 20
+73.7900
+ 30
+0.0
+ 40
+0.6500
+  0
+CIRCLE
+  5
+5E
+100
+AcDbEntity
+  8
+DRILL_1.4
+100
+AcDbCircle
+ 10
+123.4234
+ 20
+36.1900
+ 30
+0.0
+ 40
+0.7000
+  0
+CIRCLE
+  5
+5F
+100
+AcDbEntity
+  8
+DRILL_1.4
+100
+AcDbCircle
+ 10
+123.4234
+ 20
+39.6900
+ 30
+0.0
+ 40
+0.7000
+  0
+CIRCLE
+  5
+60
+100
+AcDbEntity
+  8
+DRILL_1.4
+100
+AcDbCircle
+ 10
+123.4234
+ 20
+45.4900
+ 30
+0.0
+ 40
+0.7000
+  0
+CIRCLE
+  5
+61
+100
+AcDbEntity
+  8
+DRILL_1.4
+100
+AcDbCircle
+ 10
+123.4234
+ 20
+48.9900
+ 30
+0.0
+ 40
+0.7000
+  0
+CIRCLE
+  5
+62
+100
+AcDbEntity
+  8
+DRILL_1.4
+100
+AcDbCircle
+ 10
+125.9234
+ 20
+36.1900
+ 30
+0.0
+ 40
+0.7000
+  0
+CIRCLE
+  5
+63
+100
+AcDbEntity
+  8
+DRILL_1.4
+100
+AcDbCircle
+ 10
+125.9234
+ 20
+39.6900
+ 30
+0.0
+ 40
+0.7000
+  0
+CIRCLE
+  5
+64
+100
+AcDbEntity
+  8
+DRILL_1.4
+100
+AcDbCircle
+ 10
+125.9234
+ 20
+45.4900
+ 30
+0.0
+ 40
+0.7000
+  0
+CIRCLE
+  5
+65
+100
+AcDbEntity
+  8
+DRILL_1.4
+100
+AcDbCircle
+ 10
+125.9234
+ 20
+48.9900
+ 30
+0.0
+ 40
+0.7000
+  0
+CIRCLE
+  5
+66
+100
+AcDbEntity
+  8
+BORE_3.4
+100
+AcDbCircle
+ 10
+6.4234
+ 20
+17.4900
+ 30
+0.0
+ 40
+1.7000
+  0
+CIRCLE
+  5
+67
+100
+AcDbEntity
+  8
+BORE_3.4
+100
+AcDbCircle
+ 10
+6.4234
+ 20
+76.4900
+ 30
+0.0
+ 40
+1.7000
+  0
+CIRCLE
+  5
+68
+100
+AcDbEntity
+  8
+BORE_3.4
+100
+AcDbCircle
+ 10
+124.6734
+ 20
+42.5900
+ 30
+0.0
+ 40
+1.7000
+  0
+CIRCLE
+  5
+69
+100
+AcDbEntity
+  8
+BORE_3.4
+100
+AcDbCircle
+ 10
+139.4234
+ 20
+17.4900
+ 30
+0.0
+ 40
+1.7000
+  0
+CIRCLE
+  5
+6A
+100
+AcDbEntity
+  8
+BORE_3.4
+100
+AcDbCircle
+ 10
+139.4234
+ 20
+37.6900
+ 30
+0.0
+ 40
+1.7000
+  0
+CIRCLE
+  5
+6B
+100
+AcDbEntity
+  8
+BORE_3.4
+100
+AcDbCircle
+ 10
+139.4234
+ 20
+46.4900
+ 30
+0.0
+ 40
+1.7000
+  0
+CIRCLE
+  5
+6C
+100
+AcDbEntity
+  8
+BORE_3.4
+100
+AcDbCircle
+ 10
+139.4234
+ 20
+76.4900
+ 30
+0.0
+ 40
+1.7000
+  0
+CIRCLE
+  5
+6D
+100
+AcDbEntity
+  8
+DOWEL_4.191
+100
+AcDbCircle
+ 10
+0.0000
+ 20
+0.0000
+ 30
+0.0
+ 40
+2.0955
+  0
+CIRCLE
+  5
+6E
+100
+AcDbEntity
+  8
+DOWEL_4.191
+100
+AcDbCircle
+ 10
+145.8468
+ 20
+0.0000
+ 30
+0.0
+ 40
+2.0955
+  0
+ENDSEC
+  0
+EOF

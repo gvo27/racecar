@@ -33,7 +33,7 @@ COMPOSE  := docker compose -f deploy/car/compose.yaml --env-file deploy/car/.env
 .PHONY: help setup clean build flash monitor fw-image config models compiledb unit check-dev \
         ros-image ros-test ros-test-image ros-test-run ros-shell car-up car-down car-ps car-logs car-pull \
         car-shutdown install-host teleop calibrate tune test rangefinder viz lidar-imu lidar-snapshot lidar-record mcu unit-run \
-        drivers-stop drivers-start lidar-hw-test kicad-image erc pcb-build pcb-route pcb-check pcb-mill-check pcb-review pcb-test bom \
+        drivers-stop drivers-start lidar-hw-test kicad-image erc pcb-build pcb-route pcb-check pcb-mill-check pcb-review pcb-fab pcb-test bom \
         _kicad-cfg _clean-build _need-config _need-stack _need-stack-down _need-drivers-down
 
 help:            ## list targets (grouped in README.md)
@@ -183,6 +183,10 @@ pcb-mill-check: _kicad-cfg  ## milling check of the board vs the Carvera limits 
 	@mkdir -p "$(CURDIR)/$(SCH_DIR)/review"
 	$(KICAD_RUN) python3 tools/milling_check.py rc_power_board.kicad_pcb --limits milling.toml \
 	  --waivers milling_waivers.toml --json review/milling_check.json
+
+pcb-fab: _kicad-cfg  ## DXF (F.Cu, B.Cu, Edge.Cuts), Excellon and drill-map DXF for the lab's Fusion 360 template -> docs/schematics/fab/, then test_fab
+	$(KICAD_RUN) python3 tools/fab_export.py rc_power_board.kicad_pcb --out fab
+	$(KICAD_RUN) python3 -m unittest discover -s tools -p 'test_fab.py' -v
 
 pcb-test: _kicad-cfg  ## unit tests for the PCB tools (stdlib unittest, image python3)
 	$(KICAD_RUN) python3 -m unittest discover -s tools -p 'test_*.py' -v

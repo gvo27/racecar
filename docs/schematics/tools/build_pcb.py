@@ -244,6 +244,36 @@ def add_power_zones(board, netinfo):
         add_zone(board, netinfo[net], pcbnew.B_Cu, pts, pcbnew.ZONE_CONNECTION_FULL, prio=10 + i, name="BUS_%s_%d" % (net.lstrip("/"), i))
 
 
+def draw_stock(board):
+    """Review aid: the lab stock outline and the two dowel holes on Dwgs.User, in board coordinates (the board is turned
+    and centered on the stock for the export; see placement.py). fab_export.py ignores this layer."""
+    for d in [d for d in board.GetDrawings() if d.GetLayer() == pcbnew.Dwgs_User]:
+        board.Remove(d)
+
+    def to_pt(sx, sy):
+        bx, by = placement.stock_to_board(sx, sy)
+        return pt(bx, by)
+
+    w, h = placement.STOCK
+    r = pcbnew.PCB_SHAPE(board)
+    r.SetShape(pcbnew.SHAPE_T_RECT)
+    r.SetStart(to_pt(0, 0))
+    r.SetEnd(to_pt(w, h))
+    r.SetLayer(pcbnew.Dwgs_User)
+    r.SetWidth(FromMM(0.1))
+    r.SetFilled(False)
+    board.Add(r)
+    for sx, sy in placement.DOWELS:
+        c = pcbnew.PCB_SHAPE(board)
+        c.SetShape(pcbnew.SHAPE_T_CIRCLE)
+        c.SetCenter(to_pt(sx, sy))
+        c.SetEnd(pcbnew.VECTOR2I(c.GetCenter().x + FromMM(placement.DOWEL_DIA / 2.0), c.GetCenter().y))
+        c.SetLayer(pcbnew.Dwgs_User)
+        c.SetWidth(FromMM(0.1))
+        c.SetFilled(False)
+        board.Add(c)
+
+
 def sync_drills(board_path):
     """Apply the drill set and the bored holes to an existing board in place, set the via drill, refill the zones.
     Parts, tracks and the via positions stay. Pads grow to keep the annular ring; the footprint library is the
@@ -257,6 +287,7 @@ def sync_drills(board_path):
         if t.Type() == pcbnew.PCB_VIA_T:
             t.SetDrill(FromMM(VIA_DRILL))
             t.SetWidth(FromMM(VIA_PAD))
+    draw_stock(board)
     fill_zones(board)
     board.Save(board_path)
     patch_file(board_path)

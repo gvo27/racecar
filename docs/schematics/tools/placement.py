@@ -131,3 +131,35 @@ MILLED_HOLES = [
     ("H1", 3.4), ("H2", 3.4), ("H3", 3.4), ("H4", 3.4),
     ("F1", 3.4),
 ]
+
+# ---- lab frame (Task 9) ----------------------------------------------------------------------------------------
+# Stock and dowels of the lab's Fusion 360 template (docs/schematics/example/README.md; milling.toml [stock], [dowel]).
+# Stock coordinates: origin = stock lower-left corner, x along the long side (152.4 mm), y along the short side.
+STOCK = (152.4, 101.6)
+DOWEL_DIA = 4.191
+DOWELS = [(3.2766, 3.81), (149.1234, 3.81)]
+
+# The board is turned 90 degrees counter-clockwise (top view) and centered on the stock: the board's long side (140 mm)
+# runs along stock x, with 6.2 mm at each end and 17.8 mm at each long side. The board's +y end (top, J14 side) then
+# points to stock -x (dowel 1) and the board's +x side points to stock +y. Export transform only: the KiCad board
+# does not move. The dowels sit outside the board, 14 mm from the nearest outline point.
+MARGIN_X = (STOCK[0] - OUTLINE_H) / 2.0
+MARGIN_Y = (STOCK[1] - OUTLINE_W) / 2.0
+
+
+def board_to_stock(bx, by):
+    """Board table coordinates (mm from the outline's lower-left corner, y up) -> stock coordinates."""
+    return MARGIN_X + (OUTLINE_H - by), MARGIN_Y + bx
+
+
+def stock_to_board(sx, sy):
+    return sy - MARGIN_Y, OUTLINE_H - (sx - MARGIN_X)
+
+
+def board_to_lab(bx, by):
+    """Board table coordinates -> lab frame: origin = dowel 1 center (the Fusion Setup B WCS), x along the stock long side."""
+    sx, sy = board_to_stock(bx, by)
+    return sx - DOWELS[0][0], sy - DOWELS[0][1]
+
+
+DOWELS_LAB = [(round(x - DOWELS[0][0], 4), round(y - DOWELS[0][1], 4)) for x, y in DOWELS]
