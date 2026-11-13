@@ -56,3 +56,19 @@ for i in z.infolist():
 ```
 
 The file gives 61 members. These are readable: `Toolpath/Iron.Document/theIronDoc.irondoc` (CAM XML: setups, operations, tools, stock), `Iron.Machine/1.mch` (JSON), the message logs and the PNG previews. The toolpath data holds float32 XYZ values. The BREP (`.smb`) and bulk-stream members are proprietary and stay unread. Put the extracted files in a scratch directory, not in the repository.
+
+## Demo toolpaths (decoded, Opus cross-check 2026-11-13)
+
+A worker decoded the `.toolpath` float data (tagged float32 records: points, 2D arcs, helices). Only the results below are kept, because each one matches a fact read separately from the CAM XML.
+
+| Result | Cross-check |
+| --- | --- |
+| Bore1: 2 helices around (+-72.9234, -46.99) from the stock center, radius 0.508 mm, down to 1.506 mm below the top | Dowel position and 4.191 mm hole for the 3.175 mm tool; through-cut -0.02 mm on the 1.4859 mm model |
+| Drills: 108 hits at 0.9 mm, 12 at 1.0 mm, 12 at 1.1 mm | Same counts as the hole circles in the Fusion sketch |
+| Drill depth: 0.9 mm to -1.776, 1.0 mm to -1.806, 1.1 mm to -1.506 below the top | -1.4859 - 0.02 - tip length (118 degree tip) for 0.9 and 1.0 mm; Drill4 has `drillTipThroughBottom = false`, so no tip length |
+| Isolation (setups B and C): one pass at -0.08 mm around each merged trace-and-pad outline, no extra passes | Contour depth -0.08 mm in the CAM XML |
+| Setup C paths match setup B after a mirror about the stock short axis (face extents agree within 0.03 mm) | Setup C WCS: dowel 2, Z flipped |
+
+![Demo setup B toolpaths: isolation (red/green), drills (dots), Face2 (cyan), dowels (red crosses)](demo_toolpaths_setupB.png)
+
+Inference, not proven: Face2 and Face3 cut at the stock top, only on pad-sized areas, with the "solder mask removal" tool. So the lab probably paints UV solder mask and then mills it off the pads. Ask the lab tech before relying on this.
