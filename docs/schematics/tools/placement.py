@@ -31,12 +31,12 @@ PLACEMENT = {
     "TP2": (29.5, 73.5, 0, "B"),
     "R2": (29.5, 77.0, 90, "B"),
     "D3": (29.5, 80.9, 270, "B"),
-    "U1": (40.55, 43.89, 90, "F"),
-    "C2": (49.2, 34.0, 180, "B"),
-    "C3": (50.5, 50.0, 0, "B"),
-    "TP1": (50.0, 52.8, 0, "B"),
-    "R1": (51.0, 55.9, 90, "B"),
-    "D2": (51.0, 61.0, 270, "B"),
+    "U1": (42.35, 43.89, 90, "F"),
+    "C2": (51.0, 34.0, 180, "B"),
+    "C3": (52.3, 50.0, 0, "B"),
+    "TP1": (51.8, 52.8, 0, "B"),
+    "R1": (52.8, 55.9, 90, "B"),
+    "D2": (52.8, 61.0, 270, "B"),
     # right edge: USB power for the Pi and the ESP32, next to U1 (entry outward)
     "J6": (59.8, 56.6, 270, "F"),
     "J7": (59.8, 68.4, 270, "F"),
@@ -78,21 +78,21 @@ BUS_ZONES = [
     ("/VBAT_RAW", _rect(20.9, 1.9, 27.1, 21.0)),
     # F1.2 -> arm -> prongs -> necks to the VIN pads
     ("VBAT", _rect(30.2, 15.0, 40.5, 24.5)),
-    ("VBAT", _rect(16.3, 22.4, 48.8, 28.8)),            # arm
+    ("VBAT", _rect(16.3, 22.4, 50.6, 28.8)),            # arm
     ("VBAT", _rect(16.3, 22.4, 22.9, 41.0)),            # prong B (U2 VIN)
     ("VBAT", _rect(18.48, 40.5, 20.38, 47.4)),          # pad-width neck to U2.5/6
-    ("VBAT", _rect(42.2, 22.4, 48.8, 41.0)),            # prong A (U1 VIN)
-    ("VBAT", _rect(44.68, 40.5, 46.58, 47.4)),          # pad-width neck to U1.5/6
+    ("VBAT", _rect(44.0, 22.4, 50.6, 41.0)),            # prong A (U1 VIN)
+    ("VBAT", _rect(46.48, 40.5, 48.38, 47.4)),          # pad-width neck to U1.5/6
     ("VBAT", _rect(37.5, 7.9, 39.5, 13.0)),             # stub to C1
     ("VBAT", _rect(37.5, 11.3, 40.5, 15.2)),            # stub to D1
     # +5V_CPU: U1 VOUT pads -> north -> J6.1 / J7.1 and the small parts
-    ("+5V_CPU", _rect(52.2, 43.0, 54.2, 57.4)),
-    ("+5V_CPU", _rect(52.2, 55.6, 60.1, 57.6)),
+    ("+5V_CPU", _rect(54.0, 43.0, 56.0, 57.4)),
+    ("+5V_CPU", _rect(54.0, 55.6, 60.1, 57.6)),
     ("+5V_CPU", _rect(56.0, 55.6, 58.0, 69.5)),
     ("+5V_CPU", _rect(57.8, 67.0, 60.1, 69.6)),
-    ("+5V_CPU", _rect(51.0, 49.4, 52.4, 50.6)),         # C3
-    ("+5V_CPU", _rect(50.0, 52.2, 52.4, 53.4)),         # TP1
-    ("+5V_CPU", _rect(50.4, 54.4, 52.4, 55.6)),         # R1
+    ("+5V_CPU", _rect(52.8, 49.4, 54.2, 50.6)),         # C3
+    ("+5V_CPU", _rect(51.8, 52.2, 54.2, 53.4)),         # TP1
+    ("+5V_CPU", _rect(52.2, 54.4, 54.2, 55.6)),         # R1
     # +5V_SENS: U2 VOUT pads -> trunk north -> tooth to the J8.1/J11.1 bar, branch to J9.1, C9, FB1
     ("+5V_SENS", _rect(26.1, 43.0, 28.0, 100.9)),
     ("+5V_SENS", _rect(4.0, 85.0, 27.0, 88.0)),
@@ -113,9 +113,9 @@ GND_KEEPOUTS = [
 
 # Planned F.Cu jumpers on rivets (low-current signals that would cross a GND trunk): net, pad A, via A, F.Cu path, via B, pad B.
 JUMPERS = [
-    {"net": "/U1_PG", "pad_a": ("U1", "1"), "via_a": (38.6, 49.8),
-     "stub_a": [(38.6, 43.89)],                         # B.Cu stub: pad -> waypoints -> via (keeps 0.4 mm from U1.2)
-     "path": [(38.6, 49.8), (8.0, 49.8), (8.0, 52.1), (3.4, 52.1)],
+    {"net": "/U1_PG", "pad_a": ("U1", "1"), "via_a": (40.4, 49.8),
+     "stub_a": [(40.4, 43.89)],                         # B.Cu stub: pad -> waypoints -> via (keeps 0.4 mm from U1.2)
+     "path": [(40.4, 49.8), (8.0, 49.8), (8.0, 52.1), (3.4, 52.1)],
      "via_b": (3.4, 52.1), "pad_b": ("J5", "1")},
 ]
 

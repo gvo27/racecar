@@ -161,6 +161,7 @@ def check_paths(board):
     return problems
 
 
+MODULE_GAP_MM = 1.5  # min courtyard gap between two Pololu_D36V50Fx modules (body gap >= 2.0 mm: +-0.3 mm edge tolerance, heat)
 EDGE_TOL_MM = 0.05  # a courtyard that touches the outline line is inside (the mounting holes sit on it)
 
 
@@ -189,6 +190,13 @@ def check_courtyards(board):
         for rb, sb, cb in cys[i + 1:]:
             if sa == sb and ca.Collide(cb, 0):
                 problems.append("courtyards overlap on %s: %s and %s" % ("F" if sa == pcbnew.F_Cu else "B", ra, rb))
+    mods = [(fp.GetReference(), cy) for fp in board.GetFootprints()
+            if fp.GetFPID().GetLibItemName() == "Pololu_D36V50Fx"
+            for cy in [fp.GetCourtyard(pcbnew.F_CrtYd)]]
+    for i, (ra, ca) in enumerate(mods):
+        for rb, cb in mods[i + 1:]:
+            if ca.Collide(cb, FromMM(MODULE_GAP_MM)) and not ca.Collide(cb, 0):
+                problems.append("module courtyards of %s and %s are closer than %.1f mm" % (ra, rb, MODULE_GAP_MM))
     return problems
 
 

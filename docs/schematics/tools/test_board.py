@@ -188,6 +188,13 @@ class TestCheckBoardCatches(unittest.TestCase):
         self._move("U1", 20.0, 0.0)
         self.assertTrue([p for p in check_board.check(self.b, self.lim) if "courtyard" in p and "board edge" in p])
 
+    def test_module_courtyards_too_close(self):
+        # U1 moved 1.0 mm toward U2: no overlap, but closer than MODULE_GAP_MM
+        self._move("U1", -1.0, 0.0)
+        probs = check_board.check(self.b, self.lim)
+        self.assertFalse([p for p in probs if "overlap" in p])
+        self.assertTrue([p for p in probs if "module courtyards" in p])
+
     def test_courtyards_of_the_built_board_are_clean(self):
         self.assertEqual([p for p in check_board.check(self.b, self.lim) if "courtyard" in p], [])
 
