@@ -18,7 +18,7 @@ paths:
     planned_sections: [models, supervisor, more platform keys]
     rules: .claude/rules/tuning.md
     invariants: [no unconfirmed parameters, "key change => tuning.toml + rccar_mcu_bridge.tuning.FIRMWARE_KEYS + main.cpp setKey (test-enforced by rccar_mcu_bridge/test/test_tuning.py)"]
-  Makefile: {role: entry point; no host python: car-*/ros-*/mcu/teleop via compose+docker, config via ros image, unit via ros test image, fw targets via docker (FW_ENV), rules: .claude/rules/dependencies.md}
+  Makefile: {role: entry point; no system python (host dev tools: dev-setup via uv); car-*/ros-*/mcu/teleop via compose+docker, config via ros image, unit via ros test image, fw targets via docker (FW_ENV), rules: .claude/rules/dependencies.md}
   .env.example: {role: template for gitignored .env (TZ ROS_DOMAIN_ID PLATFORM TS_DOMAIN ADMIN_TS_HOST BACKUP_DEST), rules: .claude/rules/deploy.md}
   .env: {role: secrets + private names, gitignored}
   models/: {role: manifest.yaml + README committed; cache/ gitignored, rules: .claude/rules/models.md, colcon_ignore: true, phase: 1}
