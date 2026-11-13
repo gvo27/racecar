@@ -95,5 +95,5 @@ The plugin analyzers ran on the board (`analyze_schematic.py`, `analyze_pcb.py -
 1. Accept the `U1_PG` F.Cu jumper (2 rivets, about 38 mm, north of the module bodies), or move J5 next to U1?
 2. Accept J4, J8, J6 and J7 with pin 1 at the top, J1 turned 180 degrees (GND left), and J11 and J9 0.25 mm further from the edge?
 3. Add a GND rivet beside each jumper via, or more test points?
-4. Lab tech: bit list, rivet hole, minimum cut depth (MILL-DEPTH), dowel size.
+4. Lab tech: rivet fit in the 1.1 mm hole (rivet stock: LPKF EasyContac kit, owner photo 2026-11-13). Bit list, cut depth and dowel size are closed (lab .f3z, owner photos, lab tech 2026-11-13).
 5. J1 wire-pad size is TBD; the stock footprint pads (4.4 mm, 3.0 mm drill) are a placeholder.
