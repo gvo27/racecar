@@ -27,7 +27,7 @@ Not in the file, so not known: whether Fusion "taper 30" is the angle per side o
 ## What follows for the board
 
 - A hole between 2.0 mm and 3.3 mm cannot be made. The largest drill is 2.0 mm and the only end mill is 3.175 mm. `milled_hole_min` is 3.3 mm (assumed: tool + 0.125 mm).
-- The cut depth is 0.08 mm on 0.070 mm copper: the margin is 0.01 mm on an even blank. MILL-DEPTH passes with error 0. A real depth error larger than 0.01 mm leaves copper in the isolation cut.
+- The cut depth is 0.08 mm on 0.070 mm copper: the margin is 0.01 mm on an even blank. MILL-DEPTH passes with error 0. A real depth error larger than 0.01 mm leaves copper in the isolation cut. The lab tech accepts this margin (2026-11-13) and adds a second, deeper pass in the CAM file if necessary.
 - The board is turned 90 degrees and centered on the stock, clear of the dowels. See `docs/schematics/fab/README.md`.
 
 ## How to read the file again

@@ -46,7 +46,7 @@ Rebuild: `make kicad-image pcb-review`. All tools run in the pinned KiCad 10.0.8
 | `make pcb-fab` | 5 files in `../fab/`; `test_fab.py` 21 tests pass (copper area, holes vs `kicad-cli pcb export drill`, dowels) |
 | `make pcb-test` | 119 tests pass |
 
-**MILL-DEPTH (resolved, Task 9).** The lab CAM cuts 0.08 mm deep in one pass (lab .f3z) and the owner says the blank is even (depth error 0). The minimum depth 0.08 mm is above the copper thickness of 0.070 mm, so the check passes. The margin is only 0.01 mm: a real depth error above 0.01 mm leaves copper in the isolation cut. The lab tech confirms the margin on a test piece.
+**MILL-DEPTH (resolved, Task 9).** The lab CAM cuts 0.08 mm deep in one pass (lab .f3z) and the owner says the blank is even (depth error 0). The minimum depth 0.08 mm is above the copper thickness of 0.070 mm, so the check passes. The margin is only 0.01 mm: a real depth error above 0.01 mm leaves copper in the isolation cut. The lab tech accepts this margin (2026-11-13). If necessary, the lab adds a second, deeper pass in the CAM file. No board change.
 
 **Holes (Task 9).** The lab tools make drills from 0.1 to 2.0 mm and bores of 3.3 mm or more (the only end mill is 3.175 mm). Changes: H1 to H4 3.2 to 3.4 mm; J1 wire pads 3.0 to 3.4 mm (pad 4.4 mm, ring 0.5 mm); F1 locating peg 2.4 to 3.4 mm (peg size not confirmed: the Littelfuse drawing was not reachable); vias 1.2 to 1.1 mm (pad 2.1 mm, ring 0.5 mm); Phoenix MKDS 1.5 to 1.3 mm; F1 pins 1.5 to 1.4 mm.
 

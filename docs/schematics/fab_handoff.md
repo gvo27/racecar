@@ -10,7 +10,7 @@ V-bit isolation milling in the lab's calibrated Fusion 360 template (`example/RE
 
 - **Stock:** Kepro P22-465G FR-4, 2 oz Cu, double-sided, 4" x 6" x 0.062" (101.6 x 152.4 x 1.57 mm), lab stock (owner, 2026-11-12). The earlier 3" x 6" blank (P22-365G, 76.2 x 152.4 mm) is also in stock but is too small for the dowel line of the lab template. The blank is even (depth error 0, owner). Scrub oxide off before milling. 2 oz matches the trace-width plan, so the 2 oz columns below apply directly. Other lab stock: generic double-sided 10 x 15 cm, 10 pcs, copper weight TBD (likely 1 oz): not for this board.
 - **Lab tools (from the lab .f3z and the owner's photos):**
-  - Isolation: 1 contour pass, 0.08 mm deep, chamfer mill with 0.2 mm tip (Fusion taper 30). Copper is 0.070 mm, so the margin is 0.01 mm. Cut width at depth: 0.243 mm (30 degrees included) or 0.292 mm (60 degrees included); the 0.4 mm design clearance passes both.
+  - Isolation: 1 contour pass, 0.08 mm deep, chamfer mill with 0.2 mm tip (Fusion taper 30). Copper is 0.070 mm, so the margin is 0.01 mm. The lab tech accepts this margin (2026-11-13); if necessary, the lab adds a second, deeper pass in the CAM file. Cut width at depth: 0.243 mm (30 degrees included) or 0.292 mm (60 degrees included); the 0.4 mm design clearance passes both.
   - Drill bits: 0.1 to 2.0 mm in 0.1 mm steps (owner inventory). The lab CAM uses 0.9, 1.0 and 1.1 mm.
   - End mill: one, 3.175 mm (1/8 in). It bores the dowel holes. A hole of 2.0 to 3.3 mm cannot be made.
   - Dowels: 2 holes of 4.191 mm for 4.0 mm pins, at (3.2766, 3.81) and (149.1234, 3.81) mm from the stock lower-left corner.
@@ -110,7 +110,7 @@ Solder each THT pin on every layer where it has copper. JST XH shrouds and screw
 
 - [x] Export: `make pcb-fab` writes the DXF files (F.Cu, B.Cu, Edge.Cuts), the Excellon file and the drill-map DXF to `fab/`, in the lab frame (`fab/README.md`). B.Cu is not mirrored: Setup C of the lab template flips the stock.
 - [ ] Lab template: import the files, check the dowel positions (0, 0) and (145.8468, 0) against the template, and run the lab tech's CAM. Not done.
-- [ ] Isolation as in the lab template: 0.2 mm tip V-bit, 1 pass, 0.08 mm deep, on an even blank (copper 0.070 mm, margin 0.01 mm). Drills and bores from the Excellon tool list. Outline cut: the lab tech decides.
+- [ ] Isolation as in the lab template: 0.2 mm tip V-bit, 1 pass, 0.08 mm deep, on an even blank (copper 0.070 mm, margin 0.01 mm, accepted by the lab tech). If copper stays in a cut, add a second, deeper pass. Drills and bores from the Excellon tool list. Outline cut: the lab tech decides.
 
 ## Finishing and checks
 

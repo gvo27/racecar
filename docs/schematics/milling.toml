@@ -55,13 +55,13 @@ source = "Makera PCB bit pack (the lab CAM does not use it)"
 value = 0.08
 unit = "mm"
 status = "confirmed"
-source = "lab .f3z (2D contour isolation, 1 pass, depth 0.08 mm)"
+source = "lab .f3z (2D contour isolation, 1 pass, depth 0.08 mm); lab tech 2026-11-13: the 0.01 mm margin is acceptable; if necessary, the lab adds a second, deeper pass in the CAM file"
 
 [cut_depth_max]
 value = 0.08
 unit = "mm"
 status = "confirmed"
-source = "lab .f3z (2D contour isolation, 1 pass, depth 0.08 mm)"
+source = "lab .f3z (2D contour isolation, 1 pass, depth 0.08 mm); lab tech 2026-11-13: the 0.01 mm margin is acceptable; if necessary, the lab adds a second, deeper pass in the CAM file"
 
 [cut_depth_error]
 value = 0.00
