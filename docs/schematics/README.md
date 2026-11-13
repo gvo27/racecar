@@ -66,7 +66,7 @@ The board is built and routed headless in the pinned KiCad 10.0.8 image: `make k
 
 ## CNC-milled prototype (Makera Carvera)
 
-Rev A is milled in-house from Kepro P22-365G 2 oz double-sided FR-4 (3" x 6"); no fab house, no plated holes, vias are soldered copper rivets.
+Rev A is milled in-house from Kepro P22-465G 2 oz double-sided FR-4 (4" x 6", 152.4 x 101.6 mm; lab template, `example/README.md`); no fab house, no plated holes, vias are soldered copper rivets.
 
 - **Rivets (update):** lab stock is an LPKF EasyContac kit (0.6/0.8/1.0/1.2 mm, with setting tool). Default via = 0.8 mm rivet, drill 1.1 mm, pad 2.0 mm (matches the existing `.kicad_pro` via settings); 1.2 mm optional for high current. Table and source: `fab_handoff.md`. BOM rivets now $0.
 

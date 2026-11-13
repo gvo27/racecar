@@ -1,7 +1,7 @@
 {
     "$schema": "https://schemas.kicad.org/drc.v1.json",
     "coordinate_units": "mm",
-    "date": "2026-11-13T00:04:36",
+    "date": "2026-11-13T02:32:56",
     "ignored_checks": [
         {
             "description": "Footprint has no courtyard defined",
@@ -44,6 +44,21 @@
                         "y": 96.8
                     },
                     "uuid": "0921d118-a131-42a5-9501-abad79ea30e0"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_mismatch"
+        },
+        {
+            "description": "Footprint 'SolderWire-2.5sqmm_1x02_P8.8mm_D2.4mm_OD4.4mm' does not match copy in library 'Connector_Wire'",
+            "items": [
+                {
+                    "description": "Footprint J1",
+                    "pos": {
+                        "x": 83.7,
+                        "y": 176.5
+                    },
+                    "uuid": "2de425ff-5ccd-4496-961f-eb4f119371f6"
                 }
             ],
             "severity": "warning",
@@ -170,6 +185,21 @@
             "type": "lib_footprint_mismatch"
         },
         {
+            "description": "Footprint 'MountingHole_3.2mm_M3' does not match copy in library 'MountingHole'",
+            "items": [
+                {
+                    "description": "Footprint H4",
+                    "pos": {
+                        "x": 122.5,
+                        "y": 43.5
+                    },
+                    "uuid": "ae6a7b9e-fa5f-46ea-8d50-df58e783a6c7"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_mismatch"
+        },
+        {
             "description": "Footprint 'JST_XH_B2B-XH-A_1x02_P2.50mm_Vertical' does not match copy in library 'Connector_JST'",
             "items": [
                 {
@@ -185,30 +215,45 @@
             "type": "lib_footprint_mismatch"
         },
         {
-            "description": "Footprint 'TerminalBlock_Phoenix_MKDS-1,5-2-5.08_1x02_P5.08mm_Horizontal' does not match copy in library 'TerminalBlock_Phoenix'",
+            "description": "Footprint 'MountingHole_3.2mm_M3' does not match copy in library 'MountingHole'",
             "items": [
                 {
-                    "description": "Footprint J7",
+                    "description": "Footprint H2",
                     "pos": {
-                        "x": 119.8,
-                        "y": 111.6
+                        "x": 122.5,
+                        "y": 176.5
                     },
-                    "uuid": "e33b82ac-081f-4306-842d-853c6f447b25"
+                    "uuid": "c197a594-523b-44e2-b875-33a5eac05acf"
                 }
             ],
             "severity": "warning",
             "type": "lib_footprint_mismatch"
         },
         {
-            "description": "Footprint 'TerminalBlock_Phoenix_MKDS-1,5-2-5.08_1x02_P5.08mm_Horizontal' does not match copy in library 'TerminalBlock_Phoenix'",
+            "description": "Footprint 'MountingHole_3.2mm_M3' does not match copy in library 'MountingHole'",
             "items": [
                 {
-                    "description": "Footprint J6",
+                    "description": "Footprint H3",
                     "pos": {
-                        "x": 119.8,
-                        "y": 123.4
+                        "x": 63.5,
+                        "y": 43.5
                     },
-                    "uuid": "f43b172f-d3b2-4aa0-aee5-9cf619647edd"
+                    "uuid": "c30b462c-f80a-4b05-8da6-02d5563e63c2"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_mismatch"
+        },
+        {
+            "description": "Footprint 'MountingHole_3.2mm_M3' does not match copy in library 'MountingHole'",
+            "items": [
+                {
+                    "description": "Footprint H1",
+                    "pos": {
+                        "x": 63.5,
+                        "y": 176.5
+                    },
+                    "uuid": "d613ec3a-5a64-4e9c-9adc-6ebaa4ece219"
                 }
             ],
             "severity": "warning",

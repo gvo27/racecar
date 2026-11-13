@@ -4,12 +4,17 @@ For the owner doing layout. Parts: `bom.csv` and `bom_offboard.csv` (made by `ma
 
 # A. Prototype rev A: in-house CNC (Makera Carvera)
 
-V-bit isolation milling, Gerber + Excellon via MakeraCAM. The board is not fabricated by a fab house for this revision.
+V-bit isolation milling in the lab's calibrated Fusion 360 template (`example/README.md`), with DXF and Excellon files from `make pcb-fab` (`fab/README.md`). The board is not fabricated by a fab house for this revision.
 
 ## Stock and tools
 
-- **Stock:** Kepro P22-365G FR-4, 2 oz Cu, double-sided, 3" x 6" x 0.062" (76.2 x 152.4 x 1.57 mm), lab stock, 5 pcs, dated 1997 and unsensitized: scrub oxide off before milling. 2 oz matches the trace-width plan, so the 2 oz columns below apply directly. Other lab stock: generic double-sided 10 x 15 cm, 10 pcs, copper weight TBD (likely 1 oz): not for this board.
-- **Makera PCB Fabrication Pack:** 2x 1/8" 60° 0.1 mm-tip V-bit, 2x 1/8" 30° 0.2 mm-tip V-bit, 20x milling/drilling bits (diameters not published: **TBD, lab tech to confirm**), dowel pins, UV solder-mask paint.
+- **Stock:** Kepro P22-465G FR-4, 2 oz Cu, double-sided, 4" x 6" x 0.062" (101.6 x 152.4 x 1.57 mm), lab stock (owner, 2026-11-12). The earlier 3" x 6" blank (P22-365G, 76.2 x 152.4 mm) is also in stock but is too small for the dowel line of the lab template. The blank is even (depth error 0, owner). Scrub oxide off before milling. 2 oz matches the trace-width plan, so the 2 oz columns below apply directly. Other lab stock: generic double-sided 10 x 15 cm, 10 pcs, copper weight TBD (likely 1 oz): not for this board.
+- **Lab tools (from the lab .f3z and the owner's photos):**
+  - Isolation: 1 contour pass, 0.08 mm deep, chamfer mill with 0.2 mm tip (Fusion taper 30). Copper is 0.070 mm, so the margin is 0.01 mm. Cut width at depth: 0.243 mm (30 degrees included) or 0.292 mm (60 degrees included); the 0.4 mm design clearance passes both.
+  - Drill bits: 0.1 to 2.0 mm in 0.1 mm steps (owner inventory). The lab CAM uses 0.9, 1.0 and 1.1 mm.
+  - End mill: one, 3.175 mm (1/8 in). It bores the dowel holes. A hole of 2.0 to 3.3 mm cannot be made.
+  - Dowels: 2 holes of 4.191 mm for 4.0 mm pins, at (3.2766, 3.81) and (149.1234, 3.81) mm from the stock lower-left corner.
+- **Makera PCB Fabrication Pack:** 2x 1/8" 60° 0.1 mm-tip V-bit, 2x 1/8" 30° 0.2 mm-tip V-bit, 20x milling/drilling bits, dowel pins, UV solder-mask paint. The lab CAM uses only the 0.2 mm tip V-bit.
 - **Fixturing:** rigid flat; double-sided tape on a flat sacrificial board.
 
 ## Layer strategy
@@ -45,11 +50,14 @@ The project DRC rules in `rc_power_board.kicad_pro` are set to match: `min_clear
 
 ## Rev A KiCad board (review only, 2026-11-11)
 
-`rc_power_board.kicad_pcb` is built and routed headless in the pinned KiCad 10.0.8 image. It is for owner review. **No Gerber, drill or CAM files exist yet: those steps are pending lab tech instructions.** The sections below that describe plots and MakeraCAM are plans, not done work. Values marked "assumed" wait for the lab tech.
+`rc_power_board.kicad_pcb` is built and routed headless in the pinned KiCad 10.0.8 image. It is for owner review. DXF and Excellon files for the lab's Fusion 360 template are in `fab/` (`make pcb-fab`, Task 9). The CAM stays in the lab template and has not run for this board. The Gerber and MakeraCAM steps below are an older plan. Values marked "assumed" wait for the lab tech.
 
-- **Via (assumed):** the EasyContac 0.8 rivet (1.0 mm OD) needs a 1.1 mm hole and the assumed bit set has no 1.1 mm bit, so the via is **1.2 mm drill / 2.1 mm pad** (annular 0.45 mm) in every net class. The rivet sits loose by about 0.1 mm before soldering. This replaces the 2.0 / 1.1 mm value in the tables below.
-- **Bit set (assumed, lab tech to confirm):** drill 0.8, 1.0, 1.2, 1.5 mm. A hole larger than 1.5 mm is milled with an end mill (smallest end mill assumed 1.0 mm). Footprint holes are snapped up to the next size in the board copies (XH 0.95 to 1.0, MKDS 1.3 to 1.5, F1 pins 1.4 to 1.5); pads grow to keep the 0.45 mm annular ring.
-- **Hole list from the board:** 0.8 mm x 2 (C9); 1.0 mm x 52 (U1, U2 (12 each), C1, J3, J4, J5, J8, J9, J11 to J14); 1.2 mm x 3 (rivet vias); 1.5 mm x 12 (F1 pins, J6, J7); milled: 2.4 mm x 1 (F1 peg), 3.0 mm x 2 (J1 wire pads), 3.2 mm x 4 (H1 to H4).
+- **Via (assumed):** the EasyContac 0.8 rivet (1.0 mm OD) needs a 1.1 mm hole. The owner's bit set has a 1.1 mm bit (and the lab CAM drills 1.1 mm), so the via is **1.1 mm drill / 2.1 mm pad** (annular ring 0.5 mm) in every net class. The 1.1 mm value is still assumed until the rivet is tried on a test piece.
+- **Bit set (owner photo, 2026-11-12):** drill 0.1 to 2.0 mm in 0.1 mm steps. A footprint hole is snapped up to the smallest size in the set in the board copies (XH 0.95 to 1.0, MKDS 1.3 stays 1.3, F1 pins 1.4 stays 1.4); pads grow to keep the 0.45 mm annular ring. A hole larger than 2.0 mm is bored with the 3.175 mm end mill and must be 3.3 mm or more (`milled_hole_min`, assumed: tool + 0.125 mm).
+- **Hole list from the board (lab fit, Task 9):** 0.8 mm x 2 (C9); 1.0 mm x 52 (U1, U2 (12 each), C1, J3, J4, J5, J8, J9, J11 to J14); 1.1 mm x 3 (rivet vias); 1.3 mm x 4 (J6, J7); 1.4 mm x 8 (F1 pins); bored: 3.4 mm x 7 (H1 to H4 M3 clearance, J1 wire pads, F1 locating peg), plus 2 dowel holes of 4.191 mm outside the board. Before Task 9 the board had 2.4 mm (F1 peg), 3.0 mm (J1) and 3.2 mm (H1 to H4) holes, which the lab tools cannot make.
+- **F1 peg:** the KiCad library footprint of the Littelfuse FLR 178.6165 has a 2.4 mm NPTH for the central locating peg. The Littelfuse drawing was not reachable from the build host (HTTP 403), so the peg diameter is **not confirmed**. It is larger than 2.0 mm in any case (the library hole is 2.4 mm), so it is a loose 3.4 mm locator hole. If the real peg is 2.0 mm or less, a drill from the set can replace it. Check the peg against the holder before milling.
+- **J1 wire pads:** hole 3.4 mm (was 3.0 mm), pad 4.4 mm, annular ring 0.5 mm. The 12 AWG conductor (about 2.05 mm) is loose in the hole.
+- **Frame:** the board is turned 90 degrees and centered on the stock; the two dowel holes are outside the board. Details and file list: `fab/README.md`.
 - **Outline:** 66 x 140 mm, drill/place origin at the lower-left corner. The U1 and U2 bodies (25.4 x 25.4 mm) lie inside it: U2 x 8.0 to 33.4, y 22.3 to 47.7; U1 x 36.0 to 61.4, y 22.3 to 47.7 (mm from the origin). Stackup: 2 layers, 0.070 mm copper, 1.57 mm total.
 - **Layers:** SMD parts on B.Cu, THT parts on F.Cu. Routing on B.Cu. `VBAT_RAW`, `VBAT` and GND are B.Cu zones. The F.Cu GND pour has pad connection "none" and joins B.Cu GND through one rivet via. F.Cu has one jumper track (`U1_PG`, U1.1 to J5.1, about 75 mm) on two rivet vias. The I2C jumpers of the first layout are removed. No F.Cu copper touches a THT pad (check in `make pcb-check`).
 - **Rivet vias: 3** (2 for the `U1_PG` jumper, 1 GND stitching). No via is inside a part courtyard (a rivet needs both sides soldered).
@@ -77,17 +85,17 @@ Rule of thumb: drill = outer diameter + 0.1 mm.
 
 | Feature | Hole | Method |
 | --- | --- | --- |
-| Rivet vias (EasyContac 0.8) | 1.1 mm | drill if a 1.1 mm bit exists, else mill; TBD |
+| Rivet vias (EasyContac 0.8) | 1.1 mm | drill (1.1 mm bit is in the set) |
 | U1 and U2 headers (D36V50F5) | 1.0 mm | drill, TBD. The 3 module mounting holes (2.18 mm) are not drilled: the header holds the module |
 | JST XH pins | B2B 1.0 mm; B3B/B4B/B6B 0.95 mm (or drill all at 1.0 mm) | drill, TBD |
 | C9 (CP_Radial_D8.0mm_P3.50mm) | 0.8 mm | drill, TBD |
 | C1 (CP_Radial_D10.0mm_P5.00mm) | 1.0 mm | drill, TBD |
-| Phoenix MKDS (J6/J7) | about 1.3 mm | drill or helical mill, TBD |
-| F1 FLR holder | 1.4 mm pins; 2.4 mm NPTH locating peg | drill or helical mill, TBD |
+| Phoenix MKDS (J6/J7) | 1.3 mm | drill |
+| F1 FLR holder | 1.4 mm pins; 3.4 mm NPTH locating peg hole | pins: drill; peg hole: bore with the end mill (peg size not confirmed) |
 | J6 VH option | 1.7 mm (only if chosen) | drill or helical mill, TBD |
-| J1 SolderWire | 3.0 mm | helical/circular mill with an end mill, TBD |
-| M3 mounting (H1-H4) | 3.2 mm | helical/circular mill, TBD |
-| Dowel pins | per Makera dowel pins, TBD | drill outside the board outline |
+| J1 SolderWire | 3.4 mm | bore with the 3.175 mm end mill |
+| M3 mounting (H1-H4) | 3.4 mm | bore with the 3.175 mm end mill |
+| Dowel pins | 4.191 mm for 4.0 mm pins (lab template), 2 holes | bore in Setup A, outside the board outline |
 
 ## Unplated THT soldering
 
@@ -95,14 +103,14 @@ Solder each THT pin on every layer where it has copper. JST XH shrouds and screw
 
 ## Registration and outline
 
-- 2-3 dowel-pin holes outside the board outline but inside the stock, for the flip. Bottom layer is mirrored for the flip in MakeraCAM.
-- Board outline must fit the 76.2 x 152.4 mm stock with margin for clamping and dowels. Proposed at most about 66 x 140 mm (**TBD**).
+- 2 dowel holes (4.191 mm for 4.0 mm pins) on one line along the stock long side, bored in Setup A of the lab template. B.Cu is not mirrored in the files: Setup C flips the stock.
+- The board (66 x 140 mm) is turned 90 degrees and centered on the 152.4 x 101.6 mm stock: 6.2 mm at each end, 17.8 mm at each long side. The dowel holes are about 14 mm from the outline. Outputs: `fab/` (`make pcb-fab`).
 
 ## Export and CAM
 
-- [ ] Pending lab tech instructions: plot (KiCad 10) F.Cu, B.Cu, Edge.Cuts as Gerber, and drill as Excellon. No mask/silk/paste layers. Not done in the rev A PCB work.
-- [ ] Pending lab tech instructions. MakeraCAM: set stock size, import Gerbers and Excellon, mirrored bottom for the flip (handled in MakeraCAM, not in the plot).
-- [ ] Isolation with the 30°/0.2 mm bit (about 0.25 mm per pass at 0.1 mm depth); 60°/0.1 mm for fine areas (U3). Depth at least 0.1 mm for 70 µm copper. Use the Carvera's probe auto-levelling (mesh); isolation depth 0.1-0.15 mm for 2 oz; depth error changes cut width (±0.05 mm at 30°, ±0.12 mm at 60° per ±0.1 mm). Drilling and outline with the pack bits, TBD.
+- [x] Export: `make pcb-fab` writes the DXF files (F.Cu, B.Cu, Edge.Cuts), the Excellon file and the drill-map DXF to `fab/`, in the lab frame (`fab/README.md`). B.Cu is not mirrored: Setup C of the lab template flips the stock.
+- [ ] Lab template: import the files, check the dowel positions (0, 0) and (145.8468, 0) against the template, and run the lab tech's CAM. Not done.
+- [ ] Isolation as in the lab template: 0.2 mm tip V-bit, 1 pass, 0.08 mm deep, on an even blank (copper 0.070 mm, margin 0.01 mm). Drills and bores from the Excellon tool list. Outline cut: the lab tech decides.
 
 ## Finishing and checks
 

@@ -1,6 +1,6 @@
 # Power board BOM (Rev A draft)
 
-The BOM comes from the schematic. Each symbol carries part fields. `make bom` exports them with `kicad-cli` to `bom.csv` (commit the file) and prints the cost total. Companion files: `design_overview.md` (design), `fab_handoff.md` (layout and CNC-milling steps). Rev A is milled in-house (Makera Carvera), so there is no PCB fab-house cost. Every MPN is **proposed**, pending owner approval, unless `Status` says otherwise. Prices and stock were checked 2026-10-30; confirm before ordering. J10 is intentionally absent (radar removed).
+The BOM comes from the schematic. Each symbol carries part fields. `make bom` exports them with `kicad-cli` to `bom.csv` (commit the file) and prints the cost total. Companion files: `design_overview.md` (design), `fab_handoff.md` (layout and CNC-milling steps). Rev A is milled in-house (Makera Carvera) on a 4" x 6" Kepro P22-465G blank (lab template, `example/README.md`), so there is no PCB fab-house cost. Every MPN is **proposed**, pending owner approval, unless `Status` says otherwise. Prices and stock were checked 2026-10-30; confirm before ordering. J10 is intentionally absent (radar removed).
 
 ## How the BOM is made
 
@@ -27,4 +27,4 @@ The BOM comes from the schematic. Each symbol carries part fields. `make bom` ex
 
 ## J1 footprint note
 
-KiCad's `Connector_Wire` library (checked locally) has `SolderWire-*` footprints up to 2.5 sqmm only (no 4 sqmm variant): the one in the schematic, `SolderWire-2.5sqmm_1x02_P8.8mm_D2.4mm_OD4.4mm`, has a 3.0 mm drill and a 4.4 mm pad ("D2.4mm" is the conductor diameter, not the drill). 12 AWG stranded tinned wire (about 2.05 mm) fits the 3.0 mm hole; the concern is the thin 0.7 mm annular ring at F1's current. Proposed: keep the 3.0 mm drill, enlarge the pad OD to at least 5 mm (custom copy of the footprint), thermal reliefs off. Verify against the actual wire.
+KiCad's `Connector_Wire` library (checked locally) has `SolderWire-*` footprints up to 2.5 sqmm only (no 4 sqmm variant): the one in the schematic, `SolderWire-2.5sqmm_1x02_P8.8mm_D2.4mm_OD4.4mm`, has a 3.0 mm drill and a 4.4 mm pad ("D2.4mm" is the conductor diameter, not the drill). 12 AWG stranded tinned wire (about 2.05 mm) fits the 3.0 mm hole; the concern is the thin 0.7 mm annular ring at F1's current. Task 9 (lab fit): the lab has no tool for holes between 2.0 and 3.3 mm, so the board copy has a 3.4 mm bored hole (pad 4.4 mm, annular ring 0.5 mm, 12 AWG conductor loose in the hole). Earlier proposal: keep the 3.0 mm drill, enlarge the pad OD to at least 5 mm (custom copy of the footprint), thermal reliefs off. Verify against the actual wire.

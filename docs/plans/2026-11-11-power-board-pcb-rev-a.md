@@ -209,3 +209,19 @@ The baseline board (e0ba889) passes DRC, ERC and the milling check, but these ch
 ### Task 8 (later, separate): KiRI visual diff trial
 
 Owner, 2026-11-11: try leoheck/kiri (tag 1.0.0) with KiCad 10. Do not commit anything until it works with KiCad 10. If the setup is too buggy, drop it and record that in the PR. Work in the scratchpad, in a container based on the pinned KiCad image. Pass = `kiri` makes a schematic and layout diff between two commits of `docs/schematics/` with no errors. Only then propose a pinned CI job (kiri-github-action by SHA, after a read of its permissions).
+
+### Task 9: lab fit and fab outputs (2026-11-13)
+
+**Scope change:** the work is the board plus the fab files. The CAM stays in the lab's Fusion 360 template.
+
+**Findings (Opus, from the lab .f3z):** stock 152.4 x 101.6 mm; 2 dowel holes of 4.191 mm at (3.2766, 3.81) and (149.1234, 3.81) mm; one end mill (3.175 mm); one isolation pass at 0.08 mm with a 0.2 mm tip V-bit; drills 0.9, 1.0 and 1.1 mm; the lab makes holes from the KiCad drill-map DXF. Owner (PR #3, 2026-11-12): the blank is even (depth error 0); drill bits 0.1 to 2.0 mm in 0.1 mm steps; dowel holes always; deliver DXF for F.Cu, B.Cu and Edge.Cuts, and drill files in Excellon and DXF; B.Cu not mirrored. KiCad's native DXF is not contour-safe (drill circles on Edge.Cuts; overlapping pad, track and zone outlines), so the DXF files come from `tools/fab_export.py`.
+
+**Files:** `docs/schematics/example/README.md` (new), `milling.toml`, `tools/milling_check.py`, `tools/placement.py`, `tools/build_pcb.py`, `tools/check_board.py`, `tools/route_pcb.py`, `tools/fab_export.py` (new), `tools/test_fab.py` (new), `fab/` (new, committed outputs), `rc_power_board.kicad_pcb`, `rc_power_board.kicad_pro`, `Makefile` (`pcb-fab`), `fab_handoff.md`, `bom.md`, `bom_offboard.csv`, `review/README.md`.
+
+- [x] **Step 1:** Lab limits (tests first in `test_milling_check.py`): cut depth 0.08 mm, depth error 0, drill set 0.1 to 2.0 mm, end mill 3.175 mm, `milled_hole_min` 3.3 mm (assumed), `[stock]`, `[dowel]`, the lab V-bit with both readings of the taper (0.243 mm and 0.292 mm cut width). MILL-DRILL: a hole is in the drill set or at least 3.3 mm. MILL-DEPTH uses the new values and passes (margin 0.01 mm).
+- [x] **Step 2:** Board fit (tests first in `test_board.py`): `build_pcb.py` reads the drill set from `milling.toml`; new `--sync-drills` (no re-route, zones refilled). H1 to H4, J1 and the F1 peg hole are 3.4 mm bored holes; vias 1.1/2.1 mm; MKDS 1.3 mm, F1 pins 1.4 mm. The F1 peg size is not confirmed (the Littelfuse drawing was not reachable): 3.4 mm is a loose locator hole.
+- [x] **Step 3:** Lab frame: `placement.py` has `STOCK`, `DOWELS` and the board-to-lab transform. The board is turned 90 degrees counter-clockwise and centered on the stock (6.2 mm at each end, 17.8 mm at each long side). The dowel holes are about 14 mm from the outline. The stock and the dowels are drawn on `Dwgs.User` for review.
+- [x] **Step 4:** `make pcb-fab` writes 5 files to `docs/schematics/fab/` (see `fab/README.md`). `test_fab.py` checks: file set, one layer per DXF, closed loops, no overlap, copper area against pcbnew (0.5 %), copper inside the outline, holes against `kicad-cli pcb export drill`, dowels at (0, 0) and (145.8468, 0), B.Cu not mirrored, committed files current.
+- [x] **Step 5:** Docs: `example/README.md`, `fab_handoff.md`, `bom.md`, `bom_offboard.csv`, `review/README.md`, this plan, `.claude/CLAUDE.md`, `.claude/rules/schematics.md`.
+
+**Open (owner / lab tech):** F1 peg size; Fusion taper meaning (per side or included); `milled_hole_min` 3.3 mm; the 0.01 mm depth margin on a test piece; rivet 1.1 mm hole on a test piece; the Fusion import of the files in the lab template.
