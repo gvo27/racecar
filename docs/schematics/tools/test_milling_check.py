@@ -1,5 +1,6 @@
 """Tests for milling_check.py. Run: make pcb-test (stdlib unittest, KiCad image python3)."""
 import os
+import re
 import sys
 import tempfile
 import unittest
@@ -46,7 +47,7 @@ class Synth:
         self.b.Add(t)
         return t
 
-    def via(self, x, y, net, drill=1.2, dia=2.1):
+    def via(self, x, y, net, drill=1.1, dia=2.1):
         v = pcbnew.PCB_VIA(self.b)
         v.SetPosition(VECTOR2I(FromMM(x), FromMM(y)))
         v.SetDrill(FromMM(drill))
@@ -90,13 +91,30 @@ class TestCutWidth(unittest.TestCase):
         self.assertAlmostEqual(mc.cut_width(0.2, 30, 0.20), 0.307, places=3)
         self.assertAlmostEqual(mc.cut_width(0.1, 60, 0.20), 0.331, places=3)
 
+    def test_lab_bit_both_readings_at_lab_depth(self):
+        # lab .f3z: tip 0.2 mm, Fusion taper 30, depth 0.08 mm: 30 deg included -> 0.243, 30 deg per side -> 0.292
+        self.assertAlmostEqual(mc.cut_width(0.2, 30, 0.08), 0.243, places=3)
+        self.assertAlmostEqual(mc.cut_width(0.2, 60, 0.08), 0.292, places=3)
+
 
 class TestLimits(unittest.TestCase):
     def test_loads_and_derives(self):
         lim = limits()
-        self.assertAlmostEqual(lim.depth_worst, 0.20)
-        self.assertEqual([b.name for b in lim.bits], ["30deg/0.2", "60deg/0.1"])
-        self.assertEqual(lim.drills, [0.8, 1.0, 1.2, 1.5])
+        self.assertAlmostEqual(lim.depth_worst, 0.08)
+        self.assertEqual([b.name for b in lim.bits], ["30deg/0.2", "60deg/0.2", "60deg/0.1"])
+        self.assertEqual(lim.drills, [round(0.1 * i, 1) for i in range(1, 21)])
+        self.assertAlmostEqual(lim.endmill_min, 3.175)
+        self.assertAlmostEqual(lim.milled_hole_min, 3.3)
+        self.assertAlmostEqual(lim.via_drill, 1.1)
+        self.assertAlmostEqual(lim.via_pad, 2.1)
+
+    def test_stock_and_dowels(self):
+        lim = limits()
+        self.assertEqual((lim.stock_w, lim.stock_h), (152.4, 101.6))
+        self.assertAlmostEqual(lim.stock_t, 1.57)
+        self.assertAlmostEqual(lim.dowel_dia, 4.191)
+        self.assertAlmostEqual(lim.dowel_pin, 4.0)
+        self.assertEqual(lim.dowels, [(3.2766, 3.81), (149.1234, 3.81)])
 
     def test_rejects_value_without_status(self):
         with tempfile.TemporaryDirectory() as d:
@@ -117,15 +135,17 @@ class TestGap(unittest.TestCase):
         s.track(0, 0.5 + g, 10, 0.5 + g, "B")
         return mc.check(s.b, limits())
 
-    def test_030_error(self):
-        f = self.gap(0.30)
+    def test_015_error(self):
+        f = self.gap(0.15)
         self.assertEqual(rules(f, "error"), ["MILL-GAP"])
 
-    def test_032_bit_warning(self):
-        f = self.gap(0.32)
+    def test_025_bit_warning(self):
+        f = self.gap(0.25)
         self.assertEqual(rules(f), ["MILL-GAP-BIT"])
-        self.assertIn("30deg/0.2", f[[x[0] for x in f].index("MILL-GAP-BIT")][5])
-        self.assertNotIn("60deg/0.1", f[[x[0] for x in f].index("MILL-GAP-BIT")][5])
+        msg = f[[x[0] for x in f].index("MILL-GAP-BIT")][5]
+        self.assertIn("30deg/0.2", msg)
+        self.assertIn("60deg/0.1", msg)
+        self.assertNotIn("60deg/0.2", msg)
 
     def test_045_none(self):
         self.assertEqual(rules(self.gap(0.45)), [])
@@ -138,11 +158,21 @@ class TestGap(unittest.TestCase):
 
 
 class TestDepth(unittest.TestCase):
-    def test_depth_error_with_assumed_limits(self):
-        f = [x for x in mc.check(pcbnew.BOARD(), limits()) if x[0] == "MILL-DEPTH"]
+    def test_lab_depth_passes(self):
+        # lab: 0.08 mm on an even blank (error 0) vs 0.070 mm copper
+        self.assertEqual([x for x in mc.check(pcbnew.BOARD(), limits()) if x[0] == "MILL-DEPTH"], [])
+
+    def test_shallow_depth_still_errors(self):
+        with tempfile.TemporaryDirectory() as d:
+            p = os.path.join(d, "shallow.toml")
+            text = open(LIMITS, encoding="utf-8").read()
+            text, n = re.subn(r"(\[cut_depth_min\]\nvalue = )[0-9.]+", r"\g<1>0.06", text)
+            self.assertEqual(n, 1)
+            open(p, "w", encoding="utf-8").write(text)
+            f = [x for x in mc.check(pcbnew.BOARD(), mc.load_limits(p)) if x[0] == "MILL-DEPTH"]
         self.assertEqual(len(f), 1)
         self.assertEqual(f[0][1], "error")
-        self.assertAlmostEqual(f[0][3], 0.05)
+        self.assertAlmostEqual(f[0][3], 0.06)
 
 
 class TestHoles(unittest.TestCase):
@@ -152,11 +182,26 @@ class TestHoles(unittest.TestCase):
         s.pad(fp, 20, 20, d, size, "A", attr)
         return mc.check(s.b, limits())
 
-    def test_11_error(self):
-        self.assertEqual(rules(self.hole(1.1), "error"), ["MILL-DRILL"])
+    def test_11_in_set(self):
+        self.assertEqual(rules(self.hole(1.1), "error"), [])
 
-    def test_24_milled(self):
-        self.assertEqual(rules(self.hole(2.4)), [])
+    def test_20_largest_drill(self):
+        self.assertEqual(rules(self.hole(2.0, 3.5), "error"), [])
+
+    def test_21_error(self):
+        self.assertEqual(rules(self.hole(2.1, 3.5), "error"), ["MILL-DRILL"])
+
+    def test_24_error(self):
+        self.assertEqual(rules(self.hole(2.4, 3.5), "error"), ["MILL-DRILL"])
+
+    def test_32_error(self):
+        self.assertEqual(rules(self.hole(3.2, 4.2), "error"), ["MILL-DRILL"])
+
+    def test_33_milled(self):
+        self.assertEqual(rules(self.hole(3.3, 4.3), "error"), [])
+
+    def test_34_milled(self):
+        self.assertEqual(rules(self.hole(3.4, 4.3), "error"), [])
 
     def test_in_set(self):
         self.assertEqual(rules(self.hole(1.0, 2.0)), [])
@@ -184,7 +229,7 @@ class TestFcuTht(unittest.TestCase):
 class TestVia(unittest.TestCase):
     def test_bad_via(self):
         s = Synth()
-        s.via(20, 20, "A", drill=1.1, dia=2.0)
+        s.via(20, 20, "A", drill=1.2, dia=2.1)
         self.assertIn("MILL-VIA", rules(mc.check(s.b, limits()), "error"))
 
     def test_good_via(self):
@@ -328,20 +373,20 @@ class TestWaivers(unittest.TestCase):
     def test_waiver_moves_finding(self):
         s = Synth()
         s.track(0, 0, 10, 0, "A")
-        s.track(0, 0.8, 10, 0.8, "B")
+        s.track(0, 0.65, 10, 0.65, "B")  # gap 0.15 mm
         f = mc.check(s.b, limits())
         w = mc.load_waivers(self.write(
             '[[waiver]]\nrule="MILL-GAP"\nlocation="net A"\nreason="Test."\nwho="t"\ndate="2026-11-11"\n'))
         g = mc.triage(f, w)
-        self.assertEqual([x[0] for x in g["errors"] if x[0] != "MILL-DEPTH"], [])
+        self.assertEqual([x[0] for x in g["errors"]], [])
         self.assertEqual([x[0][0] for x in g["waived"]], ["MILL-GAP"])
         self.assertEqual(g["waived"][0][1]["reason"], "Test.")
-        self.assertEqual([x[0] for x in g["questions"]], ["MILL-DEPTH"])
+        self.assertEqual(g["questions"], [])
 
     def test_unwaived_stays_error(self):
         s = Synth()
         s.track(0, 0, 10, 0, "A")
-        s.track(0, 0.8, 10, 0.8, "B")
+        s.track(0, 0.65, 10, 0.65, "B")  # gap 0.15 mm
         g = mc.triage(mc.check(s.b, limits()), [])
         self.assertIn("MILL-GAP", [x[0] for x in g["errors"]])
 

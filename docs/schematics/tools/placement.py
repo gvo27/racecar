@@ -122,9 +122,12 @@ JUMPERS = [
 # Rivet vias that tie the F.Cu GND pour to the B.Cu GND zone: (x, y, net). Each one is a rivet; the count goes in the report.
 STITCH_VIAS = []
 
-# Holes larger than the drill set that the mill cuts with an end mill: (ref, hole mm).
+# Holes larger than the largest drill (2.0 mm) that the mill bores with the 3.175 mm end mill: (ref, hole mm).
+# A bored hole is at least milled_hole_min (3.3 mm, milling.toml); holes between 2.0 and 3.3 mm cannot be made.
+# H1 to H4: M3 clearance. J1: 12 AWG wire pads (pad 4.4 mm, ring 0.5 mm). F1: locating peg of the FLR 178.6165 holder;
+# the library hole is 2.4 mm, the peg size is not confirmed (datasheet not reachable), so it is a loose 3.4 mm locator hole.
 MILLED_HOLES = [
-    ("J1", 3.0),
-    ("H1", 3.2), ("H2", 3.2), ("H3", 3.2), ("H4", 3.2),
-    ("F1", 2.4),
+    ("J1", 3.4),
+    ("H1", 3.4), ("H2", 3.4), ("H3", 3.4), ("H4", 3.4),
+    ("F1", 3.4),
 ]

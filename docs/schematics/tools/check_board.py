@@ -15,8 +15,6 @@ import milling_check as mc  # noqa: E402
 import placement  # noqa: E402
 
 SCH_DIR = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
-DRILL_SET = [0.8, 1.0, 1.2, 1.5]
-VIA_DRILL, VIA_PAD = 1.2, 2.1
 HIGH_CURRENT_MIN_W = 6.0
 HIGH_CURRENT_NETS = ("VBAT_RAW", "VBAT")
 
@@ -208,20 +206,21 @@ def check(board, limits=None, waivers=None):
     found = []
     mc.check_fcu_tht(ctx, found)
     problems += ["F.Cu on THT pad: %s" % f[2] for f in found]
-    # 2. holes outside the bit set and not listed as milled
+    # 2. holes: in the drill set, or a bored hole (>= milled_hole_min) listed in MILLED_HOLES
     milled = set(placement.MILLED_HOLES)
     for label, ref, d in holes(board):
-        if any(abs(d - s) < 0.005 for s in DRILL_SET):
+        if any(abs(d - s) < 0.005 for s in lim.drills):
             continue
-        if any(r == ref and abs(d - m) < 0.005 for r, m in milled):
+        if d >= lim.milled_hole_min - 0.005 and any(r == ref and abs(d - m) < 0.005 for r, m in milled):
             continue
-        problems.append("hole %.2f mm at %s is not in the bit set %s and not in MILLED_HOLES" % (d, label, DRILL_SET))
+        problems.append("hole %.2f mm at %s is not in the drill set (%.1f to %.1f mm) and not a bored hole (MILLED_HOLES, >= %.2f mm)" % (
+            d, label, min(lim.drills), max(lim.drills), lim.milled_hole_min))
     # 3. rivet vias
     for t in board.GetTracks():
         if t.Type() == pcbnew.PCB_VIA_T:
             drill, dia = ToMM(t.GetDrillValue()), ToMM(t.GetWidth(pcbnew.F_Cu))
-            if abs(drill - VIA_DRILL) > 0.005 or abs(dia - VIA_PAD) > 0.005:
-                problems.append("via %.2f/%.2f mm at %s (rivet via is %.1f/%.1f)" % (dia, drill, ctx.xy(t.GetPosition()), VIA_PAD, VIA_DRILL))
+            if abs(drill - lim.via_drill) > 0.005 or abs(dia - lim.via_pad) > 0.005:
+                problems.append("via %.2f/%.2f mm at %s (rivet via is %.1f/%.1f)" % (dia, drill, ctx.xy(t.GetPosition()), lim.via_pad, lim.via_drill))
     # 4. HighCurrent tracks
     for t in board.GetTracks():
         if t.Type() != pcbnew.PCB_VIA_T and short(t.GetNetname()) in HIGH_CURRENT_NETS + ("GND",):

@@ -19,7 +19,7 @@ import build_pcb  # noqa: E402
 import placement  # noqa: E402
 
 NOT_ROUTED = ("GND", "VBAT", "/VBAT_RAW", "+5V_CPU", "+5V_SENS", "/U1_PG")  # planned zones, the GND pour and planned jumpers (placement.py)
-VIA_DRILL, VIA_PAD = 1.2, 2.1
+VIA_DRILL, VIA_PAD = 1.1, 2.1
 EDGE_BAND = float(os.environ.get("ROUTE_EDGE_BAND", "2.0"))
 ROUTER_CLEARANCE_UM = 430  # board clearance is 0.4 mm; the router rounds, so give it 0.03 mm extra
 

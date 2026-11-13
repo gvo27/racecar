@@ -1,15 +1,6 @@
 {
  "errors": [],
- "questions": [
-  [
-   "MILL-DEPTH",
-   "error",
-   "limits (milling.toml)",
-   0.05,
-   0.07,
-   "min depth 0.050 mm (0.10 - 0.05) is below the copper thickness 0.070 mm: a shallow cut may not go through. The min depth must be at least 0.12 mm. Question for the owner and the lab tech (assumed depth range)."
-  ]
- ],
+ "questions": [],
  "bits": [],
  "warnings": [
   [

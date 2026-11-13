@@ -119,7 +119,7 @@ class TestBootstrap(unittest.TestCase):
     def test_net_classes_and_vias(self):
         pro = json.load(open(os.path.join(SCH_DIR, "rc_power_board.kicad_pro")))
         for c in pro["net_settings"]["classes"]:
-            self.assertEqual((c["via_diameter"], c["via_drill"]), (2.1, 1.2), c["name"])
+            self.assertEqual((c["via_diameter"], c["via_drill"]), (2.1, 1.1), c["name"])
         widths = {c["name"]: c["track_width"] for c in pro["net_settings"]["classes"]}
         self.assertEqual(widths, {"Default": 0.5, "HighCurrent": 6.0, "Power3A": 1.0, "Power5A": 1.6})
 
@@ -131,6 +131,88 @@ class TestBootstrap(unittest.TestCase):
     def test_check_board_clean(self):
         self.assertEqual(check_board.check(self.b, mc.load_limits(os.path.join(SCH_DIR, "milling.toml")),
                                            mc.load_waivers(os.path.join(SCH_DIR, "milling_waivers.toml"))), [])
+
+
+def pad_holes(board):
+    """{(ref, pad number): (drill mm, pad size mm, is NPTH)} for the pads with a hole."""
+    out = {}
+    for fp in board.GetFootprints():
+        for p in fp.Pads():
+            if p.HasHole():
+                out[(fp.GetReference(), p.GetNumber())] = (ToMM(p.GetDrillSize().x), ToMM(p.GetSize(pcbnew.F_Cu).x),
+                                                           p.GetAttribute() == pcbnew.PAD_ATTRIB_NPTH)
+    return out
+
+
+class TestHoles(unittest.TestCase):
+    """Lab fit (Task 9): every hole is in the owner's drill set (0.1 to 2.0 mm) or a bored hole >= 3.3 mm."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.b = load()
+        cls.lim = mc.load_limits(os.path.join(SCH_DIR, "milling.toml"))
+
+    def test_every_hole_makeable(self):
+        for (ref, num), (d, _, _) in pad_holes(self.b).items():
+            ok = any(abs(d - s) < 0.005 for s in self.lim.drills) or d >= self.lim.milled_hole_min - 0.005
+            self.assertTrue(ok, "%s.%s hole %.2f mm" % (ref, num, d))
+
+    def test_no_hole_smaller_than_library_drill(self):
+        sch = work_dir()
+        for fp in self.b.GetFootprints():
+            lib = build_pcb.load_footprint(fp.GetFPID().GetUniStringLibId(), sch)
+            want = max([ToMM(max(p.GetDrillSize().x, p.GetDrillSize().y)) for p in lib.Pads() if p.HasHole()] or [0])
+            have = max([ToMM(max(p.GetDrillSize().x, p.GetDrillSize().y)) for p in fp.Pads() if p.HasHole()] or [0])
+            self.assertGreaterEqual(have + 0.005, want, fp.GetReference())
+
+    def test_mounting_holes(self):
+        holes = pad_holes(self.b)
+        for r in ("H1", "H2", "H3", "H4"):
+            self.assertAlmostEqual([v for k, v in holes.items() if k[0] == r][0][0], 3.4, places=3)
+
+    def test_j1_wire_pads_bored_with_ring(self):
+        for (ref, num), (d, size, _) in pad_holes(self.b).items():
+            if ref == "J1":
+                self.assertGreaterEqual(d, 3.3 - 0.005)
+                self.assertGreaterEqual((size - d) / 2.0, 0.45 - 1e-6)
+
+    def test_f1_peg_is_bored_not_drilled_below_library_size(self):
+        peg = [v for k, v in pad_holes(self.b).items() if k[0] == "F1" and v[2]]
+        self.assertEqual(len(peg), 1)
+        self.assertGreaterEqual(peg[0][0], 3.3 - 0.005)
+
+    def test_vias_drill_is_in_set(self):
+        for t in self.b.GetTracks():
+            if t.Type() == pcbnew.PCB_VIA_T:
+                self.assertAlmostEqual(ToMM(t.GetDrillValue()), 1.1, places=3)
+
+
+class TestSyncDrills(unittest.TestCase):
+    def test_sync_drills_fixes_holes_and_vias_without_other_change(self):
+        d = tempfile.mkdtemp(prefix="syncd-")
+        dst = os.path.join(d, "rc_power_board.kicad_pcb")
+        shutil.copy(board_path(), dst)
+        for ext in (".kicad_pro", ".kicad_dru"):
+            shutil.copy(os.path.join(SCH_DIR, "rc_power_board" + ext), os.path.join(d, "rc_power_board" + ext))
+        b = pcbnew.LoadBoard(dst)
+        for fp in b.GetFootprints():
+            if fp.GetReference() == "H1":
+                list(fp.Pads())[0].SetDrillSize(pcbnew.VECTOR2I(pcbnew.FromMM(3.2), pcbnew.FromMM(3.2)))
+        v = pcbnew.PCB_VIA(b)
+        v.SetPosition(pcbnew.VECTOR2I(pcbnew.FromMM(100), pcbnew.FromMM(100)))
+        v.SetDrill(pcbnew.FromMM(1.2))
+        v.SetWidth(pcbnew.FromMM(2.1))
+        b.Add(v)
+        b.Save(dst)
+        n_tracks = len(list(pcbnew.LoadBoard(dst).GetTracks()))
+        build_pcb.sync_drills(dst)
+        b2 = pcbnew.LoadBoard(dst)
+        self.assertEqual(len(list(b2.GetTracks())), n_tracks)
+        self.assertAlmostEqual([x for k, x in pad_holes(b2).items() if k[0] == "H1"][0][0], 3.4, places=3)
+        for t in b2.GetTracks():
+            if t.Type() == pcbnew.PCB_VIA_T:
+                self.assertAlmostEqual(ToMM(t.GetDrillValue()), 1.1, places=3)
+        self.assertTrue(all(z.IsFilled() for z in b2.Zones()))
 
 
 class TestCheckBoardCatches(unittest.TestCase):
@@ -154,13 +236,13 @@ class TestCheckBoardCatches(unittest.TestCase):
 
     def test_unlisted_hole(self):
         j = [f for f in self.b.GetFootprints() if f.GetReference() == "J5"][0]
-        list(j.Pads())[0].SetDrillSize(pcbnew.VECTOR2I(pcbnew.FromMM(1.1), pcbnew.FromMM(1.1)))
-        self.assertTrue([p for p in check_board.check(self.b, self.lim) if "bit set" in p])
+        list(j.Pads())[0].SetDrillSize(pcbnew.VECTOR2I(pcbnew.FromMM(2.4), pcbnew.FromMM(2.4)))
+        self.assertTrue([p for p in check_board.check(self.b, self.lim) if "drill set" in p])
 
     def test_bad_via(self):
         v = pcbnew.PCB_VIA(self.b)
         v.SetPosition(pcbnew.VECTOR2I(pcbnew.FromMM(150), pcbnew.FromMM(100)))
-        v.SetDrill(pcbnew.FromMM(1.1))
+        v.SetDrill(pcbnew.FromMM(1.2))
         v.SetWidth(pcbnew.FromMM(2.0))
         self.b.Add(v)
         self.assertTrue([p for p in check_board.check(self.b, self.lim) if p.startswith("via ")])
@@ -296,7 +378,7 @@ class TestRoutedBoard(unittest.TestCase):
     def test_vias_are_rivets_and_counted(self):
         vias = [t for t in self.b.GetTracks() if t.Type() == pcbnew.PCB_VIA_T]
         for v in vias:
-            self.assertAlmostEqual(ToMM(v.GetDrillValue()), 1.2, places=3)
+            self.assertAlmostEqual(ToMM(v.GetDrillValue()), 1.1, places=3)
             self.assertAlmostEqual(ToMM(v.GetWidth(pcbnew.F_Cu)), 2.1, places=3)
         print("\nrivet vias: %d (%d GND stitching)" % (len(vias), sum(1 for v in vias if v.GetNetname() == "GND")))
 
@@ -380,7 +462,7 @@ class TestReviewPackage(unittest.TestCase):
         for k in ("errors", "waived", "questions", "bits", "warnings"):
             self.assertIn(k, m)
         self.assertEqual(m["errors"], [])
-        self.assertEqual([f[0] for f in m["questions"]], ["MILL-DEPTH"])
+        self.assertEqual(m["questions"], [])
 
     def test_exit_code_is_zero(self):
         self.assertEqual(self.rc, 0)

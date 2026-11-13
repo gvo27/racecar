@@ -10,6 +10,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import tomllib
 import xml.etree.ElementTree as ET
 
 import pcbnew
@@ -22,7 +23,10 @@ SCH_DIR = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__
 SCHEMATIC = "rc_power_board.kicad_sch"
 BOARD_FILE = "rc_power_board.kicad_pcb"
 FP_DIR = os.environ.get("KICAD10_FOOTPRINT_DIR", "/usr/share/kicad/footprints")
-DRILL_SET = [0.8, 1.0, 1.2, 1.5]  # assumed bit set (milling.toml)
+LIMITS_FILE = os.path.join(SCH_DIR, "milling.toml")
+with open(LIMITS_FILE, "rb") as _fh:
+    DRILL_SET = sorted(tomllib.load(_fh)["drill_set"]["value"])  # owner's bit set (milling.toml)
+VIA_DRILL, VIA_PAD = 1.1, 2.1  # EasyContac 0.8 rivet
 ANNULAR_MIN = 0.45
 COPPER_MM = 0.070
 EDGE_INSET = 0.6
@@ -133,21 +137,35 @@ def sync_fields(board_path, sch_dir=SCH_DIR):
 
 
 def snap_drill(d_mm):
-    """Next size in the drill set; holes larger than the set stay as they are (milled)."""
+    """Smallest size in the drill set that is >= d_mm. A hole larger than the set is returned unchanged:
+    it must be a bored hole of placement.MILLED_HOLES (fit_pad)."""
     for s in DRILL_SET:
         if d_mm <= s + 0.005:
             return s
     return d_mm
 
 
-def fit_pad(pad):
-    """Snap the hole to the bit set and grow the pad to keep the annular ring (board copy only)."""
+def milled_hole(ref):
+    """The bored hole size (mm) of a part, or None."""
+    sizes = [h for r, h in placement.MILLED_HOLES if r == ref]
+    return max(sizes) if sizes else None
+
+
+def fit_pad(pad, ref="", lib_pad=None):
+    """Snap the hole to the bit set (bored holes: placement.MILLED_HOLES) and grow the pad to keep the annular ring
+    (board copy only). A hole never gets smaller than the library drill."""
     if not pad.HasHole():
         return
-    ds = pad.GetDrillSize()
+    ds = (lib_pad or pad).GetDrillSize()  # lib_pad: the library footprint's pad (sync_drills); a board hole may already be snapped
+    bored = milled_hole(ref)
     dx, dy = snap_drill(ToMM(ds.x)), snap_drill(ToMM(ds.y))
+    if bored is not None and max(dx, dy) > max(DRILL_SET) + 0.005:
+        dx = dy = max(bored, dx, dy)
+    if max(dx, dy) > max(DRILL_SET) + 0.005 and bored is None:
+        raise RuntimeError("%s: hole %.2f mm is not in the drill set and not in MILLED_HOLES" % (ref, max(dx, dy)))
     pad.SetDrillSize(VECTOR2I(FromMM(dx), FromMM(dy)))
     if pad.GetAttribute() == pcbnew.PAD_ATTRIB_NPTH:
+        pad.SetSize(VECTOR2I(FromMM(max(dx, dy)), FromMM(max(dx, dy))))  # NPTH: no copper, pad = hole
         return
     sz = pad.GetSize(pcbnew.F_Cu)
     need_x, need_y = max(dx, dy) + 2 * ANNULAR_MIN, max(dx, dy) + 2 * ANNULAR_MIN
@@ -226,6 +244,24 @@ def add_power_zones(board, netinfo):
         add_zone(board, netinfo[net], pcbnew.B_Cu, pts, pcbnew.ZONE_CONNECTION_FULL, prio=10 + i, name="BUS_%s_%d" % (net.lstrip("/"), i))
 
 
+def sync_drills(board_path):
+    """Apply the drill set and the bored holes to an existing board in place, set the via drill, refill the zones.
+    Parts, tracks and the via positions stay. Pads grow to keep the annular ring; the footprint library is the
+    source of the minimum drill, so a hole already larger than the new size stays as it is."""
+    board = pcbnew.LoadBoard(board_path)
+    for fp in board.GetFootprints():
+        lib_pads = list(load_footprint(fp.GetFPID().GetUniStringLibId(), SCH_DIR).Pads())  # same pad order as the board copy
+        for pad, lib_pad in zip(fp.Pads(), lib_pads):
+            fit_pad(pad, fp.GetReference(), lib_pad)
+    for t in board.GetTracks():
+        if t.Type() == pcbnew.PCB_VIA_T:
+            t.SetDrill(FromMM(VIA_DRILL))
+            t.SetWidth(FromMM(VIA_PAD))
+    fill_zones(board)
+    board.Save(board_path)
+    patch_file(board_path)
+
+
 def sync_zones(board_path):
     """Rebuild all zones of an existing board from placement.py and refill them. Parts, tracks and vias stay."""
     board = pcbnew.LoadBoard(board_path)
@@ -287,7 +323,7 @@ def build(out_path, sch_dir=SCH_DIR):
             net = pin_net.get((ref, pad.GetNumber()))
             if net is not None and pad.GetNumber() != "":
                 pad.SetNet(net)
-            fit_pad(pad)
+            fit_pad(pad, ref)
         x, y, rot, side = placement.PLACEMENT[ref]
         fp.SetPosition(pt(x, y))
         fp.SetOrientationDegrees(rot)
@@ -312,11 +348,16 @@ def main(argv=None):
     ap.add_argument("--sch-dir", default=SCH_DIR)
     ap.add_argument("--sync-fields", action="store_true", help="only copy the symbol fields onto an existing board (in place)")
     ap.add_argument("--sync-zones", action="store_true", help="only rebuild and refill the zones of an existing board from placement.py (in place)")
+    ap.add_argument("--sync-drills", action="store_true", help="only apply the drill set, bored holes and via drill to an existing board (in place) and refill the zones")
     ap.add_argument("--force", action="store_true", help="overwrite an existing board (destroys manual edits)")
     args = ap.parse_args(argv)
     if args.sync_fields:
         n = sync_fields(args.out, args.sch_dir)
         print("pcb-build: synced symbol fields of %d parts into %s" % (n, args.out))
+        return 0
+    if args.sync_drills:
+        sync_drills(args.out)
+        print("pcb-build: synced drills and vias of %s" % args.out)
         return 0
     if args.sync_zones:
         sync_zones(args.out)

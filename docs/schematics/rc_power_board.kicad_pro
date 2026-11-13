@@ -513,7 +513,7 @@
         "track_width": 0.5,
         "tuning_profile": "",
         "via_diameter": 2.1,
-        "via_drill": 1.2,
+        "via_drill": 1.1,
         "wire_width": 6
       },
       {
@@ -532,7 +532,7 @@
         "track_width": 6.0,
         "tuning_profile": "",
         "via_diameter": 2.1,
-        "via_drill": 1.2,
+        "via_drill": 1.1,
         "wire_width": 6
       },
       {
@@ -551,7 +551,7 @@
         "track_width": 1.0,
         "tuning_profile": "",
         "via_diameter": 2.1,
-        "via_drill": 1.2,
+        "via_drill": 1.1,
         "wire_width": 6
       },
       {
@@ -570,7 +570,7 @@
         "track_width": 1.6,
         "tuning_profile": "",
         "via_diameter": 2.1,
-        "via_drill": 1.2,
+        "via_drill": 1.1,
         "wire_width": 6
       }
     ],

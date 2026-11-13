@@ -39,6 +39,13 @@ class Limits:
     depth_err: float
     drills: list
     endmill_min: float
+    milled_hole_min: float
+    stock_w: float
+    stock_h: float
+    stock_t: float
+    dowel_dia: float
+    dowel_pin: float
+    dowels: list
     via_drill: float
     via_pad: float
     annular_min: float
@@ -65,6 +72,13 @@ def load_limits(path):
             raise ValueError("%s: needs status (assumed|confirmed) and source" % key)
         return t["value"]
 
+    def table(key):
+        t = raw[key]
+        if t.get("status") not in ("assumed", "confirmed") or not t.get("source"):
+            raise ValueError("%s: needs status (assumed|confirmed) and source" % key)
+        return t
+
+    stock, dowel = table("stock"), table("dowel")
     bits = []
     for b in raw.get("isolation_bit", []):
         if b.get("status") not in ("assumed", "confirmed") or not b.get("source"):
@@ -76,6 +90,8 @@ def load_limits(path):
         copper=val("copper_thickness"), bits=bits, depth_min=val("cut_depth_min"),
         depth_max=val("cut_depth_max"), depth_err=val("cut_depth_error"),
         drills=sorted(val("drill_set")), endmill_min=val("endmill_min"),
+        milled_hole_min=val("milled_hole_min"), stock_w=stock["width"], stock_h=stock["height"], stock_t=stock["thickness"],
+        dowel_dia=dowel["diameter"], dowel_pin=dowel["pin"], dowels=[tuple(c) for c in dowel["centers"]],
         via_drill=val("via_drill"), via_pad=val("via_pad"), annular_min=val("annular_min"),
         track_min=val("track_min"), edge_clear=val("edge_clearance"), conn_edge=val("connector_edge_distance"))
 
@@ -240,10 +256,11 @@ def check_holes(ctx, out):
         for d in (dmin, dmax):
             if any(abs(d - s) < 0.005 for s in lim.drills):
                 continue
-            if d > big + 0.005 and d >= lim.endmill_min:
-                continue  # milled hole
-            out.append(("MILL-DRILL", "error", where, d, None,
-                        "hole %.3f mm is not in the drill set %s and is not a milled hole (> %.1f mm)" % (d, lim.drills, big)))
+            if d >= lim.milled_hole_min - 0.005:
+                continue  # milled hole (bored with the end mill)
+            out.append(("MILL-DRILL", "error", where, d, lim.milled_hole_min,
+                        "hole %.3f mm is not in the drill set (%.1f to %.1f mm) and is below the smallest milled hole %.2f mm "
+                        "(end mill %.3f mm)" % (d, min(lim.drills), big, lim.milled_hole_min, lim.endmill_min)))
             break
         if kind == "via":
             dia = ToMM(item.GetWidth(pcbnew.F_Cu))
