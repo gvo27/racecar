@@ -17,7 +17,6 @@ This project turns a 1:10 Tamiya TT-02 into a self-driving research platform. It
 **Claude Code plugins.** `.claude/settings.json` lists the project plugins: superpowers, pyright-lsp, clangd-lsp, embedded-skills, ros2-engineering, asd-ste100, claude-md-management, code-simplifier and caveman. Accept the trust prompt, or install each one by hand. Then run `/reload-plugins`:
 
 ```bash
-claude plugin marketplace add danyuchn/asd-ste100-skill
 claude plugin marketplace add JuliusBrussee/caveman@v4.1.0
 claude plugin install <plugin>@<marketplace> --scope project
 ```
