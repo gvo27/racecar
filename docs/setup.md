@@ -4,20 +4,21 @@ Assumptions are marked **Assume:**. If one is false, fix it before continuing.
 
 ## 1. Host
 
-**Assume:** Raspberry Pi 5 with Ubuntu 24.04 (a laptop works for firmware work), with `git`, `make` and **Docker Engine + compose plugin + buildx**. Nothing else is installed on the host: Python, PlatformIO and ROS all run in Docker. Internet access to Docker Hub, `packages.ros.org`, `raw.githubusercontent.com` (rosdep), pypi.org and registry.platformio.org.
+**Assume:** Raspberry Pi 5 with Ubuntu 24.04 (a laptop works for firmware work), with `git`, `make`, **Docker Engine + compose plugin + buildx** and **uv**. PlatformIO and ROS run in Docker. The only host Python is the uv `.venv` with the dev tools (`make dev-setup`). Internet access to Docker Hub, `packages.ros.org`, `raw.githubusercontent.com` (rosdep), pypi.org and registry.platformio.org.
 
 ```sh
 sudo usermod -aG docker,dialout $USER   # then log out and back in
 mkdir -p ~/ros2_ws/src && cd ~/ros2_ws/src
+curl -LsSf https://astral.sh/uv/install.sh | sh            # uv, if not installed (then open a new shell)
 git clone https://github.com/gvo27/racecar && cd racecar    # one clone per user; collaborators work via GitHub PRs
 make install-host                       # sudo: udev rule -> /dev/rccar-esp32, systemd unit rccar.service (enabled)
 cp .env.example .env                    # set TZ, ROS_DOMAIN_ID (default 0), PLATFORM=pi5
-make fw-image ros-image config          # build both images, then render deploy/car/.env.generated (config runs in the firmware image)
+make setup config                       # check prereqs, dev tools into .venv, build both images, then render deploy/car/.env.generated (config runs in the ROS image); safe to rerun
 ```
 
 - The repo lives at `~/ros2_ws/src/racecar` on the Pi. The containers mount it at `/ws/src/racecar` (read-only, plus `tuning.toml` and `logs/` read-write), so calibration writes your working copy. One clone per user: nobody edits another user's clone.
 - `make install-host` prints each step. It installs `deploy/car/99-rccar.rules` (CH343 `1a86:55d3` -> `/dev/rccar-esp32`, group `dialout`) and renders `deploy/car/rccar.service` with this clone's path and your user. Unplug and replug the USB cable once afterwards. The unit starts the stack at boot with whatever images are already built; deploys stay explicit (`make car-pull && make car-up`).
-- `make setup` checks the host prerequisites and builds both images (`fw-image`, `ros-image`).
+- `make setup` checks the host prerequisites (git, make, docker, uv), runs `make dev-setup` and builds both images (`fw-image`, `ros-image`). It is safe to run again: `uv sync --frozen` changes nothing when `.venv` matches `uv.lock`, `direnv allow` only renews the approval of `.envrc`, and the image builds use the docker cache. `make dev-setup` = `uv sync --frozen` + `direnv allow`. If direnv is missing or `direnv allow` fails, it prints a warning and continues.
 - `make config` (runs `deploy/render_env.py` inside the ROS image, so it needs `make ros-image` first) reads `.env` and `tuning.toml [platform.$PLATFORM]` (today: `esp32_device`, `arch`) and writes the gitignored `deploy/car/.env.generated`. It fails with a hint if `.env` is missing.
 - `make ros-image` runs `rosdep` against `package.xml`, so it needs `packages.ros.org` and `raw.githubusercontent.com`.
 
@@ -34,8 +35,7 @@ make fw-image ros-image config          # build both images, then render deploy/
 ```sh
 sudo apt install clangd direnv  # firmware LSP; direnv loads .venv (hook: eval "$(direnv hook bash)" in ~/.bashrc)
 curl -LsSf https://astral.sh/uv/install.sh | sh   # uv, if not installed
-make dev-setup                  # ruff, pyright (Python LSP), pytest from uv.lock into .venv
-direnv allow                    # one time per machine, and again after each .envrc change
+make dev-setup                  # ruff, pyright (Python LSP), pytest from uv.lock into .venv + direnv allow (make setup runs it too; rerun after each .envrc change)
 make check-dev                  # all must say OK
 make compiledb                  # firmware/esp32/compile_commands.json for clangd
 make unit                       # deploy/tests in the ROS test image, no hardware
@@ -147,7 +147,7 @@ Then switch the ESC off and unplug USB. Containers stay unprivileged; `poweroff`
 
 The procedure used to verify phase 2 (bench-verified 2026-10-29); rerun it after firmware or supervisor changes. Hardware fault injection. **Never run by an agent.** Wheels off the ground, ESC power switch within reach. Paste outputs into the PR.
 
-1. `make fw-image ros-image config`, `make flash`, `make car-up`; `make car-ps` shows `mcu-agent` and `core` healthy.
+1. `make setup config`, `make flash`, `make car-up`; `make car-ps` shows `mcu-agent` and `core` healthy.
 2. `ros2 topic echo /rccar/mcu/telemetry` (from `make ros-shell`) shows telemetry with `armed: false`.
 3. `make test` passes (steering sweep + failsafe, motor off).
 4. `make teleop`: arrow keys drive; space brakes; `d` disarms; after either, motion is refused until `a`; `a` with throttle not at 0 is refused. `make car-logs` shows `mcu_bridge` pushing tuning at startup (`MCU reachable after activation`).
