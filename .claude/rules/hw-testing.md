@@ -9,7 +9,7 @@ paths:
 
 # Hardware testing by an agent on the Pi (lidar attached)
 
-`.claude/hooks/hw_guard.py` enforces these rules. It is a PreToolUse hook and needs python3 on the dev host (Ubuntu includes it). It is the only host-side script. In auto mode, the hook "ask" or "deny" result is evaluated before the permission mode takes effect. The documentation does not say if "ask" prompts under `--dangerously-skip-permissions`. Do not run the Pi agent with that flag.
+`.claude/hooks/hw_guard.py` enforces these rules. It is a PreToolUse hook. `.claude/hooks/hw_guard.sh` starts it with the uv `.venv/bin/python`, so run `make dev-setup` on the Pi and on the dev host before you start Claude Code. If `.venv` is missing, every Bash and Edit/Write call asks for approval with the reason `make dev-setup`. It is the only host-side script. In auto mode, the hook "ask" or "deny" result is evaluated before the permission mode takes effect. The documentation does not say if "ask" prompts under `--dangerously-skip-permissions`. Do not run the Pi agent with that flag.
 
 ## Rules
 1. Run `make drivers-stop` BEFORE you edit or rebuild driver code (`rccar_drivers/`, `rccar_description/`, `docker/ros.Dockerfile`, `make ros-image`/`setup`). While the `drivers` container runs, the hook denies Edit/Write and builds. `make ros-image` also refuses (`_need-drivers-down`).
