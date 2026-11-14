@@ -35,7 +35,7 @@ make setup                              # check prerequisites, build both images
 ```sh
 sudo apt install clangd direnv  # firmware LSP; direnv loads .venv (hook: eval "$(direnv hook bash)" in ~/.bashrc)
 curl -LsSf https://astral.sh/uv/install.sh | sh   # uv, if not installed
-make dev-setup                  # ruff, pyright (Python LSP), pytest from uv.lock into .venv
+make dev-setup                  # ruff, pyright (Python LSP), pytest from uv.lock into .venv; the hw_guard hook runs on .venv python
 direnv allow                    # one time per machine, and again after each .envrc change
 make check-dev                  # all must say OK
 make compiledb                  # firmware/esp32/compile_commands.json for clangd
