@@ -31,10 +31,11 @@ help:            ## list targets (grouped in README.md)
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-21s %s\n", $$1, $$2}'
 
 # ---- setup / config -------------------------------------------------------------------------
-setup:           ## check host prereqs (git, make, docker + compose/buildx), build the firmware and ROS images
-	@for c in git make docker; do command -v $$c >/dev/null || { echo "MISSING host prerequisite: $$c"; exit 1; }; done
+setup:           ## check host prereqs (git, make, docker + compose/buildx, uv), dev tools into .venv (dev-setup), build the firmware and ROS images; safe to rerun
+	@for c in git make docker uv; do command -v $$c >/dev/null || { echo "MISSING host prerequisite: $$c (docs/setup.md)"; exit 1; }; done
 	@docker compose version >/dev/null 2>&1 || echo "WARN: docker compose plugin missing (needed for make car-up)"
 	@docker buildx version >/dev/null 2>&1 || echo "WARN: docker buildx missing (needed for multi-arch images)"
+	$(MAKE) dev-setup
 	$(MAKE) fw-image
 	$(MAKE) ros-image
 
@@ -168,8 +169,9 @@ unit-run:        ## run deploy/tests (pytest) in an already built ROS test image
 
 unit: ros-test-image unit-run  ## deploy/tests (pytest) in the ROS test image, no hardware
 
-dev-setup:       ## optional host dev tools (ruff, pyright, pytest) from uv.lock into .venv; then: direnv allow
+dev-setup:       ## host dev tools (ruff, pyright, pytest) from uv.lock into .venv, then direnv allow (skipped if direnv is missing); safe to rerun
 	uv sync --frozen
+	@if command -v direnv >/dev/null; then direnv allow || echo "WARN: direnv allow failed: run it by hand in the repo"; else echo "WARN: direnv missing: .venv/bin is not on your shell PATH (docs/setup.md, Claude Code)"; fi
 
 check-dev:       ## check optional Claude Code dev tools (uv, direnv, LSP binaries) on PATH
 	@for c in uv direnv pyright-langserver clangd; do command -v $$c >/dev/null && echo "OK   $$c" || echo "MISSING $$c (see docs/setup.md, Claude Code)"; done
