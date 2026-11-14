@@ -8,8 +8,8 @@ next: phase 3 recorder/backup, phase 4 sensors (rangefinder first; imu/encoder/b
 plan: docs/docker_ros_plan.md
 stack:
   mcu: {build: platformio in docker (docker/firmware.Dockerfile, image rccar-fw, make build/flash/monitor, FW_ENV=esp32s3), platform: espressif32@6.9.0, framework: arduino-esp32-2.0.17, comms: micro_ros_platformio jazzy serial uart0 (libdeps cached in .pio/libdeps), lang: c++gnu11}
-  ros: {distro: jazzy, image: docker/ros.Dockerfile (ros:jazzy-ros-base by digest, rosdep+colcon, target test/runtime), stack: deploy/car/compose.yaml (mcu-agent, core, tools), pkgs: [rccar_msgs, rccar_supervisor, rccar_mcu_bridge, rccar_teleop, rccar_calibration, rccar_bringup], make: [config, ros-image, car-up, car-down, ros-test, unit, teleop, calibrate, tune, test, mcu, rangefinder]}
-  host: {prereqs: [git, make, docker+compose+buildx], groups: [docker, dialout], python: none (make config runs in ros image, make unit in ros test image)}
+  ros: {distro: jazzy, image: docker/ros.Dockerfile (ros:jazzy-ros-base by digest, rosdep+colcon, target test/runtime), stack: deploy/car/compose.yaml (mcu-agent, core, tools), pkgs: [rccar_msgs, rccar_supervisor, rccar_mcu_bridge, rccar_teleop, rccar_calibration, rccar_bringup], make: [config, dev-setup, ros-image, car-up, car-down, ros-test, unit, teleop, calibrate, tune, test, mcu, rangefinder]}
+  host: {prereqs: [git, make, docker+compose+buildx], groups: [docker, dialout], python: no system python; host dev tools only via uv (.venv from uv.lock: ruff, pyright, pytest; make dev-setup + direnv allow); make config runs in ros image, make unit in ros test image}
 hw: {steer: ds3225mg@gpio4, throttle: thw1060_esc@gpio5, battery: 2s_lipo, rangefinder: garmin_lidar_lite_v4_led@esp32 i2c gpio8(sda,garmin pin3,white)/gpio9(scl,garmin pin4,green) 0x62, vin(pin1,red) 5v sensor rail, gnd(pin2,black)}
 usb_ports: {left_USB: native, planned regulated power input; right_COM: ch343 uart0, flashing + host link}
 layout: .claude/layout.yaml
@@ -29,13 +29,13 @@ invariants:
   - software stop is not safety-rated; esc power switch = hardware stop
   - no unconfirmed parameters in tuning.toml
   - new sensor => .claude/rules/<sensor>.md linking all docs/datasheets + docs/datasheets/<sensor>_<model>.md; sensor characteristics are tuning params, device protocol in a driver file
-  - new deps => package.xml (rosdep) or a Dockerfile, never host; pin versions, no :latest
+  - new deps => package.xml (rosdep) or a Dockerfile, never host; host dev tools => uv dev group (pyproject.toml + uv.lock); pin versions, no :latest
   - firmware paths: firmware/esp32/**
 workflow:  # details: .claude/rules/claude-tooling.md
   - library/framework API => check upstream docs/source at the pinned version before writing code; match stack versions (arduino-esp32 2.x, esp-idf 4.4, ros2 jazzy)
   - non-trivial change => superpowers brainstorming -> writing-plans (docs/plans/) -> test-driven-development -> requesting-code-review
   - bug => superpowers systematic-debugging first
-  - tests: no host python; deploy/ python => make unit (ros test image); ros => make ros-test (colcon test in docker); firmware => make build (compile, CI) + bench make test (hardware, user-run; never claim without output)
+  - tests: no system python (host dev tools via uv only); deploy/ python => make unit (ros test image); ros => make ros-test (colcon test in docker); firmware => make build (compile, CI) + bench make test (hardware, user-run; never claim without output)
   - every PR body = .github/pull_request_template.md with user-run bench checklist (deploy + deps + feature checks)
   - all project text (docs, .claude/*, PR/commit/review text, user-facing strings) => asd-ste100 STE: strict for .claude/procedures/errors, ste-flavored for prose; keep facts+hedges; .claude/rules/writing.md
   - after code edits => check lsp diagnostics (pyright, clangd; make compiledb for firmware)
