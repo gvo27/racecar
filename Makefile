@@ -22,7 +22,7 @@ ROS_BUILD_ARGS ?=
 COMPOSE  := docker compose -f deploy/car/compose.yaml --env-file deploy/car/.env.generated
 
 .DEFAULT_GOAL := help
-.PHONY: help setup clean build flash monitor fw-image config models compiledb unit check-dev \
+.PHONY: help setup clean build flash monitor fw-image config models compiledb unit check-dev dev-setup \
         ros-image ros-test ros-test-image ros-test-run ros-shell car-up car-down car-ps car-logs car-pull \
         car-shutdown install-host teleop calibrate tune test mcu unit-run \
         _clean-build _need-config _need-stack _need-stack-down
@@ -165,5 +165,8 @@ unit-run:        ## run deploy/tests (pytest) in an already built ROS test image
 
 unit: ros-test-image unit-run  ## deploy/tests (pytest) in the ROS test image, no hardware
 
-check-dev:       ## check optional Claude Code dev tools (LSP binaries) on PATH
-	@for c in pyright-langserver clangd; do command -v $$c >/dev/null && echo "OK   $$c" || echo "MISSING $$c (see docs/setup.md, Claude Code)"; done
+dev-setup:       ## optional host dev tools (ruff, pyright, pytest) from uv.lock into .venv; then: direnv allow
+	uv sync --frozen
+
+check-dev:       ## check optional Claude Code dev tools (uv, direnv, LSP binaries) on PATH
+	@for c in uv direnv pyright-langserver clangd; do command -v $$c >/dev/null && echo "OK   $$c" || echo "MISSING $$c (see docs/setup.md, Claude Code)"; done

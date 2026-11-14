@@ -32,9 +32,11 @@ make fw-image ros-image config          # build both images, then render deploy/
 | `ros2-engineering` | micro-ROS, ros2_control, Nav2, perception; advisory hooks (`ROS2_SKILL_DISABLE_HOOKS=all` turns them off) |
 
 ```sh
-sudo apt install clangd         # firmware LSP
-pipx install pyright            # Python LSP (or: npm install -g pyright)
-make check-dev                  # both must say OK
+sudo apt install clangd direnv  # firmware LSP; direnv loads .venv (hook: eval "$(direnv hook bash)" in ~/.bashrc)
+curl -LsSf https://astral.sh/uv/install.sh | sh   # uv, if not installed
+make dev-setup                  # ruff, pyright (Python LSP), pytest from uv.lock into .venv
+direnv allow                    # one time per machine, and again after each .envrc change
+make check-dev                  # all must say OK
 make compiledb                  # firmware/esp32/compile_commands.json for clangd
 make unit                       # deploy/tests in the ROS test image, no hardware
 ```

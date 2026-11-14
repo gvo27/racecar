@@ -1,0 +1,14 @@
+# Host dev tools only (lint, type check, stdlib tests). Install: make dev-setup (uv sync --frozen).
+# Runtime, ROS tests, firmware and KiCad tools stay in docker. Rules: .claude/rules/dependencies.md
+[project]
+name = "racecar-devtools"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = []
+
+[dependency-groups]
+dev = ["ruff==0.17.5", "pyright[nodejs]==1.1.414", "pytest==9.2.0"]
+
+[tool.uv]
+# Not a Python package: uv installs the tools only and builds nothing.
+package = false
