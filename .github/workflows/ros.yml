@@ -15,6 +15,8 @@ on:
       - "firmware/esp32/src/main.cpp"
       - "Makefile"
       - ".github/workflows/ros.yml"
+      - ".claude/rules/**"
+      - "docs/sensor_contract.md"
       - "firmware/esp32/extra_packages/**"
   pull_request:
     paths:
@@ -29,6 +31,8 @@ on:
       - "firmware/esp32/src/main.cpp"
       - "Makefile"
       - ".github/workflows/ros.yml"
+      - ".claude/rules/**"
+      - "docs/sensor_contract.md"
       - "firmware/esp32/extra_packages/**"
 
 permissions:

@@ -1,0 +1,3 @@
+(sym_lib_table
+  (lib (name "rc_power")(type "KiCad")(uri "${KIPRJMOD}/rc_power.kicad_sym")(options "")(descr "Project symbols: regulator module + rail power symbols"))
+)
