@@ -8,6 +8,8 @@ import sys
 import pytest
 
 HOOK = Path(__file__).resolve().parents[2] / '.claude' / 'hooks' / 'hw_guard.py'
+LAUNCHER = HOOK.with_name('hw_guard.sh')
+SETTINGS = HOOK.parents[1] / 'settings.json'
 spec = importlib.util.spec_from_file_location('hw_guard', HOOK)
 g = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(g)
@@ -103,3 +105,45 @@ def test_main_output_schema():
     r = subprocess.run([sys.executable, str(HOOK)], input='not json', capture_output=True,
                        text=True, timeout=30)
     assert r.returncode == 0 and r.stdout == ''
+
+
+def _project(tmp_path, venv):
+    """Fake $CLAUDE_PROJECT_DIR: the real hook, and a .venv python only if venv."""
+    (tmp_path / '.claude' / 'hooks').mkdir(parents=True)
+    (tmp_path / '.claude' / 'hooks' / 'hw_guard.py').symlink_to(HOOK)
+    if venv:
+        (tmp_path / '.venv' / 'bin').mkdir(parents=True)
+        (tmp_path / '.venv' / 'bin' / 'python').symlink_to(sys.executable)
+    return tmp_path
+
+
+def _launch(project, command):
+    payload = json.dumps({'tool_name': 'Bash', 'tool_input': {'command': command}})
+    return subprocess.run(['sh', str(LAUNCHER)], check=False, input=payload, capture_output=True,
+                          text=True, timeout=30, env={'PATH': '/usr/bin:/bin', 'CLAUDE_PROJECT_DIR': str(project)})
+
+
+def test_launcher_runs_hook_with_venv_python(tmp_path):
+    project = _project(tmp_path, venv=True)
+    r = _launch(project, 'make drivers-start')
+    assert r.returncode == 0
+    out = json.loads(r.stdout)['hookSpecificOutput']
+    assert out['permissionDecision'] == 'ask' and 'dev-setup' not in out['permissionDecisionReason']
+    r = _launch(project, 'make drivers-stop')
+    assert r.returncode == 0 and r.stdout == ''
+
+
+def test_launcher_without_venv_fails_closed(tmp_path):
+    r = _launch(_project(tmp_path, venv=False), 'make drivers-stop')
+    assert r.returncode == 0
+    out = json.loads(r.stdout)['hookSpecificOutput']
+    assert out['hookEventName'] == 'PreToolUse' and out['permissionDecision'] == 'ask'
+    assert 'make dev-setup' in out['permissionDecisionReason']
+
+
+def test_settings_register_launcher_not_system_python():
+    hooks = json.loads(SETTINGS.read_text())['hooks']['PreToolUse']
+    commands = [h['command'] for entry in hooks for h in entry['hooks']]
+    guard = [c for c in commands if 'hw_guard' in c]
+    assert len(guard) == 2
+    assert all(c == 'sh "$CLAUDE_PROJECT_DIR/.claude/hooks/hw_guard.sh"' for c in guard)

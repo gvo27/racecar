@@ -61,7 +61,7 @@ paths:
   rccar_bringup/launch/viz.launch.py: {role: foxglove_bridge websocket, 127.0.0.1:8765 default, topic whitelist; make viz, rules: .claude/rules/drivers.md, phase: 4}
   rccar_drivers/test_hw/: {role: "hardware acceptance launch_testing vs the PHYSICAL lidar (make lidar-hw-test); NOT collected by colcon test (conftest needs RCCAR_HW_TEST=1); installed to share/rccar_drivers/test_hw", rules: .claude/rules/hw-testing.md, phase: 4}
   rccar_drivers/rccar_drivers/hw_criteria.py: {role: pass/fail thresholds + eval functions for the hw test (pure, pytest test/test_hw_criteria.py), rules: .claude/rules/hw-testing.md, phase: 4}
-  .claude/hooks/: {role: hw_guard.py PreToolUse hook (ask before hardware restarts; deny driver edits/rebuilds while drivers runs); tests deploy/tests/test_hw_guard.py, rules: .claude/rules/hw-testing.md, phase: 4}
+  .claude/hooks/: {role: hw_guard.sh launcher (.venv python, no .venv => ask) + hw_guard.py PreToolUse hook (ask before hardware restarts; deny driver edits/rebuilds while drivers runs); tests deploy/tests/test_hw_guard.py, rules: .claude/rules/hw-testing.md, phase: 4}
   logs/hw_test_lidar_*.json: {role: make lidar-hw-test report (gitignored), phase: 4}
   logs/lidar_imu_*.jsonl: {role: per-run log of make lidar-imu (gitignored via logs/), phase: 4}
   logs/lidar_snapshot_<UTC>/: {role: make lidar-snapshot output (map.png + json + summary.txt; agent-readable debug data, gitignored), phase: 4}

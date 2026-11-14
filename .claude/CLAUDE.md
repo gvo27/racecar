@@ -15,7 +15,7 @@ hw: {steer: ds3225mg@gpio4, throttle: thw1060_esc@gpio5, battery: 2s_lipo, range
 usb_ports: {left_USB: native, planned regulated power input; right_COM: ch343 uart0, flashing + host link}
 layout: .claude/layout.yaml
 cmd: make help
-hooks: .claude/hooks/hw_guard.py  # PreToolUse guard (python3 on host): asks before hardware (re)starts, denies driver edits/rebuilds while drivers runs
+hooks: .claude/hooks/hw_guard.{sh,py}  # PreToolUse guard (sh launcher -> .venv python, make dev-setup; no .venv => ask): asks before hardware (re)starts, denies driver edits/rebuilds while drivers runs
 plugins: .claude/settings.json  # superpowers, pyright-lsp, clangd-lsp, embedded-skills, ros2-engineering, asd-ste100, claude-md-management, code-simplifier, caveman, kicad-happy; no project mcp servers
 rules: .claude/rules/{hw-testing,drivers,firmware,dependencies,deploy,models,repos,claude-tooling,ros2,msgs,mcu_bridge,supervisor,calibration,tuning,rangefinder,writing,schematics}.md  # path-scoped, see paths: frontmatter
 agents: .claude/agents/ros2-reviewer.md  # review diffs vs rules + ros2-engineering refs + stop-path checklist
