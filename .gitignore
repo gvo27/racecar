@@ -13,4 +13,5 @@ firmware/esp32/compile_commands.json
 docs/schematics/.history/
 deploy/car/.env.generated
 build/
-.venv
+.venv/
+.direnv/
