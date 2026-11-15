@@ -10,7 +10,7 @@ This directory holds the facts and files of one lab: the mill, its tools, the co
 | `example/README.md` | Facts read from the lab CAM file, the Fusion exports of the owner, and how to read a `.f3z` on Linux |
 | `example/Pcb DXF's amd copper plate.f3z` | The lab's calibrated Fusion 360 CAM template (demo panel of 6 boards, setups A, B and C) |
 | `example/demo_toolpaths_setupB.png` | Decoded toolpaths of setup B of the demo panel |
-| `example/fusion_export/` | Fusion exports of the owner (2026-11-15): setup sheet of setup C, tool library, sketch DXFs, screenshots |
+| `example/fusion_export/` | Fusion exports of the owner (2026-11-15): setup sheets of setups A, B, C and of all setups, tool library, sketch DXFs, screenshots |
 
 ## Open items
 

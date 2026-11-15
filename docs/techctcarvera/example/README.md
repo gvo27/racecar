@@ -32,11 +32,14 @@ Not in the file: the post-processed `.cnc` code (the post `Carvera.cps` is not r
 
 ## Fusion exports (owner, Win11, 2026-11-15)
 
-Source: PR #3 comment of 2026-11-15 (`pcb_export.zip` and 7 screenshots). Files are in `fusion_export/`. Fusion CAM 2706.1.17. The setup sheet and the sketch DXFs use inches.
+Source: PR #3 comment of 2026-11-15 (`pcb_export.zip` and 7 screenshots; the owner replaced the zip at 21:48 with the setup sheets of all setups). Files are in `fusion_export/`. Fusion CAM 2706.1.17. The setup sheets and the sketch DXFs use inches.
 
 | File | Content |
 | --- | --- |
-| `setup_sheet_setupC.html` | Setup sheet of setup C only (job "Setup C"). WCS #1. Stock 6 x 4 x 0.059 in; stock lower corner at (-0.129, -0.15, 0) in from the WCS origin, so the origin is a dowel center. Operations: 2D Contour4 and 2D Contour5 (T2, min Z 0.055 in), Face3 (T5, 6000 rpm). Tools T2 and T5. Estimated time 22 min 17 s. Setups A and B are not in the export |
+| `setup_sheet_all.htm` | All 10 operations of the 3 setups in one sheet (Fusion names the job "Setup A"): Bore1, 2D Contour2, 2D Contour3, Drill1, Drill2, Drill4, Face2, 2D Contour4, 2D Contour5, Face3. Tools T2, T4, T5. Estimated time 58 min 51 s |
+| `setup_sheet_A.htm` | Setup A: Bore1 only (T4 end mill, 10000 rpm, feed 1000 mm/min, min Z -0.059 in = through the stock). WCS origin = stock center, Z0 = stock top (stock from (-3, -2, -0.059) to (3, 2, 0) in). Estimated time 20 s |
+| `setup_sheet_B.htm` | Setup B (top): 2D Contour2, 2D Contour3 (T2, min Z 0.055 in), Drill1 0.9 mm (min Z -0.011 in), Drill2 1.0 mm (min Z -0.013 in), Drill4 1.1 mm (min Z -0.001 in), drills at 10000 rpm and 100 mm/min, Face2 (T5). WCS origin = dowel center, Z0 = stock bottom (stock from (-0.129, -0.15, 0) to (5.871, 3.85, 0.059) in). Estimated time 36 min 14 s |
+| `setup_sheet_C.htm` | Setup C (bottom): 2D Contour4, 2D Contour5 (T2, min Z 0.055 in), Face3 (T5, 6000 rpm). WCS origin = dowel center, Z0 = stock bottom. Estimated time 22 min 17 s |
 | `tool_library.json` | Tool library of the document: T2 chamfer mill "0.1mm Tip Engraving Metal" (3.175 mm shank, tip 0.2 mm, taper 30), T4 flat end mill "12mm Flute End Mill Metal" (3.175 mm, flute 12 mm), drills 0.9, 1.0 and 1.1 mm (118 degrees), T5 chamfer mill "0.3mm Tip Solder Mask Removal" (tip 0.3 mm, taper 15) |
 | `sketch1_stock_top.dxf` | Stock rectangle 6 x 4 in, origin at the lower-left corner |
 | `sketch10_dowels.dxf` | 2 dowel circles, radius 0.0825 in (diameter 4.191 mm), centers (0.129, 0.15) and (5.871, 0.15) in, and a line between them |
@@ -51,7 +54,10 @@ Results:
 - **Stock and dowels are confirmed.** The Fusion values agree with the values from the `.f3z`. In inches: 0.129 in = 3.2766 mm, 0.15 in = 3.81 mm, 5.871 in = 149.1234 mm, 0.165 in = 4.191 mm.
 - **Tool numbers:** T2 isolation, T4 end mill, T5 solder mask removal.
 - **Difference:** the T4 values in the tool library say 12000 rpm. The Bore1 operation in the `.f3z` uses 10000 rpm. The operation value applies to the cut.
-- **Still open:** the NC code (needs `Carvera.cps`), the setup sheets of setups A and B.
+- **Z origins differ.** Setup A has Z0 at the stock top. Setups B and C have Z0 at the stock bottom (the spoilboard face). The isolation depth is then top (0.0585 in) minus 0.055 in, about 0.08 mm at the 0.001 in rounding of the sheets.
+- **One tool number for the end mill and the drills.** The sheets show T4 for the end mill and for the 0.9, 1.0 and 1.1 mm drills. So each drill change is a manual change at the same tool number. The post-processed code will show how the Carvera asks for it.
+- **Face2 and Face3 cut at Z = stock top** (min Z 0.059 in). They remove material above the copper only, for example solder mask paint. This agrees with the inference below.
+- **Still open:** the NC code (needs `Carvera.cps`).
 
 ## How to read the file again
 

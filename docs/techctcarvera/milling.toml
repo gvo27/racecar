@@ -149,10 +149,11 @@ source = "owner photo, PR #3 2026-11-02; owner 2026-11-12"
 [inventory.cam_tools]
 isolation = "T2 chamfer mill '0.1mm Tip Engraving Metal': tip 0.2 mm, taper 30 deg per side (60 deg included), shank 3.175 mm, 1 flute, carbide, 12000 rpm, feed 500, plunge 200, ramp 300 mm/min"
 drills_in_cam = [0.9, 1.0, 1.1]
+drill_tool_number = "T4, the same number as the end mill (setup sheets): each drill is a manual tool change"
 end_mill = "T4 flat end mill '12mm Flute End Mill Metal': 3.175 mm, flute 12 mm, 1 flute, carbide; tool library: 12000 rpm, feed 500, plunge 200 (the Bore1 operation in the .f3z uses 10000 rpm)"
 available_not_in_cam = "Makera PCB bit pack: 60 deg V-bit, 0.1 mm tip (cut 0.192 mm at 0.08 mm depth). The lab CAM does not use it, so the milling check does not use it (removed from [[isolation_bit]] 2026-11-15, Fable review)."
 face = "T5 chamfer mill '0.3mm Tip Solder Mask Removal': tip 0.3 mm, taper 15 deg per side, 6000 rpm, feed 400, stepover 0.2 mm"
-setup_c = "Setup sheet (setup C, Fusion CAM 2706.1.17, 2026-11-15): 2D Contour4, 2D Contour5 (T2, min Z 0.055 in; model top 1.4859 mm = 0.0585 in, so about 0.08 mm deep at the 0.001 in rounding of the sheet), Face3 (T5); about 22 min"
+setups = "Setup sheets (Fusion CAM 2706.1.17, 2026-11-15, example/fusion_export/): A = Bore1 (T4, 10000 rpm, through), WCS stock center, Z0 stock top, 20 s. B = 2D Contour2/3 (T2), Drill1/2/4 (0.9/1.0/1.1 mm, all as T4, 10000 rpm, 100 mm/min), Face2 (T5), WCS dowel center, Z0 stock bottom, 36 min. C = 2D Contour4/5 (T2), Face3 (T5), WCS dowel center, Z0 stock bottom, 22 min. Isolation min Z 0.055 in under a 0.0585 in top: about 0.08 mm deep at the 0.001 in rounding"
 post = "Carvera.cps: not received (owner 2026-11-15). No NC code yet"
 status = "confirmed"
 source = "lab .f3z (example/README.md); Fusion tool library and setup sheet export (owner 2026-11-15, example/fusion_export/)"
