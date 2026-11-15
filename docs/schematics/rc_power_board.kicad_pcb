@@ -542,7 +542,7 @@
 				)
 			)
 		)
-		(property "BOM Comments" "5.0 V, 5.5 A typ; reverse protection to 40 V; 3 A per header pin. In hand: 2 owned, the same part for U1 (+5V_CPU) and U2 (+5V_SENS), so each is the other's spare. Owner 2026-11-12: replaces the D24V90F5 assumption for U2. +5V_SENS needs 4.6 A running, 4.9 A at Mapper startup; the module gives about 7.4 A at 6 V in and about 8 A at 8.4 V in (Pololu graph). FLAG: dropout about 1.0 V at 5 A (graph), so at the 6.0 V cutoff the +5V_SENS output can fall below 5 V: bench check at J11. EN and VRP not connected (PG used on U1 only). Details: docs/datasheets/regulator_pololu_d36v50f5.md"
+		(property "BOM Comments" "5.0 V, 5.5 A typ; reverse protection to 40 V; 3 A per header pin. In hand: 2 owned, the same part for U1 (+5V_CPU) and U2 (+5V_SENS), so each is the other's spare. Owner 2026-11-12: replaces the D24V90F5 assumption for U2. +5V_SENS needs 4.6 A running, 4.9 A at Mapper startup; the module gives about 7.4 A at 6.6 V in, where the graph curve starts (no data below 6.6 V), and about 7.7 A at 8.4 V in (Pololu graph). FLAG: dropout about 1.0 V at 5 A (graph), so at the 6.0 V cutoff the +5V_SENS output can fall below 5 V: bench check at J11. The same dropout applies to U1 (+5V_CPU, Pi 5 and ESP32): near 6.0 V, or when the ESC pulls the pack down under throttle, +5V_CPU can fall and the Pi can brown out: bench check at J6. EN and VRP not connected (PG used on U1 only). Details: docs/datasheets/regulator_pololu_d36v50f5.md"
 			(at 0 0 90)
 			(layer "F.SilkS")
 			(hide yes)
@@ -1446,7 +1446,7 @@
 				)
 			)
 		)
-		(property "BOM Comments" "5.0 V, 5.5 A typ; reverse protection to 40 V; 3 A per header pin. In hand: 2 owned, the same part for U1 (+5V_CPU) and U2 (+5V_SENS), so each is the other's spare. Owner 2026-11-12: replaces the D24V90F5 assumption for U2. +5V_SENS needs 4.6 A running, 4.9 A at Mapper startup; the module gives about 7.4 A at 6 V in and about 8 A at 8.4 V in (Pololu graph). FLAG: dropout about 1.0 V at 5 A (graph), so at the 6.0 V cutoff the +5V_SENS output can fall below 5 V: bench check at J11. EN and VRP not connected (PG used on U1 only). Details: docs/datasheets/regulator_pololu_d36v50f5.md"
+		(property "BOM Comments" "5.0 V, 5.5 A typ; reverse protection to 40 V; 3 A per header pin. In hand: 2 owned, the same part for U1 (+5V_CPU) and U2 (+5V_SENS), so each is the other's spare. Owner 2026-11-12: replaces the D24V90F5 assumption for U2. +5V_SENS needs 4.6 A running, 4.9 A at Mapper startup; the module gives about 7.4 A at 6.6 V in, where the graph curve starts (no data below 6.6 V), and about 7.7 A at 8.4 V in (Pololu graph). FLAG: dropout about 1.0 V at 5 A (graph), so at the 6.0 V cutoff the +5V_SENS output can fall below 5 V: bench check at J11. The same dropout applies to U1 (+5V_CPU, Pi 5 and ESP32): near 6.0 V, or when the ESC pulls the pack down under throttle, +5V_CPU can fall and the Pi can brown out: bench check at J6. EN and VRP not connected (PG used on U1 only). Details: docs/datasheets/regulator_pololu_d36v50f5.md"
 			(at 0 0 90)
 			(layer "F.SilkS")
 			(hide yes)

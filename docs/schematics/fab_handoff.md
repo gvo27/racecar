@@ -59,7 +59,7 @@ The project DRC rules in `rc_power_board.kicad_pro` are set to match: `min_clear
 - **J1 wire pads:** hole 3.4 mm (was 3.0 mm), pad 4.4 mm, annular ring 0.5 mm. The 12 AWG conductor (about 2.05 mm) is loose in the hole.
 - **Frame:** the board is turned 90 degrees and centered on the stock; the two dowel holes are outside the board. Details and file list: `fab/README.md`.
 - **Outline:** 66 x 140 mm, drill/place origin at the lower-left corner. The U1 and U2 bodies (25.4 x 25.4 mm) lie inside it: U2 x 8.0 to 33.4, y 22.3 to 47.7; U1 x 36.0 to 61.4, y 22.3 to 47.7 (mm from the origin). Stackup: 2 layers, 0.070 mm copper, 1.57 mm total.
-- **Layers:** SMD parts on B.Cu, THT parts on F.Cu. Routing on B.Cu. `VBAT_RAW`, `VBAT` and GND are B.Cu zones. The F.Cu GND pour has pad connection "none" and joins B.Cu GND through one rivet via. F.Cu has one jumper track (`U1_PG`, U1.1 to J5.1, about 75 mm) on two rivet vias. The I2C jumpers of the first layout are removed. No F.Cu copper touches a THT pad (check in `make pcb-check`).
+- **Layers:** SMD parts on B.Cu, THT parts on F.Cu. Routing on B.Cu. `VBAT_RAW`, `VBAT` and GND are B.Cu zones. The F.Cu GND pour has pad connection "none" and joins B.Cu GND through one rivet via. F.Cu has one jumper track (`U1_PG`, U1.1 to J5.1, about 39 mm) on two rivet vias. The I2C jumpers of the first layout are removed. No F.Cu copper touches a THT pad (check in `make pcb-check`).
 - **Rivet vias: 3** (2 for the `U1_PG` jumper, 1 GND stitching). No via is inside a part courtyard (a rivet needs both sides soldered).
 - **Make targets:** `make kicad-image erc pcb-build pcb-route pcb-check pcb-mill-check pcb-review pcb-test`. Details: `review/README.md`.
 - **U3 rule:** `rc_power_board.kicad_dru` rule `U3_fine` sets 0.3 mm clearance for U3 pads against pads, tracks and vias. The pour keeps 0.4 mm.
@@ -116,6 +116,7 @@ Solder each THT pin on every layer where it has copper. JST XH shrouds and screw
 
 - **No solder mask or silkscreen by default.** Optional: Makera UV solder-mask paint; otherwise tin or lacquer the copper. Mark pin 1 and polarity by milling text in copper or with a marker.
 - **Before populating:** continuity check every net against the netlist; check for shorts across adjacent isolation cuts (especially U3, J5).
+- **RISK, owner decision, not yet approved: bare copper.** The milled board has bare copper on both faces. B.Cu `VBAT_RAW` is before the fuse and faces the chassis. The F.Cu GND pour is about 0.74 mm under the parts on the module underside (the parts sit 1.8 mm below the module PCB and the header spacer is 2.54 mm: check the real spacer). Proposal: insulating lacquer or sheet on B.Cu, standoffs of 5 mm or more under the board, Kapton tape on F.Cu under U1 and U2, and the modules only on headers, never flush on the board. This note changes the "optional" text above if the owner accepts it.
 - **Open items:** lab tech to confirm bit diameters (incl. a 1.1 mm bit for the rivet holes); U3 option.
 
 ## Layout
@@ -228,7 +229,7 @@ Not the rev A path. Essentials if the board goes to a fab house:
 
 1. F1: 15 A decided by the load (ATO/ATC blade in FLR holder assumed).
 2. Reverse-polarity decision: the proposal (P-FET) is in the PR, not on the board.
-3. U2 = Pololu D36V50F5, the same part as U1 (owner 2026-11-12; two modules owned). Footprint `rc_power:Pololu_D36V50Fx` from the Pololu drawing: VIN, VOUT and GND each use a pin pair (about 2.45 A per VOUT pin at 4.9 A). About 7.4 A at 6 V in (Pololu graph), so the 6 A need is met. Dropout about 1.0 V at 5 A: the output can fall below 5 V near the 6.0 V cutoff. Check the footprint against the real module (1:1 print) before milling. Details: `docs/datasheets/regulator_pololu_d36v50f5.md`. Verify >= 4.8 V at the Mapper during startup (U2 tolerance TBD, about 0.03-0.05 V pigtail drop at 1.6 A).
+3. U2 = Pololu D36V50F5, the same part as U1 (owner 2026-11-12; two modules owned). Footprint `rc_power:Pololu_D36V50Fx` from the Pololu drawing: VIN, VOUT and GND each use a pin pair (about 2.45 A per VOUT pin at 4.9 A). About 7.4 A at 6.6 V in, where the graph curve starts (no data below 6.6 V), and about 7.7 A at 8.4 V in (Pololu graph), so the 6 A need is met from 6.6 V to 8.4 V in. Below 6.6 V the dropout decides: about 1.0 V at 5 A, so 5 A needs about 6.0 V in and the output can fall below 5 V near the 6.0 V cutoff. The same dropout applies to U1 (`+5V_CPU`): the Pi can brown out (bench check in `docs/datasheets/regulator_pololu_d36v50f5.md`). Check the footprint against the real module (1:1 print) before milling. Details: `docs/datasheets/regulator_pololu_d36v50f5.md`. Verify >= 4.8 V at the Mapper during startup (U2 tolerance TBD, about 0.03-0.05 V pigtail drop at 1.6 A).
 4. All `TBD` values in the schematic.
 5. U1 EN stays unconnected until the rev 2 prototype board.
 6. I2C pull-ups: bus is pulled up only by the Garmin's internal 13 kΩ; consider two DNP 0805 4.7-10 kΩ pull-up footprints to `+3V3_SENS` for a future IMU. Not drawn.

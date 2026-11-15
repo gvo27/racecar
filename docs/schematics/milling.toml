@@ -31,6 +31,7 @@ source = "lab .f3z (Bore1 toolpath; hole 0.165 in; centers +-72.9234 / -46.99 fr
 # Isolation bits: cut width at depth d = tip + 2 * d * tan(angle / 2)
 # The lab bit is "0.1mm Tip Engraving" in the .f3z: tip 0.2 mm, Fusion taper 30. Fusion "taper" is the angle per side
 # in most tool dialogs, but the .f3z does not say which; both readings are checked (30 deg included, 60 deg included).
+# Only bits the lab CAM uses are listed here. The 60deg/0.1 bit of the Makera pack is under [inventory.cam_tools].
 [[isolation_bit]]
 name = "30deg/0.2"
 angle_deg = 30.0
@@ -44,13 +45,6 @@ angle_deg = 60.0
 tip_mm = 0.2
 status = "confirmed"
 source = "lab .f3z (tip 0.2, taper 30), read as 30 deg per side = 60 deg included angle"
-
-[[isolation_bit]]
-name = "60deg/0.1"
-angle_deg = 60.0
-tip_mm = 0.1
-status = "confirmed"
-source = "Makera PCB bit pack (the lab CAM does not use it)"
 
 [cut_depth_min]
 value = 0.08
@@ -162,6 +156,7 @@ source = "owner photo, PR #3 2026-11-02; owner 2026-11-12"
 isolation = "chamfer mill '0.1mm Tip Engraving': tip 0.2 mm, taper 30 (Fusion value), 12000 rpm, feed 500, plunge 200"
 drills_in_cam = [0.9, 1.0, 1.1]
 end_mill = "1/8 in flat (3.175 mm), 10000 rpm"
+available_not_in_cam = "Makera PCB bit pack: 60 deg V-bit, 0.1 mm tip (cut 0.192 mm at 0.08 mm depth). The lab CAM does not use it, so the milling check does not use it (removed from [[isolation_bit]] 2026-11-15, Fable review)."
 face = "0.3 mm tip, 15 degree 'solder mask removal' tool, stepover 0.2 mm"
 status = "confirmed"
 source = "lab .f3z (docs/schematics/example/README.md)"

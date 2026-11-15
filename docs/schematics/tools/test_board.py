@@ -394,6 +394,36 @@ class TestRoutedBoard(unittest.TestCase):
             with self.subTest(path=label):
                 self.assertEqual(check_board.path_width(self.b, net, pads, w), [])
 
+    def test_rows_measure_the_load_paths(self):
+        needs = {r[1]: r for r in check_board.PATH_ROWS}
+        want = {
+            "GND trunk J1 - pour at U1": 6.0,
+            "GND entrance U1": 1.6,
+            "GND entrance U2": 1.6,
+            "GND J6/J7 - U1": 1.6,
+            "GND U2 output - J8/J9/J11/C9": 1.6,
+            "VBAT_RAW J1 - F1": 6.0,
+            "VBAT trunk F1 - prongs": 6.0,
+            "VBAT neck U2 VIN": 1.6,
+            "VBAT neck U1 VIN": 1.6,
+            "+5V_CPU load path": 1.6,
+            "+5V_SENS load path": 1.6,
+            "+5V_CPU all pads": 0.5,
+            "+5V_SENS all pads": 0.5,
+            "+6V_BEC J3 - J4": 1.0,
+        }
+        self.assertEqual({k: needs[k][3] for k in want if k in needs}, want)
+        self.assertEqual(sorted(needs), sorted(want))
+
+    def test_no_row_uses_a_stub(self):
+        # a stub hides copper next to a pad: the rows measure the real copper
+        self.assertEqual(check_board.STUB_MM, 0.0)
+
+    def test_vbat_trunk_row_does_not_cover_the_necks(self):
+        for net, label, pads, w in check_board.PATH_ROWS:
+            if net == "VBAT" and w >= 6.0:
+                self.assertFalse([p for p in pads if p.startswith(("U1.", "U2."))], label)
+
     def test_vias_are_rivets_and_counted(self):
         vias = [t for t in self.b.GetTracks() if t.Type() == pcbnew.PCB_VIA_T]
         for v in vias:
@@ -413,12 +443,12 @@ class TestRoutedBoard(unittest.TestCase):
 class TestPathWidth(unittest.TestCase):
     """path_width on a synthetic board: two pads joined by a 2.0 mm track."""
 
-    def board(self):
+    def board(self, length=20, track_w=2.0):
         from pcbnew import FromMM, VECTOR2I
         b = pcbnew.BOARD()
         n = pcbnew.NETINFO_ITEM(b, "N")
         b.Add(n)
-        for ref, x in (("A", 0), ("B", 20)):
+        for ref, x in (("A", 0), ("B", length)):
             fp = pcbnew.FOOTPRINT(b)
             fp.SetReference(ref)
             fp.SetPosition(VECTOR2I(FromMM(x), 0))
@@ -437,8 +467,8 @@ class TestPathWidth(unittest.TestCase):
         t = pcbnew.PCB_TRACK(b)
         t.SetLayer(pcbnew.B_Cu)
         t.SetStart(VECTOR2I(0, 0))
-        t.SetEnd(VECTOR2I(FromMM(20), 0))
-        t.SetWidth(FromMM(2.0))
+        t.SetEnd(VECTOR2I(FromMM(length), 0))
+        t.SetWidth(FromMM(track_w))
         t.SetNet(n)
         b.Add(t)
         return b
@@ -448,6 +478,43 @@ class TestPathWidth(unittest.TestCase):
 
     def test_fails_above_track_width(self):
         self.assertEqual(len(check_board.path_width(self.board(), "N", ["A.1", "B.1"], 3.0)), 1)
+
+    def test_need_equal_to_track_width_passes(self):
+        # opening of a track of exactly the need: a small numeric tolerance
+        self.assertEqual(check_board.path_width(self.board(), "N", ["A.1", "B.1"], 2.0), [])
+
+    def test_tolerance_is_small(self):
+        self.assertLessEqual(check_board.OPEN_TOL_MM, 0.01)
+        self.assertEqual(len(check_board.path_width(self.board(), "N", ["A.1", "B.1"], 2.05)), 1)
+
+    def test_stub_hides_a_short_neck_unless_it_is_zero(self):
+        # 1.0 mm neck, 4 mm long, 1.0 mm pads: the 2.5 mm stub of each pad covers the whole neck
+        b = self.board(length=4, track_w=1.0)
+        self.assertEqual(check_board.path_width(b, "N", ["A.1", "B.1"], 3.0, 2.5), [])
+        self.assertEqual(len(check_board.path_width(b, "N", ["A.1", "B.1"], 3.0, 0.0)), 1)
+
+    def test_fails_unknown_net(self):
+        p = check_board.path_width(self.board(), "NOPE", ["A.1", "B.1"], 1.0)
+        self.assertEqual(len(p), 1)
+
+    def test_fails_missing_pad_label(self):
+        p = check_board.path_width(self.board(), "N", ["A.1", "C.9"], 1.0)
+        self.assertEqual(len(p), 1)
+        self.assertIn("C.9", p[0])
+
+    def test_fails_all_pads_missing(self):
+        self.assertEqual(len(check_board.path_width(self.board(), "N", ["X.1", "Y.1"], 1.0)), 1)
+
+    def test_fails_empty_pad_list(self):
+        self.assertEqual(len(check_board.path_width(self.board(), "N", [], 1.0)), 1)
+
+    def test_opening_is_zero_for_missing_pad(self):
+        self.assertEqual(check_board.path_opening_mm(self.board(), "N", ["A.1", "C.9"]), 0.0)
+
+    def test_probe_point_on_copper_joins(self):
+        b = self.board()
+        self.assertEqual(check_board.path_width(b, "N", ["A.1", "@10,0"], 1.9), [])
+        self.assertEqual(len(check_board.path_width(b, "N", ["A.1", "@10,5"], 1.9)), 1)
 
 
 class TestReviewPackage(unittest.TestCase):

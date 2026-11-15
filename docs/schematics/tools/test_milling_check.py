@@ -101,7 +101,7 @@ class TestLimits(unittest.TestCase):
     def test_loads_and_derives(self):
         lim = limits()
         self.assertAlmostEqual(lim.depth_worst, 0.08)
-        self.assertEqual([b.name for b in lim.bits], ["30deg/0.2", "60deg/0.2", "60deg/0.1"])
+        self.assertEqual([b.name for b in lim.bits], ["30deg/0.2", "60deg/0.2"])
         self.assertEqual(lim.drills, [round(0.1 * i, 1) for i in range(1, 21)])
         self.assertAlmostEqual(lim.endmill_min, 3.175)
         self.assertAlmostEqual(lim.milled_hole_min, 3.3)
@@ -144,8 +144,8 @@ class TestGap(unittest.TestCase):
         self.assertEqual(rules(f), ["MILL-GAP-BIT"])
         msg = f[[x[0] for x in f].index("MILL-GAP-BIT")][5]
         self.assertIn("30deg/0.2", msg)
-        self.assertIn("60deg/0.1", msg)
         self.assertNotIn("60deg/0.2", msg)
+        self.assertNotIn("60deg/0.1", msg)
 
     def test_045_none(self):
         self.assertEqual(rules(self.gap(0.45)), [])

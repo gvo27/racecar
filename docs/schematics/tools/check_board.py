@@ -38,17 +38,41 @@ def holes(board):
 
 
 # Copper width along the current paths (Task 7b). Opening test on B.Cu: deflate the copper of the net by w/2 and
-# inflate it by w/2; the listed pads must stay in one piece. (net, label, pads, width mm). A pad is "REF.PIN";
-# "U2.GND_IN" / "U2.GND_OUT" are the two U2 GND pads (7, 8) next to VIN / the two (9, 10) next to VOUT.
-STUB_MM = 2.5  # copper within this distance of a pad that is narrower than the opening counts at its own width
+# inflate it by w/2; the listed pads must stay in one piece. A row is (net, label, pads, width mm).
+# A pad is "REF.PIN"; "U2.GND_IN" / "U2.GND_OUT" are the two U2 GND pads (7, 8) next to VIN / the two (9, 10) next
+# to VOUT; "@x,y" is a probe point (mm, board frame) that must lie in the opened copper. Probe points use the
+# placement.py frame plus origin 60, 180 with y mirrored: x = 60 + px, y = 180 - py.
+#
+# No row has a stub exemption. The rows measure the real copper. (The earlier check added back all copper within
+# 2.5 mm of each pad that is narrower than the opening. It hid the 1.9 mm VBAT necks, the 4.81 mm GND pad blocks
+# and the 5 V branches.) `stub_mm` stays as an argument for tests and diagnostics, and is 0 for every row.
+# Each row follows one current path:
+#   GND trunk: J1.2 to the pour under the U1 body, east of the U1 pad block (probe). GND entrance U1/U2: from that pour (U1) or from J1.2 (U2)
+#   to the module GND pad block, which carries one module (at most about 5.1 A). The GND of U2 reaches the pocket
+#   next to U2 through the U1 pad block and the pour north of the modules, so the entrance U2 row is the whole way.
+#   VBAT necks: one module input each. 5 V load paths: the pads that carry the load. "All pads" rows: the branches
+#   to C, R, TP and LED parts carry milliamps, so they need the Default width only.
+# Known limit: pads are solid polygons. The drill holes are not cut out, and a pad fed through the ring of its
+# neighbour (U2.6 through U2.5) counts as joined.
+STUB_MM = 0.0
+OPEN_TOL_MM = 0.01  # numeric tolerance of the opening (arc approximation): a track of exactly the need passes
 PATH_ROWS = [
-    ("GND", "GND trunk J1 - U2 input - U1", ["J1.2", "U2.GND_IN", "U1.7", "U1.8", "U1.9", "U1.10"], 6.0),
+    ("GND", "GND trunk J1 - pour at U1", ["J1.2", "@118,140"], 6.0),
+    ("GND", "GND entrance U1", ["@118,140", "U1.7", "U1.8", "U1.9", "U1.10"], 1.6),
+    ("GND", "GND entrance U2", ["J1.2", "U2.GND_IN"], 1.6),
     ("GND", "GND J6/J7 - U1", ["J6.2", "J7.2", "U1.7", "U1.8", "U1.9", "U1.10"], 1.6),
     ("GND", "GND U2 output - J8/J9/J11/C9", ["U2.GND_OUT", "J8.2", "J9.2", "J11.2", "C9.2"], 1.6),
     ("/VBAT_RAW", "VBAT_RAW J1 - F1", ["J1.1", "F1.1"], 6.0),
-    ("VBAT", "VBAT F1 - U2 VIN - U1 VIN", ["F1.2", "U2.5", "U2.6", "U1.5", "U1.6"], 6.0),
-    ("+5V_CPU", "+5V_CPU all pads", None, 1.6),
-    ("+5V_SENS", "+5V_SENS all pads", None, 1.6),
+    # trunk: F1.2 to the two prongs (probe points in the middle of each prong, 6.6 mm wide)
+    ("VBAT", "VBAT trunk F1 - prongs", ["F1.2", "@79.6,145", "@107.3,145"], 6.0),
+    # necks: one module input each (at most about 5.1 A), Power5A width
+    ("VBAT", "VBAT neck U2 VIN", ["@79.6,145", "U2.5", "U2.6"], 1.6),
+    ("VBAT", "VBAT neck U1 VIN", ["@107.3,145", "U1.5", "U1.6"], 1.6),
+    ("+5V_CPU", "+5V_CPU load path", ["U1.11", "U1.12", "J6.1", "J7.1"], 1.6),
+    ("+5V_SENS", "+5V_SENS load path", ["U2.11", "U2.12", "J8.1", "J9.1", "J11.1", "C9.1", "FB1.1"], 1.6),
+    ("+5V_CPU", "+5V_CPU all pads", None, 0.5),
+    ("+5V_SENS", "+5V_SENS all pads", None, 0.5),
+    ("+6V_BEC", "+6V_BEC J3 - J4", ["J3.2", "J4.2"], 1.0),
 ]
 
 
@@ -84,7 +108,7 @@ def _u2_gnd_ends(board):
     return gnd[:2], gnd[2:]
 
 
-def _opened_groups(board, net, labels, width_mm):
+def _opened_groups(board, net, labels, width_mm, stub_mm=STUB_MM):
     """Groups of pad labels that stay joined after the opening of width_mm. Pads narrower than the opening
     are added back at their own width (they cannot pass the opening, but they must touch the opened copper)."""
     layer = pcbnew.B_Cu
@@ -96,6 +120,10 @@ def _opened_groups(board, net, labels, width_mm):
                 q = pcbnew.SHAPE_POLY_SET()
                 p.TransformShapeToPolygon(q, layer, 0, FromMM(0.005), pcbnew.ERROR_INSIDE)
                 pads.setdefault(name, []).append((p.GetPosition(), q))
+    for l in labels or []:
+        if l.startswith("@"):
+            x, y = (float(v) for v in l[1:].split(","))
+            pads[l] = [(pcbnew.VECTOR2I(FromMM(x), FromMM(y)), pcbnew.SHAPE_POLY_SET())]
     o = pcbnew.SHAPE_POLY_SET(s)
     r = FromMM(width_mm / 2.0)
     o.Deflate(r, pcbnew.CORNER_STRATEGY_ROUND_ALL_CORNERS, FromMM(0.01))
@@ -105,9 +133,11 @@ def _opened_groups(board, net, labels, width_mm):
     for l in labels:
         for _, q in pads.get(l, []):
             o.BooleanAdd(q)
-            # a pad narrower than the opening is measured at its own width: the copper within STUB_MM of it counts
+            # a pad narrower than the opening is measured at its own width: the copper within stub_mm of it counts
+            if stub_mm <= 0 or not q.OutlineCount():
+                continue
             near = pcbnew.SHAPE_POLY_SET(q)
-            near.Inflate(FromMM(STUB_MM), pcbnew.CORNER_STRATEGY_ROUND_ALL_CORNERS, FromMM(0.01))
+            near.Inflate(FromMM(stub_mm), pcbnew.CORNER_STRATEGY_ROUND_ALL_CORNERS, FromMM(0.01))
             hit = pcbnew.SHAPE_POLY_SET()
             hit.BooleanIntersection(near, s)
             o.BooleanAdd(hit)
@@ -127,25 +157,42 @@ def _opened_groups(board, net, labels, width_mm):
     return groups
 
 
-def path_width(board, net, pads, width_mm):
-    """Opening test on B.Cu: the pads of `net` (list of "REF.PIN", or None = all pads of the net) must stay in one
-    piece after deflate+inflate by width_mm / 2. Returns the problems ([] = the path is at least width_mm wide)."""
-    g = _opened_groups(board, net, pads, width_mm)
+def _joined(g):
+    return len(g) == 1 and "missing" not in g
+
+
+def path_width(board, net, pads, width_mm, stub_mm=STUB_MM):
+    """Opening test on B.Cu: the pads of `net` (list of "REF.PIN" or "@x,y", or None = all pads of the net) must
+    stay in one piece after deflate+inflate by width_mm / 2. Returns the problems ([] = the path is at least
+    width_mm wide). A net without copper, a missing pad and an empty list are problems."""
+    if pads is not None and not pads:
+        return ["%s: the pad list is empty" % net]
+    s, _ = _net_copper(board, net, pcbnew.B_Cu)
+    if not s.OutlineCount():
+        return ["%s: no copper on B.Cu" % net]
+    g = _opened_groups(board, net, pads, width_mm - OPEN_TOL_MM, stub_mm)
+    if not g:
+        return ["%s: no pads" % net]
+    if "missing" in g:
+        return ["%s: pads not found on B.Cu: %s" % (net, ",".join(g["missing"]))]
     if len(g) <= 1:
         return []
     return ["%s: pads split into %d pieces at %.1f mm: %s" % (
         net, len(g), width_mm, "; ".join(",".join(sorted(set(v))) for v in g.values()))]
 
 
-def path_opening_mm(board, net, pads, lo=0.5, hi=8.0, step=0.05):
-    """Largest opening width (mm) at which the pads stay in one piece (bisection, 0.05 mm steps). 0.0 if none."""
-    if len(_opened_groups(board, net, pads, hi)) <= 1:
+def path_opening_mm(board, net, pads, lo=0.5, hi=8.0, step=0.05, stub_mm=STUB_MM):
+    """Largest opening width (mm) at which the pads stay in one piece (bisection, 0.05 mm steps). 0.0 if none
+    (also when a pad or the net is missing)."""
+    def ok(w):
+        return _joined(_opened_groups(board, net, pads, w, stub_mm))
+    if ok(hi):
         return hi
-    if len(_opened_groups(board, net, pads, lo)) > 1:
+    if not ok(lo):
         return 0.0
     while hi - lo > step:
         mid = (lo + hi) / 2
-        if len(_opened_groups(board, net, pads, mid)) <= 1:
+        if ok(mid):
             lo = mid
         else:
             hi = mid
@@ -242,13 +289,12 @@ def main(argv=None):
     ap.add_argument("board")
     ap.add_argument("--limits", default=os.path.join(SCH_DIR, "milling.toml"))
     ap.add_argument("--waivers", default=os.path.join(SCH_DIR, "milling_waivers.toml"))
-    ap.add_argument("--widths", action="store_true", help="print the measured opening width per path row")
+    ap.add_argument("--widths", action="store_true", help="(default, kept for old calls) print the measured opening per path row")
     args = ap.parse_args(argv)
     board = pcbnew.LoadBoard(args.board)
     problems = check(board, mc.load_limits(args.limits), mc.load_waivers(args.waivers)) + check_paths(board)
-    if args.widths:
-        for net, label, pads, w in PATH_ROWS:
-            print("check_board: opening %-34s need %.1f mm, measured %.2f mm" % (label, w, path_opening_mm(board, net, pads)))
+    for net, label, pads, w in PATH_ROWS:
+        print("check_board: opening %-34s need %.1f mm, measured %.2f mm" % (label, w, path_opening_mm(board, net, pads)))
     for p in problems:
         print("check_board: " + p)
     print("check_board: %d problems" % len(problems))

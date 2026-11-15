@@ -28,3 +28,9 @@ The BOM comes from the schematic. Each symbol carries part fields. `make bom` ex
 ## J1 footprint note
 
 KiCad's `Connector_Wire` library (checked locally) has `SolderWire-*` footprints up to 2.5 sqmm only (no 4 sqmm variant): the one in the schematic, `SolderWire-2.5sqmm_1x02_P8.8mm_D2.4mm_OD4.4mm`, has a 3.0 mm drill and a 4.4 mm pad ("D2.4mm" is the conductor diameter, not the drill). 12 AWG stranded tinned wire (about 2.05 mm) fits the 3.0 mm hole; the concern is the thin 0.7 mm annular ring at F1's current. Task 9 (lab fit): the lab has no tool for holes between 2.0 and 3.3 mm, so the board copy has a 3.4 mm bored hole (pad 4.4 mm, annular ring 0.5 mm, 12 AWG conductor loose in the hole). Earlier proposal: keep the 3.0 mm drill, enlarge the pad OD to at least 5 mm (custom copy of the footprint), thermal reliefs off. Verify against the actual wire.
+
+## Open part choices
+
+- **C9** (bulk capacitor on `+5V_SENS` at J11): `MPN`, `Manufacturer` and `Status` are `TBD`. It is the only part with no proposed MPN. Requirement from the repo: 100 uF or more, low ESR, 10 V or more, footprint `CP_Radial_D8.0mm_P3.50mm`. The Mapper ripple limit is 50 mV. The owner chooses the part.
+- The `Value` fields of C1 to C6, D1, F1 and U3 read `TBD ...`, although each has a proposed MPN. The schematic PDF shows `TBD` for them. The values change when the owner approves the MPNs.
+- The USB-C pigtails for J6 and J7 are `TBD` in `bom_offboard.csv` (part, CC termination, bench check).
