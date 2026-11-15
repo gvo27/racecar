@@ -49,4 +49,11 @@ Each lesson has the event that caused it. Sources: PR #3, `docs/schematics/READM
 34. **The worker iterates, the main agent reviews, and the main agent runs each check again.** A worker's "passes" is not evidence.
 35. **Lab limits live in one file with `status` and `source`** (skill `pcb-lab-config`). Never change a limit to make a board pass.
 36. **Two owner gates:** the plan before the schematic, the schematic before the board.
-37. **Do not commit build debris.** A 90 MB Python core dump (file `core.1` in the schematics directory) was committed with a tool change. Run `git status` and read the file list before each commit.
+## Fable review (2026-11-15)
+37. **An exemption in a check hides findings.** The path-width test counted all copper within 2.5 mm of a narrow pad. It hid two necks of 1.9 mm by 6.9 mm, and the record said 6.39 mm. A check prints the value with the exemption and without it, or has no exemption.
+38. **A check must fail when it has nothing to check.** The path-width test passed for a net with no copper and for missing pads.
+39. **Read a graph at the point where its curve starts.** The record said "7.4 A at 6 V in". The curve starts at 6.6 V in. No data is not a value.
+40. **Check each regulator against the cutoff voltage, not only the one with the largest load.** The dropout flag was on U2 only. U1 feeds the Pi and has the same dropout.
+41. **A check uses only the tools that the lab CAM uses.** The gap check used a 0.1 mm tip bit that the lab CAM does not have.
+42. **Isolation milling leaves the copper between the contours.** Ask the lab for a pocket operation where a floating piece lies between pads of different nets. Bare copper on the two faces needs insulation from the chassis and from module undersides.
+43. **Do not commit build debris.** A 90 MB Python core dump (file `core.1` in the schematics directory) was committed with a tool change. Run `git status` and read the file list before each commit.
