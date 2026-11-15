@@ -1,6 +1,6 @@
 # Lab example: Fusion 360 setup and demo panel
 
-This directory holds the lab's calibrated Fusion 360 CAM setup: `Pcb DXF's amd copper plate.f3z`. It contains a demo panel of 6 small boards that the lab already milled. The power board and its outputs (`docs/schematics/fab/`) must fit this setup. No binary was added by Task 9. The file was committed by the owner.
+This directory holds the lab's calibrated Fusion 360 CAM setup: `Pcb DXF's amd copper plate.f3z`. It contains a demo panel of 6 small boards that the lab already milled. Each board and its fab outputs must fit this setup. The owner committed the file. The Fusion exports of the owner are in `fusion_export/` (see below).
 
 ## Facts read from the file
 
@@ -22,13 +22,36 @@ Source: the CAM XML (`Toolpath/Iron.Document/theIronDoc.irondoc`), the toolpath 
 
 Owner statements (PR #3, 2026-11-12): the blank is even (depth error 0); the drill bits are 0.1 to 2.0 mm in 0.1 mm steps; dowel holes are always made; B.Cu is not mirrored.
 
-Not in the file, so not known: whether Fusion "taper 30" is the angle per side or the included angle (`milling.toml` checks both); the post-processed `.cnc` code; the tool library export.
+Not in the file: the post-processed `.cnc` code (the post `Carvera.cps` is not received, owner 2026-11-15). The Fusion exports below close the other open items (taper reading, tool library, dowel check).
 
-## What follows for the board
+## What follows for a board
 
 - A hole between 2.0 mm and 3.3 mm cannot be made. The largest drill is 2.0 mm and the only end mill is 3.175 mm. `milled_hole_min` is 3.3 mm (assumed: tool + 0.125 mm).
 - The cut depth is 0.08 mm on 0.070 mm copper: the margin is 0.01 mm on an even blank. MILL-DEPTH passes with error 0. A real depth error larger than 0.01 mm leaves copper in the isolation cut. The lab tech accepts this margin (2026-11-13) and adds a second, deeper pass in the CAM file if necessary.
-- The board is turned 90 degrees and centered on the stock, clear of the dowels. See `docs/schematics/fab/README.md`.
+- The board outline must fit the stock and stay clear of the dowel holes. Each board records its frame on the stock in its own fab README.
+
+## Fusion exports (owner, Win11, 2026-11-15)
+
+Source: PR #3 comment of 2026-11-15 (`pcb_export.zip` and 7 screenshots). Files are in `fusion_export/`. Fusion CAM 2706.1.17. The setup sheet and the sketch DXFs use inches.
+
+| File | Content |
+| --- | --- |
+| `setup_sheet_setupC.html` | Setup sheet of setup C only (job "Setup C"). WCS #1. Stock 6 x 4 x 0.059 in; stock lower corner at (-0.129, -0.15, 0) in from the WCS origin, so the origin is a dowel center. Operations: 2D Contour4 and 2D Contour5 (T2, min Z 0.055 in), Face3 (T5, 6000 rpm). Tools T2 and T5. Estimated time 22 min 17 s. Setups A and B are not in the export |
+| `tool_library.json` | Tool library of the document: T2 chamfer mill "0.1mm Tip Engraving Metal" (3.175 mm shank, tip 0.2 mm, taper 30), T4 flat end mill "12mm Flute End Mill Metal" (3.175 mm, flute 12 mm), drills 0.9, 1.0 and 1.1 mm (118 degrees), T5 chamfer mill "0.3mm Tip Solder Mask Removal" (tip 0.3 mm, taper 15) |
+| `sketch1_stock_top.dxf` | Stock rectangle 6 x 4 in, origin at the lower-left corner |
+| `sketch10_dowels.dxf` | 2 dowel circles, radius 0.0825 in (diameter 4.191 mm), centers (0.129, 0.15) and (5.871, 0.15) in, and a line between them |
+| `sketch2_stock_bottom.dxf` | The same stock and dowels in the bottom frame: x and y negated, dowels at (-0.129, -0.15) and (-5.871, -0.15) in, and a dashed line at x = -3 in (the flip axis) |
+| `measure_dowels.png` | Fusion Measure: hole diameter 0.165 in, centers (5.871, 0.15) and (0.129, 0.15) in, distance 5.742 in |
+| `tool2_vbit_geometry.png`, `tool2_vbit_feeds.png` | T2 drawing and values: taper angle 30 degrees, "Inclusive angle" empty, 12000 rpm, feed 500, plunge 200, ramp 300 mm/min, stepdown 0.1 mm |
+| `tool4_endmill_geometry.png`, `tool4_endmill_feeds.png` | T4 drawing and values: 12000 rpm, feed 500, plunge 200, stepdown 0.2 mm |
+| `tool5_mask_geometry.png`, `tool5_mask_feeds.png` | T5 drawing and values: taper angle 15 degrees, 6000 rpm, feed 400, stepover 0.2 mm |
+
+Results:
+- **Taper is the angle per side.** In the T2 drawing, the cone is about 2.6 mm long (scale bar 5 mm). It goes from the 0.2 mm tip to the 3.175 mm shank. That is 30 degrees per side. A 30 degree included cone needs about 5.6 mm. The T5 drawing agrees (15 degrees per side). So T2 is a 60 degree included V-bit. Its cut is 0.292 mm wide at 0.08 mm depth. The 30 degree included reading is removed from `milling.toml`.
+- **Stock and dowels are confirmed.** The Fusion values agree with the values from the `.f3z`. In inches: 0.129 in = 3.2766 mm, 0.15 in = 3.81 mm, 5.871 in = 149.1234 mm, 0.165 in = 4.191 mm.
+- **Tool numbers:** T2 isolation, T4 end mill, T5 solder mask removal.
+- **Difference:** the T4 values in the tool library say 12000 rpm. The Bore1 operation in the `.f3z` uses 10000 rpm. The operation value applies to the cut.
+- **Still open:** the NC code (needs `Carvera.cps`), the setup sheets of setups A and B.
 
 ## How to read the file again
 

@@ -8,7 +8,7 @@ You review. You do not edit project files. Use Bash for read-only commands and f
 
 ## Inputs
 1. The scope from the caller: schematic, board, parts, fab outputs, or all.
-2. The project rules (`.claude/rules/schematics.md`), the plan documents, `docs/datasheets/`, the lab file (`docs/schematics/milling.toml`), the review record (`docs/schematics/review/README.md`).
+2. The project rules (`.claude/rules/schematics.md`), the plan documents, `docs/datasheets/`, the lab file (`milling.toml` in the lab directory: `lab:` in `.claude/CLAUDE.md`), the review record (`docs/schematics/review/README.md`).
 3. `.claude/skills/pcb-design-check/SKILL.md` (check matrix) and `lessons.md`. For a milled board also `.claude/skills/pcb-milling-check/SKILL.md`.
 
 ## Method

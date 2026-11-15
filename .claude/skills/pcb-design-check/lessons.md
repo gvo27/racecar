@@ -37,10 +37,10 @@ Each lesson has the event that caused it. Sources: PR #3, `docs/schematics/READM
 ## Milling (holes are not plated)
 25. **DRC clean does not mean millable.** The V-bit cut width at the cut depth sets the minimum gap.
 26. **No F.Cu copper on a THT pad.** The joint is on B.Cu. SMD parts go on the routing side.
-27. **A hole between the largest drill and the smallest bored hole cannot be made** (2.0 to 3.3 mm in this lab). Change the footprint drill.
+27. **A hole between the largest drill and the smallest bored hole cannot be made** (the lab file gives the two values). Change the footprint drill.
 28. **Get the lab's CAM file early.** It gave the stock size, the dowel positions, the flip axis, the origin of each setup, the bits and the depth. The first board frame was wrong for it.
-29. **A CAM "taper" angle can be the angle of one side or the included angle.** Check the two readings.
-30. **Cut depth 0.08 mm on 0.070 mm copper leaves 0.01 mm.** The lab tech decides if that is sufficient. The agent does not change the limit.
+29. **A CAM "taper" angle can be the angle of one side or the included angle.** Fusion uses the angle per side: the tool drawing in its tool library shows it. For a different CAM tool, check the two readings until a drawing or a document decides.
+30. **A cut depth close to the copper thickness leaves a small margin** (0.01 mm on the first board). The lab tech decides if that is sufficient. The agent does not change the limit.
 31. **KiCad's native DXF draws pads, tracks and fills as overlapping outlines.** A contour cut needs one merged outline for each copper island (`fab_export.py`).
 32. **State the frame of each fab file:** origin, axis, units, top view or bottom view, mirror state. Test the hole positions against a second export.
 

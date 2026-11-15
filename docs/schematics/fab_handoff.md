@@ -4,16 +4,13 @@ For the owner doing layout. Parts: `bom.csv` and `bom_offboard.csv` (made by `ma
 
 # A. Prototype rev A: in-house CNC (Makera Carvera)
 
-V-bit isolation milling in the lab's calibrated Fusion 360 template (`example/README.md`), with DXF and Excellon files from `make pcb-fab` (`fab/README.md`). The board is not fabricated by a fab house for this revision.
+V-bit isolation milling in the lab's calibrated Fusion 360 template (`example/` in the lab directory ([`lab:` in `.claude/CLAUDE.md`](../../.claude/CLAUDE.md))), with DXF and Excellon files from `make pcb-fab` (`fab/README.md`). The board is not fabricated by a fab house for this revision.
 
 ## Stock and tools
 
 - **Stock:** Kepro P22-465G FR-4, 2 oz Cu, double-sided, 4" x 6" x 0.062" (101.6 x 152.4 x 1.57 mm), lab stock (owner, 2026-11-12). The earlier 3" x 6" blank (P22-365G, 76.2 x 152.4 mm) is also in stock but is too small for the dowel line of the lab template. The blank is even (depth error 0, owner). Scrub oxide off before milling. 2 oz matches the trace-width plan, so the 2 oz columns below apply directly. Other lab stock: generic double-sided 10 x 15 cm, 10 pcs, copper weight TBD (likely 1 oz): not for this board.
-- **Lab tools (from the lab .f3z and the owner's photos):**
-  - Isolation: 1 contour pass, 0.08 mm deep, chamfer mill with 0.2 mm tip (Fusion taper 30). Copper is 0.070 mm, so the margin is 0.01 mm. The lab tech accepts this margin (2026-11-13); if necessary, the lab adds a second, deeper pass in the CAM file. Cut width at depth: 0.243 mm (30 degrees included) or 0.292 mm (60 degrees included); the 0.4 mm design clearance passes both.
-  - Drill bits: 0.1 to 2.0 mm in 0.1 mm steps (owner inventory). The lab CAM uses 0.9, 1.0 and 1.1 mm.
-  - End mill: one, 3.175 mm (1/8 in). It bores the dowel holes. A hole of 2.0 to 3.3 mm cannot be made.
-  - Dowels: 2 holes of 4.191 mm for 4.0 mm pins, at (3.2766, 3.81) and (149.1234, 3.81) mm from the stock lower-left corner.
+- **Lab tools, cut depth, drill set, end mill and dowels:** the lab file (`milling.toml` in the lab directory ([`lab:` in `.claude/CLAUDE.md`](../../.claude/CLAUDE.md))). The values there have a status and a source. Do not copy them here.
+  - For this board: the isolation bit cuts 0.292 mm wide at the lab depth (Fusion taper 30 = 30 degrees per side, confirmed 2026-11-15 from the Fusion tool export). The 0.4 mm design clearance passes. The smallest gap on the board is 0.35 mm (U3 pads).
 - **Makera PCB Fabrication Pack:** 2x 1/8" 60° 0.1 mm-tip V-bit, 2x 1/8" 30° 0.2 mm-tip V-bit, 20x milling/drilling bits, dowel pins, UV solder-mask paint. The lab CAM uses only the 0.2 mm tip V-bit.
 - **Fixturing:** rigid flat; double-sided tape on a flat sacrificial board.
 
@@ -66,7 +63,7 @@ The project DRC rules in `rc_power_board.kicad_pro` are set to match: `min_clear
 
 ## Vias: LPKF EasyContac rivets
 
-No plated through-holes. Vias are **LPKF EasyContac** through-hole rivets from the lab kit (owner photo 2026-11-13: bags 0.6 / 0.8 / 1.0 / 1.2 mm and a setting tool; this photo is the reference for rivets, not the lab .f3z). The bag label is the inner diameter (owner caliper 2026-11-13, measured on the shaft: 0.8 bag 1.0 mm, 1.0 bag 1.45 mm, 1.2 bag 1.6 mm OD (old caliper, small error possible)). Press each rivet with the kit's setting tool, then **solder both sides**. Max board thickness for rivets is 1.6 mm (stock 1.57 mm OK). Sizes from the Vanderbilt design-guide table for LPKF EasyContac (https://my.vanderbilt.edu/daniel/?p=200); the LPKF US store lists outer diameters 0.8 / 1.0 / 1.4 / 1.6 mm, inner 0.2-0.4 mm smaller. The owner's caliper values match the outer diameters in the table (1.0 bag: 1.45 mm measured vs 1.4 mm in the table). The collar is the wider face on one end; the setting tool flares the other end.
+No plated through-holes. Vias are **LPKF EasyContac** through-hole rivets from the lab kit (owner photo 2026-11-13: bags 0.6 / 0.8 / 1.0 / 1.2 mm and a setting tool; this photo is the reference for rivets, not the lab CAM file). The bag label is the inner diameter (owner caliper 2026-11-13, measured on the shaft: 0.8 bag 1.0 mm, 1.0 bag 1.45 mm, 1.2 bag 1.6 mm OD (old caliper, small error possible)). Press each rivet with the kit's setting tool, then **solder both sides**. Max board thickness for rivets is 1.6 mm (stock 1.57 mm OK). Sizes from the Vanderbilt design-guide table for LPKF EasyContac (https://my.vanderbilt.edu/daniel/?p=200); the LPKF US store lists outer diameters 0.8 / 1.0 / 1.4 / 1.6 mm, inner 0.2-0.4 mm smaller. The owner's caliper values match the outer diameters in the table (1.0 bag: 1.45 mm measured vs 1.4 mm in the table). The collar is the wider face on one end; the setting tool flares the other end.
 
 | Rivet (inner) | Outer | Drill | Collar |
 | --- | --- | --- | --- |

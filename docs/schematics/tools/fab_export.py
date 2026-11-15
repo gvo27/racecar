@@ -19,6 +19,7 @@ import pcbnew
 from pcbnew import FromMM, ToMM
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import lab  # noqa: E402
 import placement  # noqa: E402
 
 SCH_DIR = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
@@ -30,7 +31,7 @@ DEC = 4  # decimals (0.1 um)
 
 
 def drill_max():
-    with open(os.path.join(SCH_DIR, "milling.toml"), "rb") as fh:
+    with open(lab.limits_file(), "rb") as fh:
         return max(tomllib.load(fh)["drill_set"]["value"])
 
 

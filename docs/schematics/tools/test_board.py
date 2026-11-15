@@ -14,6 +14,7 @@ from pcbnew import ToMM
 HERE = os.path.dirname(os.path.abspath(__file__))
 SCH_DIR = os.path.normpath(os.path.join(HERE, ".."))
 sys.path.insert(0, HERE)
+import lab  # noqa: E402
 import build_pcb  # noqa: E402
 import placement  # noqa: E402
 import check_board  # noqa: E402
@@ -129,7 +130,7 @@ class TestBootstrap(unittest.TestCase):
         self.assertIn("0.3mm", text)
 
     def test_check_board_clean(self):
-        self.assertEqual(check_board.check(self.b, mc.load_limits(os.path.join(SCH_DIR, "milling.toml")),
+        self.assertEqual(check_board.check(self.b, mc.load_limits(lab.limits_file()),
                                            mc.load_waivers(os.path.join(SCH_DIR, "milling_waivers.toml"))), [])
 
 
@@ -150,7 +151,7 @@ class TestHoles(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.b = load()
-        cls.lim = mc.load_limits(os.path.join(SCH_DIR, "milling.toml"))
+        cls.lim = mc.load_limits(lab.limits_file())
 
     def test_every_hole_makeable(self):
         for (ref, num), (d, _, _) in pad_holes(self.b).items():
@@ -239,7 +240,7 @@ class TestCheckBoardCatches(unittest.TestCase):
 
     def setUp(self):
         self.b = load()
-        self.lim = mc.load_limits(os.path.join(SCH_DIR, "milling.toml"))
+        self.lim = mc.load_limits(lab.limits_file())
 
     def test_fcu_track_on_tht_pad(self):
         j = [f for f in self.b.GetFootprints() if f.GetReference() == "J5"][0]
@@ -380,7 +381,7 @@ class TestRoutedBoard(unittest.TestCase):
         self.assertEqual(self.drc["schematic_parity"], [])
 
     def test_check_board_clean(self):
-        lim = mc.load_limits(os.path.join(SCH_DIR, "milling.toml"))
+        lim = mc.load_limits(lab.limits_file())
         self.assertEqual(check_board.check(self.b, lim, mc.load_waivers(os.path.join(SCH_DIR, "milling_waivers.toml"))), [])
 
     def test_high_current_tracks_at_least_6mm(self):
@@ -432,7 +433,7 @@ class TestRoutedBoard(unittest.TestCase):
         print("\nrivet vias: %d (%d GND stitching)" % (len(vias), sum(1 for v in vias if v.GetNetname() == "GND")))
 
     def test_f_cu_tracks_never_touch_tht_pads(self):
-        for p in check_board.check(self.b, mc.load_limits(os.path.join(SCH_DIR, "milling.toml"))):
+        for p in check_board.check(self.b, mc.load_limits(lab.limits_file())):
             self.assertNotIn("F.Cu on THT pad", p)
 
     def test_every_net_has_copper(self):

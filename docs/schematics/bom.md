@@ -1,6 +1,6 @@
 # Power board BOM (Rev A draft)
 
-The BOM comes from the schematic. Each symbol carries part fields. `make bom` exports them with `kicad-cli` to `bom.csv` (commit the file) and prints the cost total. Companion files: `design_overview.md` (design), `fab_handoff.md` (layout and CNC-milling steps). Rev A is milled in-house (Makera Carvera) on a 4" x 6" Kepro P22-465G blank (lab template, `example/README.md`), so there is no PCB fab-house cost. Every MPN is **proposed**, pending owner approval, unless `Status` says otherwise. Prices and stock were checked 2026-10-30; confirm before ordering. J10 is intentionally absent (radar removed).
+The BOM comes from the schematic. Each symbol carries part fields. `make bom` exports them with `kicad-cli` to `bom.csv` (commit the file) and prints the cost total. Companion files: `design_overview.md` (design), `fab_handoff.md` (layout and CNC-milling steps). Rev A is milled in-house on the lab stock (lab file and lab template: the lab directory ([`lab:` in `.claude/CLAUDE.md`](../../.claude/CLAUDE.md))), so there is no PCB fab-house cost. Every MPN is **proposed**, pending owner approval, unless `Status` says otherwise. Prices and stock were checked 2026-10-30; confirm before ordering. J10 is intentionally absent (radar removed).
 
 ## How the BOM is made
 

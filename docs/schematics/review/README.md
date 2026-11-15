@@ -58,7 +58,7 @@ Rebuild: `make kicad-image pcb-review`. All tools run in the pinned KiCad 10.0.8
 | `make pcb-fab` | 5 files in `../fab/`; `test_fab.py` 21 tests pass (copper area, holes vs `kicad-cli pcb export drill`, dowels) |
 | `make pcb-test` | 131 tests pass |
 
-**MILL-DEPTH (resolved, Task 9).** The lab CAM cuts 0.08 mm deep in one pass (lab .f3z) and the owner says the blank is even (depth error 0). The minimum depth 0.08 mm is above the copper thickness of 0.070 mm, so the check passes. The margin is only 0.01 mm: a real depth error above 0.01 mm leaves copper in the isolation cut. The lab tech accepts this margin (2026-11-13). If necessary, the lab adds a second, deeper pass in the CAM file. No board change.
+**MILL-DEPTH (resolved, Task 9).** The lab CAM cuts 0.08 mm deep in one pass (lab CAM file) and the owner says the blank is even (depth error 0). The minimum depth 0.08 mm is above the copper thickness of 0.070 mm, so the check passes. The margin is only 0.01 mm: a real depth error above 0.01 mm leaves copper in the isolation cut. The lab tech accepts this margin (2026-11-13). If necessary, the lab adds a second, deeper pass in the CAM file. No board change.
 
 **Holes (Task 9).** The lab tools make drills from 0.1 to 2.0 mm and bores of 3.3 mm or more (the only end mill is 3.175 mm). Changes: H1 to H4 3.2 to 3.4 mm; J1 wire pads 3.0 to 3.4 mm (pad 4.4 mm, ring 0.5 mm); F1 locating peg 2.4 to 3.4 mm (peg size not confirmed: the Littelfuse drawing was not reachable); vias 1.2 to 1.1 mm (pad 2.1 mm, ring 0.5 mm); Phoenix MKDS 1.5 to 1.3 mm; F1 pins 1.5 to 1.4 mm.
 
@@ -72,7 +72,7 @@ Earlier warnings, now removed: 3 F.Cu GND "slivers" and 4 MILL-ISLAND were false
 
 - Confirmed from the lab file and the owner (Task 9): drill set 0.1 to 2.0 mm in 0.1 mm steps; end mill 3.175 mm; cut depth 0.08 mm; depth error 0; stock 152.4 x 101.6 mm; dowels 4.191 mm.
 - Assumed: bored holes of 3.3 mm or more (tool + 0.125 mm). Confirmed: rivet via 1.1 mm drill / 2.1 mm pad; the 0.8 mm EasyContac rivet (1.0 mm OD, owner caliper 2026-11-13) sits about 0.05 mm loose before soldering.
-- Isolation bit: 0.2 mm tip, Fusion taper 30. Cut width at 0.08 mm depth: 0.243 mm (30 deg included) or 0.292 mm (60 deg included). The smallest copper gap on the board is 0.35 mm (U3 pads), which passes both readings.
+- Isolation bit: 0.2 mm tip, Fusion taper 30. Cut width at 0.08 mm depth: 0.292 mm. Fusion taper is the angle per side (60 deg included): confirmed 2026-11-15 from the Fusion tool library export (lab file, lab directory: `lab:` in `.claude/CLAUDE.md`). The 30 deg included reading (0.243 mm) is removed. The smallest copper gap on the board is 0.35 mm (U3 pads), which passes.
 - U1 and U2 are the Pololu D36V50F5 (owner 2026-11-12). The footprint comes from Pololu's drawing (tolerance of drill location +-0.1 mm). The 3 mounting holes are on F.Fab only. The standoff of the module over the F.Cu pour (parts 1.8 mm under the module) is not known: check on the real header.
 - No reverse-polarity protection (owner decision). U3 keeps the stock SOT-23-5 footprint and rule `U3_fine`.
 - XH and terminal-block orientation: pin 1 at the bottom on the left edge, except J4 and J8 (rotated 270 degrees: pin 1 at the top). J6 and J7 on the right edge also have pin 1 at the top. Deviation from the rule "pin 1 at the same end": it is needed for B.Cu routing without rivets. J8 turned means the Garmin pin order runs top to bottom. Wire entry direction of the vertical XH headers is not checked: check it with the 1:1 print.

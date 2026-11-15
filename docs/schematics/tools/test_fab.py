@@ -17,6 +17,7 @@ from pcbnew import ToMM
 HERE = os.path.dirname(os.path.abspath(__file__))
 SCH_DIR = os.path.normpath(os.path.join(HERE, ".."))
 sys.path.insert(0, HERE)
+import lab  # noqa: E402
 import fab_export  # noqa: E402
 import milling_check as mc  # noqa: E402
 import placement  # noqa: E402
@@ -124,7 +125,7 @@ class TestFrame(unittest.TestCase):
         self.assertEqual(placement.DOWELS_LAB, [(0.0, 0.0), (145.8468, 0.0)])
 
     def test_matches_milling_toml(self):
-        lim = mc.load_limits(os.path.join(SCH_DIR, "milling.toml"))
+        lim = mc.load_limits(lab.limits_file())
         self.assertEqual(placement.STOCK, (lim.stock_w, lim.stock_h))
         self.assertEqual([tuple(d) for d in placement.DOWELS], lim.dowels)
         self.assertAlmostEqual(placement.DOWEL_DIA, lim.dowel_dia)
@@ -378,7 +379,7 @@ class TestOutputs(unittest.TestCase):
         self.assertIn("BORE_3.4", {e["layer"] for e in es})
 
     def test_every_board_hole_is_makeable(self):
-        lim = mc.load_limits(os.path.join(SCH_DIR, "milling.toml"))
+        lim = mc.load_limits(lab.limits_file())
         for _, d, use in fab_export.tools(self.holes):
             if use == "DRILL":
                 self.assertTrue(any(abs(d - s) < 0.005 for s in lim.drills), d)

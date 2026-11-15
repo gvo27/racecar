@@ -9,10 +9,11 @@ import pcbnew
 from pcbnew import FromMM, VECTOR2I
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import lab  # noqa: E402
 import milling_check as mc  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-LIMITS = os.path.join(HERE, "..", "milling.toml")
+LIMITS = lab.limits_file()
 
 
 def limits():
@@ -91,9 +92,8 @@ class TestCutWidth(unittest.TestCase):
         self.assertAlmostEqual(mc.cut_width(0.2, 30, 0.20), 0.307, places=3)
         self.assertAlmostEqual(mc.cut_width(0.1, 60, 0.20), 0.331, places=3)
 
-    def test_lab_bit_both_readings_at_lab_depth(self):
-        # lab .f3z: tip 0.2 mm, Fusion taper 30, depth 0.08 mm: 30 deg included -> 0.243, 30 deg per side -> 0.292
-        self.assertAlmostEqual(mc.cut_width(0.2, 30, 0.08), 0.243, places=3)
+    def test_lab_bit_at_lab_depth(self):
+        # lab tool T2: tip 0.2 mm, Fusion taper 30 = angle per side = 60 deg included (Fusion tool export 2026-11-15)
         self.assertAlmostEqual(mc.cut_width(0.2, 60, 0.08), 0.292, places=3)
 
 
@@ -101,7 +101,7 @@ class TestLimits(unittest.TestCase):
     def test_loads_and_derives(self):
         lim = limits()
         self.assertAlmostEqual(lim.depth_worst, 0.08)
-        self.assertEqual([b.name for b in lim.bits], ["30deg/0.2", "60deg/0.2"])
+        self.assertEqual([b.name for b in lim.bits], ["60deg/0.2"])
         self.assertEqual(lim.drills, [round(0.1 * i, 1) for i in range(1, 21)])
         self.assertAlmostEqual(lim.endmill_min, 3.175)
         self.assertAlmostEqual(lim.milled_hole_min, 3.3)
@@ -139,13 +139,12 @@ class TestGap(unittest.TestCase):
         f = self.gap(0.15)
         self.assertEqual(rules(f, "error"), ["MILL-GAP"])
 
-    def test_025_bit_warning(self):
-        f = self.gap(0.25)
-        self.assertEqual(rules(f), ["MILL-GAP-BIT"])
-        msg = f[[x[0] for x in f].index("MILL-GAP-BIT")][5]
-        self.assertIn("30deg/0.2", msg)
-        self.assertNotIn("60deg/0.2", msg)
-        self.assertNotIn("60deg/0.1", msg)
+    def test_025_error_with_the_lab_bit(self):
+        # 0.25 mm is narrower than the 0.292 mm cut of the only lab isolation bit
+        self.assertEqual(rules(self.gap(0.25), "error"), ["MILL-GAP"])
+
+    def test_030_none(self):
+        self.assertEqual(rules(self.gap(0.30)), [])
 
     def test_045_none(self):
         self.assertEqual(rules(self.gap(0.45)), [])

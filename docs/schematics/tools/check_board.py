@@ -1,6 +1,6 @@
 """Board checks that KiCad DRC does not make (unplated, milled board). Make target: pcb-check.
 
-check(board) -> list[str] of problems. CLI: check_board.py <board> [--limits milling.toml --waivers milling_waivers.toml]
+check(board) -> list[str] of problems. CLI: check_board.py <board> [--limits <lab milling.toml> --waivers milling_waivers.toml]
 exit 1 if there is any problem. Runs with the python3 of the KiCad image.
 """
 import argparse
@@ -11,6 +11,7 @@ import pcbnew
 from pcbnew import FromMM, ToMM
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import lab  # noqa: E402
 import milling_check as mc  # noqa: E402
 import placement  # noqa: E402
 
@@ -248,7 +249,7 @@ def check_courtyards(board):
 def check(board, limits=None, waivers=None):
     problems = []
     # 1. F.Cu copper on a THT pad (open on an unplated board)
-    lim = limits or mc.load_limits(os.path.join(SCH_DIR, "milling.toml"))
+    lim = limits or mc.load_limits(lab.limits_file())
     ctx = mc.Ctx(board, lim)
     found = []
     mc.check_fcu_tht(ctx, found)
@@ -287,7 +288,7 @@ def check(board, limits=None, waivers=None):
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("board")
-    ap.add_argument("--limits", default=os.path.join(SCH_DIR, "milling.toml"))
+    ap.add_argument("--limits", default=lab.limits_file())
     ap.add_argument("--waivers", default=os.path.join(SCH_DIR, "milling_waivers.toml"))
     ap.add_argument("--widths", action="store_true", help="(default, kept for old calls) print the measured opening per path row")
     args = ap.parse_args(argv)

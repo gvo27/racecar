@@ -1,5 +1,6 @@
-# Lab config for rev A: milling limits, machine and lab inventory (Makera Carvera, in-house isolation milling).
-# This is the one file for lab facts. Maintain it with the skill .claude/skills/pcb-lab-config/SKILL.md.
+# Lab config: milling limits, machine and lab inventory (Makera Carvera, in-house isolation milling).
+# This is the one file for lab facts. Its directory is the lab directory: the pointer is the `lab:` line of
+# .claude/CLAUDE.md. Maintain it with the skill .claude/skills/pcb-lab-config/SKILL.md.
 # Every value has status = "confirmed" or "assumed" and a source.
 # Assumed values stay assumed until the lab tech confirms them. Do not change a limit to make a board pass.
 # Checked by tools/milling_check.py (make pcb-mill-check). Skill: .claude/skills/pcb-milling-check/SKILL.md
@@ -17,7 +18,7 @@ height = 101.6
 thickness = 1.57
 unit = "mm"
 status = "confirmed"
-source = "lab .f3z (Fusion stock 152.4 x 101.6 mm); owner 2026-11-12 (4x6 in blank, P22-465G); docs/schematics/example/README.md"
+source = "lab .f3z (Fusion stock 152.4 x 101.6 mm; Fusion Sketch1 6 x 4 in, example/fusion_export/, 2026-11-15); owner 2026-11-12 (4x6 in blank, P22-465G); example/README.md"
 
 # Dowel holes: bored in Setup A with the 3.175 mm end mill, for 4.0 mm pins. Centers from the stock lower-left corner.
 [dowel]
@@ -26,25 +27,18 @@ pin = 4.0
 centers = [[3.2766, 3.81], [149.1234, 3.81]]
 unit = "mm"
 status = "confirmed"
-source = "lab .f3z (Bore1 toolpath; hole 0.165 in; centers +-72.9234 / -46.99 from the stock center); owner 2026-11-12 (4.0 mm pins)"
+source = "lab .f3z (Bore1 toolpath; hole 0.165 in; centers +-72.9234 / -46.99 from the stock center); Fusion Measure and Sketch10 (owner 2026-11-15, example/fusion_export/): diameter 0.165 in, centers (0.129, 0.15) and (5.871, 0.15) in, distance 5.742 in; owner 2026-11-12 (4.0 mm pins)"
 
 # Isolation bits: cut width at depth d = tip + 2 * d * tan(angle / 2)
-# The lab bit is "0.1mm Tip Engraving" in the .f3z: tip 0.2 mm, Fusion taper 30. Fusion "taper" is the angle per side
-# in most tool dialogs, but the .f3z does not say which; both readings are checked (30 deg included, 60 deg included).
+# The lab bit is tool T2 "0.1mm Tip Engraving Metal": tip 0.2 mm, Fusion taper 30. Fusion "taper" is the angle per side
+# (from the tool axis), so the included angle is 60 deg. The 30 deg included reading was removed 2026-11-15.
 # Only bits the lab CAM uses are listed here. The 60deg/0.1 bit of the Makera pack is under [inventory.cam_tools].
-[[isolation_bit]]
-name = "30deg/0.2"
-angle_deg = 30.0
-tip_mm = 0.2
-status = "confirmed"
-source = "lab .f3z (tip 0.2, taper 30), read as 30 deg included angle; Makera PCB bit pack"
-
 [[isolation_bit]]
 name = "60deg/0.2"
 angle_deg = 60.0
 tip_mm = 0.2
 status = "confirmed"
-source = "lab .f3z (tip 0.2, taper 30), read as 30 deg per side = 60 deg included angle"
+source = "Fusion tool library export (owner 2026-11-15, example/fusion_export/tool_library.json: TA 30, tip-diameter 0.2, 'Inclusive angle' empty). The tool drawing (tool2_vbit_geometry.png) shows the cone from the 0.2 mm tip to the 3.175 mm shank in about 2.6 mm of length: 30 deg per side (30 deg included would need about 5.6 mm)"
 
 [cut_depth_min]
 value = 0.08
@@ -130,7 +124,7 @@ spindle_w = 200
 spindle_rpm_max = 15000
 collet = "1/8 in (3.175 mm) shank"
 tool_slots = 6
-cam = "Autodesk Fusion 360, post Carvera.cps, lab template docs/schematics/example/"
+cam = "Autodesk Fusion 360, post Carvera.cps, lab template example/ in the lab directory"
 unit = "mm"
 status = "confirmed"
 source = "model: owner, PR #3 2026-11-02 (Makera Carvera Standard) and lab .f3z (Carvera, 3 axes, Carvera.cps); work area, spindle, collet: makera.com/products/carvera and global.makera.com/products/carvera, read 2026-11-15; tool_slots: retailer listing (core-electronics.com.au), not from the Makera table"
@@ -153,10 +147,12 @@ status = "confirmed"
 source = "owner photo, PR #3 2026-11-02; owner 2026-11-12"
 
 [inventory.cam_tools]
-isolation = "chamfer mill '0.1mm Tip Engraving': tip 0.2 mm, taper 30 (Fusion value), 12000 rpm, feed 500, plunge 200"
+isolation = "T2 chamfer mill '0.1mm Tip Engraving Metal': tip 0.2 mm, taper 30 deg per side (60 deg included), shank 3.175 mm, 1 flute, carbide, 12000 rpm, feed 500, plunge 200, ramp 300 mm/min"
 drills_in_cam = [0.9, 1.0, 1.1]
-end_mill = "1/8 in flat (3.175 mm), 10000 rpm"
+end_mill = "T4 flat end mill '12mm Flute End Mill Metal': 3.175 mm, flute 12 mm, 1 flute, carbide; tool library: 12000 rpm, feed 500, plunge 200 (the Bore1 operation in the .f3z uses 10000 rpm)"
 available_not_in_cam = "Makera PCB bit pack: 60 deg V-bit, 0.1 mm tip (cut 0.192 mm at 0.08 mm depth). The lab CAM does not use it, so the milling check does not use it (removed from [[isolation_bit]] 2026-11-15, Fable review)."
-face = "0.3 mm tip, 15 degree 'solder mask removal' tool, stepover 0.2 mm"
+face = "T5 chamfer mill '0.3mm Tip Solder Mask Removal': tip 0.3 mm, taper 15 deg per side, 6000 rpm, feed 400, stepover 0.2 mm"
+setup_c = "Setup sheet (setup C, Fusion CAM 2706.1.17, 2026-11-15): 2D Contour4, 2D Contour5 (T2, min Z 0.055 in; model top 1.4859 mm = 0.0585 in, so about 0.08 mm deep at the 0.001 in rounding of the sheet), Face3 (T5); about 22 min"
+post = "Carvera.cps: not received (owner 2026-11-15). No NC code yet"
 status = "confirmed"
-source = "lab .f3z (docs/schematics/example/README.md)"
+source = "lab .f3z (example/README.md); Fusion tool library and setup sheet export (owner 2026-11-15, example/fusion_export/)"
