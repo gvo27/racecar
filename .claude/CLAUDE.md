@@ -18,7 +18,8 @@ cmd: make help
 hooks: .claude/hooks/hw_guard.{sh,py}  # PreToolUse guard (sh launcher -> .venv python, make dev-setup; no .venv => ask): asks before hardware (re)starts, denies driver edits/rebuilds while drivers runs
 plugins: .claude/settings.json  # superpowers, pyright-lsp, clangd-lsp, embedded-skills, ros2-engineering, asd-ste100, claude-md-management, code-simplifier, caveman, kicad-happy; no project mcp servers
 rules: .claude/rules/{hw-testing,drivers,firmware,dependencies,deploy,models,repos,claude-tooling,ros2,msgs,mcu_bridge,supervisor,calibration,tuning,rangefinder,writing,schematics}.md  # path-scoped, see paths: frontmatter
-agents: .claude/agents/ros2-reviewer.md  # review diffs vs rules + ros2-engineering refs + stop-path checklist
+agents: .claude/agents/{ros2-reviewer,pcb-designer,pcb-worker,pcb-reviewer}.md  # ros2-reviewer: review diffs vs rules + ros2-engineering refs + stop-path checklist; pcb-designer: main-session kicad lead (claude --agent pcb-designer), dispatches pcb-worker (iterate) + pcb-reviewer (read-only review)
+skills: .claude/skills/{sim-parity,pcb-lab-config,pcb-parts,pcb-design-check,pcb-milling-check}/SKILL.md  # pcb-*: lab file (docs/schematics/milling.toml), parts + bom, check matrix + lessons.md, mill limits
 invariants:
   - esp32 role: actuator pwm + host comms only; powers nothing
   - sensors on separate power rail, common ground, <=3.3v signals

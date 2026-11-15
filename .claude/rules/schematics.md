@@ -31,6 +31,12 @@ paths:
 - Rev A prototype is milled in-house on a Makera Carvera from 2 oz double-sided FR-4 (Kepro P22-465G, 4"×6", 152.4 x 101.6 mm): no plated holes; vias are LPKF EasyContac 0.8 mm rivets (drill 1.1 / pad 2.1 mm, OD 1.0 mm measured 2026-11-13; see `fab_handoff.md`); DRC clearance ≥0.4 mm; route THT connector pins on the bottom; board outline fits the stock.
 - Net classes live in `rc_power_board.kicad_pro`; clearance 0.4 mm all classes; HighCurrent 6.0, Power5A (`+5V_CPU`, `+5V_SENS`) 1.6, Power3A (`*+6V_BEC`) 1.0, Default 0.5 mm; DRC rules min clearance 0.4, track 0.5, via 2.0, annular 0.45, min hole 0.8; via 2.1/1.1 mm (EasyContac 0.8 mm rivet, OD 1.0 mm measured). `fab_handoff.md` matches the plan's net-class table for rev A; fab-house revisions restore the plan values.
 
+## Agents and skills (PCB work)
+- New board or a large change => start the main session as `claude --agent pcb-designer` (`.claude/agents/pcb-designer.md`): start questions, plan, owner approval of the plan, schematic loop, owner approval of the schematic, board loop, report. It dispatches `pcb-worker` (one task, iterate) and `pcb-reviewer` (read-only, independent). A session without `--agent` follows the same file.
+- Skills: `pcb-lab-config` (lab file `docs/schematics/milling.toml`: machine, bits, stock, rivets, limits), `pcb-parts` (part choice, datasheet notes, BOM fields, compatibility), `pcb-design-check` (check matrix, lessons in `lessons.md`), `pcb-milling-check` (board against the mill limits). A skill for fab-house rule compliance does not exist: use the kicad-happy skills `jlcpcb` and `pcbway`.
+- Environment: docker, make, the KiCad 10.0.8 image (`make kicad-image`), the Freerouting image, plugin kicad-happy. Optional: `ngspice`, `zstd`, distributor API keys. The list is in `pcb-designer.md`.
+- Review record: `docs/schematics/review/README.md` and `docs/schematics/review/fable_final/README.md`.
+
 ## Tooling (kicad-happy@kicad-happy)
 - Review/analysis => `kicad` skill; subcircuit checks => `spice` skill (needs ngspice); EMC once a PCB exists => `emc`.
 - Analyzer output goes to `docs/schematics/analysis/` (config `.kicad-happy.json`; per-run JSON gitignored, manifest tracked).

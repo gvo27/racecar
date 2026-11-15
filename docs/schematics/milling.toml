@@ -1,4 +1,5 @@
-# Milling limits for rev A (Makera Carvera, in-house isolation milling).
+# Lab config for rev A: milling limits, machine and lab inventory (Makera Carvera, in-house isolation milling).
+# This is the one file for lab facts. Maintain it with the skill .claude/skills/pcb-lab-config/SKILL.md.
 # Every value has status = "confirmed" or "assumed" and a source.
 # Assumed values stay assumed until the lab tech confirms them. Do not change a limit to make a board pass.
 # Checked by tools/milling_check.py (make pcb-mill-check). Skill: .claude/skills/pcb-milling-check/SKILL.md
@@ -123,3 +124,44 @@ value = 1.0
 unit = "mm"
 status = "assumed"
 source = "owner/main session 2026-11-11: each J* courtyard within 1.0 mm of the board edge (wire entry outward)"
+
+# ---- Machine and lab inventory (skill pcb-lab-config). The checks do not read these tables. ----
+# To move to a different machine or lab: change this file, then run make pcb-test pcb-check pcb-mill-check.
+[machine]
+manufacturer = "Makera"
+model = "Carvera (standard, not Carvera Air)"
+axes = 3
+work_area = [360.0, 240.0, 140.0]
+spindle_w = 200
+spindle_rpm_max = 15000
+collet = "1/8 in (3.175 mm) shank"
+tool_slots = 6
+cam = "Autodesk Fusion 360, post Carvera.cps, lab template docs/schematics/example/"
+unit = "mm"
+status = "confirmed"
+source = "model: owner, PR #3 2026-11-02 (Makera Carvera Standard) and lab .f3z (Carvera, 3 axes, Carvera.cps); work area, spindle, collet: makera.com/products/carvera and global.makera.com/products/carvera, read 2026-11-15; tool_slots: retailer listing (core-electronics.com.au), not from the Makera table"
+
+[inventory.rivets]
+kit = "LPKF EasyContac"
+sizes_label = [0.6, 0.8, 1.0, 1.2]
+od_measured = { "0.8" = 1.0, "1.0" = 1.45, "1.2" = 1.6 }
+setting_tool = true
+unit = "mm"
+status = "confirmed"
+source = "owner photo 2026-11-13 (kit and setting tool); owner caliper 2026-11-13 (OD on the shaft, old caliper, small error possible); the bag label is the inner diameter"
+
+[inventory.blanks]
+part = "Kepro P22-465G"
+copper_oz = 2
+sides = 2
+size_in = [4, 6]
+status = "confirmed"
+source = "owner photo, PR #3 2026-11-02; owner 2026-11-12"
+
+[inventory.cam_tools]
+isolation = "chamfer mill '0.1mm Tip Engraving': tip 0.2 mm, taper 30 (Fusion value), 12000 rpm, feed 500, plunge 200"
+drills_in_cam = [0.9, 1.0, 1.1]
+end_mill = "1/8 in flat (3.175 mm), 10000 rpm"
+face = "0.3 mm tip, 15 degree 'solder mask removal' tool, stepover 0.2 mm"
+status = "confirmed"
+source = "lab .f3z (docs/schematics/example/README.md)"

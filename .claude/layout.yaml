@@ -37,6 +37,14 @@ paths:
   .claude/: {role: CLAUDE.md, layout.yaml, rules/*.md, agents/*.md, settings.json}
   .claude/rules/rangefinder.md: {role: rangefinder wiring, names, invariants, sensor-swap recipe; links all rangefinder docs, rules: .claude/rules/claude-tooling.md, phase: 4}
   .claude/agents/ros2-reviewer.md: {role: project subagent; reviews diffs vs rules + ros2-engineering refs + stop-path checklist, phase: 2}
+  .claude/agents/pcb-designer.md: {role: "main-session agent for kicad schematic + board work (claude --agent pcb-designer): intake questions, plan, owner gates (plan, schematic), worker + review loop, report", rules: .claude/rules/schematics.md, phase: 1}
+  .claude/agents/pcb-worker.md: {role: project subagent; one bounded kicad task for the pcb-designer loop; reports diff + check output, rules: .claude/rules/schematics.md, phase: 1}
+  .claude/agents/pcb-reviewer.md: {role: project subagent; read-only review of schematic, board, bom, fab outputs; punch list with evidence, rules: .claude/rules/schematics.md, phase: 1}
+  .claude/skills/pcb-lab-config/: {role: project skill; keeps the lab file docs/schematics/milling.toml (machine, bits, stock, rivets, limits; status + source per value), phase: 1}
+  .claude/skills/pcb-parts/: {role: project skill; part choice, datasheet notes (docs/datasheets), bom in symbol fields (make bom), compatibility checks, phase: 1}
+  .claude/skills/pcb-design-check/: {role: project skill; check matrix (schematic, board, parts, fab outputs, principles) + lessons.md (lessons of the rev A board), phase: 1}
+  .claude/skills/pcb-milling-check/: {role: project skill; board vs the mill limits (make pcb-mill-check), phase: 1}
+  docs/schematics/milling.toml: {role: "lab file: milling limits + machine + lab inventory; one source for lab facts", rules: .claude/skills/pcb-lab-config/SKILL.md, phase: 1}
   .claude/settings.json: {role: project claude plugins + mcp enablement, rules: [.claude/rules/dependencies.md, .claude/rules/claude-tooling.md], phase: 1}
   pyrightconfig.json: {role: pyright-lsp config (include rccar_* + deploy; missing imports = warning since rclpy/rccar_msgs only exist in the ROS image), location: repo root (required), rules: .claude/rules/claude-tooling.md, phase: 1}
   firmware/esp32/.clangd: {role: clangd flags for xtensa; db from make compiledb (gitignored compile_commands.json, .pio-core/), rules: .claude/rules/claude-tooling.md, phase: 1}
