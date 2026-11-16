@@ -5,6 +5,12 @@ rot = KiCad orientation in degrees (counter-clockwise, seen from the top) applie
 BEFORE the part is flipped to its side. Side "F" = top (THT), "B" = bottom (SMD). A part on "B" is flipped
 left-right about its origin.
 """
+import os
+import sys
+import tomllib
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import lab  # noqa: E402
 
 OUTLINE_W = 66.0
 OUTLINE_H = 140.0
@@ -123,7 +129,7 @@ JUMPERS = [
 STITCH_VIAS = []
 
 # Holes larger than the largest drill (2.0 mm) that the mill bores with the 3.175 mm end mill: (ref, hole mm).
-# A bored hole is at least milled_hole_min (3.3 mm, milling.toml); holes between 2.0 and 3.3 mm cannot be made.
+# A bored hole is at least milled_hole_min (lab milling.toml); holes between 2.0 and 3.3 mm cannot be made.
 # H1 to H4: M3 clearance. J1: 12 AWG wire pads (pad 4.4 mm, ring 0.5 mm). F1: locating peg of the FLR 178.6165 holder;
 # the library hole is 2.4 mm, the peg size is not confirmed (datasheet not reachable), so it is a loose 3.4 mm locator hole.
 MILLED_HOLES = [
@@ -133,11 +139,13 @@ MILLED_HOLES = [
 ]
 
 # ---- lab frame (Task 9) ----------------------------------------------------------------------------------------
-# Stock and dowels of the lab's Fusion 360 template (docs/schematics/example/README.md; milling.toml [stock], [dowel]).
-# Stock coordinates: origin = stock lower-left corner, x along the long side (152.4 mm), y along the short side.
-STOCK = (152.4, 101.6)
-DOWEL_DIA = 4.191
-DOWELS = [(3.2766, 3.81), (149.1234, 3.81)]
+# Stock and dowels of the lab's Fusion 360 template: milling.toml [stock], [dowel] in the lab directory (lab.py).
+# Stock coordinates: origin = stock lower-left corner, x along the long side, y along the short side.
+with open(lab.limits_file(), "rb") as _fh:
+    _LAB = tomllib.load(_fh)
+STOCK = (_LAB["stock"]["width"], _LAB["stock"]["height"])
+DOWEL_DIA = _LAB["dowel"]["diameter"]
+DOWELS = [tuple(c) for c in _LAB["dowel"]["centers"]]
 
 # The board is turned 90 degrees counter-clockwise (top view) and centered on the stock: the board's long side (140 mm)
 # runs along stock x, with 6.2 mm at each end and 17.8 mm at each long side. The board's +y end (top, J14 side) then

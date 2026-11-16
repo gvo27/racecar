@@ -1,9 +1,9 @@
 """Milling check for the power board (Makera Carvera isolation milling).
 
 DRC-clean does not mean CNC-millable. Rule ids and groups: .claude/skills/pcb-milling-check/SKILL.md
-Limits: docs/schematics/milling.toml. Waivers: docs/schematics/milling_waivers.toml.
+Limits: milling.toml in the lab directory (lab.py; pointer `lab:` in .claude/CLAUDE.md). Waivers: docs/schematics/milling_waivers.toml.
 
-CLI: milling_check.py <board> --limits <toml> [--waivers <toml>] --json <out>
+CLI: milling_check.py <board> [--limits <toml>] [--waivers <toml>] --json <out>
 Exit: 0 = no unwaived error, 1 = unwaived errors (MILL-DEPTH counts), 2 = the check could not run.
 Runs with the python3 of the KiCad image (pcbnew).
 """
@@ -16,6 +16,8 @@ from dataclasses import dataclass
 
 import pcbnew
 from pcbnew import FromMM, ToMM
+
+import lab
 
 # Finding = (rule_id, severity "error"|"warning", where, value, limit, message)
 FORBIDDEN_WAIVERS = ("MILL-FCU-THT", "MILL-RIVET-ACCESS")
@@ -470,12 +472,12 @@ def run(board_path, limits_path, waivers_path=None):
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("board")
-    ap.add_argument("--limits", required=True)
+    ap.add_argument("--limits", default=None, help="default: milling.toml in the lab directory (lab.py)")
     ap.add_argument("--waivers")
     ap.add_argument("--json")
     args = ap.parse_args(argv)
     try:
-        findings, groups = run(args.board, args.limits, args.waivers)
+        findings, groups = run(args.board, args.limits or lab.limits_file(), args.waivers)
     except Exception as exc:  # noqa: BLE001 - exit 2 = the check could not run
         print("milling-check: cannot run: %s" % exc, file=sys.stderr)
         return 2

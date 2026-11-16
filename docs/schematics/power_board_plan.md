@@ -120,10 +120,10 @@ Worst case, the board's battery input carries about **8.4 A** into the two switc
 | +5V\_SENS | Slamtec Mapper M2M1 lidar (J11) | 0.75 A typ, 1.3 A max; 1.4 to 1.6 A for a few seconds at startup (datasheet) | Ripple 50 mV max: C9 bulk cap right at J11; USB-A pigtail harness |
 | `+5V_SENS` | Radar (removed from scope) | TBD | Model not chosen |
 | `+5V_SENS` | 3.3 V LDO input | 0.3 A | An LDO draws the same current it delivers |
-| `+5V_SENS` | **Rail total** | **4.6 A (4.9 A at Mapper startup)** | Pick a buck rated 6 A (Pololu D36V50F5, owner 2026-11-12: about 7.4 A at 6 V in) |
+| `+5V_SENS` | **Rail total** | **4.6 A (4.9 A at Mapper startup)** | Pick a buck rated 6 A (Pololu D36V50F5, owner 2026-11-12: about 7.4 A at 6.6 V in, where the graph curve starts, and about 7.7 A at 8.4 V in) |
 | `+3V3_SENS` | IMU | < 0.02 A (approx.) | Noise-sensitive; the reason for the LDO |
 | `+3V3_SENS` | Shaft encoder | < 0.05 A (approx.) |  |
-| `+3V3_SENS` | **Rail total** | **0.3 A (TBD)** | LDO heat at 0.3 A: (5 − 3.3) × 0.3 ≈ 0.5 W |
+| `+3V3_SENS` | **Rail total** | **0.3 A (TBD)** | LDO heat at 0.3 A: (5 − 3.3) × 0.3 ≈ 0.5 W. FLAG (review 2026-11): keep the load at 0.15 A or less until U3 has more copper or the load is measured (0.3 A gives about 0.57 W, about +105 K in SOT-25 per the Diodes datasheet, not archived in the repo) |
 | ESC BEC (off-board) | DS3225MG servo | 2.3 A stall at 6.8 V (datasheet) | Fed by the ESC's 6 V / 3 A output |
 | `VBAT` | ESC + motor (off-board, own 12 AWG leads) | 20 A | Peaks may exceed this briefly |
 | `VBAT` | Two regulators' inputs | 8.4 A at 6.4 V in | U1 4.4 A + U2 4.0 A, at 90 % efficiency |

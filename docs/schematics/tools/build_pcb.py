@@ -17,15 +17,16 @@ import pcbnew
 from pcbnew import FromMM, ToMM, VECTOR2I
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import lab  # noqa: E402
 import placement  # noqa: E402
 
 SCH_DIR = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 SCHEMATIC = "rc_power_board.kicad_sch"
 BOARD_FILE = "rc_power_board.kicad_pcb"
 FP_DIR = os.environ.get("KICAD10_FOOTPRINT_DIR", "/usr/share/kicad/footprints")
-LIMITS_FILE = os.path.join(SCH_DIR, "milling.toml")
+LIMITS_FILE = lab.limits_file()
 with open(LIMITS_FILE, "rb") as _fh:
-    DRILL_SET = sorted(tomllib.load(_fh)["drill_set"]["value"])  # owner's bit set (milling.toml)
+    DRILL_SET = sorted(tomllib.load(_fh)["drill_set"]["value"])  # owner's bit set (lab milling.toml)
 VIA_DRILL, VIA_PAD = 1.1, 2.1  # EasyContac 0.8 rivet
 ANNULAR_MIN = 0.45
 COPPER_MM = 0.070

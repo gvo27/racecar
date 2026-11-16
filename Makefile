@@ -180,9 +180,9 @@ pcb-check: _kicad-cfg  ## DRC (with schematic parity) + board checks + milling c
 pcb-review: _kicad-cfg  ## write review/: drc.json, milling_check.json, layer PDF, 1:1 PDF
 	$(KICAD_RUN) python3 tools/review_plots.py
 
-pcb-mill-check: _kicad-cfg  ## milling check of the board vs the Carvera limits (milling.toml, waivers); exit 1 = unwaived errors
+pcb-mill-check: _kicad-cfg  ## milling check of the board vs the lab limits (milling.toml in the lab directory, waivers); exit 1 = unwaived errors
 	@mkdir -p "$(CURDIR)/$(SCH_DIR)/review"
-	$(KICAD_RUN) python3 tools/milling_check.py rc_power_board.kicad_pcb --limits milling.toml \
+	$(KICAD_RUN) python3 tools/milling_check.py rc_power_board.kicad_pcb \
 	  --waivers milling_waivers.toml --json review/milling_check.json
 
 pcb-fab: _kicad-cfg  ## DXF (F.Cu, B.Cu, Edge.Cuts), Excellon and drill-map DXF for the lab's Fusion 360 template -> docs/schematics/fab/, then test_fab

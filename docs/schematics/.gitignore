@@ -8,3 +8,6 @@ fp-info-cache
 analysis/*/
 datasheets/*.pdf
 spice/
+# core dumps of the tools (python3 in the KiCad image)
+core
+core.[0-9]*

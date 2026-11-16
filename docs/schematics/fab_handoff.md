@@ -4,16 +4,13 @@ For the owner doing layout. Parts: `bom.csv` and `bom_offboard.csv` (made by `ma
 
 # A. Prototype rev A: in-house CNC (Makera Carvera)
 
-V-bit isolation milling in the lab's calibrated Fusion 360 template (`example/README.md`), with DXF and Excellon files from `make pcb-fab` (`fab/README.md`). The board is not fabricated by a fab house for this revision.
+V-bit isolation milling in the lab's calibrated Fusion 360 template (`example/` in the lab directory ([`lab:` in `.claude/CLAUDE.md`](../../.claude/CLAUDE.md))), with DXF and Excellon files from `make pcb-fab` (`fab/README.md`). The board is not fabricated by a fab house for this revision.
 
 ## Stock and tools
 
 - **Stock:** Kepro P22-465G FR-4, 2 oz Cu, double-sided, 4" x 6" x 0.062" (101.6 x 152.4 x 1.57 mm), lab stock (owner, 2026-11-12). The earlier 3" x 6" blank (P22-365G, 76.2 x 152.4 mm) is also in stock but is too small for the dowel line of the lab template. The blank is even (depth error 0, owner). Scrub oxide off before milling. 2 oz matches the trace-width plan, so the 2 oz columns below apply directly. Other lab stock: generic double-sided 10 x 15 cm, 10 pcs, copper weight TBD (likely 1 oz): not for this board.
-- **Lab tools (from the lab .f3z and the owner's photos):**
-  - Isolation: 1 contour pass, 0.08 mm deep, chamfer mill with 0.2 mm tip (Fusion taper 30). Copper is 0.070 mm, so the margin is 0.01 mm. The lab tech accepts this margin (2026-11-13); if necessary, the lab adds a second, deeper pass in the CAM file. Cut width at depth: 0.243 mm (30 degrees included) or 0.292 mm (60 degrees included); the 0.4 mm design clearance passes both.
-  - Drill bits: 0.1 to 2.0 mm in 0.1 mm steps (owner inventory). The lab CAM uses 0.9, 1.0 and 1.1 mm.
-  - End mill: one, 3.175 mm (1/8 in). It bores the dowel holes. A hole of 2.0 to 3.3 mm cannot be made.
-  - Dowels: 2 holes of 4.191 mm for 4.0 mm pins, at (3.2766, 3.81) and (149.1234, 3.81) mm from the stock lower-left corner.
+- **Lab tools, cut depth, drill set, end mill and dowels:** the lab file (`milling.toml` in the lab directory ([`lab:` in `.claude/CLAUDE.md`](../../.claude/CLAUDE.md))). The values there have a status and a source. Do not copy them here.
+  - For this board: the isolation bit cuts 0.292 mm wide at the lab depth (Fusion taper 30 = 30 degrees per side, confirmed 2026-11-15 from the Fusion tool export). The 0.4 mm design clearance passes. The smallest gap on the board is 0.35 mm (U3 pads).
 - **Makera PCB Fabrication Pack:** 2x 1/8" 60° 0.1 mm-tip V-bit, 2x 1/8" 30° 0.2 mm-tip V-bit, 20x milling/drilling bits, dowel pins, UV solder-mask paint. The lab CAM uses only the 0.2 mm tip V-bit.
 - **Fixturing:** rigid flat; double-sided tape on a flat sacrificial board.
 
@@ -59,14 +56,14 @@ The project DRC rules in `rc_power_board.kicad_pro` are set to match: `min_clear
 - **J1 wire pads:** hole 3.4 mm (was 3.0 mm), pad 4.4 mm, annular ring 0.5 mm. The 12 AWG conductor (about 2.05 mm) is loose in the hole.
 - **Frame:** the board is turned 90 degrees and centered on the stock; the two dowel holes are outside the board. Details and file list: `fab/README.md`.
 - **Outline:** 66 x 140 mm, drill/place origin at the lower-left corner. The U1 and U2 bodies (25.4 x 25.4 mm) lie inside it: U2 x 8.0 to 33.4, y 22.3 to 47.7; U1 x 36.0 to 61.4, y 22.3 to 47.7 (mm from the origin). Stackup: 2 layers, 0.070 mm copper, 1.57 mm total.
-- **Layers:** SMD parts on B.Cu, THT parts on F.Cu. Routing on B.Cu. `VBAT_RAW`, `VBAT` and GND are B.Cu zones. The F.Cu GND pour has pad connection "none" and joins B.Cu GND through one rivet via. F.Cu has one jumper track (`U1_PG`, U1.1 to J5.1, about 75 mm) on two rivet vias. The I2C jumpers of the first layout are removed. No F.Cu copper touches a THT pad (check in `make pcb-check`).
+- **Layers:** SMD parts on B.Cu, THT parts on F.Cu. Routing on B.Cu. `VBAT_RAW`, `VBAT` and GND are B.Cu zones. The F.Cu GND pour has pad connection "none" and joins B.Cu GND through one rivet via. F.Cu has one jumper track (`U1_PG`, U1.1 to J5.1, about 39 mm) on two rivet vias. The I2C jumpers of the first layout are removed. No F.Cu copper touches a THT pad (check in `make pcb-check`).
 - **Rivet vias: 3** (2 for the `U1_PG` jumper, 1 GND stitching). No via is inside a part courtyard (a rivet needs both sides soldered).
 - **Make targets:** `make kicad-image erc pcb-build pcb-route pcb-check pcb-mill-check pcb-review pcb-test`. Details: `review/README.md`.
 - **U3 rule:** `rc_power_board.kicad_dru` rule `U3_fine` sets 0.3 mm clearance for U3 pads against pads, tracks and vias. The pour keeps 0.4 mm.
 
 ## Vias: LPKF EasyContac rivets
 
-No plated through-holes. Vias are **LPKF EasyContac** through-hole rivets from the lab kit (owner photo 2026-11-13: bags 0.6 / 0.8 / 1.0 / 1.2 mm and a setting tool; this photo is the reference for rivets, not the lab .f3z). The bag label is the inner diameter (owner caliper 2026-11-13, measured on the shaft: 0.8 bag 1.0 mm, 1.0 bag 1.45 mm, 1.2 bag 1.6 mm OD (old caliper, small error possible)). Press each rivet with the kit's setting tool, then **solder both sides**. Max board thickness for rivets is 1.6 mm (stock 1.57 mm OK). Sizes from the Vanderbilt design-guide table for LPKF EasyContac (https://my.vanderbilt.edu/daniel/?p=200); the LPKF US store lists outer diameters 0.8 / 1.0 / 1.4 / 1.6 mm, inner 0.2-0.4 mm smaller. The owner's caliper values match the outer diameters in the table (1.0 bag: 1.45 mm measured vs 1.4 mm in the table). The collar is the wider face on one end; the setting tool flares the other end.
+No plated through-holes. Vias are **LPKF EasyContac** through-hole rivets from the lab kit (owner photo 2026-11-13: bags 0.6 / 0.8 / 1.0 / 1.2 mm and a setting tool; this photo is the reference for rivets, not the lab CAM file). The bag label is the inner diameter (owner caliper 2026-11-13, measured on the shaft: 0.8 bag 1.0 mm, 1.0 bag 1.45 mm, 1.2 bag 1.6 mm OD (old caliper, small error possible)). Press each rivet with the kit's setting tool, then **solder both sides**. Max board thickness for rivets is 1.6 mm (stock 1.57 mm OK). Sizes from the Vanderbilt design-guide table for LPKF EasyContac (https://my.vanderbilt.edu/daniel/?p=200); the LPKF US store lists outer diameters 0.8 / 1.0 / 1.4 / 1.6 mm, inner 0.2-0.4 mm smaller. The owner's caliper values match the outer diameters in the table (1.0 bag: 1.45 mm measured vs 1.4 mm in the table). The collar is the wider face on one end; the setting tool flares the other end.
 
 | Rivet (inner) | Outer | Drill | Collar |
 | --- | --- | --- | --- |
@@ -116,6 +113,7 @@ Solder each THT pin on every layer where it has copper. JST XH shrouds and screw
 
 - **No solder mask or silkscreen by default.** Optional: Makera UV solder-mask paint; otherwise tin or lacquer the copper. Mark pin 1 and polarity by milling text in copper or with a marker.
 - **Before populating:** continuity check every net against the netlist; check for shorts across adjacent isolation cuts (especially U3, J5).
+- **RISK, owner decision, not yet approved: bare copper.** The milled board has bare copper on both faces. B.Cu `VBAT_RAW` is before the fuse and faces the chassis. The F.Cu GND pour is about 0.74 mm under the parts on the module underside (the parts sit 1.8 mm below the module PCB and the header spacer is 2.54 mm: check the real spacer). Proposal: insulating lacquer or sheet on B.Cu, standoffs of 5 mm or more under the board, Kapton tape on F.Cu under U1 and U2, and the modules only on headers, never flush on the board. This note changes the "optional" text above if the owner accepts it.
 - **Open items:** lab tech to confirm bit diameters (incl. a 1.1 mm bit for the rivet holes); U3 option.
 
 ## Layout
@@ -228,7 +226,7 @@ Not the rev A path. Essentials if the board goes to a fab house:
 
 1. F1: 15 A decided by the load (ATO/ATC blade in FLR holder assumed).
 2. Reverse-polarity decision: the proposal (P-FET) is in the PR, not on the board.
-3. U2 = Pololu D36V50F5, the same part as U1 (owner 2026-11-12; two modules owned). Footprint `rc_power:Pololu_D36V50Fx` from the Pololu drawing: VIN, VOUT and GND each use a pin pair (about 2.45 A per VOUT pin at 4.9 A). About 7.4 A at 6 V in (Pololu graph), so the 6 A need is met. Dropout about 1.0 V at 5 A: the output can fall below 5 V near the 6.0 V cutoff. Check the footprint against the real module (1:1 print) before milling. Details: `docs/datasheets/regulator_pololu_d36v50f5.md`. Verify >= 4.8 V at the Mapper during startup (U2 tolerance TBD, about 0.03-0.05 V pigtail drop at 1.6 A).
+3. U2 = Pololu D36V50F5, the same part as U1 (owner 2026-11-12; two modules owned). Footprint `rc_power:Pololu_D36V50Fx` from the Pololu drawing: VIN, VOUT and GND each use a pin pair (about 2.45 A per VOUT pin at 4.9 A). About 7.4 A at 6.6 V in, where the graph curve starts (no data below 6.6 V), and about 7.7 A at 8.4 V in (Pololu graph), so the 6 A need is met from 6.6 V to 8.4 V in. Below 6.6 V the dropout decides: about 1.0 V at 5 A, so 5 A needs about 6.0 V in and the output can fall below 5 V near the 6.0 V cutoff. The same dropout applies to U1 (`+5V_CPU`): the Pi can brown out (bench check in `docs/datasheets/regulator_pololu_d36v50f5.md`). Check the footprint against the real module (1:1 print) before milling. Details: `docs/datasheets/regulator_pololu_d36v50f5.md`. Verify >= 4.8 V at the Mapper during startup (U2 tolerance TBD, about 0.03-0.05 V pigtail drop at 1.6 A).
 4. All `TBD` values in the schematic.
 5. U1 EN stays unconnected until the rev 2 prototype board.
 6. I2C pull-ups: bus is pulled up only by the Garmin's internal 13 kΩ; consider two DNP 0805 4.7-10 kΩ pull-up footprints to `+3V3_SENS` for a future IMU. Not drawn.

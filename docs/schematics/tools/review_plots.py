@@ -15,6 +15,7 @@ import subprocess
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import lab  # noqa: E402
 import drc_summary  # noqa: E402
 import milling_check as mc  # noqa: E402
 
@@ -39,7 +40,7 @@ def main(argv=None):
     run(["kicad-cli", "pcb", "export", "pdf", "--mode-single", "--layers", "Edge.Cuts,F.Fab,B.Fab", "--scale", "1",
          "--sketch-pads-on-fab-layers", "--drill-shape-opt", "2", "--black-and-white",
          "-o", os.path.join(args.out, "rc_power_board_1to1.pdf"), args.board])
-    findings, groups = mc.run(args.board, os.path.join(SCH_DIR, "milling.toml"), os.path.join(SCH_DIR, "milling_waivers.toml"))
+    findings, groups = mc.run(args.board, lab.limits_file(), os.path.join(SCH_DIR, "milling_waivers.toml"))
     ser = {k: [list(f) for f in v] for k, v in groups.items() if k != "waived"}
     ser["waived"] = [{"finding": list(f), "waiver": w} for f, w in groups["waived"]]
     with open(os.path.join(args.out, "milling_check.json"), "w", encoding="utf-8") as fh:

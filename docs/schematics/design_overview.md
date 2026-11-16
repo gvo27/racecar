@@ -28,13 +28,13 @@ Netlist: 40 parts, 21 nets. Schematic: `rc_power_board.kicad_sch` / `.pdf` (KiCa
 
 ## Sensor 5 V (D)
 
-- **U2, 5 V buck ≥ 6 A** (Pololu D36V50F5, same part as U1, owner 2026-11-12; about 7.4 A at 6 V in, about 8 A at 8.4 V in; dropout about 1.0 V at 5 A, so the output can sag below 5 V near the 6.0 V cutoff: bench check; `bom.md`). Feeds Mapper, LIDAR-Lite v4, camera hub, LDO.
+- **U2, 5 V buck ≥ 6 A** (Pololu D36V50F5, same part as U1, owner 2026-11-12; about 7.4 A at 6.6 V in, where the graph curve starts (no data below 6.6 V), and about 7.7 A at 8.4 V in; dropout about 1.0 V at 5 A, so 5 A needs about 6.0 V in and the output can sag below 5 V near the 6.0 V cutoff: bench check; `bom.md`). The same dropout applies to U1: `+5V_CPU` can fall near 6.0 V or when the ESC pulls the pack down, and the Pi can brown out (C1 gives almost no hold-up: 470 uF x 0.5 V / 9 A is about 26 us). Feeds Mapper, LIDAR-Lite v4, camera hub, LDO.
 - **J11 Slamtec Mapper M2M1.** Harness: XH to 22 AWG 3 A USB-A pigtail (pin 1 `+5V_SENS` red, 2 GND black); never from Pi USB or the pack. 0.75 A typ, 1.3 A max, 1.4–1.6 A startup; ripple ≤ 50 mV. C9 (≥ 100 µF low-ESR, TBD) sits right at J11.
 - **J8 Garmin LIDAR-Lite v4, one 4-pin XH header.** Pins match Garmin 1–4: 1 `+5V_SENS` (red; 4.75–5.25 V, 85 mA acquiring), 2 GND (black), 3 `I2C_SDA` (white), 4 `I2C_SCL` (green); address 0x62. Internal 13 kΩ pull-ups to 3.3 V: no external pull-ups. One keyed header (not 2×2-pin) so it can't be cross-plugged; harness is straight-through.
 
 ## Sensor 3.3 V (E)
 
-- **U3, AP2112K-3.3 LDO from `+5V_SENS`.** 3.3 V for IMU and shaft encoder; 0.3 A, ≈ 0.5 W.
+- **U3, AP2112K-3.3 LDO from `+5V_SENS`.** 3.3 V for IMU and shaft encoder; budget 0.3 A, ≈ 0.5 W. **FLAG, U3 thermal:** keep `+3V3_SENS` at 0.15 A or less until U3 has more copper or the load is measured. 0.3 A gives about 0.57 W, about +105 K in SOT-25 (theta JA 184 C/W, Tj max 150 C, per the Diodes datasheet, not archived in the repo). The known loads (IMU < 0.02 A, encoder < 0.05 A, D4 about 2 mA) are about 0.07 A, about 0.13 W, about +24 K.
 - **FB1 + C6 LC filter (optional).** Attenuates U2 ripple before the LDO.
 
 ## Across the board
@@ -64,3 +64,4 @@ Netlist: 40 parts, 21 nets. Schematic: `rc_power_board.kicad_sch` / `.pdf` (KiCa
 5. J1 pad size for 12 AWG; module footprints for U1 and U2.
 6. I2C pull-ups: only the Garmin's internal 13 kΩ pulls up the bus; consider two DNP 0805 4.7–10 kΩ footprints to `+3V3_SENS` for a future IMU. Not drawn.
 7. U3 footprint vs V-bit clearance: AP2112K SOT-23-5 pad gap about 0.35 mm < 0.4 mm DRC. Custom narrower pads (gap about 0.45 mm), mill with the 60°/0.1 mm bit, or a local DRC exception.
+8. Brown-out policy at low pack voltage: VBAT sense to the ESP32, or a throttle limit when `U1_PG` goes low? (Owner question.)

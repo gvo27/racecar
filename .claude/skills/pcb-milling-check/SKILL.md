@@ -1,16 +1,16 @@
 ---
 name: pcb-milling-check
-description: Use when a .kicad_pcb in docs/schematics/ is created, changed, re-routed or reviewed, or before any claim that the power board is millable. Checks the board against the Makera Carvera isolation-milling limits (V-bit cut width at depth, copper gaps, drill set, annular ring, unplated-hole rules, slivers, islands). DRC-clean does not mean CNC-millable.
+description: Use when a .kicad_pcb in docs/schematics/ is created, changed, re-routed or reviewed, or before any claim that the power board is millable. Checks the board against the isolation-milling limits of the lab mill (V-bit cut width at depth, copper gaps, drill set, annular ring, unplated-hole rules, slivers, islands). DRC-clean does not mean CNC-millable.
 ---
 
-# PCB milling check (rev A, Makera Carvera)
+# PCB milling check (in-house isolation milling)
 
 KiCad DRC checks the numbers in `rc_power_board.kicad_pro` and `.kicad_dru`. It does not know the cutter. This skill checks the board against the tool that removes the copper.
 
 ## Run
 - `make pcb-mill-check`. The check runs `docs/schematics/tools/milling_check.py` in the pinned KiCad 10 image.
 - Output: `docs/schematics/review/milling_check.json` and a text summary. Exit code 0 = no errors, 1 = errors, 2 = the check could not run.
-- Limits: `docs/schematics/milling.toml`. Every value there is `confirmed` or `assumed`. Assumed values stay assumed until the lab tech confirms them. Do not change a limit to make a board pass.
+- Limits: `milling.toml` in the lab directory (`lab:` in `.claude/CLAUDE.md`). Every value there is `confirmed` or `assumed`. Assumed values stay assumed until the lab tech confirms them. Do not change a limit to make a board pass. To add or change a lab fact (machine, bits, stock, depth), use the skill `pcb-lab-config`.
 
 ## What it checks (rule ids)
 | Id | Check | Severity |

@@ -19,7 +19,7 @@ Status: **both regulators on the board** (owner decision 2026-11-12). The owner 
 | input voltage | 5.5 to 50 V (limited by dropout at the low end) |
 | output voltage | 5 V, +-4 % |
 | continuous output current | 5.5 A typical |
-| max continuous current vs VIN (graph, no heat sink or air flow) | about 7.4 A at 6 V in, about 8 A at 8.4 V in |
+| max continuous current vs VIN (graph, no heat sink or air flow) | Vout = 5 V curve starts at about 6.6 V in with about 7.4 A (no data below 6.6 V), about 7.7 A at 8.4 V in, about 8.2 A at 12 V in |
 | dropout | about 1.0 V at 5 A (graph) |
 | reverse-voltage protection | to 40 V |
 | header pin current | 3 A per pin |
@@ -35,8 +35,9 @@ Status: **both regulators on the board** (owner decision 2026-11-12). The owner 
 
 ## fit to this board
 - **U1 (`+5V_CPU`):** Pi 5 and ESP32, about 5.5 A budget. EN and VRP not connected. PG goes to J5.1.
-- **U2 (`+5V_SENS`):** 4.6 A running, 4.9 A at Mapper startup. The graph shows about 7.4 A at 6 V in and about 8 A at 8.4 V in, so the rule "U2 >= 6 A" is met at 6-8.4 V in. EN, VRP and PG not connected.
+- **U2 (`+5V_SENS`):** 4.6 A running, 4.9 A at Mapper startup. The graph curve starts at about 6.6 V in (about 7.4 A) and reads about 7.7 A at 8.4 V in, so the rule "U2 >= 6 A" is met by the graph from 6.6 V to 8.4 V in. Below 6.6 V the graph has no data and the dropout decides: about 1.0 V at 5 A, so 5 A needs about 6.0 V in. EN, VRP and PG not connected.
 - **Dropout risk at the 6.0 V cutoff:** the dropout is about 1.0 V at 5 A. At the 2S cutoff (6.0 V) the output can fall below 5 V, and the Mapper needs at least 4.8 V. **Bench check:** measure the voltage at J11 during Mapper startup with the pack near 6.0 V.
+- **Brown-out risk on U1 (`+5V_CPU`):** the same dropout applies to U1 (budget 5.5 A, Pi 5 and ESP32). Near the 6.0 V cutoff, and when the ESC pulls the pack voltage down under throttle, `+5V_CPU` can fall and the Pi can brown out. C1 (470 uF, proposed) gives almost no hold-up: 470 uF x 0.5 V / 9 A is about 26 us. **Bench check:** log `VBAT` at J1 and `+5V_CPU` at J6 under throttle with the pack near 6.5 V. Policy question for the owner: `design_overview.md`, decision 8.
 - **Ripple:** not published (**TBD**). C9 (>= 100 uF low-ESR) at J11 stays.
 - **Pin current:** VIN, VOUT and GND each use a pin pair (3 A per pin). U2 VOUT at 4.9 A is about 2.45 A per pin. U2 VIN is about 2.1 A per pin at 6.0 V in.
 - **Standoff (open check):** the module has parts 1.8 mm below its PCB. The F.Cu GND pour is under the module and has no solder mask on the milled board. Check the module standoff on the real header (1:1 print and a mock-up) before milling.
