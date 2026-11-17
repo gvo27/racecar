@@ -15,12 +15,15 @@ import pcbnew
 from pcbnew import ToMM
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-SCH_DIR = os.path.normpath(os.path.join(HERE, ".."))
 sys.path.insert(0, HERE)
+sys.path.insert(1, os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "pcb", "tools")))  # lab.py, paths.py, placement.py
 import lab  # noqa: E402
+import paths  # noqa: E402
 import fab_export  # noqa: E402
 import milling_check as mc  # noqa: E402
 import placement  # noqa: E402
+
+SCH_DIR = paths.board_dir()
 
 BOARD = os.path.join(SCH_DIR, "rc_power_board.kicad_pcb")
 
@@ -394,7 +397,7 @@ class TestCommitted(unittest.TestCase):
         for name in fab_export.FILES:
             with self.subTest(name):
                 with open(os.path.join(SCH_DIR, "fab", name), "rb") as a, open(os.path.join(d, name), "rb") as b:
-                    self.assertEqual(a.read(), b.read(), "run make pcb-fab and commit docs/schematics/fab/")
+                    self.assertEqual(a.read(), b.read(), "run make pcb-fab and commit the fab/ directory of the board")
 
 
 if __name__ == "__main__":

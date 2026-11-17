@@ -18,9 +18,10 @@ from pcbnew import FromMM, ToMM, VECTOR2I
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import lab  # noqa: E402
+import paths  # noqa: E402
 import placement  # noqa: E402
 
-SCH_DIR = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+SCH_DIR = paths.board_dir()
 SCHEMATIC = "rc_power_board.kicad_sch"
 BOARD_FILE = "rc_power_board.kicad_pcb"
 FP_DIR = os.environ.get("KICAD10_FOOTPRINT_DIR", "/usr/share/kicad/footprints")
@@ -102,7 +103,7 @@ def parse_netlist(path):
 
 def load_footprint(fpid, sch_dir):
     lib, name = fpid.split(":", 1)
-    path = os.path.join(sch_dir, lib + ".pretty") if lib == "rc_power" else os.path.join(FP_DIR, lib + ".pretty")
+    path = os.path.join(paths.LIB_DIR, lib + ".pretty") if lib == "rc_power" else os.path.join(FP_DIR, lib + ".pretty")
     fp = pcbnew.FootprintLoad(path, name)
     if fp is None:
         raise RuntimeError("footprint not found: %s" % fpid)

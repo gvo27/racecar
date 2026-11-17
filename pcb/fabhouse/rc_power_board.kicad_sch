@@ -10,8 +10,8 @@
 		(rev "A (draft)")
 		(company "gvo27/racecar")
 		(comment 1 "Draft for review, values marked TBD are unconfirmed")
-		(comment 2 "Spec: docs/schematics/power_board_plan.md")
-		(comment 3 "Meeting summary: docs/schematics/design_overview.md; project KiCad version 10.0")
+		(comment 2 "Spec: docs/pcb/power_board_plan.md")
+		(comment 3 "Meeting summary: docs/pcb/design_overview.md; project KiCad version 10.0")
 	)
 	(lib_symbols
 		(symbol "Connector:TestPoint"

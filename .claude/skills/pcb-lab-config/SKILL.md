@@ -5,13 +5,13 @@ description: Use when the lab machine, drill or end-mill set, isolation bits, cu
 
 # Lab config (one file for the machine and the lab inventory)
 
-All lab facts that the board depends on are in one file: `milling.toml` in the lab directory. The checks (`tools/milling_check.py`, `tools/check_board.py`, `tools/fab_export.py`, `tools/placement.py`) read it. Documents cite it. No tool and no document keeps its own copy of a lab value.
+All lab facts that the board depends on are in one file: `milling.toml` in the lab directory. The checks read it: `tools/milling_check.py` and `tools/fab_export.py` in the lab directory, `pcb/tools/check_board.py` and `pcb/tools/placement.py`. Documents cite it. No tool and no document keeps its own copy of a lab value.
 
 A move to a different machine or a change of inventory is then one change of this file, followed by the checks.
 
 ## Lab directory (one pointer)
 - The `lab:` line of `.claude/CLAUDE.md` is the only place that names the lab directory. Documents, rules, skills and agents write "the lab directory" and point to that line. They do not write the path.
-- Code reads the line through `docs/schematics/tools/lab.py`. The environment variable `LAB_DIR` overrides it.
+- Code reads the line through `pcb/tools/lab.py`. The environment variable `LAB_DIR` overrides it.
 - Contents: `milling.toml` (the lab file), `README.md` (index), `example/` (the lab CAM file and its `README.md`), `example/fusion_export/` (setup sheet, tool library, sketch DXFs and screenshots that the owner exports from the CAM tool).
 - The lab directory holds lab facts and lab files only. Board files stay in the board directory.
 - To use the lab in a different project or repo, copy the lab directory and set the `lab:` line there.
@@ -22,7 +22,7 @@ A move to a different machine or a change of inventory is then one change of thi
 - `status = "assumed"`: all other values. An assumed value stays assumed until a person confirms it.
 - `source`: where the value comes from, with the date for a statement, a photo or a measurement.
 - `[machine]` gives manufacturer, model, axes, work area and the CAM tool. `[inventory.*]` tables list stock that does not set a limit directly (rivet kit, blanks).
-- `tools/milling_check.py` `load_limits` rejects a limit without `status` or `source`.
+- `tools/milling_check.py` (lab directory) `load_limits` rejects a limit without `status` or `source`.
 
 ## Fill or change the file
 1. **Collect the inputs.** Ask the owner for: machine manufacturer and model, CAM tool, the machine or CAM file if one exists, bit and drill inventory (a photo is sufficient), copper stock (manufacturer, part number, copper weight, size), rivet or via method, the fixture method (dowels, tape, clamps).

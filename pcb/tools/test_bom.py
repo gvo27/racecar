@@ -5,6 +5,7 @@
 - bom_total reproduces the numbers of the old hand-kept bom.md.
 """
 import csv
+import os
 import re
 import tempfile
 import unittest
@@ -12,10 +13,11 @@ from pathlib import Path
 
 import bom_total
 
-SCH_DIR = Path(__file__).resolve().parent.parent
+PCB_DIR = Path(__file__).resolve().parent.parent
+SCH_DIR = Path(os.environ.get("BOARD_DIR") or PCB_DIR / "fabhouse").resolve()  # board directory (see paths.py)
 SCH = SCH_DIR / "rc_power_board.kicad_sch"
 BOM = SCH_DIR / "bom.csv"
-OFFBOARD = SCH_DIR / "bom_offboard.csv"
+OFFBOARD = PCB_DIR.parent / "docs" / "pcb" / "bom_offboard.csv"
 ALLOWED_STATUS = {"proposed", "assumed", "in hand", "TBD"}
 EXEMPT = re.compile(r"^(TP\d+|H\d+|J1)$")
 

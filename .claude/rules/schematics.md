@@ -1,16 +1,25 @@
 ---
 paths:
-  - "docs/schematics/**"
+  - "pcb/**"
+  - "docs/pcb/**"
+  - "docs/techctcarvera/**"
 ---
 
 # Schematics (power distribution board)
 
+## Layout
+- `pcb/<board>/`: one KiCad project for each board (schematic, board, rules, `bom.csv`, `fab/` outputs). The board now is `pcb/fabhouse/`. Make targets use `BOARD=<board>` (default `fabhouse`).
+- `pcb/lib/`: symbol and footprint libraries, shared by all boards. `pcb/tools/`: board tools and their tests (`paths.py` holds the layout).
+- `docs/pcb/`: context of the board and the schematic (plan, overview, BOM notes, review record, analysis). Read it. The tools write only `review/` and `analysis/` there.
+- The lab directory (`lab:` in `.claude/CLAUDE.md`): lab facts, `milling_waivers.toml` and the mill tools (`tools/milling_check.py`, `tools/fab_export.py`).
+- `pcb/COLCON_IGNORE` keeps the directory out of the ROS 2 build.
+
 ## Sources of truth
-- Spec / build guide: `docs/schematics/power_board_plan.md` (exported from the live Claude Doc linked at its top). Schematic changes that contradict it => update the plan in the same change, or ask.
-- Parts: symbol fields in the schematic (MPN, Manufacturer, Status, Unit cost USD, Supplier link, BOM Comments), exported by `make bom` to `docs/schematics/bom.csv` (commit it); off-board items in `bom_offboard.csv`; notes in `docs/schematics/bom.md`. CNC-milling (rev A) and later fab checklist: `docs/schematics/fab_handoff.md`.
-- Meeting summary: `docs/schematics/design_overview.md` (concise, < 2 pages). Keep it in step with the schematic.
+- Spec / build guide: `docs/pcb/power_board_plan.md` (exported from the live Claude Doc linked at its top). Schematic changes that contradict it => update the plan in the same change, or ask.
+- Parts: symbol fields in the schematic (MPN, Manufacturer, Status, Unit cost USD, Supplier link, BOM Comments), exported by `make bom` to `pcb/fabhouse/bom.csv` (commit it); off-board items in `bom_offboard.csv`; notes in `docs/pcb/bom.md`. CNC-milling (rev A) and later fab checklist: `docs/pcb/fab_handoff.md`.
+- Meeting summary: `docs/pcb/design_overview.md` (concise, < 2 pages). Keep it in step with the schematic.
 - Inventory and part facts: `docs/datasheets/` (components_list.xlsx, ESC manual, servo datasheet, Pololu D36V50F5 (U1 and U2, `regulator_pololu_d36v50f5.md`; the D24V90F5 note is superseded)). Never invent a part value: unknown => `TBD` (repo rule: no unconfirmed parameters).
-- Project KiCad version: 10.0. Do not save the project with an older KiCad; do not downgrade the file format (the schematic is KiCad 10 format since the U2 footprint change; see docs/schematics/README.md).
+- Project KiCad version: 10.0. Do not save the project with an older KiCad; do not downgrade the file format (the schematic is KiCad 10 format since the U2 footprint change; see docs/pcb/README.md).
 
 ## Invariants
 - Rails: `VBAT`, `+5V_CPU` (Pi 5 + ESP32 only), `+5V_SENS`, `+3V3_SENS` (LDO from `+5V_SENS`), `+6V_BEC` (ESC BEC, servo only, never joined to a 5 V rail). One common `GND`; never `GNDA`/`GNDD`/`GNDPWR`.
@@ -35,19 +44,19 @@ paths:
 - New board or a large change => start the main session as `claude --agent pcb-designer` (`.claude/agents/pcb-designer.md`): start questions, plan, owner approval of the plan, schematic loop, owner approval of the schematic, board loop, report. It dispatches `pcb-worker` (one task, iterate) and `pcb-reviewer` (read-only, independent). A session without `--agent` follows the same file.
 - Skills: `pcb-lab-config` (lab file `milling.toml` in the lab directory (`lab:` in `.claude/CLAUDE.md`): machine, bits, stock, rivets, limits), `pcb-parts` (part choice, datasheet notes, BOM fields, compatibility), `pcb-design-check` (check matrix, lessons in `lessons.md`), `pcb-milling-check` (board against the mill limits). A skill for fab-house rule compliance does not exist: use the kicad-happy skills `jlcpcb` and `pcbway`.
 - Environment: docker, make, the KiCad 10.0.8 image (`make kicad-image`), the Freerouting image, plugin kicad-happy. Optional: `ngspice`, `zstd`, distributor API keys. The list is in `pcb-designer.md`.
-- Review record: `docs/schematics/review/README.md` and `docs/schematics/review/fable_final/README.md`.
+- Review record: `docs/pcb/review/README.md` and `docs/pcb/review/fable_final/README.md`.
 
 ## Tooling (kicad-happy@kicad-happy)
 - Review/analysis => `kicad` skill; subcircuit checks => `spice` skill (needs ngspice); EMC once a PCB exists => `emc`.
-- Analyzer output goes to `docs/schematics/analysis/` (config `.kicad-happy.json`; per-run JSON gitignored, manifest tracked).
-- Treat analyzer findings as claims to verify against the raw `.kicad_sch` and datasheets; known false positives on this board: "U3 missing input capacitor" (C7 is its input cap), "U3 EN missing pull-up" (EN tied to VIN per AP2112 datasheet), "U1 PG missing pull-up" (ESP32 input pull-up), "VBAT plane split" (overlapping bus zones merge into one piece). More in `docs/schematics/review/README.md`.
+- Analyzer output goes to `docs/pcb/analysis/` (config `.kicad-happy.json`; per-run JSON gitignored, manifest tracked).
+- Treat analyzer findings as claims to verify against the raw `.kicad_sch` and datasheets; known false positives on this board: "U3 missing input capacitor" (C7 is its input cap), "U3 EN missing pull-up" (EN tied to VIN per AP2112 datasheet), "U1 PG missing pull-up" (ESP32 input pull-up), "VBAT plane split" (overlapping bus zones merge into one piece). More in `docs/pcb/review/README.md`.
 - ERC/DRC results count only when run in KiCad 10 (user-run, or kicad-cli 10 if installed); never claim ERC passed without its output.
 
 ## Rev A PCB (review only; Gerber and CAM wait for the lab tech)
-- Board: `docs/schematics/rc_power_board.kicad_pcb`, built by `tools/build_pcb.py` and routed by `tools/route_pcb.py` in the pinned KiCad 10.0.8 image (`docker/kicad.Dockerfile`) and Freerouting 2.5.0 (digest in the Makefile). Make targets: `kicad-image erc pcb-build pcb-route pcb-check pcb-mill-check pcb-review pcb-fab pcb-test bom`. No host Python for the tools. After the first build the `.kicad_pcb` is the owner's file: `pcb-build` refuses to overwrite it without `--force`.
-- Rivet via: drill and pad from the lab file (`via_drill`, `via_pad`), in every net class. A hole larger than the largest drill (`drill_set`) is bored with the end mill and must be at least `milled_hole_min`; the list is `MILLED_HOLES` in `tools/placement.py`. Never make a hole between the largest drill and `milled_hole_min`. Limits, their status and the lab facts: the lab directory (`lab:` in `.claude/CLAUDE.md`).
-- Fab outputs: `make pcb-fab` writes `docs/schematics/fab/` (DXF F.Cu, B.Cu, Edge.Cuts; Excellon; drill-map DXF) in the lab frame: origin = dowel 1, board turned 90 degrees counter-clockwise on the lab stock, B.Cu not mirrored (`fab/README.md`). Commit the outputs after a board change; `make pcb-test` fails if they are old. Never use KiCad's native DXF for the mill. `build_pcb.py --sync-drills` (`make pcb-build PCB_BUILD_ARGS=--sync-drills`) applies the drill set, bored holes and via drill to an existing board.
-- `make pcb-check` also runs the opening test of `check_board.py` (`PATH_ROWS`): copper width along the GND, `VBAT` and 5 V paths on B.Cu. Power zones and the `U1_PG` jumper are planned in `tools/placement.py` (`BUS_ZONES`, `GND_KEEPOUTS`, `JUMPERS`); the router (no vias) handles signals only. `build_pcb.py --sync-fields` copies the symbol fields onto an existing board without other changes. `build_pcb.py --sync-zones` (`make pcb-build PCB_BUILD_ARGS=--sync-zones`) rebuilds and refills the zones of an existing board from `placement.py`; parts and tracks stay.
+- Board: `pcb/fabhouse/rc_power_board.kicad_pcb`, built by `pcb/tools/build_pcb.py` and routed by `pcb/tools/route_pcb.py` in the pinned KiCad 10.0.8 image (`docker/kicad.Dockerfile`) and Freerouting 2.5.0 (digest in the Makefile). Make targets: `kicad-image erc pcb-build pcb-route pcb-check pcb-mill-check pcb-review pcb-fab pcb-test bom`. No host Python for the tools. After the first build the `.kicad_pcb` is the owner's file: `pcb-build` refuses to overwrite it without `--force`.
+- Rivet via: drill and pad from the lab file (`via_drill`, `via_pad`), in every net class. A hole larger than the largest drill (`drill_set`) is bored with the end mill and must be at least `milled_hole_min`; the list is `MILLED_HOLES` in `pcb/tools/placement.py`. Never make a hole between the largest drill and `milled_hole_min`. Limits, their status and the lab facts: the lab directory (`lab:` in `.claude/CLAUDE.md`).
+- Fab outputs: `make pcb-fab` writes `pcb/fabhouse/fab/` (DXF F.Cu, B.Cu, Edge.Cuts; Excellon; drill-map DXF) in the lab frame: origin = dowel 1, board turned 90 degrees counter-clockwise on the lab stock, B.Cu not mirrored (`fab/README.md`). Commit the outputs after a board change; `make pcb-test` fails if they are old. Never use KiCad's native DXF for the mill. `build_pcb.py --sync-drills` (`make pcb-build PCB_BUILD_ARGS=--sync-drills`) applies the drill set, bored holes and via drill to an existing board.
+- `make pcb-check` also runs the opening test of `check_board.py` (`PATH_ROWS`): copper width along the GND, `VBAT` and 5 V paths on B.Cu. Power zones and the `U1_PG` jumper are planned in `pcb/tools/placement.py` (`BUS_ZONES`, `GND_KEEPOUTS`, `JUMPERS`); the router (no vias) handles signals only. `build_pcb.py --sync-fields` copies the symbol fields onto an existing board without other changes. `build_pcb.py --sync-zones` (`make pcb-build PCB_BUILD_ARGS=--sync-zones`) rebuilds and refills the zones of an existing board from `placement.py`; parts and tracks stay.
 - After every board change run `make pcb-check pcb-mill-check` (skill `pcb-milling-check`). DRC clean does not mean millable. MILL-DEPTH uses the lab depth (`cut_depth_*` and `copper_thickness` in the lab file); a failure means a limit changed, not the board.
 - Never put F.Cu copper on a THT pad. Never put a via inside a part courtyard. No F-side courtyard overlaps another one or crosses the board edge (DRC `courtyards_overlap` and `check_board.py`). Module footprints (`Pololu_D36V50Fx`) carry the real body: a header-only footprint hides collisions. VBAT, VBAT_RAW and GND are B.Cu zones, not tracks.
 - Connector pin order decides if a net can be routed on one layer: do not change a J3/J4/J5/J8 orientation without a new `make pcb-route`. Rule `U3_fine` is in `rc_power_board.kicad_dru`.

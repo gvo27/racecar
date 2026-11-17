@@ -30,7 +30,7 @@ Status: **both regulators on the board** (owner decision 2026-11-12). The owner 
 - Each power function uses a pin pair (one pin per row). Along the edge, top view with the pin edge on the left: VOUT, GND, GND, VIN, VRP, then EN (outer row) and PG (inner row).
 - 3 mounting holes, diameter 2.18 mm (#2 or M2 screws), 2.2 mm in from the edges. Top view with the pin edge at the bottom: the holes are at the top-right, bottom-left and bottom-right corners. The module body is always on the inner-row side of the pins.
 - Symbol `rc_power:D36V50F5` pin numbers (odd = inner row, even = outer row): 1 PG, 2 EN, 3-4 VRP, 5-6 VIN, 7-10 GND, 11-12 VOUT.
-- Footprint `rc_power:Pololu_D36V50Fx` (`docs/schematics/rc_power.pretty`): origin = pad 1, pin edge on the right, body on the inner-row side. F.Fab shows the full 25.4 x 25.4 mm body and the 3 mounting holes (circles only, no drill: the drill set has 4 sizes and the header holds the module). F.CrtYd is the body plus 0.25 mm. Test: `docs/schematics/tools/test_footprint.py`.
+- Footprint `rc_power:Pololu_D36V50Fx` (`pcb/lib/rc_power.pretty`): origin = pad 1, pin edge on the right, body on the inner-row side. F.Fab shows the full 25.4 x 25.4 mm body and the 3 mounting holes (circles only, no drill: the drill set has 4 sizes and the header holds the module). F.CrtYd is the body plus 0.25 mm. Test: `pcb/tools/test_footprint.py`.
 - Drawing tolerances: drill location +-0.1 mm, board edge +-0.3 mm.
 
 ## fit to this board
