@@ -42,7 +42,7 @@ KiCad DRC checks the numbers in `rc_power_board.kicad_pro` and `.kicad_dru`. It 
 Three groups: **errors** (unwaived), **waived** (with the reason), **owner/lab-tech questions** (limits that are assumed and change the result, for example MILL-DEPTH). Add the MILL-GAP-BIT areas.
 
 ## Rules for agents
-- The last four rows read the design rules of the board (`design_rules.toml`: board directory, else lab directory; `pcb/tools/rules.py`). Do not change a design rule to make a board pass without a statement of the owner or the lab tech.
+- The last four rows read the design rules of the board (`design_rules.toml`: board directory, else lab directory; `pcb/libraries/rules.py`). Do not change a design rule to make a board pass without a statement of the owner or the lab tech.
 - Run it after every board change and before any review request. Report the counts, every error and the MILL-GAP-BIT areas.
 - Never claim "millable" or "ready to mill". The most you can say is "passes the milling check with the assumed limits", until the lab tech confirms the limits and the owner signs off.
 - Fix a finding on the board (move, re-route, change a footprint through the schematic). Do not weaken `milling.toml`.

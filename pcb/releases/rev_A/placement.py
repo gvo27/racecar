@@ -1,6 +1,6 @@
-"""Placement of the rev A power board (pcb/fabhouse). First-build data for build_pcb.py.
+"""Placement of the rev A power board (pcb/releases/rev_A). First-build data for build_pcb.py.
 
-Board data only. pcb/tools/placement.py loads this file and adds the lab frame.
+Board data only. pcb/libraries/placement.py loads this file and adds the lab frame.
 
 Coordinates are mm from the outline's lower-left corner (x to the right, y up).
 rot = KiCad orientation in degrees (counter-clockwise, seen from the top) applied to the footprint

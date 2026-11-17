@@ -8,7 +8,7 @@ description: Use when a part for a KiCad board must be chosen, replaced or check
 ## Where part data lives (one place for each kind of fact)
 | Fact | Place | Rule |
 | --- | --- | --- |
-| The BOM | Symbol fields in the `.kicad_sch`: `MPN`, `Manufacturer`, `Status`, `Unit cost USD`, `Supplier link`, `BOM Comments` | `make bom` exports `pcb/fabhouse/bom.csv` with `kicad-cli`. Commit the two files together. Never edit `bom.csv` by hand |
+| The BOM | Symbol fields in the `.kicad_sch`: `MPN`, `Manufacturer`, `Status`, `Unit cost USD`, `Supplier link`, `BOM Comments` | `make bom` exports `bom.csv` of the board directory (`pcb/<BOARD>/`) with `kicad-cli`. Commit the two files together. Never edit `bom.csv` by hand |
 | Parts with no symbol | `docs/pcb/bom_offboard.csv` | Housings, crimps, wire, stock, rivets. Kept by hand |
 | Part facts | `docs/datasheets/<kind>_<model>.md`, with the archived PDF, drawing or page beside it | One note for each part model. Each number has its source (page, figure, graph) |
 | Inventory | `docs/datasheets/components_list.xlsx` (owner file) and `Status = in hand` in the symbol field | Ask the owner before you write "in hand" |

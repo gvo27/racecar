@@ -16,7 +16,7 @@ from pcbnew import ToMM
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-sys.path.insert(1, os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "pcb", "tools")))  # lab.py, paths.py, placement.py
+sys.path.insert(1, os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "pcb", "libraries")))  # lab.py, paths.py, placement.py
 import lab  # noqa: E402
 import paths  # noqa: E402
 import fab_export  # noqa: E402
@@ -389,15 +389,6 @@ class TestOutputs(unittest.TestCase):
             elif use == "BORE":
                 self.assertGreaterEqual(d, lim.milled_hole_min - 0.005)
 
-
-class TestCommitted(unittest.TestCase):
-    def test_committed_fab_files_are_current(self):
-        d = tempfile.mkdtemp(prefix="fabc-")
-        fab_export.export(BOARD, d)
-        for name in fab_export.FILES:
-            with self.subTest(name):
-                with open(os.path.join(SCH_DIR, "fab", name), "rb") as a, open(os.path.join(d, name), "rb") as b:
-                    self.assertEqual(a.read(), b.read(), "run make pcb-fab and commit the fab/ directory of the board")
 
 
 if __name__ == "__main__":

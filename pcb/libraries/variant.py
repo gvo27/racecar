@@ -1,6 +1,6 @@
 """Make the schematic of a board variant from the schematic of the base board. Make target: pcb-sch.
 
-A variant has the same circuit as the base board (pcb/fabhouse) without the parts in `[parts] exclude` of its design
+A variant has the same circuit as the base board (paths.base_board_dir()) without the parts in `[parts] exclude` of its design
 rules, and with the footprints of `[parts.footprint]` (same part value, a package that the variant can make). For each excluded part the copy has `(on_board no)`, `(in_bom no)` and `(dnp yes)`: the part stays in the
 drawing, is crossed out, and has no footprint and no BOM row. A part with a variant footprint gets TBD in its part
 fields (MPN, Manufacturer, Supplier link, Status) and an empty unit cost: the base part number is for the base
@@ -100,7 +100,7 @@ def run(base_dir, board_dir):
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("--base-dir", default=os.path.join(paths.PCB_DIR, paths.DEFAULT_BOARD))
+    ap.add_argument("--base-dir", default=paths.base_board_dir())
     ap.add_argument("--board-dir", default=paths.board_dir())
     args = ap.parse_args(argv)
     return run(args.base_dir, args.board_dir)

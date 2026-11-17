@@ -4,7 +4,7 @@ The BOM comes from the schematic. Each symbol carries part fields. `make bom` ex
 
 ## How the BOM is made
 
-- `make bom` writes `bom.csv`: one row per group of symbols with equal Value, Footprint and MPN. Columns: Reference, Qty, Value, Footprint, MPN, Manufacturer, Status, Unit cost USD, Supplier link, BOM Comments. It then runs `tools/bom_total.py`, which prints the total and the total without parts that are in hand.
+- `make bom` writes `bom.csv`: one row per group of symbols with equal Value, Footprint and MPN. Columns: Reference, Qty, Value, Footprint, MPN, Manufacturer, Status, Unit cost USD, Supplier link, BOM Comments. It then runs `pcb/libraries/bom_total.py`, which prints the total and the total without parts that are in hand.
 - Symbol fields: `MPN`, `Manufacturer`, `Status` (`proposed`, `assumed`, `in hand` or `TBD`), `Unit cost USD` (number only; "Price est." in BOM Comments marks an estimate), `Supplier link`, `BOM Comments` (key specs, flags, decisions). Unknown value => `TBD`. TP*, H* and J1 have no part (`none`).
 - To edit a field in KiCad 10: Schematic Editor > Tools > Edit Symbol Fields (Symbol Fields Table). Edit the cells, save, then run `make bom` and commit `bom.csv` with the schematic. Do not change `Value`, `Footprint` or `Datasheet` for BOM reasons. F1 `MPN` lists the fuse and the holder (comma-separated); its cost is fuse plus holder.
 - `make pcb-test` fails if `bom.csv` is not equal to a fresh export, if a symbol has no MPN or an invalid Status, or if the totals change. After a field change, KiCad "Update PCB from Schematic" copies the fields to the footprints; DRC parity warns until then.

@@ -4,7 +4,7 @@ chassis: tamiya_tt02_1:10
 goals: [sensor_fusion, object_detection, semantic_slam, racing_trajectory_optimization]
 compute: {high_level: raspberry_pi_5 (ros2 jazzy in docker, deploy/car), real_time: esp32-s3-n16r8 (micro-ros client)}
 phase: 2 complete (ros2 actuator path, bench-verified); phase 4 lidar in progress (branch lidar: rccar_drivers mapper_driver + drivers container, compile/CI only, bench pending); phase 4 started: rangefinder driver (compile-only, awaiting bench)  # pi: mcu-agent+core(supervisor,mcu_bridge) -usb/micro-ros-> esp32 -pwm-> servo+esc; legacy ascii path removed
-next: power board rev A PCB: owner/Opus/Fable review (docs/pcb/review/README.md), lab tech limits; phase 4 lidar bench (power from +5V_SENS, wlan0 on SLAMWARE AP, make viz checks), then phase 3 recorder/backup, phase 4 sensors (imu/encoder/battery, camera)
+next: power board rev A PCB: owner review and open items (docs/pcb/review/README.md), lab tech limits; phase 4 lidar bench (power from +5V_SENS, wlan0 on SLAMWARE AP, make viz checks), then phase 3 recorder/backup, phase 4 sensors (imu/encoder/battery, camera)
 plan: docs/docker_ros_plan.md
 sim: {repo: gvo27/racecar-sim (pins this repo via .repos), contract: docs/sensor_contract.md, skill: sim-parity, car.launch sim:=true = same nodes (mcu_bridge pushes tuning to the virtual esp32)}
 stack:
@@ -14,7 +14,7 @@ stack:
 hw: {steer: ds3225mg@gpio4, throttle: thw1060_esc@gpio5, battery: 2s_lipo, rangefinder: garmin_lidar_lite_v4_led@esp32 i2c gpio8(sda,garmin pin3,white)/gpio9(scl,garmin pin4,green) 0x62, vin(pin1,red) 5v sensor rail, gnd(pin2,black)}
 usb_ports: {left_USB: native, planned regulated power input; right_COM: ch343 uart0, flashing + host link}
 layout: .claude/layout.yaml
-lab: docs/techctcarvera/  # the one pointer to the mill lab config (milling.toml: machine, bits, stock, rivets, limits; example/: lab CAM file + Fusion exports). Docs, rules, skills and agents name "the lab directory" and point here; tools read this line (pcb/tools/lab.py); mill tools + waivers + mill tuning file: tools/, milling_waivers.toml, design_rules.toml there. Another lab or repo => change this line only
+lab: docs/techctcarvera/  # the one pointer to the mill lab config (milling.toml: machine, bits, stock, rivets, limits; example/: lab CAM file + Fusion exports). Docs, rules, skills and agents name "the lab directory" and point here; tools read this line (pcb/libraries/lab.py); mill tools + waivers + mill tuning file: tools/, milling_waivers.toml, design_rules.toml there. Another lab or repo => change this line only
 convention: .claude/ = general rules, skills, agents (no site values); docs/ = specific config and facts that change (lab, parts, board); this file = pointers between them, no config values
 cmd: make help
 hooks: .claude/hooks/hw_guard.{sh,py}  # PreToolUse guard (sh launcher -> .venv python, make dev-setup; no .venv => ask): asks before hardware (re)starts, denies driver edits/rebuilds while drivers runs

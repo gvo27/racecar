@@ -1,7 +1,7 @@
 """BOM export and cost total (stdlib only; runs in the KiCad image).
 
-    python3 tools/bom_total.py --export   # kicad-cli export to bom.csv, then totals
-    python3 tools/bom_total.py            # totals only
+    python3 libraries/bom_total.py --export   # kicad-cli export to bom.csv, then totals
+    python3 libraries/bom_total.py            # totals only
 
 Total = sum(Qty x Unit cost USD) of bom.csv (all rows) and of bom_offboard.csv
 (rows with In total = yes). "Without in hand" leaves out rows with Status "in hand".
@@ -12,8 +12,10 @@ import subprocess
 import sys
 from pathlib import Path
 
+import paths  # noqa: E402
+
 PCB_DIR = Path(__file__).resolve().parent.parent
-SCH_DIR = Path(os.environ.get("BOARD_DIR") or PCB_DIR / "fabhouse").resolve()  # board directory (see paths.py)
+SCH_DIR = Path(paths.board_dir())  # board directory (see paths.py)
 SCH = SCH_DIR / "rc_power_board.kicad_sch"
 BOM = SCH_DIR / "bom.csv"
 OFFBOARD = PCB_DIR.parent / "docs" / "pcb" / "bom_offboard.csv"

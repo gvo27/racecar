@@ -20,7 +20,7 @@ from pcbnew import FromMM, ToMM
 
 import os
 
-sys.path.insert(1, os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "pcb", "tools")))  # lab.py
+sys.path.insert(1, os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "pcb", "libraries")))  # lab.py
 import lab  # noqa: E402
 
 # Finding = (rule_id, severity "error"|"warning", where, value, limit, message)
@@ -140,7 +140,7 @@ class Ctx:
     def __init__(self, board, lim, rules=None):
         self.b = board
         self.lim = lim
-        self.rules = rules  # design rules of the board (pcb/tools/rules.py) or None: lab limits only
+        self.rules = rules  # design rules of the board (pcb/libraries/rules.py) or None: lab limits only
         o = board.GetDesignSettings().GetAuxOrigin()
         self.ox, self.oy = o.x, o.y
 
@@ -515,7 +515,7 @@ def check_islands(ctx, out):
 
 
 def check(board, limits, rules=None):
-    """All findings. `rules` = the design rules of the board (pcb/tools/rules.py). With them, the track, edge and ring
+    """All findings. `rules` = the design rules of the board (pcb/libraries/rules.py). With them, the track, edge and ring
     limits of the design replace the lab limits (they are never below them), and the design-rule checks run."""
     if rules is not None:
         limits = dataclasses.replace(limits, track_min=max(limits.track_min, rules.track_min),
@@ -575,7 +575,7 @@ def main(argv=None):
     ap.add_argument("--json")
     args = ap.parse_args(argv)
     try:
-        import rules as design_rules  # pcb/tools
+        import rules as design_rules  # pcb/libraries
         findings, groups = run(args.board, args.limits or lab.limits_file(), args.waivers, design_rules.load(args.rules))
     except Exception as exc:  # noqa: BLE001 - exit 2 = the check could not run
         print("milling-check: cannot run: %s" % exc, file=sys.stderr)

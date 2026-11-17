@@ -1,18 +1,19 @@
-"""Placement of the mill prototype (pcb/mill). It starts from the rev A placement (pcb/fabhouse) and changes it.
+"""Placement of the mill prototype (pcb/mill). It starts from the rev A placement (placement.py of the base board, paths.base_board_dir()) and changes it.
 
 Differences from rev A: no LEDs and LED resistors (`[parts] exclude` of the design rules). C2 to C8 are through-hole
 capacitors with 5.0 mm lead pitch on the top side (`[parts.footprint]`). The 3.3 V nets are planned zones. Pads of
 two different parts on different nets are at least component_gap apart. Coordinates: mm from the outline's lower-left
-corner (x to the right, y up). pcb/tools/placement.py loads this file.
+corner (x to the right, y up). pcb/libraries/placement.py loads this file.
 
 Through-hole capacitor (C_Disc, P5.00mm): the position is pad 1. Pad 2 is 5.0 mm to the east (rot 0), north (rot 90),
 west (rot 180) or south (rot 270).
 """
 import os
 
-import placement as _loader  # pcb/tools/placement.py is being imported: only load_board_file is used
+import placement as _loader  # pcb/libraries/placement.py is being imported: only load_board_file is used
 
-_base = _loader.load_board_file(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "fabhouse", "placement.py"))
+import paths as _paths  # noqa: E402
+_base = _loader.load_board_file(os.path.join(_paths.base_board_dir(), "placement.py"))
 globals().update(_base)
 
 

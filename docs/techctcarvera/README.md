@@ -54,7 +54,7 @@ The values are start values with `status = "assumed"`. `make pcb-rules BOARD=mil
 
 1. Copy this directory into the other repo.
 2. Add a `lab:` line with the new path to the `.claude/CLAUDE.md` of that repo.
-3. Copy the skills `pcb-lab-config` and `pcb-milling-check`, and `lab.py` from `pcb/tools/`. The mill tools come with this directory. They find `lab.py` at `pcb/tools/` of the repo root.
+3. Copy the skills `pcb-lab-config` and `pcb-milling-check`, and `lab.py` from `pcb/libraries/`. The mill tools come with this directory. They find `lab.py` at `pcb/libraries/` of the repo root.
 4. Run the milling check on the board of that project.
 
 For a different lab or mill, make a new lab directory with the skill `pcb-lab-config`, then change the `lab:` line.

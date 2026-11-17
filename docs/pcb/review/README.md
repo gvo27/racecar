@@ -1,6 +1,6 @@
 # Rev A power board: review package
 
-Scope (owner, 2026-11-11): a valid, DRC-clean, routed KiCad PCB **for review only**. Task 9 (2026-11-13) adds the board fit to the lab's Fusion 360 template and the fab files in `../fab/` (DXF, Excellon; `make pcb-fab`). The CAM stays in the lab template. The milling rules still apply to the board.
+Scope (owner, 2026-11-11): a valid, DRC-clean, routed KiCad PCB **for review only**. Task 9 (2026-11-13) adds the board fit to the lab's Fusion 360 template and the fab files (DXF, Excellon; `make pcb-fab`, written to `build/fab/<BOARD>/`, not committed). The CAM stays in the lab template. The milling rules still apply to the board.
 
 Rebuild: `make kicad-image pcb-review`. All tools run in the pinned KiCad 10.0.8 image. Freerouting 2.5.0 runs in its own pinned image (`make pcb-route`).
 
@@ -55,7 +55,7 @@ Rebuild: `make kicad-image pcb-review`. All tools run in the pinned KiCad 10.0.8
 | DRC with schematic parity | 0 errors, 0 unconnected items, parity clean; 16 `lib_footprint_mismatch` warnings (see below) |
 | `make pcb-check` (`check_board.py`) | 0 problems: no F.Cu copper on a THT pad, every hole in the drill set or a bored hole of at least 3.3 mm in `MILLED_HOLES`, all vias 1.1/2.1 mm, no narrow HighCurrent track |
 | `make pcb-mill-check` | 0 unwaived errors, 0 waived, 0 MILL-GAP-BIT areas, 2 MILL-SLIVER warnings, 0 MILL-ISLAND warnings, 0 owner/lab-tech questions |
-| `make pcb-fab` | 5 files in `../fab/`; `test_fab.py` 21 tests pass (copper area, holes vs `kicad-cli pcb export drill`, dowels) |
+| `make pcb-fab` | 5 files in `build/fab/releases/rev_A/`; `test_fab.py` 20 tests pass (copper area, holes vs `kicad-cli pcb export drill`, dowels) |
 | `make pcb-test` | 131 tests pass |
 
 **MILL-DEPTH (resolved, Task 9).** The lab CAM cuts 0.08 mm deep in one pass (lab CAM file) and the owner says the blank is even (depth error 0). The minimum depth 0.08 mm is above the copper thickness of 0.070 mm, so the check passes. The margin is only 0.01 mm: a real depth error above 0.01 mm leaves copper in the isolation cut. The lab tech accepts this margin (2026-11-13). If necessary, the lab adds a second, deeper pass in the CAM file. No board change.
@@ -74,7 +74,7 @@ Earlier warnings, now removed: 3 F.Cu GND "slivers" and 4 MILL-ISLAND were false
 - Assumed: bored holes of 3.3 mm or more (tool + 0.125 mm). Confirmed: rivet via 1.1 mm drill / 2.1 mm pad; the 0.8 mm EasyContac rivet (1.0 mm OD, owner caliper 2026-11-13) sits about 0.05 mm loose before soldering.
 - Isolation bit: 0.2 mm tip, Fusion taper 30. Cut width at 0.08 mm depth: 0.292 mm. Fusion taper is the angle per side (60 deg included): confirmed 2026-11-15 from the Fusion tool library export (lab file, lab directory: `lab:` in `.claude/CLAUDE.md`). The 30 deg included reading (0.243 mm) is removed. The smallest copper gap on the board is 0.35 mm (U3 pads), which passes.
 - U1 and U2 are the Pololu D36V50F5 (owner 2026-11-12). The footprint comes from Pololu's drawing (tolerance of drill location +-0.1 mm). The 3 mounting holes are on F.Fab only. The standoff of the module over the F.Cu pour (parts 1.8 mm under the module) is not known: check on the real header.
-- No reverse-polarity protection (owner decision). U3 keeps the stock SOT-23-5 footprint and rule `U3_fine`.
+- Reverse-polarity protection: status in `docs/pcb/reverse_polarity_proposal.md`. U3 keeps the stock SOT-23-5 footprint and rule `U3_fine`.
 - XH and terminal-block orientation: pin 1 at the bottom on the left edge, except J4 and J8 (rotated 270 degrees: pin 1 at the top). J6 and J7 on the right edge also have pin 1 at the top. Deviation from the rule "pin 1 at the same end": it is needed for B.Cu routing without rivets. J8 turned means the Garmin pin order runs top to bottom. Wire entry direction of the vertical XH headers is not checked: check it with the 1:1 print.
 
 ## Owner GUI checks (user-run)
@@ -109,3 +109,22 @@ The plugin analyzers ran on the board (`analyze_schematic.py`, `analyze_pcb.py -
 3. Add a GND rivet beside each jumper via, or more test points?
 4. Lab tech: closed. Rivet hole = rivet OD + 0.1 mm, widened in a second pass if necessary (lab tech 2026-11-13; rivet stock: LPKF EasyContac kit, owner photo 2026-11-13). Bit list, cut depth and dowel size are also closed (lab .f3z, owner photos, lab tech 2026-11-13).
 5. J1 wire-pad size is TBD; the stock footprint pads (4.4 mm, 3.0 mm drill) are a placeholder.
+
+## Open items from the Fable final review (2026-11-15)
+
+This section owns these open items. The dated record is in `docs/archive/pcb/review/fable_final/README.md` (history). The `assumed` lab values and their status are in `milling.toml` of the lab directory.
+
+| # | Item | Who decides | Proposal |
+| --- | --- | --- | --- |
+| R1 | Module entrances: the pad pitch limits the `VBAT` necks to 1.88 mm and the GND pad block to 4.81 mm, below the fuse-rating rule (16.5 A) | owner | Accept: each entrance carries one module's current |
+| R2 | Bare copper on the two faces. B.Cu `VBAT_RAW` is before the fuse and faces the chassis. The F.Cu GND pour is about 0.74 mm under the module underside parts | owner | Lacquer or an insulating sheet on B.Cu, standoffs of 5 mm or more, Kapton on F.Cu under U1 and U2, modules only on headers |
+| R3 | Isolation contours leave floating copper (about 75 pieces, 37 mm2 on B.Cu, computed with the 0.243 mm cut) | lab tech | A pocket operation, or accept |
+| R4 | CAM frame: import `B_Cu.dxf` in the same model frame as `F_Cu.dxf`. Cut the outline last or leave tabs. Dowel play permits about 0.19 mm shift between the faces | lab tech | Lab CAM setup |
+| R5 | Brown-out: U1 and U2 need about 6.0 V in for 5 A. `+5V_CPU` can fall near the cutoff or under ESC load | owner | `VBAT` sense to the ESP32, or a throttle limit when `U1_PG` goes low. Bench check |
+| R6 | I2C at 400 kHz with only the 13 kohm rangefinder pull-ups: rise time about 600 ns (estimate) against 300 ns | owner | Pads for two pull-ups to `+3V3_SENS`, or 100 kHz, or a scope check |
+| R7 | `THROTTLE_PWM` floats while the ESP32 is in reset | owner | Pad for a 10 kohm pull-down. Bench check with the ESC |
+| R8 | `+6V_BEC` has no capacitor, test point or clamp at J4 (servo stall 2.3 A) | owner | 100 to 220 uF, 10 V or more, at J4 |
+| R9 | Vibration: U1, U2, C1 and F1 hang on B-side joints of an unplated board. The module M2 holes cannot be made | owner | Adhesive, or a 2.0 mm hole for M2 screws |
+| R10 | The F1 holder footprint says "PCB thickness up to 1.5 mm". The blank is 1.57 mm | owner | Check the pin length and the peg on the real holder |
+| R11 | `rc_power_board.pdf` has the old note text. The `Value` fields of C1 to C6, D1, F1 and U3 show `TBD` | owner | Approve the MPNs, then plot again |
+| R12 | Parts with no MPN: C9, and the USB-C pigtails of J6 and J7 (CC termination) | owner | `bom.csv`, `bom_offboard.csv`. Bench check of the pigtails |

@@ -45,7 +45,7 @@ def read_dru(path):
 
 def dru_text(r):
     out = ["(version 1)", "",
-           "# Made by pcb/tools/gen_rules.py from the [[exception]] entries of the design rules (%s)." % os.path.basename(r.path),
+           "# Made by pcb/libraries/gen_rules.py from the [[exception]] entries of the design rules (%s)." % os.path.basename(r.path),
            "# Do not edit: change the design rules, then run `make pcb-rules`. Zone fill is not covered: a pour keeps the",
            "# zone clearance from these pads, unless the exception has zones = true."]
     for e in r.exceptions:

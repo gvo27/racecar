@@ -4,7 +4,7 @@ For the owner doing layout. Parts: `bom.csv` and `bom_offboard.csv` (made by `ma
 
 # A. Prototype rev A: in-house CNC (Makera Carvera)
 
-V-bit isolation milling in the lab's calibrated Fusion 360 template (`example/` in the lab directory ([`lab:` in `.claude/CLAUDE.md`](../../.claude/CLAUDE.md))), with DXF and Excellon files from `make pcb-fab` (`fab/README.md`). The board is not fabricated by a fab house for this revision.
+V-bit isolation milling in the lab's calibrated Fusion 360 template (`example/` in the lab directory ([`lab:` in `.claude/CLAUDE.md`](../../.claude/CLAUDE.md))), with DXF and Excellon files from `make pcb-fab` (`build/fab/<BOARD>/`, not committed; frame and file list: the docstring of `tools/fab_export.py` in the lab directory). The board is not fabricated by a fab house for this revision.
 
 ## Stock and tools
 
@@ -47,14 +47,14 @@ The project DRC rules in `rc_power_board.kicad_pro` are set to match: `min_clear
 
 ## Rev A KiCad board (review only, 2026-11-11)
 
-`rc_power_board.kicad_pcb` is built and routed headless in the pinned KiCad 10.0.8 image. It is for owner review. DXF and Excellon files for the lab's Fusion 360 template are in `fab/` (`make pcb-fab`, Task 9). The CAM stays in the lab template and has not run for this board. The Gerber and MakeraCAM steps below are an older plan. Values marked "assumed" wait for the lab tech.
+`rc_power_board.kicad_pcb` is built and routed headless in the pinned KiCad 10.0.8 image. It is for owner review. `make pcb-fab` makes the DXF and Excellon files for the lab's Fusion 360 template (Task 9). The CAM stays in the lab template and has not run for this board. The Gerber and MakeraCAM steps below are an older plan. Values marked "assumed" wait for the lab tech.
 
 - **Via (confirmed):** the EasyContac 0.8 rivet (1.0 mm OD, owner caliper 2026-11-13, measured on the shaft: 0.8 bag 1.0 mm, 1.0 bag 1.45 mm, 1.2 bag 1.6 mm OD (old caliper, small error possible)) needs a 1.1 mm hole (lab tech rule: OD + 0.1 mm). Rivet stock is the LPKF EasyContac kit (owner photo 2026-11-13). The owner's bit set has a 1.1 mm bit, so the via is **1.1 mm drill / 2.1 mm pad** (annular ring 0.5 mm) in every net class. If a rivet does not fit, the lab widens the hole in a second pass.
 - **Bit set (owner photo, 2026-11-12):** drill 0.1 to 2.0 mm in 0.1 mm steps. A footprint hole is snapped up to the smallest size in the set in the board copies (XH 0.95 to 1.0, MKDS 1.3 stays 1.3, F1 pins 1.4 stays 1.4); pads grow to keep the 0.45 mm annular ring. A hole larger than 2.0 mm is bored with the 3.175 mm end mill and must be 3.3 mm or more (`milled_hole_min`, assumed: tool + 0.125 mm).
 - **Hole list from the board (lab fit, Task 9):** 0.8 mm x 2 (C9); 1.0 mm x 52 (U1, U2 (12 each), C1, J3, J4, J5, J8, J9, J11 to J14); 1.1 mm x 3 (rivet vias); 1.3 mm x 4 (J6, J7); 1.4 mm x 8 (F1 pins); bored: 3.4 mm x 7 (H1 to H4 M3 clearance, J1 wire pads, F1 locating peg), plus 2 dowel holes of 4.191 mm outside the board. Before Task 9 the board had 2.4 mm (F1 peg), 3.0 mm (J1) and 3.2 mm (H1 to H4) holes, which the lab tools cannot make.
 - **F1 peg:** the KiCad library footprint of the Littelfuse FLR 178.6165 has a 2.4 mm NPTH for the central locating peg. The Littelfuse drawing was not reachable from the build host (HTTP 403), so the peg diameter is **not confirmed**. It is larger than 2.0 mm in any case (the library hole is 2.4 mm), so it is a loose 3.4 mm locator hole. If the real peg is 2.0 mm or less, a drill from the set can replace it. Check the peg against the holder before milling.
 - **J1 wire pads:** hole 3.4 mm (was 3.0 mm), pad 4.4 mm, annular ring 0.5 mm. The 12 AWG conductor (about 2.05 mm) is loose in the hole.
-- **Frame:** the board is turned 90 degrees and centered on the stock; the two dowel holes are outside the board. Details and file list: `fab/README.md`.
+- **Frame:** the board is turned 90 degrees and centered on the stock; the two dowel holes are outside the board. Details and file list: the docstring of `tools/fab_export.py` in the lab directory.
 - **Outline:** 66 x 140 mm, drill/place origin at the lower-left corner. The U1 and U2 bodies (25.4 x 25.4 mm) lie inside it: U2 x 8.0 to 33.4, y 22.3 to 47.7; U1 x 36.0 to 61.4, y 22.3 to 47.7 (mm from the origin). Stackup: 2 layers, 0.070 mm copper, 1.57 mm total.
 - **Layers:** SMD parts on B.Cu, THT parts on F.Cu. Routing on B.Cu. `VBAT_RAW`, `VBAT` and GND are B.Cu zones. The F.Cu GND pour has pad connection "none" and joins B.Cu GND through one rivet via. F.Cu has one jumper track (`U1_PG`, U1.1 to J5.1, about 39 mm) on two rivet vias. The I2C jumpers of the first layout are removed. No F.Cu copper touches a THT pad (check in `make pcb-check`).
 - **Rivet vias: 3** (2 for the `U1_PG` jumper, 1 GND stitching). No via is inside a part courtyard (a rivet needs both sides soldered).
@@ -101,11 +101,11 @@ Solder each THT pin on every layer where it has copper. JST XH shrouds and screw
 ## Registration and outline
 
 - 2 dowel holes (4.191 mm for 4.0 mm pins) on one line along the stock long side, bored in Setup A of the lab template. B.Cu is not mirrored in the files: Setup C flips the stock.
-- The board (66 x 140 mm) is turned 90 degrees and centered on the 152.4 x 101.6 mm stock: 6.2 mm at each end, 17.8 mm at each long side. The dowel holes are about 14 mm from the outline. Outputs: `fab/` (`make pcb-fab`).
+- The board (66 x 140 mm) is turned 90 degrees and centered on the 152.4 x 101.6 mm stock: 6.2 mm at each end, 17.8 mm at each long side. The dowel holes are about 14 mm from the outline. Outputs: `make pcb-fab`.
 
 ## Export and CAM
 
-- [x] Export: `make pcb-fab` writes the DXF files (F.Cu, B.Cu, Edge.Cuts), the Excellon file and the drill-map DXF to `fab/`, in the lab frame (`fab/README.md`). B.Cu is not mirrored: Setup C of the lab template flips the stock.
+- [x] Export: `make pcb-fab` writes the DXF files (F.Cu, B.Cu, Edge.Cuts), the Excellon file and the drill-map DXF to `build/fab/<BOARD>/`, in the lab frame (the docstring of `tools/fab_export.py` in the lab directory). B.Cu is not mirrored: Setup C of the lab template flips the stock.
 - [ ] Lab template: import the files, check the dowel positions (0, 0) and (145.8468, 0) against the template, and run the lab tech's CAM. Not done.
 - [ ] Isolation as in the lab template: 0.2 mm tip V-bit, 1 pass, 0.08 mm deep, on an even blank (copper 0.070 mm, margin 0.01 mm, accepted by the lab tech). If copper stays in a cut, add a second, deeper pass. Drills and bores from the Excellon tool list. Outline cut: the lab tech decides.
 
@@ -225,7 +225,7 @@ Not the rev A path. Essentials if the board goes to a fab house:
 # Open items before publish
 
 1. F1: 15 A decided by the load (ATO/ATC blade in FLR holder assumed).
-2. Reverse-polarity decision: the proposal (P-FET) is in the PR, not on the board.
+2. Reverse-polarity protection: proposal and status in `reverse_polarity_proposal.md`.
 3. U2 = Pololu D36V50F5, the same part as U1 (owner 2026-11-12; two modules owned). Footprint `rc_power:Pololu_D36V50Fx` from the Pololu drawing: VIN, VOUT and GND each use a pin pair (about 2.45 A per VOUT pin at 4.9 A). About 7.4 A at 6.6 V in, where the graph curve starts (no data below 6.6 V), and about 7.7 A at 8.4 V in (Pololu graph), so the 6 A need is met from 6.6 V to 8.4 V in. Below 6.6 V the dropout decides: about 1.0 V at 5 A, so 5 A needs about 6.0 V in and the output can fall below 5 V near the 6.0 V cutoff. The same dropout applies to U1 (`+5V_CPU`): the Pi can brown out (bench check in `docs/datasheets/regulator_pololu_d36v50f5.md`). Check the footprint against the real module (1:1 print) before milling. Details: `docs/datasheets/regulator_pololu_d36v50f5.md`. Verify >= 4.8 V at the Mapper during startup (U2 tolerance TBD, about 0.03-0.05 V pigtail drop at 1.6 A).
 4. All `TBD` values in the schematic.
 5. U1 EN stays unconnected until the rev 2 prototype board.

@@ -56,10 +56,10 @@ All other copper has a 2.0 mm gap: the pours to the VBAT, 5 V, `/LDO_IN` and `+3
 | `make pcb-rules BOARD=mill` | The project files agree with the design rules. 16 values assumed |
 | `make pcb-check BOARD=mill` | DRC: 0 errors, 0 unconnected, parity clean. 117 warnings: 26 `lib_footprint_mismatch` (pads changed by the build), 91 `silk_over_copper` (silkscreen of the library footprints; the milled board has no silkscreen). `check_board`: 0 problems |
 | `make pcb-mill-check BOARD=mill` | 0 errors, 0 waived, 96 warnings: 85 `MILL-GAP-FIXED`, 9 `MILL-CUT-SPACING`, 2 `MILL-CONN-EDGE`. No `MILL-SLIVER`, no `MILL-ISLAND` |
-| `make pcb-fab BOARD=mill` | Outputs in `pcb/mill/fab/`. The target then runs `test_fab.py` on the mill board: 21 tests, OK |
+| `make pcb-fab BOARD=mill` | Outputs in `build/fab/mill/` (not committed). The target then runs `test_fab.py` on the mill board: 21 tests, OK |
 | `make bom BOARD=mill` | `pcb/mill/bom.csv`. C2 to C8: part number TBD, no cost. Total 91.83 USD |
 | `make pcb-test` | 99 + 62 = 161 tests, OK |
-| Rev A (`make pcb-check pcb-mill-check pcb-fab`, BOARD=fabhouse) | Same as before: DRC 0 errors, `check_board` 0 problems, milling check 0 errors and 2 `MILL-SLIVER` warnings. No change in `pcb/fabhouse` |
+| Rev A (`make pcb-check pcb-mill-check pcb-fab`, base board) | Same as before: DRC 0 errors, `check_board` 0 problems, milling check 0 errors and 2 `MILL-SLIVER` warnings. No change in `pcb/fabhouse` |
 
 Copper width along the current paths (opening test, B.Cu):
 

@@ -14,7 +14,7 @@ import rules  # noqa: E402
 import gen_rules  # noqa: E402
 import variant  # noqa: E402
 
-BASE = os.path.join(paths.PCB_DIR, "fabhouse")
+BASE = paths.base_board_dir()
 MILL = os.path.join(paths.PCB_DIR, "mill")
 MILL_RULES = os.path.join(lab.lab_dir(), rules.FILE_NAME)
 
@@ -75,6 +75,14 @@ class TestLoad(unittest.TestCase):
         r = dataclasses.replace(rules.load(MILL_RULES), track_min=0.3)
         lim = {"track_min": {"value": 0.5}, "edge_clearance": {"value": 0.5}, "annular_min": {"value": 0.45}}
         self.assertEqual(len(rules.check_against_lab(r, lim)), 1)
+
+
+class TestBaseBoard(unittest.TestCase):
+    def test_makefile_base_board_is_the_paths_default(self):
+        # one owner for the default board: paths.DEFAULT_BOARD; the Makefile keeps a copy for make
+        with open(os.path.join(paths.REPO_ROOT, "Makefile"), encoding="utf-8") as f:
+            line = next(ln for ln in f if ln.startswith("BASE_BOARD"))
+        self.assertEqual(line.split(":=", 1)[1].strip(), paths.DEFAULT_BOARD.replace(os.sep, "/"))
 
 
 class TestGenRules(unittest.TestCase):

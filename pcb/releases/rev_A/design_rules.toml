@@ -1,5 +1,5 @@
-# Design rules of the rev A board (fab house quality). Format and keys: pcb/tools/rules.py, docs in docs/pcb/README.md.
-# These are the values of the rev A design. `make pcb-rules BOARD=fabhouse` checks that the KiCad project files agree.
+# Design rules of the rev A board (fab house quality). Format and keys: pcb/libraries/rules.py, docs in docs/pcb/README.md.
+# These are the values of the rev A design. `make pcb-rules` (base board) checks that the KiCad project files agree.
 # The mill prototype uses a different file: design_rules.toml in the lab directory.
 
 [horizontal_error]
