@@ -21,3 +21,10 @@ STEM = "rc_power_board"
 
 def board_dir():
     return os.path.abspath(os.environ.get("BOARD_DIR") or os.path.join(PCB_DIR, DEFAULT_BOARD))
+
+
+def review_dir():
+    """Review files of the selected board: docs/pcb/review for the base board, review/ of the lab directory for a mill board."""
+    import lab
+    board = os.path.basename(board_dir())
+    return os.path.join(DOCS_DIR, "review") if board == DEFAULT_BOARD else os.path.join(lab.lab_dir(), "review")

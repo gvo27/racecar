@@ -1,4 +1,4 @@
-"""Write the review files for the rev A board into docs/pcb/review/. Make target: pcb-review.
+"""Write the review files for the rev A board into the review directory of the board (paths.review_dir()). Make target: pcb-review.
 
   drc.json                     kicad-cli DRC with schematic parity
   milling_check.json           milling check (groups: errors, waived, questions, bits, warnings)
@@ -31,7 +31,7 @@ def run(cmd):
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--board", default=os.path.join(SCH_DIR, "rc_power_board.kicad_pcb"))
-    ap.add_argument("--out", default=os.path.join(paths.DOCS_DIR, "review"))
+    ap.add_argument("--out", default=paths.review_dir())
     args = ap.parse_args(argv)
     os.makedirs(args.out, exist_ok=True)
     drc = os.path.join(args.out, "drc.json")

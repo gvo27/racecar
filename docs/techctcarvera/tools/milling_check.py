@@ -456,25 +456,31 @@ def check_cut_spacing(ctx, out):
 
 
 def check_component_gap(ctx, out):
-    """Design rules: the courtyards of two parts on one side of the board are at least component_gap apart."""
+    """Design rules: pads of two different parts on different nets are at least component_gap apart on each copper layer.
+    The mill cuts between them, so close parts need an accurate cut. A part with an [[exception]] is left out: its own
+    pad gaps are the smaller ones, and MILL-GAP-FIXED lists them."""
     rules = ctx.rules
     if not rules or rules.component_gap <= 0:
         return
     gap = FromMM(rules.component_gap)
-    cys = []
-    for fp in ctx.b.GetFootprints():
-        fp.BuildCourtyardCaches()
-        front = fp.GetLayer() == pcbnew.F_Cu
-        cy = fp.GetCourtyard(pcbnew.F_CrtYd if front else pcbnew.B_CrtYd)
-        if cy.OutlineCount():
-            cys.append((fp.GetReference(), front, cy))
-    for i, (ra, sa, ca) in enumerate(cys):
-        for rb, sb, cb in cys[i + 1:]:
-            if sa != sb or not ca.BBox().GetInflated(gap).Intersects(cb.BBox()) or not ca.Collide(cb, gap - 1000):
-                continue
-            d = distance_nm(ca, cb, gap)
-            out.append(("MILL-COMP-GAP", "error", "%s and %s on %s" % (ra, rb, "F" if sa else "B"), d, rules.component_gap,
-                        "courtyard gap %.2f mm is below the component gap %.2f mm" % (d, rules.component_gap)))
+    exc = {e.ref for e in rules.exceptions}
+    seen = {}
+    for layer in copper_layers(ctx.b):
+        pads = [it for it in collect(ctx, layer) if it.kind == "pad" and it.ref not in exc]
+        for i, a in enumerate(pads):
+            abb = a.bbox.GetInflated(gap)
+            for c in pads[i + 1:]:
+                if a.ref == c.ref or (a.net != 0 and a.net == c.net) or not abb.Intersects(c.bbox):
+                    continue
+                if not a.shape.Collide(c.shape, gap - 1000):
+                    continue
+                d = distance_nm(a.shape, c.shape, gap)
+                key = tuple(sorted((a.ref, c.ref)))
+                if key not in seen or d < seen[key][0]:
+                    seen[key] = (d, "%s | %s" % (a.desc, c.desc))
+    for (ra, rb), (d, where) in sorted(seen.items()):
+        out.append(("MILL-COMP-GAP", "error", where, d, rules.component_gap,
+                    "pad gap %.2f mm between %s and %s is below the component gap %.2f mm" % (d, ra, rb, rules.component_gap)))
 
 
 def check_islands(ctx, out):

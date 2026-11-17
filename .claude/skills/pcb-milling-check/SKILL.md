@@ -27,6 +27,10 @@ KiCad DRC checks the numbers in `rc_power_board.kicad_pro` and `.kicad_dru`. It 
 | MILL-EDGE | Copper-to-board-edge distance >= the configured edge clearance | error |
 | MILL-RIVET-ACCESS | A rivet via must be solderable on both sides: no via inside the courtyard of an F-side part (its body covers the top joint) or of a B-side part | error |
 | MILL-CONN-EDGE | Each connector (J*) courtyard is within the configured distance of the board edge (wire entry outward) | warning |
+| MILL-GAP (design rules) | With design rules that have a `horizontal_error`: each gap >= cut width + 2 x `horizontal_error` | error |
+| MILL-GAP-FIXED | A gap below that value that the design cannot change: two pads of one footprint, or a part with an `[[exception]]` in the design rules. Listed for the lab tech | warning |
+| MILL-CUT-SPACING | Tracks and zone copper narrower than the copper target (`cut_spacing_min` - `clearance`). Shows the thin areas | warning |
+| MILL-COMP-GAP | Pads of two different parts on different nets are at least `component_gap` apart. Parts with an `[[exception]]` are left out | error |
 
 ## Loop: run, triage, fix, run again
 1. **Run** the check.
@@ -38,6 +42,7 @@ KiCad DRC checks the numbers in `rc_power_board.kicad_pro` and `.kicad_dru`. It 
 Three groups: **errors** (unwaived), **waived** (with the reason), **owner/lab-tech questions** (limits that are assumed and change the result, for example MILL-DEPTH). Add the MILL-GAP-BIT areas.
 
 ## Rules for agents
+- The last four rows read the design rules of the board (`design_rules.toml`: board directory, else lab directory; `pcb/tools/rules.py`). Do not change a design rule to make a board pass without a statement of the owner or the lab tech.
 - Run it after every board change and before any review request. Report the counts, every error and the MILL-GAP-BIT areas.
 - Never claim "millable" or "ready to mill". The most you can say is "passes the milling check with the assumed limits", until the lab tech confirms the limits and the owner signs off.
 - Fix a finding on the board (move, re-route, change a footprint through the schematic). Do not weaken `milling.toml`.

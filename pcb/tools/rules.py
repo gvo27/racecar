@@ -38,6 +38,7 @@ class Exception_:
     ref: str
     clearance: float
     reason: str
+    zones: bool = False  # True: the lower clearance is also valid for zone fill (planned zones at the part)
 
 
 @dataclass
@@ -120,9 +121,9 @@ def load(path=None):
         for k in ("ref", "clearance", "reason"):
             if not e.get(k):
                 raise ValueError("%s: exception %r: missing field %s" % (path, e, k))
-        if set(e) - {"ref", "clearance", "reason"}:
+        if set(e) - {"ref", "clearance", "reason", "zones"}:
             raise ValueError("%s: exception %s: unknown field" % (path, e["ref"]))
-        exc.append(Exception_(e["ref"], float(e["clearance"]), e["reason"]))
+        exc.append(Exception_(e["ref"], float(e["clearance"]), e["reason"], bool(e.get("zones", False))))
     parts = raw.get("parts", {})
     if set(parts) - {"exclude", "reason"}:
         raise ValueError("%s: [parts] has unknown keys" % path)

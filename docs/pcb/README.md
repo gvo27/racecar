@@ -23,6 +23,10 @@ Layout since 2026-11-16: the KiCad project, the libraries, the tools and the fab
 | `pcb/fabhouse/rc_power_board.pdf` | Plot of the sheet, for review without KiCad. |
 | `pcb/fabhouse/.kicad-happy.json` | Config for the kicad-happy Claude plugin (analysis output in `analysis/`, gitignored except the manifest). |
 
+## Mill prototype
+
+A second board, `pcb/mill/`, is the coarse copy of this board for the lab mill: no LEDs (D2 to D4) and no LED resistors (R1 to R3), wider tracks and gaps. This is a deviation from `power_board_plan.md` for the prototype only. Its rules, its review record and the tuning steps are in the lab directory (`design_rules.toml`, `review/README.md`, `README.md`).
+
 ## KiCad version
 
 The project version is **KiCad 10.0**; KiCad 9 or older cannot open a KiCad 10 save.

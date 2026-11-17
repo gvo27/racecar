@@ -21,12 +21,13 @@ import rules  # noqa: E402
 DRU_RULE = re.compile(r'\(rule\s+(\S+)\s+\(condition\s+"([^"]*)"\)\s+\(constraint\s+clearance\s+\(min\s+([0-9.]+)mm\)\)\s*\)', re.S)
 
 
-def condition(ref):
-    return "A.Type == 'Pad' && A.Reference == '%s' && B.Type != 'Zone'" % ref
+def condition(e):
+    base = "A.Type == 'Pad' && A.Reference == '%s'" % e.ref
+    return base if e.zones else base + " && B.Type != 'Zone'"
 
 
 def want_dru(r):
-    return [("%s_fine" % e.ref, condition(e.ref), e.clearance) for e in r.exceptions]
+    return [("%s_fine" % e.ref, condition(e), e.clearance) for e in r.exceptions]
 
 
 def read_dru(path):
@@ -40,18 +41,20 @@ def dru_text(r):
     out = ["(version 1)", "",
            "# Made by pcb/tools/gen_rules.py from the [[exception]] entries of the design rules (%s)." % os.path.basename(r.path),
            "# Do not edit: change the design rules, then run `make pcb-rules`. Zone fill is not covered: a pour keeps the",
-           "# zone clearance from these pads."]
+           "# zone clearance from these pads, unless the exception has zones = true."]
     for e in r.exceptions:
         out += ["# %s: %s" % (e.ref, e.reason),
-                "(rule %s_fine" % e.ref, '\t(condition "%s")' % condition(e.ref),
+                "(rule %s_fine" % e.ref, '\t(condition "%s")' % condition(e),
                 "\t(constraint clearance (min %smm))" % ("%g" % e.clearance), ")"]
     return "\n".join(out) + "\n"
 
 
 def want_pro(r, via_drill, via_pad):
     """(path in the JSON, wanted value) pairs."""
-    # min_clearance stays the board clearance: the exception rules of the .kicad_dru go below it for their parts only
-    w = [(("board", "design_settings", "rules", "min_clearance"), r.clearance),
+    # min_clearance is the board clearance: the exception rules of the .kicad_dru go below it for their parts only.
+    # An exception with zones = true puts the lower clearance on the pads (build_pcb.py), and KiCad reports a pad
+    # clearance below min_clearance, so min_clearance is then the lowest of these exceptions.
+    w = [(("board", "design_settings", "rules", "min_clearance"), min([r.clearance] + [e.clearance for e in r.exceptions if e.zones])),
          (("board", "design_settings", "rules", "min_track_width"), r.track_min),
          (("board", "design_settings", "rules", "min_copper_edge_clearance"), r.edge_clearance),
          (("board", "design_settings", "rules", "min_via_annular_width"), r.annular_min)]

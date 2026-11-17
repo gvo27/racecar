@@ -18,7 +18,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import build_pcb  # noqa: E402
 import placement  # noqa: E402
 
-NOT_ROUTED = ("GND", "VBAT", "/VBAT_RAW", "+5V_CPU", "+5V_SENS", "/U1_PG")  # planned zones, the GND pour and planned jumpers (placement.py)
+# planned zones, the GND pour and planned jumpers (placement file of the board): the router does not get these nets
+NOT_ROUTED = tuple(sorted({"GND"} | {row[0] for row in placement.BUS_ZONES} | {j["net"] for j in placement.JUMPERS}))
 RULES = build_pcb.RULES  # design rules of the board (design_rules.toml)
 VIA_DRILL, VIA_PAD = build_pcb.VIA_DRILL, build_pcb.VIA_PAD
 EDGE_BAND = float(os.environ.get("ROUTE_EDGE_BAND", RULES.edge_band))
@@ -92,7 +93,7 @@ def prepare(board_path, dsn_path, allow_vias=False):
             ol.Append(q)
         work.Add(z)
     # bus zones are obstacles for the router
-    for _, pts in placement.BUS_ZONES:
+    for pts in (row[1] for row in placement.BUS_ZONES):
         z = pcbnew.ZONE(work)
         z.SetIsRuleArea(True)
         z.SetLayer(pcbnew.B_Cu)
@@ -211,7 +212,7 @@ def add_jumpers(board):
                 return p.GetPosition()
         raise RuntimeError("no pad %s.%s" % (ref, num))
 
-    def track(a, b, layer, net, width=RULES.track_width["Default"]):
+    def track(a, b, layer, net, width=RULES.track_min):  # widen_tracks sets the net-class width where it fits
         t = pcbnew.PCB_TRACK(board)
         t.SetStart(a)
         t.SetEnd(b)

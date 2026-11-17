@@ -286,7 +286,7 @@ class TestOutputs(unittest.TestCase):
                     self.assertTrue(covered((x, y), bcu), "B.Cu pad %s.%s at %.2f, %.2f" % (fp.GetReference(), pad.GetNumber(), x, y))
                 if pad.IsOnLayer(pcbnew.F_Cu) and pad.GetAttribute() == pcbnew.PAD_ATTRIB_SMD:
                     self.assertTrue(covered((x, y), fcu))
-        self.assertGreater(n_b, 100)
+        self.assertGreater(n_b, 80)  # sanity: the loop saw the pads (rev A has 106, the mill board 94)
 
     def test_holes_centered_on_b_cu_pads(self):
         bcu = self.copper_loops("rc_power_board-B_Cu.dxf")

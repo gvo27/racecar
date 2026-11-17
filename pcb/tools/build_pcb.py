@@ -245,8 +245,10 @@ def add_power_zones(board, netinfo):
     # F.Cu islands below PIECE_MIN_MM2 are removed (the pour joins B.Cu GND only through rivet vias).
     add_zone(board, gnd, pcbnew.F_Cu, outline, pcbnew.ZONE_CONNECTION_NONE, prio=0, name="GND_F", island_area_mm2=PIECE_MIN_MM2)
     add_zone(board, gnd, pcbnew.B_Cu, outline, pcbnew.ZONE_CONNECTION_FULL, prio=0, name="GND_B")
-    for i, (net, pts) in enumerate(placement.BUS_ZONES):
-        add_zone(board, netinfo[net], pcbnew.B_Cu, pts, pcbnew.ZONE_CONNECTION_FULL, prio=10 + i, name="BUS_%s_%d" % (net.lstrip("/"), i))
+    # a BUS_ZONES row is (net, points) or (net, points, {"clearance": mm, "min_w": mm}) for a fine zone at an exception part
+    for i, row in enumerate(placement.BUS_ZONES):
+        net, pts, opts = row[0], row[1], (row[2] if len(row) > 2 else {})
+        add_zone(board, netinfo[net], pcbnew.B_Cu, pts, pcbnew.ZONE_CONNECTION_FULL, prio=10 + i, name="BUS_%s_%d" % (net.lstrip("/"), i), **opts)
 
 
 def draw_stock(board):
@@ -302,7 +304,7 @@ def sync_zones(board_path):
     """Rebuild all zones of an existing board from placement.py and refill them. Parts, tracks and vias stay."""
     board = pcbnew.LoadBoard(board_path)
     old = list(board.Zones())
-    netinfo = {n: board.FindNet(n) for n in {"GND"} | {n for n, _ in placement.BUS_ZONES}}
+    netinfo = {n: board.FindNet(n) for n in {"GND"} | {row[0] for row in placement.BUS_ZONES}}
     add_power_zones(board, netinfo)
     for z in old:  # (the old zones go last: pcbnew Python loses the ZONE type after the last zone is removed)
         board.Remove(z)
@@ -364,6 +366,11 @@ def build(out_path, sch_dir=SCH_DIR):
             if net is not None and pad.GetNumber() != "":
                 pad.SetNet(net)
             fit_pad(pad, ref)
+            # [[exception]] with zones = true: the pad carries the lower clearance, so the zone filler uses it too
+            # (pcbnew Python fills zones without the custom rules of the .kicad_dru)
+            exc = RULES.exception_for(ref)
+            if exc is not None and exc.zones:
+                pad.SetLocalClearance(FromMM(exc.clearance))
         x, y, rot, side = placement.PLACEMENT[ref]
         fp.SetPosition(pt(x, y))
         fp.SetOrientationDegrees(rot)

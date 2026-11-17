@@ -1,0 +1,544 @@
+{
+ "errors": [],
+ "questions": [],
+ "bits": [],
+ "warnings": [
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U3.1 B.Cu net /LDO_IN at (50.95, -102.16) | pad U3.2 B.Cu net GND at (50.00, -102.16)",
+   0.350005,
+   0.49237604307034016,
+   "gap 0.350 mm is below cut width 0.292 mm + 2 x horizontal error 0.10 mm = 0.492 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U3.1 B.Cu net /LDO_IN at (50.95, -102.16) | zone fill B.Cu net GND",
+   0.350005,
+   0.49237604307034016,
+   "gap 0.350 mm is below cut width 0.292 mm + 2 x horizontal error 0.10 mm = 0.492 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U3.1 B.Cu net /LDO_IN at (50.95, -102.16) | zone fill B.Cu net GND",
+   0.30053,
+   0.49237604307034016,
+   "gap 0.301 mm is below cut width 0.292 mm + 2 x horizontal error 0.10 mm = 0.492 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U3.2 B.Cu net GND at (50.00, -102.16) | pad U3.3 B.Cu net /LDO_IN at (49.05, -102.16)",
+   0.350005,
+   0.49237604307034016,
+   "gap 0.350 mm is below cut width 0.292 mm + 2 x horizontal error 0.10 mm = 0.492 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U3.2 B.Cu net GND at (50.00, -102.16) | zone fill B.Cu net /LDO_IN",
+   0.350578,
+   0.49237604307034016,
+   "gap 0.351 mm is below cut width 0.292 mm + 2 x horizontal error 0.10 mm = 0.492 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U3.2 B.Cu net GND at (50.00, -102.16) | zone fill B.Cu net /LDO_IN",
+   0.350578,
+   0.49237604307034016,
+   "gap 0.351 mm is below cut width 0.292 mm + 2 x horizontal error 0.10 mm = 0.492 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U3.3 B.Cu net /LDO_IN at (49.05, -102.16) | zone fill B.Cu net GND",
+   0.350005,
+   0.49237604307034016,
+   "gap 0.350 mm is below cut width 0.292 mm + 2 x horizontal error 0.10 mm = 0.492 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U3.3 B.Cu net /LDO_IN at (49.05, -102.16) | zone fill B.Cu net GND",
+   0.3005,
+   0.49237604307034016,
+   "gap 0.300 mm is below cut width 0.292 mm + 2 x horizontal error 0.10 mm = 0.492 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U3.4 B.Cu net unconnected-(U3-NC-Pad4) at (49.05, -104.44) | zone fill B.Cu net GND",
+   0.350005,
+   0.49237604307034016,
+   "gap 0.350 mm is below cut width 0.292 mm + 2 x horizontal error 0.10 mm = 0.492 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U3.4 B.Cu net unconnected-(U3-NC-Pad4) at (49.05, -104.44) | zone fill B.Cu net GND",
+   0.30053,
+   0.49237604307034016,
+   "gap 0.301 mm is below cut width 0.292 mm + 2 x horizontal error 0.10 mm = 0.492 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U3.5 B.Cu net +3V3_SENS at (50.95, -104.44) | zone fill B.Cu net GND",
+   0.350005,
+   0.49237604307034016,
+   "gap 0.350 mm is below cut width 0.292 mm + 2 x horizontal error 0.10 mm = 0.492 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U3.5 B.Cu net +3V3_SENS at (50.95, -104.44) | zone fill B.Cu net GND",
+   0.30053,
+   0.49237604307034016,
+   "gap 0.301 mm is below cut width 0.292 mm + 2 x horizontal error 0.10 mm = 0.492 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-SLIVER",
+   "warning",
+   "zone fill B.Cu net GND at (49.50, -105.34)",
+   0.0536691478625,
+   0.5,
+   "zone fill has copper narrower than 0.50 mm (0.05 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-SLIVER",
+   "warning",
+   "zone fill B.Cu net GND at (50.49, -105.38)",
+   0.0751761823925,
+   0.5,
+   "zone fill has copper narrower than 0.50 mm (0.08 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-ISLAND",
+   "warning",
+   "zone fill B.Cu net +5V_SENS at (26.10, -100.40)",
+   9.0578682e-05,
+   null,
+   "zone island touches no item of net +5V_SENS"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "track B.Cu net /THROTTLE_PWM at (4.64, -58.77)",
+   1.125,
+   1.5,
+   "track 1.12 mm wide, 2.0 mm long: below the copper target 1.50 mm (cut spacing 2.0 mm - clearance 0.50 mm)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "track B.Cu net /THROTTLE_PWM at (4.64, -59.14)",
+   1.4,
+   1.5,
+   "track 1.40 mm wide, 0.4 mm long: below the copper target 1.50 mm (cut spacing 2.0 mm - clearance 0.50 mm)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "track B.Cu net /U1_PG at (40.40, -43.89)",
+   0.9,
+   1.5,
+   "track 0.90 mm wide, 5.9 mm long: below the copper target 1.50 mm (cut spacing 2.0 mm - clearance 0.50 mm)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "zone fill F.Cu net GND at (4.32, -1.27)",
+   0.9482344102465,
+   1.5,
+   "zone fill has copper narrower than the copper target 1.50 mm (0.95 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "zone fill F.Cu net GND at (61.68, -1.27)",
+   0.9482341084585,
+   1.5,
+   "zone fill has copper narrower than the copper target 1.50 mm (0.95 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "zone fill F.Cu net GND at (1.31, -4.32)",
+   0.9482361531135,
+   1.5,
+   "zone fill has copper narrower than the copper target 1.50 mm (0.95 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "zone fill F.Cu net GND at (64.69, -4.32)",
+   0.948234911976,
+   1.5,
+   "zone fill has copper narrower than the copper target 1.50 mm (0.95 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "zone fill F.Cu net GND at (1.30, -42.50)",
+   2.0445707091945,
+   1.5,
+   "zone fill has copper narrower than the copper target 1.50 mm (2.04 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "zone fill F.Cu net GND at (1.31, -45.00)",
+   0.6859167910025,
+   1.5,
+   "zone fill has copper narrower than the copper target 1.50 mm (0.69 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "zone fill F.Cu net GND at (1.31, -47.50)",
+   0.6859168765075,
+   1.5,
+   "zone fill has copper narrower than the copper target 1.50 mm (0.69 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "zone fill F.Cu net GND at (41.41, -47.99)",
+   0.865131918404,
+   1.5,
+   "zone fill has copper narrower than the copper target 1.50 mm (0.87 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "zone fill F.Cu net GND at (1.33, -52.10)",
+   1.0821889312575,
+   1.5,
+   "zone fill has copper narrower than the copper target 1.50 mm (1.08 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "zone fill F.Cu net GND at (1.30, -56.70)",
+   2.0464498918195,
+   1.5,
+   "zone fill has copper narrower than the copper target 1.50 mm (2.05 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "zone fill F.Cu net GND at (1.31, -59.20)",
+   0.6859167910025,
+   1.5,
+   "zone fill has copper narrower than the copper target 1.50 mm (0.69 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "zone fill F.Cu net GND at (1.31, -61.70)",
+   0.6859168765075,
+   1.5,
+   "zone fill has copper narrower than the copper target 1.50 mm (0.69 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "zone fill F.Cu net GND at (1.31, -64.20)",
+   0.6859168765075,
+   1.5,
+   "zone fill has copper narrower than the copper target 1.50 mm (0.69 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "zone fill F.Cu net GND at (1.31, -66.70)",
+   0.6859155871065,
+   1.5,
+   "zone fill has copper narrower than the copper target 1.50 mm (0.69 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "zone fill F.Cu net GND at (1.32, -69.20)",
+   0.683060002359,
+   1.5,
+   "zone fill has copper narrower than the copper target 1.50 mm (0.68 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "zone fill F.Cu net GND at (1.27, -135.68)",
+   0.948235184329,
+   1.5,
+   "zone fill has copper narrower than the copper target 1.50 mm (0.95 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "zone fill F.Cu net GND at (64.73, -135.68)",
+   0.9482340497605,
+   1.5,
+   "zone fill has copper narrower than the copper target 1.50 mm (0.95 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "zone fill F.Cu net GND at (4.32, -138.73)",
+   0.948239113414,
+   1.5,
+   "zone fill has copper narrower than the copper target 1.50 mm (0.95 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "zone fill F.Cu net GND at (61.68, -138.73)",
+   0.948241127286,
+   1.5,
+   "zone fill has copper narrower than the copper target 1.50 mm (0.95 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "zone fill B.Cu net +5V_CPU at (53.48, -50.30)",
+   2.20819397286,
+   1.5,
+   "zone fill has copper narrower than the copper target 1.50 mm (2.21 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "zone fill B.Cu net +5V_SENS at (6.40, -98.62)",
+   1.5674289390615,
+   1.5,
+   "zone fill has copper narrower than the copper target 1.50 mm (1.57 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "zone fill B.Cu net /LDO_IN at (49.05, -101.35)",
+   0.627516914051,
+   1.5,
+   "zone fill has copper narrower than the copper target 1.50 mm (0.63 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "zone fill B.Cu net /LDO_IN at (50.95, -101.35)",
+   0.627516914051,
+   1.5,
+   "zone fill has copper narrower than the copper target 1.50 mm (0.63 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "zone fill B.Cu net GND at (50.00, -104.50)",
+   2.5199999532585,
+   1.5,
+   "zone fill has copper narrower than the copper target 1.50 mm (2.52 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "zone fill B.Cu net +3V3_SENS at (53.42, -104.44)",
+   6.7689052923605,
+   1.5,
+   "zone fill has copper narrower than the copper target 1.50 mm (6.77 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "zone fill B.Cu net +3V3_SENS at (56.50, -107.60)",
+   2.065436409392,
+   1.5,
+   "zone fill has copper narrower than the copper target 1.50 mm (2.07 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "zone fill B.Cu net +3V3_SENS at (56.50, -116.60)",
+   2.065435409392,
+   1.5,
+   "zone fill has copper narrower than the copper target 1.50 mm (2.07 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "zone fill B.Cu net +3V3_SENS at (56.50, -125.25)",
+   1.926042675646,
+   1.5,
+   "zone fill has copper narrower than the copper target 1.50 mm (1.93 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "zone fill B.Cu net +5V_SENS at (26.65, -69.05)",
+   1.832910475668,
+   1.5,
+   "zone fill has copper narrower than the copper target 1.50 mm (1.83 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "zone fill B.Cu net +5V_SENS at (27.50, -86.50)",
+   3.1654364175295,
+   1.5,
+   "zone fill has copper narrower than the copper target 1.50 mm (3.17 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "zone fill B.Cu net GND at (4.33, -1.27)",
+   0.9308258667285,
+   1.5,
+   "zone fill has copper narrower than the copper target 1.50 mm (0.93 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "zone fill B.Cu net GND at (61.67, -1.31)",
+   0.930829031745,
+   1.5,
+   "zone fill has copper narrower than the copper target 1.50 mm (0.93 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "zone fill B.Cu net GND at (64.73, -4.33)",
+   0.9308238538795,
+   1.5,
+   "zone fill has copper narrower than the copper target 1.50 mm (0.93 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "zone fill B.Cu net GND at (1.31, -4.33)",
+   0.9308291740505,
+   1.5,
+   "zone fill has copper narrower than the copper target 1.50 mm (0.93 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "zone fill B.Cu net GND at (17.03, -41.98)",
+   1.244271055367,
+   1.5,
+   "zone fill has copper narrower than the copper target 1.50 mm (1.24 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "zone fill B.Cu net GND at (44.96, -42.02)",
+   1.396565989011,
+   1.5,
+   "zone fill has copper narrower than the copper target 1.50 mm (1.40 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "zone fill B.Cu net GND at (1.31, -45.00)",
+   0.6859179515925,
+   1.5,
+   "zone fill has copper narrower than the copper target 1.50 mm (0.69 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "zone fill B.Cu net GND at (1.31, -47.50)",
+   0.6859179515925,
+   1.5,
+   "zone fill has copper narrower than the copper target 1.50 mm (0.69 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "zone fill B.Cu net GND at (5.23, -51.31)",
+   0.7701065280795,
+   1.5,
+   "zone fill has copper narrower than the copper target 1.50 mm (0.77 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "zone fill B.Cu net GND at (1.37, -52.15)",
+   1.083450252056,
+   1.5,
+   "zone fill has copper narrower than the copper target 1.50 mm (1.08 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "zone fill B.Cu net GND at (1.30, -56.70)",
+   2.04804793727,
+   1.5,
+   "zone fill has copper narrower than the copper target 1.50 mm (2.05 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "zone fill B.Cu net GND at (1.31, -59.20)",
+   0.685916614863,
+   1.5,
+   "zone fill has copper narrower than the copper target 1.50 mm (0.69 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "zone fill B.Cu net GND at (1.31, -61.70)",
+   0.6859179515925,
+   1.5,
+   "zone fill has copper narrower than the copper target 1.50 mm (0.69 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "zone fill B.Cu net GND at (1.31, -64.20)",
+   0.6859179515925,
+   1.5,
+   "zone fill has copper narrower than the copper target 1.50 mm (0.69 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "zone fill B.Cu net GND at (1.31, -66.70)",
+   0.6859179515925,
+   1.5,
+   "zone fill has copper narrower than the copper target 1.50 mm (0.69 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "zone fill B.Cu net GND at (1.27, -135.67)",
+   0.930827560827,
+   1.5,
+   "zone fill has copper narrower than the copper target 1.50 mm (0.93 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "zone fill B.Cu net GND at (64.73, -135.67)",
+   0.930827050032,
+   1.5,
+   "zone fill has copper narrower than the copper target 1.50 mm (0.93 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "zone fill B.Cu net GND at (4.33, -138.73)",
+   0.9308239350365,
+   1.5,
+   "zone fill has copper narrower than the copper target 1.50 mm (0.93 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "zone fill B.Cu net GND at (61.67, -138.69)",
+   0.9306913127045,
+   1.5,
+   "zone fill has copper narrower than the copper target 1.50 mm (0.93 mm2 removed by an opening test)"
+  ]
+ ],
+ "waived": []
+}
