@@ -12,10 +12,11 @@ from pcbnew import FromMM, ToMM
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import lab  # noqa: E402
+import paths  # noqa: E402
 import milling_check as mc  # noqa: E402
 import placement  # noqa: E402
 
-SCH_DIR = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+SCH_DIR = paths.board_dir()
 HIGH_CURRENT_MIN_W = 6.0
 HIGH_CURRENT_NETS = ("VBAT_RAW", "VBAT")
 
@@ -289,7 +290,7 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("board")
     ap.add_argument("--limits", default=lab.limits_file())
-    ap.add_argument("--waivers", default=os.path.join(SCH_DIR, "milling_waivers.toml"))
+    ap.add_argument("--waivers", default=lab.waivers_file())
     ap.add_argument("--widths", action="store_true", help="(default, kept for old calls) print the measured opening per path row")
     args = ap.parse_args(argv)
     board = pcbnew.LoadBoard(args.board)

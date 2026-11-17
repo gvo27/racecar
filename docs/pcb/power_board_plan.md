@@ -2,7 +2,7 @@
 
 Exported 2026-11-06 from the live doc: https://claude.ai/artifact/G7oi8ZxQaXkXNUEQmDbfmX (edit there, re-export here). Build guide and background for the schematic in this folder (`rc_power_board.kicad_sch`). Project KiCad version: 10.0.
 
-> **For the design meeting:** the one-page summary of the current schematic is `docs/schematics/design_overview.md`. This guide is the step-by-step build and background reference.
+> **For the design meeting:** the one-page summary of the current schematic is `docs/pcb/design_overview.md`. This guide is the step-by-step build and background reference.
 
 ## Overview
 
@@ -25,11 +25,11 @@ Everything hangs off one fused `VBAT` bus: a single replaceable main fuse protec
 
 **How the work flows.** You draw the schematic (a logical wiring diagram), assign each symbol a physical footprint, lay out the PCB (where copper actually goes), and export Gerber files that a fab house (JLCPCB, PCBWay, OSH Park) turns into a board. This guide gets you through the schematic in detail and sketches the later steps so you and the reviewer share vocabulary.
 
-> **Rev A is milled in-house** on the lab's Makera Carvera from 2 oz double-sided FR-4 (no plated holes; vias are LPKF EasyContac 0.8 mm rivets from the lab kit, 1.1 mm drill, 2.0 mm pad). The repo's `docs/schematics/fab_handoff.md` part A has the milling workflow; the fab-house steps in this guide apply to later revisions.
+> **Rev A is milled in-house** on the lab's Makera Carvera from 2 oz double-sided FR-4 (no plated holes; vias are LPKF EasyContac 0.8 mm rivets from the lab kit, 1.1 mm drill, 2.0 mm pad). The repo's `docs/pcb/fab_handoff.md` part A has the milling workflow; the fab-house steps in this guide apply to later revisions.
 
 **What a good review draft contains:** a clean, readable schematic PDF; the KiCad project folder (zipped or in git); the power budget table below; and a list of open questions. Reviewers spend their time on design when the drawing itself is tidy, so the formatting section matters as much as the electrical one.
 
-> **Repo note:** the KiCad project lives next to this file in `docs/schematics/`; see `README.md` there. The invariant "ESP32 powers nothing" from the project rules is what this board makes true.
+> **Repo note:** the KiCad project is in `pcb/fabhouse/`; see `README.md` next to this file. The invariant "ESP32 powers nothing" from the project rules is what this board makes true.
 
 ## Electrical background for a first board
 

@@ -1,6 +1,6 @@
 ---
 name: pcb-milling-check
-description: Use when a .kicad_pcb in docs/schematics/ is created, changed, re-routed or reviewed, or before any claim that the power board is millable. Checks the board against the isolation-milling limits of the lab mill (V-bit cut width at depth, copper gaps, drill set, annular ring, unplated-hole rules, slivers, islands). DRC-clean does not mean CNC-millable.
+description: Use when a .kicad_pcb in pcb/ is created, changed, re-routed or reviewed, or before any claim that the power board is millable. Checks the board against the isolation-milling limits of the lab mill (V-bit cut width at depth, copper gaps, drill set, annular ring, unplated-hole rules, slivers, islands). DRC-clean does not mean CNC-millable.
 ---
 
 # PCB milling check (in-house isolation milling)
@@ -8,8 +8,8 @@ description: Use when a .kicad_pcb in docs/schematics/ is created, changed, re-r
 KiCad DRC checks the numbers in `rc_power_board.kicad_pro` and `.kicad_dru`. It does not know the cutter. This skill checks the board against the tool that removes the copper.
 
 ## Run
-- `make pcb-mill-check`. The check runs `docs/schematics/tools/milling_check.py` in the pinned KiCad 10 image.
-- Output: `docs/schematics/review/milling_check.json` and a text summary. Exit code 0 = no errors, 1 = errors, 2 = the check could not run.
+- `make pcb-mill-check`. The check runs `tools/milling_check.py` in the lab directory in the pinned KiCad 10 image.
+- Output: `docs/pcb/review/milling_check.json` and a text summary. Exit code 0 = no errors, 1 = errors, 2 = the check could not run.
 - Limits: `milling.toml` in the lab directory (`lab:` in `.claude/CLAUDE.md`). Every value there is `confirmed` or `assumed`. Assumed values stay assumed until the lab tech confirms them. Do not change a limit to make a board pass. To add or change a lab fact (machine, bits, stock, depth), use the skill `pcb-lab-config`.
 
 ## What it checks (rule ids)
@@ -30,7 +30,7 @@ KiCad DRC checks the numbers in `rc_power_board.kicad_pro` and `.kicad_dru`. It 
 
 ## Loop: run, triage, fix, run again
 1. **Run** the check.
-2. **Triage** each finding as real or false positive. A false positive needs a waiver in `docs/schematics/milling_waivers.toml`: rule id, location (ref/net/xy), the reason in one sentence, who, date. The check reports waived findings in their own group; it never hides them. Never waive MILL-FCU-THT or MILL-RIVET-ACCESS. MILL-DEPTH is a finding about the limits (the lab tech decides), not about the board.
+2. **Triage** each finding as real or false positive. A false positive needs a waiver in `milling_waivers.toml` in the lab directory: rule id, location (ref/net/xy), the reason in one sentence, who, date. The check reports waived findings in their own group; it never hides them. Never waive MILL-FCU-THT or MILL-RIVET-ACCESS. MILL-DEPTH is a finding about the limits (the lab tech decides), not about the board.
 3. **Fix** the real findings. First try fixes that do not move parts: neck a track down (never below its net-class width), change a zone clearance, change a pad shape in the board copy. If one region keeps failing, re-lay that whole region, or swap equivalent pins through the schematic. Do not stack local patches or add rivets to escape a crowded area.
 4. **Run again** until there are 0 unwaived errors. A board that is "nearly clean" is not done: report the open errors, not a percentage.
 

@@ -4,8 +4,7 @@
 _autosave-*
 fp-info-cache
 *.kicad_prl
-# kicad-happy: keep analysis/manifest.json, ignore per-run JSON (track_in_git: false)
-analysis/*/
+# kicad-happy: the analysis output is in docs/pcb/analysis (see .kicad-happy.json and docs/pcb/.gitignore)
 datasheets/*.pdf
 spice/
 # core dumps of the tools (python3 in the KiCad image)

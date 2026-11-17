@@ -19,10 +19,12 @@ import pcbnew
 from pcbnew import FromMM, ToMM
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(1, os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "pcb", "tools")))  # lab.py, paths.py, placement.py
 import lab  # noqa: E402
+import paths  # noqa: E402
 import placement  # noqa: E402
 
-SCH_DIR = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+SCH_DIR = paths.board_dir()
 STEM = "rc_power_board"
 FILES = [STEM + "-F_Cu.dxf", STEM + "-B_Cu.dxf", STEM + "-Edge_Cuts.dxf", STEM + ".drl", STEM + "-drl_map.dxf"]
 MAX_ERR = FromMM(0.005)  # arc and circle approximation (mm)

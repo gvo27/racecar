@@ -1,6 +1,6 @@
 # Fab outputs for the lab's Fusion 360 template
 
-Made by `make pcb-fab` (`tools/fab_export.py`) from `rc_power_board.kicad_pcb`. `make pcb-fab` also runs `tools/test_fab.py`. `make pcb-test` fails if these files are not current. Do not edit them by hand. The CAM stays in the lab template; these files are its inputs.
+Made by `make pcb-fab` (`tools/fab_export.py` in the lab directory) from `rc_power_board.kicad_pcb`. `make pcb-fab` also runs `tools/test_fab.py`. `make pcb-test` fails if these files are not current. Do not edit them by hand. The CAM stays in the lab template; these files are its inputs.
 
 KiCad's own DXF export is not used. It puts drill circles on Edge.Cuts, and it writes pad, track and zone outlines as separate overlapping lines. A contour along a pad circle inside a pour would cut the copper.
 

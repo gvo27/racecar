@@ -1,6 +1,6 @@
 # Lessons from the rev A power board
 
-Each lesson has the event that caused it. Sources: PR #3, `docs/schematics/README.md`, `docs/schematics/review/README.md`, the git history of `docs/schematics/`. Add a lesson when a review finds an error that a rule could prevent.
+Each lesson has the event that caused it. Sources: PR #3, `docs/pcb/README.md`, `docs/pcb/review/README.md`, the git history of `pcb/` (before 2026-11-16: `docs/schematics/`). Add a lesson when a review finds an error that a rule could prevent.
 
 ## Owner rules (PR #3, 2026-11-14)
 1. **Wire the schematic.** Draw wired connections between the parts of a region, so a person can follow the circuit. Use one label for each bus. Labels alone connect regions, not parts in one region.

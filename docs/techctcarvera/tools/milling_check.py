@@ -1,7 +1,7 @@
 """Milling check for the power board (Makera Carvera isolation milling).
 
 DRC-clean does not mean CNC-millable. Rule ids and groups: .claude/skills/pcb-milling-check/SKILL.md
-Limits: milling.toml in the lab directory (lab.py; pointer `lab:` in .claude/CLAUDE.md). Waivers: docs/schematics/milling_waivers.toml.
+Limits: milling.toml in the lab directory (lab.py; pointer `lab:` in .claude/CLAUDE.md). Waivers: milling_waivers.toml in the lab directory.
 
 CLI: milling_check.py <board> [--limits <toml>] [--waivers <toml>] --json <out>
 Exit: 0 = no unwaived error, 1 = unwaived errors (MILL-DEPTH counts), 2 = the check could not run.
@@ -17,7 +17,10 @@ from dataclasses import dataclass
 import pcbnew
 from pcbnew import FromMM, ToMM
 
-import lab
+import os
+
+sys.path.insert(1, os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "pcb", "tools")))  # lab.py
+import lab  # noqa: E402
 
 # Finding = (rule_id, severity "error"|"warning", where, value, limit, message)
 FORBIDDEN_WAIVERS = ("MILL-FCU-THT", "MILL-RIVET-ACCESS")

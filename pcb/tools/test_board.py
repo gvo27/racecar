@@ -12,24 +12,27 @@ import pcbnew
 from pcbnew import ToMM
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-SCH_DIR = os.path.normpath(os.path.join(HERE, ".."))
 sys.path.insert(0, HERE)
 import lab  # noqa: E402
+import paths  # noqa: E402
 import build_pcb  # noqa: E402
 import placement  # noqa: E402
 import check_board  # noqa: E402
 import milling_check as mc  # noqa: E402
 
+SCH_DIR = paths.board_dir()
+
 _WORK = None
 
 
 def work_dir():
-    """A temp copy of docs/schematics with a freshly built board (built once for all tests)."""
+    """A temp copy of the board directory with a freshly built board (built once for all tests)."""
     global _WORK
     if _WORK is None:
         _WORK = tempfile.mkdtemp(prefix="pcbtest-")
         dst = os.path.join(_WORK, "sch")
-        shutil.copytree(SCH_DIR, dst, ignore=shutil.ignore_patterns("*.kicad_pcb", "review", "analysis", ".history", "*.kicad_prl", "*-backups", "fp-info-cache"))
+        shutil.copytree(paths.LIB_DIR, os.path.join(_WORK, "lib"))  # the lib tables name ../lib
+        shutil.copytree(SCH_DIR, dst, ignore=shutil.ignore_patterns("*.kicad_pcb", "review", "analysis", ".history", "*.kicad_prl", "*-backups", "fp-info-cache", "fab", "*.lck"))
         rc = build_pcb.main(["--out", os.path.join(dst, "rc_power_board.kicad_pcb"), "--sch-dir", dst])
         assert rc == 0, "build failed"
         _WORK = dst
@@ -131,7 +134,7 @@ class TestBootstrap(unittest.TestCase):
 
     def test_check_board_clean(self):
         self.assertEqual(check_board.check(self.b, mc.load_limits(lab.limits_file()),
-                                           mc.load_waivers(os.path.join(SCH_DIR, "milling_waivers.toml"))), [])
+                                           mc.load_waivers(lab.waivers_file())), [])
 
 
 def pad_holes(board):
@@ -316,6 +319,7 @@ class TestSyncFields(unittest.TestCase):
     def test_new_netlist_field_reaches_footprint_without_other_change(self):
         tmp = tempfile.mkdtemp(prefix="sync-")
         dst = os.path.join(tmp, "sch")
+        shutil.copytree(paths.LIB_DIR, os.path.join(tmp, "lib"))  # the lib tables name ../lib
         shutil.copytree(work_dir(), dst, ignore=shutil.ignore_patterns("review", ".history", "*-backups", "fp-info-cache"))
         sch = os.path.join(dst, "rc_power_board.kicad_sch")
         text = open(sch, encoding="utf-8").read()
@@ -382,7 +386,7 @@ class TestRoutedBoard(unittest.TestCase):
 
     def test_check_board_clean(self):
         lim = mc.load_limits(lab.limits_file())
-        self.assertEqual(check_board.check(self.b, lim, mc.load_waivers(os.path.join(SCH_DIR, "milling_waivers.toml"))), [])
+        self.assertEqual(check_board.check(self.b, lim, mc.load_waivers(lab.waivers_file())), [])
 
     def test_high_current_tracks_at_least_6mm(self):
         for t in self.b.GetTracks():

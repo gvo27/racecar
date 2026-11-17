@@ -11,7 +11,7 @@ import unittest
 import pcbnew
 from pcbnew import ToMM
 
-PRETTY = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "rc_power.pretty")
+PRETTY = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib", "rc_power.pretty")
 BODY = 25.4
 PITCH = 2.54
 

@@ -10,7 +10,7 @@ firmware/esp32/compile_commands.json
 .pio-core/
 .cache/
 .pytest_cache/
-docs/schematics/.history/
+pcb/*/.history/
 deploy/car/.env.generated
 build/
 .venv/
