@@ -15,9 +15,11 @@ import lab  # noqa: E402
 import paths  # noqa: E402
 import milling_check as mc  # noqa: E402
 import placement  # noqa: E402
+import rules  # noqa: E402
 
 SCH_DIR = paths.board_dir()
-HIGH_CURRENT_MIN_W = 6.0
+RULES = rules.load()
+HIGH_CURRENT_MIN_W = RULES.track_width["HighCurrent"]
 HIGH_CURRENT_NETS = ("VBAT_RAW", "VBAT")
 
 
@@ -58,24 +60,8 @@ def holes(board):
 # neighbour (U2.6 through U2.5) counts as joined.
 STUB_MM = 0.0
 OPEN_TOL_MM = 0.01  # numeric tolerance of the opening (arc approximation): a track of exactly the need passes
-PATH_ROWS = [
-    ("GND", "GND trunk J1 - pour at U1", ["J1.2", "@118,140"], 6.0),
-    ("GND", "GND entrance U1", ["@118,140", "U1.7", "U1.8", "U1.9", "U1.10"], 1.6),
-    ("GND", "GND entrance U2", ["J1.2", "U2.GND_IN"], 1.6),
-    ("GND", "GND J6/J7 - U1", ["J6.2", "J7.2", "U1.7", "U1.8", "U1.9", "U1.10"], 1.6),
-    ("GND", "GND U2 output - J8/J9/J11/C9", ["U2.GND_OUT", "J8.2", "J9.2", "J11.2", "C9.2"], 1.6),
-    ("/VBAT_RAW", "VBAT_RAW J1 - F1", ["J1.1", "F1.1"], 6.0),
-    # trunk: F1.2 to the two prongs (probe points in the middle of each prong, 6.6 mm wide)
-    ("VBAT", "VBAT trunk F1 - prongs", ["F1.2", "@79.6,145", "@107.3,145"], 6.0),
-    # necks: one module input each (at most about 5.1 A), Power5A width
-    ("VBAT", "VBAT neck U2 VIN", ["@79.6,145", "U2.5", "U2.6"], 1.6),
-    ("VBAT", "VBAT neck U1 VIN", ["@107.3,145", "U1.5", "U1.6"], 1.6),
-    ("+5V_CPU", "+5V_CPU load path", ["U1.11", "U1.12", "J6.1", "J7.1"], 1.6),
-    ("+5V_SENS", "+5V_SENS load path", ["U2.11", "U2.12", "J8.1", "J9.1", "J11.1", "C9.1", "FB1.1"], 1.6),
-    ("+5V_CPU", "+5V_CPU all pads", None, 0.5),
-    ("+5V_SENS", "+5V_SENS all pads", None, 0.5),
-    ("+6V_BEC", "+6V_BEC J3 - J4", ["J3.2", "J4.2"], 1.0),
-]
+# The rows are board data: PATH_ROWS in the placement file of the board. A row names a net class or a width in mm.
+PATH_ROWS = [(net, label, pads, RULES.track_width[w] if isinstance(w, str) else w) for net, label, pads, w in placement.PATH_ROWS]
 
 
 def _net_copper(board, net, layer):
@@ -208,7 +194,7 @@ def check_paths(board):
     return problems
 
 
-MODULE_GAP_MM = 1.5  # min courtyard gap between two Pololu_D36V50Fx modules (body gap >= 2.0 mm: +-0.3 mm edge tolerance, heat)
+MODULE_GAP_MM = RULES.module_gap  # design rules (module_gap): min courtyard gap between two Pololu_D36V50Fx modules (body gap >= 2.0 mm: +-0.3 mm edge tolerance, heat)
 EDGE_TOL_MM = 0.05  # a courtyard that touches the outline line is inside (the mounting holes sit on it)
 
 
@@ -279,7 +265,7 @@ def check(board, limits=None, waivers=None):
     problems += check_courtyards(board)
     # 6. milling check: unwaived errors. MILL-DEPTH is a finding about the assumed limits (owner/lab tech), not the board:
     #    it is the only rule id left out here, and `make pcb-mill-check` keeps it visible.
-    findings = mc.check(board, lim)
+    findings = mc.check(board, lim, RULES)
     groups = mc.triage(findings, waivers or [])
     for f in groups["errors"]:
         problems.append("%s %s: %s" % (f[0], f[2], f[5]))

@@ -1,0 +1,115 @@
+# Mill tuning file: design rules for a board that this lab mills. EDIT THIS FILE to tune a prototype.
+# A board directory without its own design_rules.toml uses this file (pcb/mill). Keys and checks: pcb/tools/rules.py.
+# After a change: `make pcb-all BOARD=mill` (rules -> zones -> route -> checks -> fab outputs).
+# milling.toml holds the machine facts (bit, depth, drills, stock). This file holds what the design must keep because the
+# mill is not accurate in X and Y. A value here must not be below the lab limit of the same name in milling.toml.
+# Each value has status = "confirmed" or "assumed" and a source. Assumed values stay assumed until the lab tech confirms them.
+
+# Position error of a cut in X or Y, for each side of a copper edge. The milling check needs
+# gap >= cut width + 2 x horizontal_error (rule MILL-GAP).
+[horizontal_error]
+value = 0.10
+unit = "mm"
+status = "assumed"
+source = "start value (owner 2026-11-16: the mill is not dialed in, horizontal spacing is the larger problem). Lab tech to measure"
+
+# Smallest distance between the centers of two isolation gaps. Copper between two gaps is then at least
+# cut_spacing_min - clearance wide ("copper_target"). Thinner copper is listed by rule MILL-CUT-SPACING.
+[cut_spacing_min]
+value = 2.0
+unit = "mm"
+status = "assumed"
+source = "lab tech by the owner 2026-11-16: aim for a minimum of 2 mm spacing between cuts. Reading (centers of two gaps) not confirmed"
+
+# Copper gap between two nets (KiCad clearance, all net classes).
+[clearance]
+value = 0.5
+unit = "mm"
+status = "assumed"
+source = "cut width 0.292 mm + 2 x 0.10 mm horizontal error = 0.492 mm, rounded up"
+
+# Hard minimum track width (DRC error below it). The router narrows a track to this width only at a pad that is
+# smaller than the track (0805, SOT-23-5).
+[track_min]
+value = 0.5
+unit = "mm"
+status = "assumed"
+source = "lab limit track_min (milling.toml). The target widths are in [netclass.*]"
+
+# Smallest width of zone copper (necks of the pours).
+[zone_min_width]
+value = 1.0
+unit = "mm"
+status = "assumed"
+source = "owner 2026-11-16: thicker copper at thin areas. Start value"
+
+# Gap between a pour and other copper.
+[zone_clearance]
+value = 0.5
+unit = "mm"
+status = "assumed"
+source = "same as clearance"
+
+# Smallest gap between the courtyards of two parts on one side of the board (rule MILL-COMP-GAP). 0 = no check.
+[component_gap]
+value = 2.0
+unit = "mm"
+status = "assumed"
+source = "owner 2026-11-16: increase the spacing between different components, 2 mm target"
+
+[module_gap]
+value = 2.0
+unit = "mm"
+status = "assumed"
+source = "rev A value 1.5 mm, raised to component_gap"
+
+[edge_clearance]
+value = 1.0
+unit = "mm"
+status = "assumed"
+source = "rev A value 0.5 mm + allowance for the outline cut. Start value"
+
+[edge_band]
+value = 2.0
+unit = "mm"
+status = "assumed"
+source = "rev A value (route_pcb.py): the router keeps tracks out of this band along the outline"
+
+# Annular ring of a pad with a hole. XH pins (2.5 mm pitch) limit this value: a larger ring closes the gap between the pins.
+[annular_min]
+value = 0.45
+unit = "mm"
+status = "assumed"
+source = "lab limit annular_min (milling.toml). Not raised: JST-XH pin pitch"
+
+# Target track width for each net class. The router uses it where it fits and narrows only at small pads.
+[netclass.Default]
+track_width = 1.5
+status = "assumed"
+source = "cut_spacing_min 2.0 - clearance 0.5"
+
+[netclass.HighCurrent]
+track_width = 6.0
+status = "assumed"
+source = "rev A value (copper for the F1 rating)"
+
+[netclass.Power3A]
+track_width = 1.5
+status = "assumed"
+source = "rev A value 1.0 mm, raised to the Default target"
+
+[netclass.Power5A]
+track_width = 2.0
+status = "assumed"
+source = "rev A value 1.6 mm, raised. Start value"
+
+# Parts with a pad gap that the footprint fixes. The clearance of these parts is lower. The checks list them, never hide them.
+[[exception]]
+ref = "U3"
+clearance = 0.3
+reason = "AP2112K, SOT-23-5: the gap between its own pads is 0.35 mm. Owner 2026-11-16: U3 stays SOT-23-5"
+
+# Parts of the schematic that are not on a board with these rules.
+[parts]
+exclude = ["D2", "D3", "D4", "R1", "R2", "R3"]
+reason = "lab tech by the owner 2026-11-16: no surface mount LEDs on the milled board. R1 to R3 are the LED resistors"

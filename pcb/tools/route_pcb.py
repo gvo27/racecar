@@ -19,9 +19,14 @@ import build_pcb  # noqa: E402
 import placement  # noqa: E402
 
 NOT_ROUTED = ("GND", "VBAT", "/VBAT_RAW", "+5V_CPU", "+5V_SENS", "/U1_PG")  # planned zones, the GND pour and planned jumpers (placement.py)
-VIA_DRILL, VIA_PAD = 1.1, 2.1
-EDGE_BAND = float(os.environ.get("ROUTE_EDGE_BAND", "2.0"))
-ROUTER_CLEARANCE_UM = 430  # board clearance is 0.4 mm; the router rounds, so give it 0.03 mm extra
+RULES = build_pcb.RULES  # design rules of the board (design_rules.toml)
+VIA_DRILL, VIA_PAD = build_pcb.VIA_DRILL, build_pcb.VIA_PAD
+EDGE_BAND = float(os.environ.get("ROUTE_EDGE_BAND", RULES.edge_band))
+BOARD_CLEARANCE_UM = int(round(RULES.clearance * 1000))
+ROUTER_CLEARANCE_UM = BOARD_CLEARANCE_UM + 30  # the router rounds, so give it 0.03 mm more than the board clearance
+# Widen in steps: a track that cannot get its full net-class width gets the largest width that fits. Off for a board with
+# track_min = Default width (rev A: all or nothing, as routed).
+STEP_WIDEN = RULES.track_width["Default"] > RULES.track_min + 1e-9
 
 
 def clear_copper(board):
@@ -149,7 +154,7 @@ def prepare(board_path, dsn_path, allow_vias=False):
         raise RuntimeError("DSN export failed")
     with open(dsn_path, encoding="utf-8") as fh:
         text = fh.read()
-    text, n = re.subn(r"\(clearance 400\)", "(clearance %d)" % ROUTER_CLEARANCE_UM, text)
+    text, n = re.subn(r"\(clearance %d\)" % BOARD_CLEARANCE_UM, "(clearance %d)" % ROUTER_CLEARANCE_UM, text)
     if n == 0:
         raise RuntimeError("no clearance rule found in the DSN")
     with open(dsn_path, "w", encoding="utf-8") as fh:
@@ -157,11 +162,12 @@ def prepare(board_path, dsn_path, allow_vias=False):
 
 
 def widen_tracks(board):
-    """The router narrows tracks near pads. Set each track back to its net-class width where that keeps 0.4 mm
-    clearance to other-net copper on its layer; a track that does not fit stays as routed (never below 0.5 mm)."""
+    """The router narrows tracks near pads. Set each track back to its net-class width where that keeps the board
+    clearance to other-net copper on its layer. If the full width does not fit, the track gets the largest width that fits
+    (steps of 0.1 mm). It never gets narrower than the router made it."""
     ns = board.GetDesignSettings().m_NetSettings
-    clr = FromMM(0.4 + 0.005)
-    clr_u3 = FromMM(0.3 + 0.005)  # rule U3_fine (rc_power_board.kicad_dru)
+    clr = FromMM(RULES.clearance + 0.005)
+    clr_exc = {e.ref: FromMM(e.clearance + 0.005) for e in RULES.exceptions}  # [[exception]] of the design rules
     items = {pcbnew.F_Cu: [], pcbnew.B_Cu: []}
     for layer in items:
         for t in board.GetTracks():
@@ -178,16 +184,23 @@ def widen_tracks(board):
         old = t.GetWidth()
         if old >= want:
             continue
-        t.SetWidth(want)
-        shape = t.GetEffectiveShape(t.GetLayer())
-        box = shape.BBox().GetInflated(clr)
-        for other, net, osh in items[t.GetLayer()]:
-            if other is t or (net == t.GetNetCode() and net != 0):
-                continue
-            c = clr_u3 if other.Type() == pcbnew.PCB_PAD_T and other.GetParentFootprint().GetReference() == "U3" else clr
-            if box.Intersects(osh.BBox().GetInflated(c)) and shape.Collide(osh, c):
-                t.SetWidth(old)
+        w = want
+        while w > old:
+            t.SetWidth(w)
+            shape = t.GetEffectiveShape(t.GetLayer())
+            box = shape.BBox().GetInflated(clr)
+            hit = False
+            for other, net, osh in items[t.GetLayer()]:
+                if other is t or (net == t.GetNetCode() and net != 0):
+                    continue
+                c = clr_exc.get(other.GetParentFootprint().GetReference(), clr) if other.Type() == pcbnew.PCB_PAD_T else clr
+                if box.Intersects(osh.BBox().GetInflated(c)) and shape.Collide(osh, c):
+                    hit = True
+                    break
+            if not hit:
                 break
+            w = max(old, w - FromMM(0.1)) if STEP_WIDEN else old
+        t.SetWidth(w)
 
 
 def add_jumpers(board):
@@ -198,7 +211,7 @@ def add_jumpers(board):
                 return p.GetPosition()
         raise RuntimeError("no pad %s.%s" % (ref, num))
 
-    def track(a, b, layer, net, width=0.5):
+    def track(a, b, layer, net, width=RULES.track_width["Default"]):
         t = pcbnew.PCB_TRACK(board)
         t.SetStart(a)
         t.SetEnd(b)
@@ -283,7 +296,7 @@ def add_stitching_vias(board):
         if cy.OutlineCount():
             courts.append(cy)
     edges = [d.GetEffectiveShape() for d in board.GetDrawings() if d.GetLayer() == pcbnew.Edge_Cuts]
-    keep = FromMM(0.4 + 0.05)
+    keep = FromMM(RULES.clearance + 0.05)
     reach = FromMM(4.5)
     others = [(sh, sh.BBox()) for sh in others]
     n = 0
@@ -311,7 +324,7 @@ def add_stitching_vias(board):
                     continue
                 if any(c.Contains(pos) or c.Collide(vs, 0) for c in courts):
                     continue
-                if any(e.Collide(vs, FromMM(0.6)) for e in edges):
+                if any(e.Collide(vs, FromMM(RULES.edge_clearance + 0.1)) for e in edges):
                     continue
                 if any(hs.Collide(vs, FromMM(0.3)) for hs in holes):
                     continue

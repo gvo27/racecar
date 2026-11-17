@@ -20,6 +20,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import lab  # noqa: E402
 import paths  # noqa: E402
 import placement  # noqa: E402
+import rules  # noqa: E402
 
 SCH_DIR = paths.board_dir()
 SCHEMATIC = "rc_power_board.kicad_sch"
@@ -27,11 +28,13 @@ BOARD_FILE = "rc_power_board.kicad_pcb"
 FP_DIR = os.environ.get("KICAD10_FOOTPRINT_DIR", "/usr/share/kicad/footprints")
 LIMITS_FILE = lab.limits_file()
 with open(LIMITS_FILE, "rb") as _fh:
-    DRILL_SET = sorted(tomllib.load(_fh)["drill_set"]["value"])  # owner's bit set (lab milling.toml)
-VIA_DRILL, VIA_PAD = 1.1, 2.1  # EasyContac 0.8 rivet
-ANNULAR_MIN = 0.45
+    _LAB = tomllib.load(_fh)
+DRILL_SET = sorted(_LAB["drill_set"]["value"])  # owner's bit set (lab milling.toml)
+VIA_DRILL, VIA_PAD = _LAB["via_drill"]["value"], _LAB["via_pad"]["value"]  # rivet via (lab milling.toml)
+RULES = rules.load()  # design rules of the board (design_rules.toml)
+ANNULAR_MIN = RULES.annular_min
 COPPER_MM = 0.070
-EDGE_INSET = 0.6
+EDGE_INSET = RULES.edge_clearance + 0.1  # the pour stops 0.1 mm inside the edge clearance (fill rounding)
 PIECE_MIN_MM2 = 200  # F.Cu pour pieces smaller than this are dropped unless connected (strips along the edge, slivers)
 BOARD_MM = 1.57
 # board position of the outline's lower-left corner (KiCad coordinates, y down, mm)
@@ -187,7 +190,7 @@ def add_outline(board):
     board.Add(r)
 
 
-def add_zone(board, net, layer, pts, connection, clearance=0.4, min_w=0.5, prio=0, name="", island_area_mm2=None):
+def add_zone(board, net, layer, pts, connection, clearance=RULES.zone_clearance, min_w=RULES.zone_min_width, prio=0, name="", island_area_mm2=None):
     z = pcbnew.ZONE(board)
     z.SetLayer(layer)
     z.SetNet(net)
@@ -313,6 +316,10 @@ def build(out_path, sch_dir=SCH_DIR):
     xml = os.path.join(tmp, "net.xml")
     export_netlist(sch_dir, xml)
     comps, nets = parse_netlist(xml)
+    # parts that are not on a board with these design rules ([parts] exclude): no footprint, no pad on a net
+    comps = {r: c for r, c in comps.items() if r not in RULES.exclude}
+    nets = {n: [(r, p) for r, p in nodes if r not in RULES.exclude] for n, nodes in nets.items()}
+    nets = {n: nodes for n, nodes in nets.items() if nodes}
 
     # project files next to the board: the net classes and rules of the .kicad_pro load with it
     out_dir = os.path.dirname(os.path.abspath(out_path))

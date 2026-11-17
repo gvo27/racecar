@@ -157,6 +157,9 @@ _kicad-cfg:
 	  docker run --rm --user $(shell id -u):$(shell id -g) -v "$(KICAD_CFG)":/cfg $(KICAD_IMAGE) \
 	  sh -c 'cp /usr/share/kicad/template/sym-lib-table /usr/share/kicad/template/fp-lib-table /cfg/kicad/10.0/'; }
 
+pcb-rules: _kicad-cfg  ## check the KiCad project files of BOARD against its design rules (design_rules.toml); PCB_RULES_ARGS=--write changes them
+	$(KICAD_RUN) python3 $(PCB_TOOLS)/gen_rules.py $(PCB_RULES_ARGS)
+
 erc: _kicad-cfg  ## KiCad ERC on the power board schematic (0 errors required; warnings are printed)
 	@mkdir -p "$(CURDIR)/build/erc"
 	$(KICAD_RUN) kicad-cli sch erc --format json --severity-all \
