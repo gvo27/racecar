@@ -13,7 +13,7 @@ Layout since 2026-11-16: the KiCad project, the libraries, the tools and the fab
 | `fab_handoff.md` | Rev A CNC-milling handoff (Makera Carvera) plus later-revision fab checklist: DRC/net classes, rivets, holes, IPC-2221 table, connector table, export, sign-off. |
 | `power_board_plan.md` | The build guide and background: rails, power budget, trace widths, a step-by-step KiCad guide and open questions. Exported from the live doc linked at its top. |
 | `power_architecture.png` | Block diagram used by the plan. |
-| `reverse_polarity_proposal.md` | Archived proposal for reverse-polarity protection (P-FET Q1 + R4). Not on rev A (owner 2026-11-11). |
+| `reverse_polarity_proposal.md` | Reverse-polarity protection (P-FET Q1 + R4): the proposal and its status. |
 | `pcb/fabhouse/rc_power_board.kicad_pro` / `.kicad_sch` | KiCad project and the one-sheet A3 schematic (regions A to E plus notes). |
 | `pcb/lib/rc_power.kicad_sym` + `pcb/fabhouse/sym-lib-table` | Project symbol library: `D36V50F5` (all 12 module pins, used by U1 and U2), `REG_MODULE` (generic VIN/GND/VOUT/EN, no longer used on the board) and one power symbol per rail. |
 | `pcb/fabhouse/rc_power_board.kicad_pcb` / `.kicad_dru` | Rev A board, routed, for review only (no Gerber or CAM files). The `.kicad_dru` holds rule `U3_fine`. |
@@ -40,7 +40,7 @@ Previous revision: the meeting-cleanup revision was generated in KiCad 7 format,
 - Facts, archived drawing and graphs: `docs/datasheets/regulator_pololu_d36v50f5.md`. The D24V90F5 note stays as history (`regulator_pololu_d24v90f5.md`, superseded).
 - Both modules use the symbol `rc_power:D36V50F5` and the footprint `rc_power:Pololu_D36V50Fx`. The footprint shows the real 25.4 x 25.4 mm body (the first rev A layout used a plain pin header and put the body over J6 and J7). U2 EN, VRP and PG have no-connect flags, as U1 EN and VRP.
 - **Flag:** dropout is about 1.0 V at 5 A (Pololu graph). Near the 6.0 V cutoff the +5V_SENS output can fall below 5 V, and the Mapper needs at least 4.8 V. Bench check at J11 during Mapper startup.
-- Decisions on 2026-11-11 (owner): no reverse-polarity protection on rev A (the modules have their own); U3 keeps the stock SOT-23-5 footprint with the `U3_fine` DRC rule.
+- Decisions on 2026-11-11 (owner): reverse-polarity protection (status: `reverse_polarity_proposal.md`); U3 keeps the stock SOT-23-5 footprint with the `U3_fine` DRC rule.
 - Plan: `docs/plans/2026-11-11-power-board-pcb-rev-a.md` (Task 7c).
 
 ## Rev A PCB (review only)

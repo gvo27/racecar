@@ -60,7 +60,7 @@ Netlist: 40 parts, 21 nets. Schematic: `rc_power_board.kicad_sch` / `.pdf` (KiCa
 1. Size VBAT/GND copper for F1's 15 A (≈ 16.5 A), not the 9.0 A load.
 2. U1: 5.0 V vs the Pi 5's preferred 5.1 V; dropout at 5.5 A near 6.0 V.
 3. Keep the FB1/C6 filter, or rely on LDO ripple rejection?
-4. Reverse-polarity protection: P-FET proposal (Q1 + R4 between F1 and VBAT) is in `reverse_polarity_proposal.md`, not on the board; U1 has its own (to −40 V); proposed U2's is TBD; C1/D1 are exposed.
+4. Reverse-polarity protection: proposal and status in `reverse_polarity_proposal.md`.
 5. J1 pad size for 12 AWG; module footprints for U1 and U2.
 6. I2C pull-ups: only the Garmin's internal 13 kΩ pulls up the bus; consider two DNP 0805 4.7–10 kΩ footprints to `+3V3_SENS` for a future IMU. Not drawn.
 7. U3 footprint vs V-bit clearance: AP2112K SOT-23-5 pad gap about 0.35 mm < 0.4 mm DRC. Custom narrower pads (gap about 0.45 mm), mill with the 60°/0.1 mm bit, or a local DRC exception.

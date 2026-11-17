@@ -74,7 +74,7 @@ Earlier warnings, now removed: 3 F.Cu GND "slivers" and 4 MILL-ISLAND were false
 - Assumed: bored holes of 3.3 mm or more (tool + 0.125 mm). Confirmed: rivet via 1.1 mm drill / 2.1 mm pad; the 0.8 mm EasyContac rivet (1.0 mm OD, owner caliper 2026-11-13) sits about 0.05 mm loose before soldering.
 - Isolation bit: 0.2 mm tip, Fusion taper 30. Cut width at 0.08 mm depth: 0.292 mm. Fusion taper is the angle per side (60 deg included): confirmed 2026-11-15 from the Fusion tool library export (lab file, lab directory: `lab:` in `.claude/CLAUDE.md`). The 30 deg included reading (0.243 mm) is removed. The smallest copper gap on the board is 0.35 mm (U3 pads), which passes.
 - U1 and U2 are the Pololu D36V50F5 (owner 2026-11-12). The footprint comes from Pololu's drawing (tolerance of drill location +-0.1 mm). The 3 mounting holes are on F.Fab only. The standoff of the module over the F.Cu pour (parts 1.8 mm under the module) is not known: check on the real header.
-- No reverse-polarity protection (owner decision). U3 keeps the stock SOT-23-5 footprint and rule `U3_fine`.
+- Reverse-polarity protection: status in `docs/pcb/reverse_polarity_proposal.md`. U3 keeps the stock SOT-23-5 footprint and rule `U3_fine`.
 - XH and terminal-block orientation: pin 1 at the bottom on the left edge, except J4 and J8 (rotated 270 degrees: pin 1 at the top). J6 and J7 on the right edge also have pin 1 at the top. Deviation from the rule "pin 1 at the same end": it is needed for B.Cu routing without rivets. J8 turned means the Garmin pin order runs top to bottom. Wire entry direction of the vertical XH headers is not checked: check it with the 1:1 print.
 
 ## Owner GUI checks (user-run)
