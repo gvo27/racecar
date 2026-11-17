@@ -114,7 +114,8 @@ status = "assumed"
 source = "rev A value. Not raised: the Pololu pin pitch (2.54 mm) limits the necks at the module pads to 1.9 mm"
 
 # Parts with a pad gap that the footprint fixes: the 2 mm copper gap is not possible at their pads. `clearance` is the gap
-# that a pour or a planned zone keeps from their pads (zones = true). The checks list the smaller gaps, never hide them.
+# that a pour or a planned zone keeps from their pads (zones = true), or the gap between the pads of one part only
+# (own_pads = true). Use one of the two forms. The checks list the smaller gaps, never hide them.
 [[exception]]
 ref = "U3"
 clearance = 0.34
@@ -130,8 +131,8 @@ own_pads = true  # only the pads of one header are 0.6 mm apart. Tracks and zone
 [[exception]]
 refs = ["U1", "U2"]
 clearance = 0.64
-reason = "Pololu D36V50F5, 2.54 mm pin pitch, 0.64 mm between two pads. The VBAT necks are as wide as the pads, so zone copper is 0.64 mm from the next pad"
-zones = true
+reason = "Pololu D36V50F5, 2.54 mm pin pitch, 0.64 mm between two pads. The planned necks at the module pads keep the board clearance, and the pours keep zone_clearance (review 2026-11-17: with zones = true the GND pours came 0.64 mm near the VOUT, VIN and VRP pads)"
+own_pads = true  # only the pads of one module are 0.64 mm apart
 
 # Parts of the schematic that are not on a board with these rules.
 [parts]

@@ -130,6 +130,8 @@ def load(path=None):
             raise ValueError("%s: exception %r: needs ref or refs" % (path, e))
         if set(e) - {"ref", "refs", "clearance", "reason", "zones", "own_pads"}:
             raise ValueError("%s: exception %s: unknown field" % (path, refs))
+        if e.get("zones") and e.get("own_pads"):  # the DRU rule and the pad clearance of build_pcb would disagree
+            raise ValueError("%s: exception %s: use zones or own_pads, not both" % (path, refs))
         for ref in refs:
             exc.append(Exception_(ref, float(e["clearance"]), e["reason"], bool(e.get("zones", False)), bool(e.get("own_pads", False))))
     parts = raw.get("parts", {})

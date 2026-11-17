@@ -34,7 +34,7 @@ PLACEMENT.update({
     "TP3": (57.0, 120.0, 0, "B"),
     # input capacitors of the modules: north of the pin rows (the top side under a module body is not free).
     # Pad 1 on a VBAT stub north of the VIN pads, pad 2 in the GND pour north of the GND pads
-    # y = 52.6: the pads are clear of the F.Cu jumper of U1_PG along y = 49.8
+    # y = 52.6: the pads are 0.95 mm from the F.Cu jumper of U1_PG along y = 49.8 (board clearance 0.8 mm)
     "C4": (17.8, 52.6, 0, "F"),      # U2
     "C2": (45.8, 52.6, 0, "F"),      # U1
     # output capacitors: C5 on the +5V_SENS trunk, C3 on the +5V_CPU bar north of J7
@@ -55,9 +55,11 @@ PLACEMENT.update({
 #          different nets keep the board clearance (0.8 mm), so the fine zones start inside their pad
 #          and end 0.8 mm from the fine zone of the next net.
 #   _NEAR: next to a pin header or a module, where 2 mm leaves no copper. Board clearance (0.8 mm).
+#   _NEAR_GND: GND area at the pin headers of an edge. The router can put signal tracks in it (keepout False).
+#   Other _NEAR GND areas are router keepouts: a track there would make the GND trunk narrower.
 _FINE = {"clearance": 0.34, "min_w": 0.5}
 _NEAR = {"clearance": 0.8, "min_w": 1.2}
-_NEAR_GND = {"clearance": 0.8, "min_w": 1.2, "keepout": False}   # GND area with tracks in it
+_NEAR_GND = {"clearance": 0.8, "min_w": 1.2, "keepout": False}
 
 # rev A zone rows that this board does not have or draws again: (net, x0, y0) of the rectangle
 _DROP = {("+5V_CPU", 52.8, 49.4), ("+5V_CPU", 51.8, 52.2), ("+5V_CPU", 52.2, 54.4),          # C3, TP1, R1
@@ -65,6 +67,7 @@ _DROP = {("+5V_CPU", 52.8, 49.4), ("+5V_CPU", 51.8, 52.2), ("+5V_CPU", 52.2, 54.
          ("+5V_SENS", 3.5, 82.3), ("+5V_SENS", 5.3, 87.5), ("+5V_SENS", 4.0, 98.1),          # J8/J11 bar, J9 branch
          ("+5V_SENS", 26.1, 43.0),
          ("+5V_CPU", 56.0, 55.6),                                                            # trunk, bar J6 to J7
+         ("+5V_CPU", 54.0, 43.0),                                                            # U1 VOUT trunk: again
          ("VBAT", 18.48, 40.5), ("VBAT", 46.48, 40.5), ("VBAT", 37.5, 7.9)}                  # VIN necks, C1 stub: again as _NEAR
 
 
@@ -76,28 +79,41 @@ BUS_ZONES = [
     # GND at the pin headers of the left and the right edge: the 2 mm pour leaves no copper between the pins, the tracks
     # and the edge, so these two areas are GND zones with the board clearance. They are first in the list: every other
     # zone has priority over them.
-    ("GND", _rect(0.6, 27.0, 12.5, 105.5), _NEAR_GND),
+    # (left edge: x to 10.1 at y 86.9 to 95.0, so that the area is 2 mm from the C9.1 pad and leaves no sliver at C9.2)
+    ("GND", [(0.6, 27.0), (12.5, 27.0), (12.5, 86.9), (10.1, 86.9), (10.1, 95.0), (12.5, 95.0), (12.5, 105.5), (0.6, 105.5)],
+     _NEAR_GND),
     ("GND", _rect(58.6, 103.5, 65.4, 132.0), _NEAR_GND),
     # GND trunk from J1.2 along the bottom edge (need 6.0 mm): 2 mm from the C1.1 pad leaves 5.4 mm, so this part of the
-    # trunk and the C1 stub have the board clearance
-    ("GND", _rect(28.0, 0.6, 65.4, 7.4), _NEAR_GND),
+    # trunk and the C1 stub have the board clearance (C1.1 is 0.8 mm from the trunk)
+    ("GND", _rect(28.0, 0.6, 65.4, 7.4), _NEAR),
     # GND at the GND pads of the modules: between the VIN neck and the 5 V trunk. With the board clearance to the neck
     # (0.8 mm) and 2 mm to the trunk, the GND copper north of the pads is 2.8 mm wide (1.6 mm with the 2 mm pour only)
-    ("GND", _rect(20.4, 41.0, 25.5, 51.0), _NEAR_GND),
-    ("GND", _rect(48.4, 41.0, 53.5, 51.0), _NEAR_GND),
+    # (U2: south of pad 9 the 2 mm gap to VBAT prong B and the 0.8 mm gap to the +5V_SENS neck leave a GND tongue of
+    # 0.6 mm, a MILL-CUT-SPACING warning. A smaller area leaves a sliver below 0.5 mm there)
+    ("GND", _rect(20.4, 41.0, 25.5, 51.0), _NEAR),
+    ("GND", _rect(48.4, 41.0, 53.5, 51.0), _NEAR),
 ] + [row for row in _base["BUS_ZONES"] if _keep(row)] + [
     # +5V_SENS trunk: ends 0.1 mm inside the FB1 bar (y 99.1 to 100.9). The rev A trunk overlaps the whole bar end, and
     # the fill then leaves fragments of 0.003 mm2 there (MILL-ISLAND)
-    ("+5V_SENS", _rect(26.1, 43.0, 28.0, 99.2)),
+    ("+5V_SENS", _rect(26.1, 49.0, 28.0, 99.2)),
+    ("+5V_CPU", _rect(54.0, 49.0, 56.0, 57.4)),
+    # VOUT necks at the module pins (U2.11/12, U1.11/12): board clearance to the GND pads 9 and 10 (0.64 mm pad gap).
+    # With 2 mm the trunk does not reach the VOUT pads. The 2 mm trunks start north of the pin rows (y 49): a 2 mm trunk
+    # over the pin row leaves a GND tongue of 0.6 mm south of pad 9
+    ("+5V_SENS", _rect(26.1, 42.9, 28.0, 49.6), _NEAR),
+    ("+5V_CPU", _rect(54.0, 42.9, 56.0, 49.6), _NEAR),
     # J8.1 + J11.1 bar and the J9.1 branch, moved with J11 and J9
     ("+5V_SENS", _rect(3.5, 82.3, 6.2, 90.5), _NEAR),
     ("+5V_SENS", _rect(5.9, 87.5, 7.7, 99.5), _NEAR),
     ("+5V_SENS", _rect(4.6, 98.1, 6.3, 99.7), _NEAR),
     # VBAT at the module pins. The VIN necks are as wide as the pads (rev A rows) and go on north of the pin row to the
     # stubs of the input capacitors. Board clearance (_NEAR): the GND pads are 0.64 mm from the VIN pads, and the GND
-    # copper between the VIN neck and the 5 V trunk is then 2.8 mm wide
-    ("VBAT", _rect(18.48, 40.5, 20.38, 53.0), _NEAR),
-    ("VBAT", _rect(46.48, 40.5, 48.38, 53.0), _NEAR),
+    # copper between the VIN neck and the 5 V trunk is then 2.8 mm wide. North of y 50.5 the neck is 1.3 mm wide: the
+    # full width would be 1.2 mm from the GND pad of the input capacitor (C4.2, C2.2). 1.3 mm is above min_w
+    ("VBAT", _rect(18.48, 40.5, 20.38, 50.5), _NEAR),
+    ("VBAT", _rect(18.2, 50.4, 19.5, 53.0), _NEAR),
+    ("VBAT", _rect(46.48, 40.5, 48.38, 50.5), _NEAR),
+    ("VBAT", _rect(46.2, 50.4, 47.5, 53.0), _NEAR),
     ("VBAT", _rect(16.6, 51.4, 20.38, 53.8)),           # C4.1
     ("VBAT", _rect(44.6, 51.4, 48.38, 53.8)),           # C2.1
     ("VBAT", _rect(37.5, 7.9, 39.5, 11.5), _NEAR),      # stub to C1 (rev A row)
@@ -134,3 +150,4 @@ JUMPERS = [
      "path": [(39.6, 49.8), (8.0, 49.8), (8.0, 52.1), (3.4, 52.1)],
      "via_b": (3.4, 52.1), "pad_b": ("J5", "1")},
 ]
+

@@ -162,10 +162,22 @@ def prepare(board_path, dsn_path, allow_vias=False):
         fh.write(text)
 
 
+def fit_width(want, floor, step, collides):
+    """The largest width from `want` down to `floor` (steps of `step`) where collides(width) is False.
+    Returns (width, ok). ok is False when the floor width also collides: the track then keeps the floor width."""
+    w = want
+    while w > floor:
+        if not collides(w):
+            return w, True
+        w = max(floor, w - step)
+    return floor, not collides(floor)
+
+
 def widen_tracks(board):
     """The router narrows tracks near pads. Set each track back to its net-class width where that keeps the board
-    clearance to other-net copper on its layer. If the full width does not fit, the track gets the largest width that fits
-    (steps of 0.1 mm). It never gets narrower than the router made it."""
+    clearance to other-net copper on its layer. Rev A (STEP_WIDEN off): the full width or the router width.
+    Board with STEP_WIDEN: the largest width that fits (steps of 0.1 mm), down to track_min. Such a track can get
+    narrower than the router made it. A track that does not fit at its smallest width is printed (DRC finds it too)."""
     ns = board.GetDesignSettings().m_NetSettings
     clr = FromMM(RULES.clearance + 0.005)
     # an [[exception]] lowers the clearance of a track to a pad only in the rev A form (not own_pads, not zones)
@@ -187,27 +199,27 @@ def widen_tracks(board):
         if old >= want and not STEP_WIDEN:
             continue
         want = max(want, old) if not STEP_WIDEN else want
-        w = want
         # a board with step widening: a track that is too near other copper as routed gets narrower, down to track_min
         floor = min(old, FromMM(RULES.track_min)) if STEP_WIDEN else old
-        if STEP_WIDEN:
-            old = floor
-        while w > old:
+
+        def collides(w, t=t):
             t.SetWidth(w)
             shape = t.GetEffectiveShape(t.GetLayer())
             box = shape.BBox().GetInflated(clr)
-            hit = False
             for other, net, osh in items[t.GetLayer()]:
                 if other is t or (net == t.GetNetCode() and net != 0):
                     continue
                 c = clr_exc.get(other.GetParentFootprint().GetReference(), clr) if other.Type() == pcbnew.PCB_PAD_T else clr
                 if box.Intersects(osh.BBox().GetInflated(c)) and shape.Collide(osh, c):
-                    hit = True
-                    break
-            if not hit:
-                break
-            w = max(old, w - FromMM(0.1)) if STEP_WIDEN else old
+                    return True
+            return False
+
+        step = FromMM(0.1) if STEP_WIDEN else max(want - floor, 1)
+        w, ok = fit_width(want, floor, step, collides)
         t.SetWidth(w)
+        if not ok:
+            print("pcb-route: track %s at (%.2f, %.2f) is too near other copper at %.2f mm" % (
+                t.GetNetname(), ToMM(t.GetStart().x), ToMM(t.GetStart().y), ToMM(w)), file=sys.stderr)
 
 
 def add_jumpers(board):

@@ -191,7 +191,7 @@ pcb-route: _kicad-cfg  ## route the board from scratch (Freerouting 2.5.0): B.Cu
 	$(KICAD_RUN) python3 $(PCB_TOOLS)/route_pcb.py dsn rc_power_board.kicad_pcb --dsn "$(CURDIR)/build/route/in.dsn"
 	docker run --rm --user $(shell id -u):$(shell id -g) -v "$(CURDIR)/build/route":/data --entrypoint java $(FREEROUTING_IMAGE) \
 	  -jar /app/freerouting-executable.jar --gui-enabled=false --api_server-enabled=false --user_data_path=/data/user \
-	  -de /data/in.dsn -do /data/out.ses -mp 40 > "$(CURDIR)/build/route/freerouting.log" 2>&1; tail -n 3 "$(CURDIR)/build/route/freerouting.log"
+	  -de /data/in.dsn -do /data/out.ses -mp 40 -mt 1 > "$(CURDIR)/build/route/freerouting.log" 2>&1; tail -n 3 "$(CURDIR)/build/route/freerouting.log"
 	$(KICAD_RUN) python3 $(PCB_TOOLS)/route_pcb.py ses rc_power_board.kicad_pcb --ses "$(CURDIR)/build/route/out.ses"
 
 pcb-check: _kicad-cfg  ## DRC (with schematic parity) + board checks + milling check; fails on DRC errors, unconnected items, check_board problems

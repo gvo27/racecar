@@ -2,8 +2,9 @@
 
 A variant has the same circuit as the base board (pcb/fabhouse) without the parts in `[parts] exclude` of its design
 rules, and with the footprints of `[parts.footprint]` (same part value, a package that the variant can make). For each excluded part the copy has `(on_board no)`, `(in_bom no)` and `(dnp yes)`: the part stays in the
-drawing, is crossed out, and has no footprint and no BOM row. Nothing else changes, so the variant cannot drift from
-the base schematic. Do not edit the variant schematic by hand: edit the base schematic, then run `make pcb-sch`.
+drawing, is crossed out, and has no footprint and no BOM row. A part with a variant footprint gets TBD in its part
+fields (MPN, Manufacturer, Supplier link, Status) and an empty unit cost: the base part number is for the base
+footprint. Nothing else changes, so the variant cannot drift from the base schematic. Do not edit the variant schematic by hand: edit the base schematic, then run `make pcb-sch`.
 
 The first run also copies the project file and the lib tables of the base board. Stdlib only.
 """
@@ -23,6 +24,28 @@ FLAGS = (("on_board", "no"), ("in_bom", "no"), ("dnp", "yes"))
 COPY_ONCE = (paths.STEM + ".kicad_pro", "sym-lib-table", "fp-lib-table", ".gitignore")
 
 
+PROP = r'\(property "%s" "((?:[^"\\]|\\.)*)"'
+# fields of the base part that are wrong for a part with another footprint: the variant sets them to TBD (no
+# unconfirmed part numbers). The unit cost is empty: the cost total counts the part as 0.
+PART_FIELDS = (("MPN", "TBD"), ("Manufacturer", "TBD"), ("Supplier link", "TBD"), ("Status", "TBD"), ("Unit cost USD", ""))
+
+
+def clear_part_fields(block, ref, footprint):
+    """Set the part fields of a symbol with a variant footprint to TBD. BOM Comments keeps the base part number."""
+    old = re.search(PROP % "MPN", block)
+    old_note = re.search(PROP % "BOM Comments", block)
+    for name, val in PART_FIELDS:
+        block, n = re.subn(PROP % re.escape(name), lambda m, name=name, val=val: '(property "%s" "%s"' % (name, val), block, count=1)
+        if n != 1:
+            raise RuntimeError("symbol %s has no %s property" % (ref, name))
+    note = "Variant footprint %s: part number TBD (owner). Base board part %s: %s" % (
+        footprint, old.group(1) if old else "-", old_note.group(1) if old_note else "-")
+    block, n = re.subn(PROP % "BOM Comments", lambda m: '(property "BOM Comments" "%s"' % note, block, count=1)
+    if n != 1:
+        raise RuntimeError("symbol %s has no BOM Comments property" % ref)
+    return block
+
+
 def make_variant(text, exclude, footprints=None):
     """Return (new text, references that were changed). `footprints`: ref -> footprint of the variant."""
     done = []
@@ -37,6 +60,7 @@ def make_variant(text, exclude, footprints=None):
             block, n = re.subn(r'\(property "Footprint" "[^"]*"', '(property "Footprint" "%s"' % footprints[ref.group(1)], block, count=1)
             if n != 1:
                 raise RuntimeError("symbol %s has no Footprint property" % ref.group(1))
+            block = clear_part_fields(block, ref.group(1), footprints[ref.group(1)])
             done.append(ref.group(1))
         if ref.group(1) not in exclude:
             return block

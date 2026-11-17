@@ -53,13 +53,13 @@
 	(condition "A.Type == 'Pad' && B.Type == 'Pad' && A.Reference == 'J14' && B.Reference == 'J14'")
 	(constraint clearance (min 0.6mm))
 )
-# U1: Pololu D36V50F5, 2.54 mm pin pitch, 0.64 mm between two pads. The VBAT necks are as wide as the pads, so zone copper is 0.64 mm from the next pad
+# U1: Pololu D36V50F5, 2.54 mm pin pitch, 0.64 mm between two pads. The planned necks at the module pads keep the board clearance, and the pours keep zone_clearance (review 2026-11-17: with zones = true the GND pours came 0.64 mm near the VOUT, VIN and VRP pads)
 (rule U1_fine
-	(condition "A.Type == 'Pad' && A.Reference == 'U1' && B.Type != 'Track' && B.Type != 'Via'")
+	(condition "A.Type == 'Pad' && B.Type == 'Pad' && A.Reference == 'U1' && B.Reference == 'U1'")
 	(constraint clearance (min 0.64mm))
 )
-# U2: Pololu D36V50F5, 2.54 mm pin pitch, 0.64 mm between two pads. The VBAT necks are as wide as the pads, so zone copper is 0.64 mm from the next pad
+# U2: Pololu D36V50F5, 2.54 mm pin pitch, 0.64 mm between two pads. The planned necks at the module pads keep the board clearance, and the pours keep zone_clearance (review 2026-11-17: with zones = true the GND pours came 0.64 mm near the VOUT, VIN and VRP pads)
 (rule U2_fine
-	(condition "A.Type == 'Pad' && A.Reference == 'U2' && B.Type != 'Track' && B.Type != 'Via'")
+	(condition "A.Type == 'Pad' && B.Type == 'Pad' && A.Reference == 'U2' && B.Reference == 'U2'")
 	(constraint clearance (min 0.64mm))
 )

@@ -6012,7 +6012,7 @@
 				)
 			)
 		)
-		(property "BOM Comments" "Price est. 10 uF, 25 V, X5R. X5R loses capacity under DC bias; verify effective value at 8.4 V. Samsung CL21A106KAYNNNE was out of stock" (at 0 0 0)
+		(property "BOM Comments" "Variant footprint Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm: part number TBD (owner). Base board part CC0805KRX5R8BB106: Price est. 10 uF, 25 V, X5R. X5R loses capacity under DC bias; verify effective value at 8.4 V. Samsung CL21A106KAYNNNE was out of stock" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6020,7 +6020,7 @@
 				(hide yes)
 			)
 		)
-		(property "Supplier link" "https://www.digikey.com/en/products/detail/yageo/CC0805KRX5R8BB106/7164387" (at 0 0 0)
+		(property "Supplier link" "TBD" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6028,7 +6028,7 @@
 				(hide yes)
 			)
 		)
-		(property "Unit cost USD" "0.10" (at 0 0 0)
+		(property "Unit cost USD" "" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6036,7 +6036,7 @@
 				(hide yes)
 			)
 		)
-		(property "Status" "proposed" (at 0 0 0)
+		(property "Status" "TBD" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6044,7 +6044,7 @@
 				(hide yes)
 			)
 		)
-		(property "Manufacturer" "YAGEO" (at 0 0 0)
+		(property "Manufacturer" "TBD" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6052,7 +6052,7 @@
 				(hide yes)
 			)
 		)
-		(property "MPN" "CC0805KRX5R8BB106" (at 0 0 0)
+		(property "MPN" "TBD" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6485,7 +6485,7 @@
 				)
 			)
 		)
-		(property "BOM Comments" "1 uF, 50 V, X7R. DigiKey backorder; Mouser in stock" (at 0 0 0)
+		(property "BOM Comments" "Variant footprint Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm: part number TBD (owner). Base board part CL21B105KBFNNNE: 1 uF, 50 V, X7R. DigiKey backorder; Mouser in stock" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6493,7 +6493,7 @@
 				(hide yes)
 			)
 		)
-		(property "Supplier link" "https://www.digikey.com/en/products/detail/samsung-electro-mechanics/CL21B105KBFNNNE/3886687" (at 0 0 0)
+		(property "Supplier link" "TBD" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6501,7 +6501,7 @@
 				(hide yes)
 			)
 		)
-		(property "Unit cost USD" "0.12" (at 0 0 0)
+		(property "Unit cost USD" "" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6509,7 +6509,7 @@
 				(hide yes)
 			)
 		)
-		(property "Status" "proposed" (at 0 0 0)
+		(property "Status" "TBD" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6517,7 +6517,7 @@
 				(hide yes)
 			)
 		)
-		(property "Manufacturer" "Samsung Electro-Mechanics" (at 0 0 0)
+		(property "Manufacturer" "TBD" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6525,7 +6525,7 @@
 				(hide yes)
 			)
 		)
-		(property "MPN" "CL21B105KBFNNNE" (at 0 0 0)
+		(property "MPN" "TBD" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8118,7 +8118,7 @@
 				)
 			)
 		)
-		(property "BOM Comments" "1 uF, 50 V, X7R. DigiKey backorder; Mouser in stock" (at 0 0 0)
+		(property "BOM Comments" "Variant footprint Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm: part number TBD (owner). Base board part CL21B105KBFNNNE: 1 uF, 50 V, X7R. DigiKey backorder; Mouser in stock" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8126,7 +8126,7 @@
 				(hide yes)
 			)
 		)
-		(property "Supplier link" "https://www.digikey.com/en/products/detail/samsung-electro-mechanics/CL21B105KBFNNNE/3886687" (at 0 0 0)
+		(property "Supplier link" "TBD" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8134,7 +8134,7 @@
 				(hide yes)
 			)
 		)
-		(property "Unit cost USD" "0.12" (at 0 0 0)
+		(property "Unit cost USD" "" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8142,7 +8142,7 @@
 				(hide yes)
 			)
 		)
-		(property "Status" "proposed" (at 0 0 0)
+		(property "Status" "TBD" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8150,7 +8150,7 @@
 				(hide yes)
 			)
 		)
-		(property "Manufacturer" "Samsung Electro-Mechanics" (at 0 0 0)
+		(property "Manufacturer" "TBD" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8158,7 +8158,7 @@
 				(hide yes)
 			)
 		)
-		(property "MPN" "CL21B105KBFNNNE" (at 0 0 0)
+		(property "MPN" "TBD" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8932,7 +8932,7 @@
 				)
 			)
 		)
-		(property "BOM Comments" "Price est. 10 uF, 25 V, X5R. X5R loses capacity under DC bias; verify effective value at 8.4 V. Samsung CL21A106KAYNNNE was out of stock" (at 0 0 0)
+		(property "BOM Comments" "Variant footprint Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm: part number TBD (owner). Base board part CC0805KRX5R8BB106: Price est. 10 uF, 25 V, X5R. X5R loses capacity under DC bias; verify effective value at 8.4 V. Samsung CL21A106KAYNNNE was out of stock" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8940,7 +8940,7 @@
 				(hide yes)
 			)
 		)
-		(property "Supplier link" "https://www.digikey.com/en/products/detail/yageo/CC0805KRX5R8BB106/7164387" (at 0 0 0)
+		(property "Supplier link" "TBD" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8948,7 +8948,7 @@
 				(hide yes)
 			)
 		)
-		(property "Unit cost USD" "0.10" (at 0 0 0)
+		(property "Unit cost USD" "" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8956,7 +8956,7 @@
 				(hide yes)
 			)
 		)
-		(property "Status" "proposed" (at 0 0 0)
+		(property "Status" "TBD" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8964,7 +8964,7 @@
 				(hide yes)
 			)
 		)
-		(property "Manufacturer" "YAGEO" (at 0 0 0)
+		(property "Manufacturer" "TBD" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8972,7 +8972,7 @@
 				(hide yes)
 			)
 		)
-		(property "MPN" "CC0805KRX5R8BB106" (at 0 0 0)
+		(property "MPN" "TBD" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10265,7 +10265,7 @@
 				)
 			)
 		)
-		(property "BOM Comments" "22 uF, 10 V, X5R. FLAG: 10 V X5R on a 5 V rail loses much capacitance to DC bias; consider a 16 V part (e.g. 22 uF 16 V X5R 0805/1206). DigiKey backorder; YAGEO CC0805MKX5R6BB226 listed as substitute (no link)" (at 0 0 0)
+		(property "BOM Comments" "Variant footprint Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm: part number TBD (owner). Base board part GRM21BR61A226ME44L: 22 uF, 10 V, X5R. FLAG: 10 V X5R on a 5 V rail loses much capacitance to DC bias; consider a 16 V part (e.g. 22 uF 16 V X5R 0805/1206). DigiKey backorder; YAGEO CC0805MKX5R6BB226 listed as substitute (no link)" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10273,7 +10273,7 @@
 				(hide yes)
 			)
 		)
-		(property "Supplier link" "https://www.digikey.com/en/products/detail/murata-electronics/GRM21BR61A226ME44L/4905527" (at 0 0 0)
+		(property "Supplier link" "TBD" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10281,7 +10281,7 @@
 				(hide yes)
 			)
 		)
-		(property "Unit cost USD" "0.30" (at 0 0 0)
+		(property "Unit cost USD" "" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10289,7 +10289,7 @@
 				(hide yes)
 			)
 		)
-		(property "Status" "proposed" (at 0 0 0)
+		(property "Status" "TBD" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10297,7 +10297,7 @@
 				(hide yes)
 			)
 		)
-		(property "Manufacturer" "Murata" (at 0 0 0)
+		(property "Manufacturer" "TBD" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10305,7 +10305,7 @@
 				(hide yes)
 			)
 		)
-		(property "MPN" "GRM21BR61A226ME44L" (at 0 0 0)
+		(property "MPN" "TBD" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11269,7 +11269,7 @@
 				)
 			)
 		)
-		(property "BOM Comments" "22 uF, 10 V, X5R. FLAG: 10 V X5R on a 5 V rail loses much capacitance to DC bias; consider a 16 V part (e.g. 22 uF 16 V X5R 0805/1206). DigiKey backorder; YAGEO CC0805MKX5R6BB226 listed as substitute (no link)" (at 0 0 0)
+		(property "BOM Comments" "Variant footprint Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm: part number TBD (owner). Base board part GRM21BR61A226ME44L: 22 uF, 10 V, X5R. FLAG: 10 V X5R on a 5 V rail loses much capacitance to DC bias; consider a 16 V part (e.g. 22 uF 16 V X5R 0805/1206). DigiKey backorder; YAGEO CC0805MKX5R6BB226 listed as substitute (no link)" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11277,7 +11277,7 @@
 				(hide yes)
 			)
 		)
-		(property "Supplier link" "https://www.digikey.com/en/products/detail/murata-electronics/GRM21BR61A226ME44L/4905527" (at 0 0 0)
+		(property "Supplier link" "TBD" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11285,7 +11285,7 @@
 				(hide yes)
 			)
 		)
-		(property "Unit cost USD" "0.30" (at 0 0 0)
+		(property "Unit cost USD" "" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11293,7 +11293,7 @@
 				(hide yes)
 			)
 		)
-		(property "Status" "proposed" (at 0 0 0)
+		(property "Status" "TBD" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11301,7 +11301,7 @@
 				(hide yes)
 			)
 		)
-		(property "Manufacturer" "Murata" (at 0 0 0)
+		(property "Manufacturer" "TBD" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11309,7 +11309,7 @@
 				(hide yes)
 			)
 		)
-		(property "MPN" "GRM21BR61A226ME44L" (at 0 0 0)
+		(property "MPN" "TBD" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11807,7 +11807,7 @@
 				)
 			)
 		)
-		(property "BOM Comments" "Price est. 10 uF, 25 V, X5R. X5R loses capacity under DC bias; verify effective value at 8.4 V. Samsung CL21A106KAYNNNE was out of stock" (at 0 0 0)
+		(property "BOM Comments" "Variant footprint Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm: part number TBD (owner). Base board part CC0805KRX5R8BB106: Price est. 10 uF, 25 V, X5R. X5R loses capacity under DC bias; verify effective value at 8.4 V. Samsung CL21A106KAYNNNE was out of stock" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11815,7 +11815,7 @@
 				(hide yes)
 			)
 		)
-		(property "Supplier link" "https://www.digikey.com/en/products/detail/yageo/CC0805KRX5R8BB106/7164387" (at 0 0 0)
+		(property "Supplier link" "TBD" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11823,7 +11823,7 @@
 				(hide yes)
 			)
 		)
-		(property "Unit cost USD" "0.10" (at 0 0 0)
+		(property "Unit cost USD" "" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11831,7 +11831,7 @@
 				(hide yes)
 			)
 		)
-		(property "Status" "proposed" (at 0 0 0)
+		(property "Status" "TBD" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11839,7 +11839,7 @@
 				(hide yes)
 			)
 		)
-		(property "Manufacturer" "YAGEO" (at 0 0 0)
+		(property "Manufacturer" "TBD" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11847,7 +11847,7 @@
 				(hide yes)
 			)
 		)
-		(property "MPN" "CC0805KRX5R8BB106" (at 0 0 0)
+		(property "MPN" "TBD" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)

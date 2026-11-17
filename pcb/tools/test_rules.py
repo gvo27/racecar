@@ -54,6 +54,8 @@ class TestLoad(unittest.TestCase):
         self.assertTrue(r.exception_for("J5").own_pads)          # pin headers: one entry with a refs list
         self.assertFalse(r.exception_for("J5").zones)
         self.assertIsNone(r.exception_for("J6"))                 # the USB pigtail terminals have no exception
+        self.assertTrue(r.exception_for("U1").own_pads)          # module pins: only the pad gaps of the module itself
+        self.assertFalse(r.exception_for("U2").zones)
         self.assertEqual(set(r.footprint), {"C2", "C3", "C4", "C5", "C6", "C7", "C8"})
         self.assertGreater(r.annular_target, r.annular_min)
 
@@ -64,7 +66,8 @@ class TestLoad(unittest.TestCase):
                          ('[netclass.Default]\ntrack_width = 1.3', '[netclass.Default]\ntrack_width = 0.2'),  # below track_min
                          ('[zone_clearance]\nvalue = 2.0', '[zone_clearance]\nvalue = 0.2'),                # below clearance
                          ('[annular_target]\nvalue = 0.8', '[annular_target]\nvalue = 0.2'),                # below annular_min
-                         ('own_pads = true', 'own_pad = true')):                                            # unknown exception field
+                         ('own_pads = true  # only the pads of one header', 'own_pad = true'),              # unknown exception field
+                         ('own_pads = true  # only the pads of one header', 'own_pads = true\nzones = true')):  # both forms
             with self.subTest(new=new), self.assertRaises(ValueError):
                 rules.load(edited(MILL_RULES, old, new))
 
@@ -111,11 +114,16 @@ class TestVariant(unittest.TestCase):
         diff = [(x.strip(), y.strip()) for x, y in zip(a, b) if x != y]
         self.assertEqual(sorted(diff), sorted([("(in_bom yes)", "(in_bom no)"), ("(on_board yes)", "(on_board no)"), ("(dnp no)", "(dnp yes)")] * 2))
 
-    def test_footprint_of_a_part_changes_and_nothing_else(self):
-        text, done = variant.make_variant(self.base, set(), {"C6": "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm"})
+    def test_footprint_of_a_part_changes_and_its_part_fields_are_tbd(self):
+        fp = "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm"
+        text, done = variant.make_variant(self.base, set(), {"C6": fp})
         self.assertEqual(done, ["C6"])
         diff = [(x.strip(), y.strip()) for x, y in zip(self.base.splitlines(), text.splitlines()) if x != y]
-        self.assertEqual(diff, [('(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"', '(property "Footprint" "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm"')])
+        self.assertEqual(diff[0], ('(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"', '(property "Footprint" "%s"' % fp))
+        new = {y.split('"')[1]: y.split('"')[3] for _, y in diff[1:]}
+        self.assertEqual(set(new), {"MPN", "Manufacturer", "Supplier link", "Status", "Unit cost USD", "BOM Comments"})
+        self.assertEqual((new["MPN"], new["Manufacturer"], new["Status"], new["Unit cost USD"]), ("TBD", "TBD", "TBD", ""))
+        self.assertIn("Base board part", new["BOM Comments"])
 
     def test_no_exclude_list_gives_the_base_schematic(self):
         self.assertEqual(variant.make_variant(self.base, set())[0], self.base)
@@ -124,6 +132,35 @@ class TestVariant(unittest.TestCase):
         r = rules.load(MILL_RULES)
         want = variant.make_variant(self.base, set(r.exclude), r.footprint)[0]
         self.assertEqual(open(os.path.join(MILL, paths.STEM + ".kicad_sch"), encoding="utf-8").read(), want, "run make pcb-sch BOARD=mill")
+
+
+class TestRingAndWidth(unittest.TestCase):
+    """Pure helpers of build_pcb (ring_for) and route_pcb (fit_width)."""
+    def test_pads_of_one_net_do_not_limit_the_ring(self):
+        import build_pcb
+        # four pads 2.5 mm apart on one net, the next net 5.8 mm away (F1): the full ring fits
+        pads = [(0, 0, 1.4, 2.3, 2.3, 1), (2.5, 0, 1.4, 2.3, 2.3, 1), (8.3, 0, 1.4, 2.3, 2.3, 2)]
+        self.assertAlmostEqual(build_pcb.ring_for(pads, 0.8, 0.45, 2.0), 0.8)
+        # two nets 3.5 mm apart: the ring gets smaller
+        pads = [(0, 0, 1.0, 1.9, 1.9, 1), (3.5, 0, 1.0, 1.9, 1.9, 2)]
+        self.assertAlmostEqual(build_pcb.ring_for(pads, 0.8, 0.45, 2.0), 0.45)
+        # pads with no net have nets of their own
+        self.assertAlmostEqual(build_pcb.ring_for([(0, 0, 1.0, 1.9, 1.9, "a"), (3.5, 0, 1.0, 1.9, 1.9, "b")], 0.8, 0.45, 2.0), 0.45)
+
+    def test_npth_cap_keeps_the_library_gap_or_the_rule_gap(self):
+        import build_pcb
+        hole = [(0.0, 0.0, 1.7)]
+        self.assertAlmostEqual(build_pcb.npth_cap((2.9, 0, 1.4, 2.3, 2.3, 1), hole, 2.0), 2.3)   # 0.05 mm now: stays
+        self.assertAlmostEqual(build_pcb.npth_cap((6.4, 0, 1.4, 2.3, 2.3, 1), hole, 2.0), 5.4)   # far: 2 mm gap
+        self.assertEqual(build_pcb.npth_cap((6.4, 0, 1.4, 2.3, 2.3, 1), [], 2.0), float("inf"))
+
+    def test_fit_width_steps_down_and_tests_the_floor(self):
+        import route_pcb
+        self.assertEqual(route_pcb.fit_width(13, 5, 1, lambda w: w > 9), (9, True))
+        self.assertEqual(route_pcb.fit_width(13, 5, 1, lambda w: False), (13, True))
+        self.assertEqual(route_pcb.fit_width(13, 5, 1, lambda w: True), (5, False))   # floor collides: reported
+        self.assertEqual(route_pcb.fit_width(13, 5, 8, lambda w: w > 5), (5, True))   # rev A: full width or floor
+        self.assertEqual(route_pcb.fit_width(5, 5, 1, lambda w: False), (5, True))
 
 
 class TestMillBoard(unittest.TestCase):
@@ -177,12 +214,28 @@ class TestMillBoard(unittest.TestCase):
         for f in fixed:
             a, b = f[2].split(" | ")
             self.assertNotIn("track", f[2])
-            if "zone fill" in a + b:   # zone fill only at a pad of a part with zones = true (U3, the modules)
+            if "zone fill" in a + b:   # zone fill only at a pad of a part with zones = true (U3)
                 self.assertIn(ref(a) or ref(b), zone_refs, f[2])
             else:                      # else two pads of one part
                 self.assertEqual(ref(a), ref(b), f[2])
         self.assertTrue(any("pad U3." in f[2] for f in fixed))
         self.assertTrue(any("pad J5." in f[2] for f in fixed))
+        self.assertFalse(any("zone fill" in f[2] and ("pad U1." in f[2] or "pad U2." in f[2]) for f in fixed))
+
+    def test_f1_rings_grow_except_at_the_holder_hole(self):
+        import pcbnew
+        fp = self.board.FindFootprintByReference("F1")
+        hole = next(p for p in fp.Pads() if p.GetAttribute() == pcbnew.PAD_ATTRIB_NPTH)
+        hr = pcbnew.ToMM(hole.GetDrillSize().x) / 2.0
+        grown = 0
+        for p in fp.Pads():
+            if p.GetAttribute() == pcbnew.PAD_ATTRIB_NPTH or not p.HasHole():
+                continue
+            ring = (pcbnew.ToMM(p.GetSize(pcbnew.B_Cu).x) - pcbnew.ToMM(p.GetDrillSize().x)) / 2.0
+            gap = pcbnew.ToMM((p.GetPosition() - hole.GetPosition()).EuclideanNorm()) - hr - pcbnew.ToMM(p.GetSize(pcbnew.B_Cu).x) / 2.0
+            self.assertGreater(gap, 0.0)                      # no copper on the unplated hole
+            grown += ring >= self.rules.annular_target - 0.005
+        self.assertEqual(grown, 4)                            # the outer pads: pads of one net do not limit the ring
 
     def test_exception_part_is_in_the_component_gap_check(self):
         r = dataclasses.replace(self.rules, component_gap=2.6)  # U3 to C6 is 2.55 mm

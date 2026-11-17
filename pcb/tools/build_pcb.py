@@ -179,36 +179,61 @@ def fit_pad(pad, ref="", lib_pad=None):
         pad.SetSize(new)
 
 
+def ring_for(pads, target, minimum, gap):
+    """The largest annular ring from `target` down to `minimum` (steps of 0.05 mm) that keeps two pads of different
+    nets `gap` apart. pads: (x, y, drill, size_x, size_y, net) in mm. Pads of one net can touch (example: F1)."""
+    def size(p, ring):
+        return max(p[3], p[2] + 2 * ring), max(p[4], p[2] + 2 * ring)
+
+    ring = target
+    while ring > minimum + 1e-9:
+        ok = True
+        for i, a in enumerate(pads):
+            for c in pads[i + 1:]:
+                if a[5] == c[5]:
+                    continue
+                dist = ((a[0] - c[0]) ** 2 + (a[1] - c[1]) ** 2) ** 0.5
+                if dist - (max(size(a, ring)) + max(size(c, ring))) / 2.0 < gap - 1e-6:
+                    ok = False
+        if ok:
+            break
+        ring = round(ring - 0.05, 2)
+    return max(ring, minimum)
+
+
 def grow_rings(fp, ref):
     """Design rules: give the THT pads of a part the larger annular ring `annular_target` (hand soldering on holes
-    without plating). The ring gets smaller in steps of 0.05 mm, down to `annular_min`, until the pads of the part are
-    `component_gap` apart. A part with an [[exception]] (pin header, module) keeps its pads."""
+    without plating). The ring gets smaller in steps of 0.05 mm, down to `annular_min`, until the pads of different
+    nets of the part are `component_gap` apart (ring_for). A part with an [[exception]] (pin header, module) keeps its
+    pads."""
     if RULES.annular_target <= ANNULAR_MIN + 1e-9 or RULES.exception_for(ref) is not None:
         return
     pads = [p for p in fp.Pads() if p.HasHole() and p.GetAttribute() != pcbnew.PAD_ATTRIB_NPTH]
     if not pads:
         return
-
-    def size(p, ring):
-        d = max(ToMM(p.GetDrillSize().x), ToMM(p.GetDrillSize().y))
-        s = p.GetSize(pcbnew.F_Cu)
-        return max(ToMM(s.x), d + 2 * ring), max(ToMM(s.y), d + 2 * ring)
-
-    ring = RULES.annular_target
-    while ring > ANNULAR_MIN + 1e-9:
-        ok = True
-        for i, a in enumerate(pads):
-            for c in pads[i + 1:]:
-                dist = ToMM((a.GetPosition() - c.GetPosition()).EuclideanNorm())
-                if dist - (max(size(a, ring)) + max(size(c, ring))) / 2.0 < RULES.component_gap - 1e-6:
-                    ok = False
-        if ok:
-            break
-        ring = round(ring - 0.05, 2)
-    ring = max(ring, ANNULAR_MIN)
+    holes = [(ToMM(p.GetPosition().x), ToMM(p.GetPosition().y), ToMM(p.GetDrillSize().x) / 2.0)
+             for p in fp.Pads() if p.GetAttribute() == pcbnew.PAD_ATTRIB_NPTH]
+    rows = []
     for p in pads:
-        sx, sy = size(p, ring)
-        p.SetSize(VECTOR2I(FromMM(sx), FromMM(sy)))
+        s = p.GetSize(pcbnew.F_Cu)
+        net = p.GetNetCode() if p.GetNetCode() > 0 else "pad%s" % p.GetNumber()  # no net: a net of its own
+        rows.append((ToMM(p.GetPosition().x), ToMM(p.GetPosition().y), max(ToMM(p.GetDrillSize().x), ToMM(p.GetDrillSize().y)),
+                     ToMM(s.x), ToMM(s.y), net))
+    ring = ring_for(rows, RULES.annular_target, ANNULAR_MIN, RULES.component_gap)
+    for p, r in zip(pads, rows):
+        cap = npth_cap(r, holes, RULES.component_gap)
+        p.SetSize(VECTOR2I(FromMM(max(r[3], min(r[2] + 2 * ring, cap))), FromMM(max(r[4], min(r[2] + 2 * ring, cap)))))
+
+
+def npth_cap(pad, holes, gap):
+    """Largest round pad size (mm) that keeps a pad `gap` from each unplated hole of its part, or the library gap if
+    that is smaller (example: F1, holder center hole). pad: (x, y, drill, size_x, size_y, net); holes: (x, y, radius)."""
+    cap = float("inf")
+    for hx, hy, hr in holes:
+        dist = ((pad[0] - hx) ** 2 + (pad[1] - hy) ** 2) ** 0.5
+        now = dist - hr - max(pad[3], pad[4]) / 2.0     # gap of the library pad
+        cap = min(cap, 2.0 * (dist - hr - min(gap, max(now, 0.0))))
+    return cap
 
 
 def add_outline(board):
