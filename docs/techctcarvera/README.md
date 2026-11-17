@@ -30,14 +30,17 @@ The mill is not accurate in X and Y. The board `pcb/mill` is a coarse copy of th
 | --- | --- |
 | `horizontal_error` | Position error of a cut for each side. The milling check needs gap >= cut width + 2 x this value (`MILL-GAP`). It is used for copper gaps only, not for the edge clearance, the annular ring or the holes. If you raise it, raise `clearance` and `zone_clearance` to at least cut width + 2 x this value |
 | `cut_spacing_min` | Smallest distance between the centers of two isolation gaps. Copper between two gaps must be `cut_spacing_min` - `clearance` wide. `MILL-CUT-SPACING` lists thinner copper |
-| `clearance`, `zone_clearance` | Copper gap between two nets, and between a pour and other copper |
+| `clearance` | Copper gap for tracks and pads. Set it to at least cut width + 2 x `horizontal_error` |
+| `zone_clearance` | Copper gap that the pours and the planned zones keep from other copper (2.0 mm: the "2 mm copper gap wherever possible" rule). A zone in `pcb/mill/placement.py` can have a smaller value where 2 mm leaves no copper (`_NEAR`, `_FINE`) |
 | `track_min` | Hard minimum track width |
 | `[netclass.*] track_width` | Target track width of each net class. A track is narrower only where a pad gives no room |
 | `zone_min_width` | Smallest width of pour copper |
 | `component_gap` | Smallest gap between pads of two different parts on different nets (`MILL-COMP-GAP`) |
-| `module_gap`, `edge_clearance`, `edge_band`, `annular_min` | Module courtyard gap, copper to board edge, router band along the edge, annular ring |
-| `[[exception]]` | A part whose footprint fixes a smaller gap (U3). `zones = true`: planned zones can use the lower clearance at its pads |
+| `module_gap`, `edge_clearance`, `edge_band` | Module courtyard gap, copper to board edge, router band along the edge |
+| `annular_min`, `annular_target` | Smallest annular ring, and the ring that a THT pad gets when its part has room (hand soldering). A part with an `[[exception]]` keeps its pads |
+| `[[exception]]` | A part whose footprint fixes a smaller gap (`ref` or a `refs` list). `clearance` is that gap. `own_pads = true` (pin headers): only the pads of the part are that close, tracks and zones keep the board clearance. `zones = true` (U3, modules): planned zones and pours can also use the lower clearance at its pads |
 | `[parts] exclude` | Parts of the schematic that are not on the board |
+| `[parts.footprint]` | Parts that have a different footprint on this board (same value). `make pcb-sch` writes it into the mill schematic. A new footprint needs a position in `pcb/mill/placement.py` |
 
 The values are start values with `status = "assumed"`. `make pcb-rules BOARD=mill` prints the assumed keys. A value must not be below the lab limit of the same name in `milling.toml`.
 

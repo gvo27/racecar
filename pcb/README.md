@@ -3,7 +3,7 @@
 | Path | Content |
 | --- | --- |
 | `fabhouse/` | The rev A board: KiCad project (`rc_power_board.kicad_sch`, `.kicad_pcb`, `.kicad_pro`, `.kicad_dru`), lib tables, `bom.csv` (from `make bom`), `fab/` outputs (from `make pcb-fab`) |
-| `mill/` | The mill prototype: the rev A circuit without the LEDs and their resistors, with wider tracks and gaps for the lab mill. Made by `make pcb-all BOARD=mill` from `mill/placement.py` and the mill tuning file (`design_rules.toml` in the lab directory). Do not edit the schematic or the board by hand |
+| `mill/` | The mill prototype: the rev A circuit without the LEDs and their resistors, with through-hole capacitors for C2 to C8, and with wider tracks and gaps for the lab mill. Made by `make pcb-all BOARD=mill` from `mill/placement.py` and the mill tuning file (`design_rules.toml` in the lab directory). Do not edit the schematic or the board by hand |
 | `lib/` | Symbol and footprint libraries, shared by all boards (`rc_power.kicad_sym`, `rc_power.pretty/`) |
 | `tools/` | Board tools and their tests. They run in the KiCad image through `make`. `paths.py` holds this layout |
 | `COLCON_IGNORE` | Keeps this directory out of the ROS 2 build |

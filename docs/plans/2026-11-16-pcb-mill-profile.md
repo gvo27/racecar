@@ -23,6 +23,12 @@ The lab mill is not accurate in X and Y. The owner wants one config file that de
 - The design rules do not move parts. A rule change that the placement cannot keep makes a check fail. Then a person or an agent changes `pcb/mill/placement.py`.
 - The component gap is measured between pads on different nets, not between courtyards. A 2 mm courtyard gap between all parts does not fit the 66 mm wide outline (modules, connectors).
 
+## Second layout (2026-11-17, lab tech notes)
+- Owner decisions: U3 stays. The 0805 capacitors become through-hole capacitors (5.0 mm pitch). 2 mm copper gap wherever possible. Pin headers stay standard. "2 mm between cuts" is the rule where a 2 mm copper gap is not possible.
+- Tuning file: `horizontal_error` 0.25, `clearance` 0.8, `zone_clearance` 2.0, `zone_min_width` 1.2, tracks 1.3, `annular_target` 0.8, exceptions for the XH headers (`own_pads`) and the modules, `[parts.footprint]` for C2 to C8.
+- Tools: ring growth in `build_pcb.py`, footprint override in `variant.py`, zones with their own clearance and zones that the router can cross.
+- Results and the list of areas without the 2 mm gap: `review/README.md` of the lab directory.
+
 ## Follow-up
 - Lab tech: confirm the values of the tuning file (questions in `review/README.md` of the lab directory).
 - Review of the mill board by `pcb-reviewer` and by the owner.

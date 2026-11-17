@@ -26,6 +26,8 @@ def condition(e):
     zones = true: against pads and zone fill, not tracks and vias. Note: build_pcb.py also puts the lower clearance on
     the pads then (the zone filler needs it), and KiCad DRC uses that pad value for tracks too. The milling check
     (MILL-GAP) reports a track that is too near such a pad."""
+    if e.own_pads:  # a pin header: only its own pads are closer than the board clearance
+        return "A.Type == 'Pad' && B.Type == 'Pad' && A.Reference == '%s' && B.Reference == '%s'" % (e.ref, e.ref)
     base = "A.Type == 'Pad' && A.Reference == '%s'" % e.ref
     return base + (" && B.Type != 'Track' && B.Type != 'Via'" if e.zones else " && B.Type != 'Zone'")
 

@@ -29,6 +29,7 @@ SCALARS = {
     "edge_clearance": (0.1, 10.0),
     "edge_band": (0.0, 10.0),
     "annular_min": (0.1, 5.0),
+    "annular_target": (0.1, 5.0),
 }
 CLASS_ORDER = ("Default", "HighCurrent", "Power3A", "Power5A")
 
@@ -39,6 +40,7 @@ class Exception_:
     clearance: float
     reason: str
     zones: bool = False  # True: the lower clearance is also valid for zone fill (planned zones at the part)
+    own_pads: bool = False  # True: the lower clearance is valid only between two pads of this part
 
 
 @dataclass
@@ -55,9 +57,11 @@ class Rules:
     edge_clearance: float
     edge_band: float
     annular_min: float
+    annular_target: float
     track_width: dict = field(default_factory=dict)   # net class -> width mm
     exceptions: list = field(default_factory=list)
     exclude: tuple = ()
+    footprint: dict = field(default_factory=dict)     # ref -> footprint of this board (not the footprint of the base schematic)
     status: dict = field(default_factory=dict)        # key -> assumed|confirmed
 
     @property
@@ -118,16 +122,22 @@ def load(path=None):
             raise ValueError("%s: netclass %s track_width %.2f is below track_min %.2f" % (path, name, widths[name], vals["track_min"]))
     exc = []
     for e in raw.get("exception", []):
-        for k in ("ref", "clearance", "reason"):
+        refs = [e["ref"]] if e.get("ref") else list(e.get("refs", []))  # one part, or a list of parts with the same values
+        for k in ("clearance", "reason"):
             if not e.get(k):
                 raise ValueError("%s: exception %r: missing field %s" % (path, e, k))
-        if set(e) - {"ref", "clearance", "reason", "zones"}:
-            raise ValueError("%s: exception %s: unknown field" % (path, e["ref"]))
-        exc.append(Exception_(e["ref"], float(e["clearance"]), e["reason"], bool(e.get("zones", False))))
+        if not refs or (e.get("ref") and e.get("refs")):
+            raise ValueError("%s: exception %r: needs ref or refs" % (path, e))
+        if set(e) - {"ref", "refs", "clearance", "reason", "zones", "own_pads"}:
+            raise ValueError("%s: exception %s: unknown field" % (path, refs))
+        for ref in refs:
+            exc.append(Exception_(ref, float(e["clearance"]), e["reason"], bool(e.get("zones", False)), bool(e.get("own_pads", False))))
     parts = raw.get("parts", {})
-    if set(parts) - {"exclude", "reason"}:
+    if set(parts) - {"exclude", "reason", "footprint", "footprint_reason"}:
         raise ValueError("%s: [parts] has unknown keys" % path)
-    r = Rules(path=path, track_width=widths, exceptions=exc, exclude=tuple(parts.get("exclude", [])), status=status, **vals)
+    r = Rules(path=path, track_width=widths, exceptions=exc, exclude=tuple(parts.get("exclude", [])), footprint=dict(parts.get("footprint", {})), status=status, **vals)
+    if r.annular_target < r.annular_min - 1e-9:
+        raise ValueError("%s: annular_target %.2f is below annular_min %.2f" % (path, r.annular_target, r.annular_min))
     if r.zone_clearance < r.clearance - 1e-9:
         raise ValueError("%s: zone_clearance %.2f is below clearance %.2f" % (path, r.zone_clearance, r.clearance))
     return r
@@ -154,6 +164,8 @@ def main(argv=None):
         print("  exception %-8s clearance %.2f mm: %s" % (e.ref, e.clearance, e.reason))
     if r.exclude:
         print("  parts not on this board: %s" % ", ".join(r.exclude))
+    for ref, fp in sorted(r.footprint.items()):
+        print("  footprint %-5s %s" % (ref, fp))
     return 0
 
 

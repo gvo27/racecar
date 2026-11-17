@@ -93,7 +93,7 @@ def prepare(board_path, dsn_path, allow_vias=False):
             ol.Append(q)
         work.Add(z)
     # bus zones are obstacles for the router
-    for pts in (row[1] for row in placement.BUS_ZONES):
+    for pts in (row[1] for row in placement.BUS_ZONES if not (len(row) > 2 and row[2].get("keepout") is False)):
         z = pcbnew.ZONE(work)
         z.SetIsRuleArea(True)
         z.SetLayer(pcbnew.B_Cu)
@@ -168,7 +168,8 @@ def widen_tracks(board):
     (steps of 0.1 mm). It never gets narrower than the router made it."""
     ns = board.GetDesignSettings().m_NetSettings
     clr = FromMM(RULES.clearance + 0.005)
-    clr_exc = {e.ref: FromMM(e.clearance + 0.005) for e in RULES.exceptions}  # [[exception]] of the design rules
+    # an [[exception]] lowers the clearance of a track to a pad only in the rev A form (not own_pads, not zones)
+    clr_exc = {e.ref: FromMM(e.clearance + 0.005) for e in RULES.exceptions if not e.own_pads and not e.zones}
     items = {pcbnew.F_Cu: [], pcbnew.B_Cu: []}
     for layer in items:
         for t in board.GetTracks():
@@ -183,9 +184,14 @@ def widen_tracks(board):
             continue
         want = ns.GetEffectiveNetClass(t.GetNetname()).GetTrackWidth()
         old = t.GetWidth()
-        if old >= want:
+        if old >= want and not STEP_WIDEN:
             continue
+        want = max(want, old) if not STEP_WIDEN else want
         w = want
+        # a board with step widening: a track that is too near other copper as routed gets narrower, down to track_min
+        floor = min(old, FromMM(RULES.track_min)) if STEP_WIDEN else old
+        if STEP_WIDEN:
+            old = floor
         while w > old:
             t.SetWidth(w)
             shape = t.GetEffectiveShape(t.GetLayer())

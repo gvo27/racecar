@@ -179,6 +179,38 @@ def fit_pad(pad, ref="", lib_pad=None):
         pad.SetSize(new)
 
 
+def grow_rings(fp, ref):
+    """Design rules: give the THT pads of a part the larger annular ring `annular_target` (hand soldering on holes
+    without plating). The ring gets smaller in steps of 0.05 mm, down to `annular_min`, until the pads of the part are
+    `component_gap` apart. A part with an [[exception]] (pin header, module) keeps its pads."""
+    if RULES.annular_target <= ANNULAR_MIN + 1e-9 or RULES.exception_for(ref) is not None:
+        return
+    pads = [p for p in fp.Pads() if p.HasHole() and p.GetAttribute() != pcbnew.PAD_ATTRIB_NPTH]
+    if not pads:
+        return
+
+    def size(p, ring):
+        d = max(ToMM(p.GetDrillSize().x), ToMM(p.GetDrillSize().y))
+        s = p.GetSize(pcbnew.F_Cu)
+        return max(ToMM(s.x), d + 2 * ring), max(ToMM(s.y), d + 2 * ring)
+
+    ring = RULES.annular_target
+    while ring > ANNULAR_MIN + 1e-9:
+        ok = True
+        for i, a in enumerate(pads):
+            for c in pads[i + 1:]:
+                dist = ToMM((a.GetPosition() - c.GetPosition()).EuclideanNorm())
+                if dist - (max(size(a, ring)) + max(size(c, ring))) / 2.0 < RULES.component_gap - 1e-6:
+                    ok = False
+        if ok:
+            break
+        ring = round(ring - 0.05, 2)
+    ring = max(ring, ANNULAR_MIN)
+    for p in pads:
+        sx, sy = size(p, ring)
+        p.SetSize(VECTOR2I(FromMM(sx), FromMM(sy)))
+
+
 def add_outline(board):
     r = pcbnew.PCB_SHAPE(board)
     r.SetShape(pcbnew.SHAPE_T_RECT)
@@ -245,9 +277,11 @@ def add_power_zones(board, netinfo):
     # F.Cu islands below PIECE_MIN_MM2 are removed (the pour joins B.Cu GND only through rivet vias).
     add_zone(board, gnd, pcbnew.F_Cu, outline, pcbnew.ZONE_CONNECTION_NONE, prio=0, name="GND_F", island_area_mm2=PIECE_MIN_MM2)
     add_zone(board, gnd, pcbnew.B_Cu, outline, pcbnew.ZONE_CONNECTION_FULL, prio=0, name="GND_B")
-    # a BUS_ZONES row is (net, points) or (net, points, {"clearance": mm, "min_w": mm}) for a fine zone at an exception part
+    # a BUS_ZONES row is (net, points) or (net, points, {"clearance": mm, "min_w": mm, "keepout": bool}): a zone with
+    # its own clearance and width. "keepout": False = the router can put tracks in the area (route_pcb.py)
     for i, row in enumerate(placement.BUS_ZONES):
-        net, pts, opts = row[0], row[1], (row[2] if len(row) > 2 else {})
+        net, pts, opts = row[0], row[1], dict(row[2] if len(row) > 2 else {})
+        opts.pop("keepout", None)
         add_zone(board, netinfo[net], pcbnew.B_Cu, pts, pcbnew.ZONE_CONNECTION_FULL, prio=10 + i, name="BUS_%s_%d" % (net.lstrip("/"), i), **opts)
 
 
@@ -371,6 +405,7 @@ def build(out_path, sch_dir=SCH_DIR):
             exc = RULES.exception_for(ref)
             if exc is not None and exc.zones:
                 pad.SetLocalClearance(FromMM(exc.clearance))
+        grow_rings(fp, ref)
         x, y, rot, side = placement.PLACEMENT[ref]
         fp.SetPosition(pt(x, y))
         fp.SetOrientationDegrees(rot)

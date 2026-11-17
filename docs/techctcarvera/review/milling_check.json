@@ -6,498 +6,978 @@
   [
    "MILL-GAP-FIXED",
    "warning",
+   "pad U1.1 F.Cu net /U1_PG at (42.35, -43.89) | pad U1.2 F.Cu net unconnected-(U1-EN-Pad2) at (42.35, -46.43)",
+   0.640016,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U1.1 F.Cu net /U1_PG at (42.35, -43.89) | pad U1.3 F.Cu net unconnected-(U1-VRP-Pad3) at (44.89, -43.89)",
+   0.640016,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U1.1 F.Cu net /U1_PG at (42.35, -43.89) | zone fill F.Cu net GND",
+   0.6405,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U1.2 F.Cu net unconnected-(U1-EN-Pad2) at (42.35, -46.43) | pad U1.4 F.Cu net unconnected-(U1-VRP-Pad4) at (44.89, -46.43)",
+   0.640016,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U1.2 F.Cu net unconnected-(U1-EN-Pad2) at (42.35, -46.43) | zone fill F.Cu net GND",
+   0.6405,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U1.3 F.Cu net unconnected-(U1-VRP-Pad3) at (44.89, -43.89) | pad U1.4 F.Cu net unconnected-(U1-VRP-Pad4) at (44.89, -46.43)",
+   0.640016,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U1.3 F.Cu net unconnected-(U1-VRP-Pad3) at (44.89, -43.89) | pad U1.5 F.Cu net VBAT at (47.43, -43.89)",
+   0.640016,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U1.3 F.Cu net unconnected-(U1-VRP-Pad3) at (44.89, -43.89) | zone fill F.Cu net GND",
+   0.6405,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U1.4 F.Cu net unconnected-(U1-VRP-Pad4) at (44.89, -46.43) | pad U1.6 F.Cu net VBAT at (47.43, -46.43)",
+   0.640016,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U1.5 F.Cu net VBAT at (47.43, -43.89) | pad U1.7 F.Cu net GND at (49.97, -43.89)",
+   0.640016,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U1.5 F.Cu net VBAT at (47.43, -43.89) | zone fill F.Cu net GND",
+   0.6405,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U1.6 F.Cu net VBAT at (47.43, -46.43) | pad U1.8 F.Cu net GND at (49.97, -46.43)",
+   0.640016,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U1.9 F.Cu net GND at (52.51, -43.89) | pad U1.11 F.Cu net +5V_CPU at (55.05, -43.89)",
+   0.640016,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U1.10 F.Cu net GND at (52.51, -46.43) | pad U1.12 F.Cu net +5V_CPU at (55.05, -46.43)",
+   0.640016,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U1.11 F.Cu net +5V_CPU at (55.05, -43.89) | zone fill F.Cu net GND",
+   0.6405,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U1.12 F.Cu net +5V_CPU at (55.05, -46.43) | zone fill F.Cu net GND",
+   0.6405,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J14.1 F.Cu net +3V3_SENS at (61.10, -125.60) | pad J14.2 F.Cu net GND at (61.10, -128.10)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J13.1 F.Cu net +3V3_SENS at (61.10, -116.60) | pad J13.2 F.Cu net GND at (61.10, -119.10)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J8.1 F.Cu net +5V_SENS at (4.50, -83.20) | pad J8.2 F.Cu net GND at (4.50, -80.70)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J8.2 F.Cu net GND at (4.50, -80.70) | pad J8.3 F.Cu net /I2C_SDA at (4.50, -78.20)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J8.3 F.Cu net /I2C_SDA at (4.50, -78.20) | pad J8.4 F.Cu net /I2C_SCL at (4.50, -75.70)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J3.1 F.Cu net GND at (3.40, -42.50) | pad J3.2 F.Cu net +6V_BEC at (3.40, -45.00)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J3.2 F.Cu net +6V_BEC at (3.40, -45.00) | pad J3.3 F.Cu net /THROTTLE_PWM at (3.40, -47.50)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J4.1 F.Cu net GND at (4.50, -36.00) | pad J4.2 F.Cu net +6V_BEC at (4.50, -33.50)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J4.2 F.Cu net +6V_BEC at (4.50, -33.50) | pad J4.3 F.Cu net /STEER_PWM at (4.50, -31.00)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J9.1 F.Cu net +5V_SENS at (4.30, -98.90) | pad J9.2 F.Cu net GND at (4.30, -101.40)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J12.1 F.Cu net +3V3_SENS at (61.10, -107.60) | pad J12.2 F.Cu net GND at (61.10, -110.10)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J11.1 F.Cu net +5V_SENS at (4.30, -89.80) | pad J11.2 F.Cu net GND at (4.30, -92.30)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J5.1 F.Cu net /U1_PG at (3.40, -56.70) | pad J5.2 F.Cu net /THROTTLE_PWM at (3.40, -59.20)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J5.2 F.Cu net /THROTTLE_PWM at (3.40, -59.20) | pad J5.3 F.Cu net /STEER_PWM at (3.40, -61.70)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J5.3 F.Cu net /STEER_PWM at (3.40, -61.70) | pad J5.4 F.Cu net /I2C_SDA at (3.40, -64.20)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J5.4 F.Cu net /I2C_SDA at (3.40, -64.20) | pad J5.5 F.Cu net /I2C_SCL at (3.40, -66.70)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J5.5 F.Cu net /I2C_SCL at (3.40, -66.70) | pad J5.6 F.Cu net GND at (3.40, -69.20)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U2.1 F.Cu net unconnected-(U2-PG-Pad1) at (14.35, -43.89) | pad U2.2 F.Cu net unconnected-(U2-EN-Pad2) at (14.35, -46.43)",
+   0.640016,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U2.1 F.Cu net unconnected-(U2-PG-Pad1) at (14.35, -43.89) | pad U2.3 F.Cu net unconnected-(U2-VRP-Pad3) at (16.89, -43.89)",
+   0.640016,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U2.1 F.Cu net unconnected-(U2-PG-Pad1) at (14.35, -43.89) | zone fill F.Cu net GND",
+   0.6405,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U2.2 F.Cu net unconnected-(U2-EN-Pad2) at (14.35, -46.43) | pad U2.4 F.Cu net unconnected-(U2-VRP-Pad4) at (16.89, -46.43)",
+   0.640016,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U2.2 F.Cu net unconnected-(U2-EN-Pad2) at (14.35, -46.43) | zone fill F.Cu net GND",
+   0.6405,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U2.3 F.Cu net unconnected-(U2-VRP-Pad3) at (16.89, -43.89) | pad U2.4 F.Cu net unconnected-(U2-VRP-Pad4) at (16.89, -46.43)",
+   0.640016,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U2.3 F.Cu net unconnected-(U2-VRP-Pad3) at (16.89, -43.89) | pad U2.5 F.Cu net VBAT at (19.43, -43.89)",
+   0.640016,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U2.3 F.Cu net unconnected-(U2-VRP-Pad3) at (16.89, -43.89) | zone fill F.Cu net GND",
+   0.6405,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U2.4 F.Cu net unconnected-(U2-VRP-Pad4) at (16.89, -46.43) | pad U2.6 F.Cu net VBAT at (19.43, -46.43)",
+   0.640016,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U2.5 F.Cu net VBAT at (19.43, -43.89) | pad U2.7 F.Cu net GND at (21.97, -43.89)",
+   0.640016,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U2.5 F.Cu net VBAT at (19.43, -43.89) | zone fill F.Cu net GND",
+   0.6405,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U2.6 F.Cu net VBAT at (19.43, -46.43) | pad U2.8 F.Cu net GND at (21.97, -46.43)",
+   0.640016,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U2.9 F.Cu net GND at (24.51, -43.89) | pad U2.11 F.Cu net +5V_SENS at (27.05, -43.89)",
+   0.640016,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U2.10 F.Cu net GND at (24.51, -46.43) | pad U2.12 F.Cu net +5V_SENS at (27.05, -46.43)",
+   0.640016,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U2.11 F.Cu net +5V_SENS at (27.05, -43.89) | zone fill F.Cu net GND",
+   0.6405,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U2.12 F.Cu net +5V_SENS at (27.05, -46.43) | zone fill F.Cu net GND",
+   0.6405,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U1.1 B.Cu net /U1_PG at (42.35, -43.89) | pad U1.2 B.Cu net unconnected-(U1-EN-Pad2) at (42.35, -46.43)",
+   0.640016,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U1.1 B.Cu net /U1_PG at (42.35, -43.89) | pad U1.3 B.Cu net unconnected-(U1-VRP-Pad3) at (44.89, -43.89)",
+   0.640016,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U1.2 B.Cu net unconnected-(U1-EN-Pad2) at (42.35, -46.43) | pad U1.4 B.Cu net unconnected-(U1-VRP-Pad4) at (44.89, -46.43)",
+   0.640016,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U1.3 B.Cu net unconnected-(U1-VRP-Pad3) at (44.89, -43.89) | pad U1.4 B.Cu net unconnected-(U1-VRP-Pad4) at (44.89, -46.43)",
+   0.640016,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U1.3 B.Cu net unconnected-(U1-VRP-Pad3) at (44.89, -43.89) | pad U1.5 B.Cu net VBAT at (47.43, -43.89)",
+   0.640016,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U1.3 B.Cu net unconnected-(U1-VRP-Pad3) at (44.89, -43.89) | zone fill B.Cu net VBAT",
+   0.640549,
+   0.7923760430703402,
+   "gap 0.641 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U1.4 B.Cu net unconnected-(U1-VRP-Pad4) at (44.89, -46.43) | pad U1.6 B.Cu net VBAT at (47.43, -46.43)",
+   0.640016,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U1.4 B.Cu net unconnected-(U1-VRP-Pad4) at (44.89, -46.43) | zone fill B.Cu net VBAT",
+   0.640549,
+   0.7923760430703402,
+   "gap 0.641 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U1.5 B.Cu net VBAT at (47.43, -43.89) | pad U1.7 B.Cu net GND at (49.97, -43.89)",
+   0.640016,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U1.6 B.Cu net VBAT at (47.43, -46.43) | pad U1.8 B.Cu net GND at (49.97, -46.43)",
+   0.640016,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U1.7 B.Cu net GND at (49.97, -43.89) | zone fill B.Cu net VBAT",
+   0.640549,
+   0.7923760430703402,
+   "gap 0.641 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U1.8 B.Cu net GND at (49.97, -46.43) | zone fill B.Cu net VBAT",
+   0.640549,
+   0.7923760430703402,
+   "gap 0.641 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U1.9 B.Cu net GND at (52.51, -43.89) | pad U1.11 B.Cu net +5V_CPU at (55.05, -43.89)",
+   0.640016,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U1.9 B.Cu net GND at (52.51, -43.89) | zone fill B.Cu net +5V_CPU",
+   0.6405,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U1.10 B.Cu net GND at (52.51, -46.43) | pad U1.12 B.Cu net +5V_CPU at (55.05, -46.43)",
+   0.640016,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U1.10 B.Cu net GND at (52.51, -46.43) | zone fill B.Cu net +5V_CPU",
+   0.6405,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J14.1 B.Cu net +3V3_SENS at (61.10, -125.60) | pad J14.2 B.Cu net GND at (61.10, -128.10)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J13.1 B.Cu net +3V3_SENS at (61.10, -116.60) | pad J13.2 B.Cu net GND at (61.10, -119.10)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J8.1 B.Cu net +5V_SENS at (4.50, -83.20) | pad J8.2 B.Cu net GND at (4.50, -80.70)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J8.2 B.Cu net GND at (4.50, -80.70) | pad J8.3 B.Cu net /I2C_SDA at (4.50, -78.20)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J8.3 B.Cu net /I2C_SDA at (4.50, -78.20) | pad J8.4 B.Cu net /I2C_SCL at (4.50, -75.70)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J3.1 B.Cu net GND at (3.40, -42.50) | pad J3.2 B.Cu net +6V_BEC at (3.40, -45.00)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J3.2 B.Cu net +6V_BEC at (3.40, -45.00) | pad J3.3 B.Cu net /THROTTLE_PWM at (3.40, -47.50)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J4.1 B.Cu net GND at (4.50, -36.00) | pad J4.2 B.Cu net +6V_BEC at (4.50, -33.50)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J4.2 B.Cu net +6V_BEC at (4.50, -33.50) | pad J4.3 B.Cu net /STEER_PWM at (4.50, -31.00)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J9.1 B.Cu net +5V_SENS at (4.30, -98.90) | pad J9.2 B.Cu net GND at (4.30, -101.40)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J12.1 B.Cu net +3V3_SENS at (61.10, -107.60) | pad J12.2 B.Cu net GND at (61.10, -110.10)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J11.1 B.Cu net +5V_SENS at (4.30, -89.80) | pad J11.2 B.Cu net GND at (4.30, -92.30)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J5.1 B.Cu net /U1_PG at (3.40, -56.70) | pad J5.2 B.Cu net /THROTTLE_PWM at (3.40, -59.20)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J5.2 B.Cu net /THROTTLE_PWM at (3.40, -59.20) | pad J5.3 B.Cu net /STEER_PWM at (3.40, -61.70)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J5.3 B.Cu net /STEER_PWM at (3.40, -61.70) | pad J5.4 B.Cu net /I2C_SDA at (3.40, -64.20)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J5.4 B.Cu net /I2C_SDA at (3.40, -64.20) | pad J5.5 B.Cu net /I2C_SCL at (3.40, -66.70)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J5.5 B.Cu net /I2C_SCL at (3.40, -66.70) | pad J5.6 B.Cu net GND at (3.40, -69.20)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U2.1 B.Cu net unconnected-(U2-PG-Pad1) at (14.35, -43.89) | pad U2.2 B.Cu net unconnected-(U2-EN-Pad2) at (14.35, -46.43)",
+   0.640016,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U2.1 B.Cu net unconnected-(U2-PG-Pad1) at (14.35, -43.89) | pad U2.3 B.Cu net unconnected-(U2-VRP-Pad3) at (16.89, -43.89)",
+   0.640016,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U2.1 B.Cu net unconnected-(U2-PG-Pad1) at (14.35, -43.89) | zone fill B.Cu net GND",
+   0.6405,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U2.2 B.Cu net unconnected-(U2-EN-Pad2) at (14.35, -46.43) | pad U2.4 B.Cu net unconnected-(U2-VRP-Pad4) at (16.89, -46.43)",
+   0.640016,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U2.2 B.Cu net unconnected-(U2-EN-Pad2) at (14.35, -46.43) | zone fill B.Cu net GND",
+   0.6405,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U2.3 B.Cu net unconnected-(U2-VRP-Pad3) at (16.89, -43.89) | pad U2.4 B.Cu net unconnected-(U2-VRP-Pad4) at (16.89, -46.43)",
+   0.640016,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U2.3 B.Cu net unconnected-(U2-VRP-Pad3) at (16.89, -43.89) | pad U2.5 B.Cu net VBAT at (19.43, -43.89)",
+   0.640016,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U2.3 B.Cu net unconnected-(U2-VRP-Pad3) at (16.89, -43.89) | zone fill B.Cu net VBAT",
+   0.640549,
+   0.7923760430703402,
+   "gap 0.641 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U2.4 B.Cu net unconnected-(U2-VRP-Pad4) at (16.89, -46.43) | pad U2.6 B.Cu net VBAT at (19.43, -46.43)",
+   0.640016,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U2.4 B.Cu net unconnected-(U2-VRP-Pad4) at (16.89, -46.43) | zone fill B.Cu net GND",
+   0.640694,
+   0.7923760430703402,
+   "gap 0.641 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U2.4 B.Cu net unconnected-(U2-VRP-Pad4) at (16.89, -46.43) | zone fill B.Cu net VBAT",
+   0.640549,
+   0.7923760430703402,
+   "gap 0.641 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U2.5 B.Cu net VBAT at (19.43, -43.89) | pad U2.7 B.Cu net GND at (21.97, -43.89)",
+   0.640016,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U2.6 B.Cu net VBAT at (19.43, -46.43) | pad U2.8 B.Cu net GND at (21.97, -46.43)",
+   0.640016,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U2.7 B.Cu net GND at (21.97, -43.89) | zone fill B.Cu net VBAT",
+   0.640549,
+   0.7923760430703402,
+   "gap 0.641 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U2.8 B.Cu net GND at (21.97, -46.43) | zone fill B.Cu net VBAT",
+   0.640549,
+   0.7923760430703402,
+   "gap 0.641 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U2.9 B.Cu net GND at (24.51, -43.89) | pad U2.11 B.Cu net +5V_SENS at (27.05, -43.89)",
+   0.640016,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U2.9 B.Cu net GND at (24.51, -43.89) | zone fill B.Cu net +5V_SENS",
+   0.640549,
+   0.7923760430703402,
+   "gap 0.641 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U2.10 B.Cu net GND at (24.51, -46.43) | pad U2.12 B.Cu net +5V_SENS at (27.05, -46.43)",
+   0.640016,
+   0.7923760430703402,
+   "gap 0.640 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad U2.10 B.Cu net GND at (24.51, -46.43) | zone fill B.Cu net +5V_SENS",
+   0.640549,
+   0.7923760430703402,
+   "gap 0.641 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
    "pad U3.1 B.Cu net /LDO_IN at (50.95, -102.66) | pad U3.2 B.Cu net GND at (50.00, -102.66)",
-   0.350005,
-   0.49237604307034016,
-   "gap 0.350 mm is below cut width 0.292 mm + 2 x horizontal error 0.10 mm = 0.492 mm (gap fixed by the footprint or an exception)"
+   0.350007,
+   0.7923760430703402,
+   "gap 0.350 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
   ],
   [
    "MILL-GAP-FIXED",
    "warning",
    "pad U3.1 B.Cu net /LDO_IN at (50.95, -102.66) | zone fill B.Cu net GND",
-   0.350005,
-   0.49237604307034016,
-   "gap 0.350 mm is below cut width 0.292 mm + 2 x horizontal error 0.10 mm = 0.492 mm (gap fixed by the footprint or an exception)"
-  ],
-  [
-   "MILL-GAP-FIXED",
-   "warning",
-   "pad U3.1 B.Cu net /LDO_IN at (50.95, -102.66) | zone fill B.Cu net GND",
-   0.34052,
-   0.49237604307034016,
-   "gap 0.341 mm is below cut width 0.292 mm + 2 x horizontal error 0.10 mm = 0.492 mm (gap fixed by the footprint or an exception)"
+   0.350007,
+   0.7923760430703402,
+   "gap 0.350 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
   ],
   [
    "MILL-GAP-FIXED",
    "warning",
    "pad U3.2 B.Cu net GND at (50.00, -102.66) | pad U3.3 B.Cu net /LDO_IN at (49.05, -102.66)",
-   0.350005,
-   0.49237604307034016,
-   "gap 0.350 mm is below cut width 0.292 mm + 2 x horizontal error 0.10 mm = 0.492 mm (gap fixed by the footprint or an exception)"
+   0.350007,
+   0.7923760430703402,
+   "gap 0.350 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
   ],
   [
    "MILL-GAP-FIXED",
    "warning",
    "pad U3.2 B.Cu net GND at (50.00, -102.66) | zone fill B.Cu net /LDO_IN",
-   0.350578,
-   0.49237604307034016,
-   "gap 0.351 mm is below cut width 0.292 mm + 2 x horizontal error 0.10 mm = 0.492 mm (gap fixed by the footprint or an exception)"
+   0.39843,
+   0.7923760430703402,
+   "gap 0.398 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
   ],
   [
    "MILL-GAP-FIXED",
    "warning",
    "pad U3.2 B.Cu net GND at (50.00, -102.66) | zone fill B.Cu net /LDO_IN",
-   0.350578,
-   0.49237604307034016,
-   "gap 0.351 mm is below cut width 0.292 mm + 2 x horizontal error 0.10 mm = 0.492 mm (gap fixed by the footprint or an exception)"
+   0.39843,
+   0.7923760430703402,
+   "gap 0.398 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
   ],
   [
    "MILL-GAP-FIXED",
    "warning",
    "pad U3.3 B.Cu net /LDO_IN at (49.05, -102.66) | zone fill B.Cu net GND",
-   0.350005,
-   0.49237604307034016,
-   "gap 0.350 mm is below cut width 0.292 mm + 2 x horizontal error 0.10 mm = 0.492 mm (gap fixed by the footprint or an exception)"
-  ],
-  [
-   "MILL-GAP-FIXED",
-   "warning",
-   "pad U3.3 B.Cu net /LDO_IN at (49.05, -102.66) | zone fill B.Cu net GND",
-   0.34052,
-   0.49237604307034016,
-   "gap 0.341 mm is below cut width 0.292 mm + 2 x horizontal error 0.10 mm = 0.492 mm (gap fixed by the footprint or an exception)"
+   0.350007,
+   0.7923760430703402,
+   "gap 0.350 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
   ],
   [
    "MILL-GAP-FIXED",
    "warning",
    "pad U3.4 B.Cu net unconnected-(U3-NC-Pad4) at (49.05, -104.94) | zone fill B.Cu net GND",
-   0.34052,
-   0.49237604307034016,
-   "gap 0.341 mm is below cut width 0.292 mm + 2 x horizontal error 0.10 mm = 0.492 mm (gap fixed by the footprint or an exception)"
+   0.340515,
+   0.7923760430703402,
+   "gap 0.341 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
   ],
   [
    "MILL-GAP-FIXED",
    "warning",
    "pad U3.4 B.Cu net unconnected-(U3-NC-Pad4) at (49.05, -104.94) | zone fill B.Cu net GND",
-   0.350005,
-   0.49237604307034016,
-   "gap 0.350 mm is below cut width 0.292 mm + 2 x horizontal error 0.10 mm = 0.492 mm (gap fixed by the footprint or an exception)"
+   0.350007,
+   0.7923760430703402,
+   "gap 0.350 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
   ],
   [
    "MILL-GAP-FIXED",
    "warning",
    "pad U3.4 B.Cu net unconnected-(U3-NC-Pad4) at (49.05, -104.94) | zone fill B.Cu net GND",
-   0.34052,
-   0.49237604307034016,
-   "gap 0.341 mm is below cut width 0.292 mm + 2 x horizontal error 0.10 mm = 0.492 mm (gap fixed by the footprint or an exception)"
+   0.340515,
+   0.7923760430703402,
+   "gap 0.341 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
   ],
   [
    "MILL-GAP-FIXED",
    "warning",
    "pad U3.5 B.Cu net +3V3_SENS at (50.95, -104.94) | zone fill B.Cu net GND",
-   0.34052,
-   0.49237604307034016,
-   "gap 0.341 mm is below cut width 0.292 mm + 2 x horizontal error 0.10 mm = 0.492 mm (gap fixed by the footprint or an exception)"
+   0.350007,
+   0.7923760430703402,
+   "gap 0.350 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
   ],
   [
    "MILL-GAP-FIXED",
    "warning",
    "pad U3.5 B.Cu net +3V3_SENS at (50.95, -104.94) | zone fill B.Cu net GND",
-   0.350005,
-   0.49237604307034016,
-   "gap 0.350 mm is below cut width 0.292 mm + 2 x horizontal error 0.10 mm = 0.492 mm (gap fixed by the footprint or an exception)"
+   0.340515,
+   0.7923760430703402,
+   "gap 0.341 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
   ],
   [
-   "MILL-GAP-FIXED",
+   "MILL-CONN-EDGE",
    "warning",
-   "pad U3.5 B.Cu net +3V3_SENS at (50.95, -104.94) | zone fill B.Cu net GND",
-   0.424717,
-   0.49237604307034016,
-   "gap 0.425 mm is below cut width 0.292 mm + 2 x horizontal error 0.10 mm = 0.492 mm (gap fixed by the footprint or an exception)"
+   "footprint J9 at (4.30, -98.90)",
+   null,
+   1.0,
+   "connector courtyard is more than 1.0 mm from the board edge"
   ],
   [
-   "MILL-CUT-SPACING",
+   "MILL-CONN-EDGE",
    "warning",
-   "zone fill F.Cu net GND at (4.32, -1.27)",
-   0.9482344102465,
-   1.5,
-   "zone fill has copper narrower than the copper target 1.50 mm (0.95 mm2 removed by an opening test)"
-  ],
-  [
-   "MILL-CUT-SPACING",
-   "warning",
-   "zone fill F.Cu net GND at (61.68, -1.27)",
-   0.9482341084585,
-   1.5,
-   "zone fill has copper narrower than the copper target 1.50 mm (0.95 mm2 removed by an opening test)"
+   "footprint J11 at (4.30, -89.80)",
+   null,
+   1.0,
+   "connector courtyard is more than 1.0 mm from the board edge"
   ],
   [
    "MILL-CUT-SPACING",
    "warning",
-   "zone fill F.Cu net GND at (1.31, -4.32)",
-   0.9482361531135,
-   1.5,
-   "zone fill has copper narrower than the copper target 1.50 mm (0.95 mm2 removed by an opening test)"
+   "zone fill B.Cu net +3V3_SENS at (56.50, -107.60)",
+   1.7837400590485,
+   1.2,
+   "zone fill has copper narrower than the copper target 1.20 mm (1.78 mm2 removed by an opening test)"
   ],
   [
    "MILL-CUT-SPACING",
    "warning",
-   "zone fill F.Cu net GND at (64.69, -4.32)",
-   0.948234911976,
-   1.5,
-   "zone fill has copper narrower than the copper target 1.50 mm (0.95 mm2 removed by an opening test)"
+   "zone fill B.Cu net +3V3_SENS at (56.50, -116.60)",
+   1.7837390590485,
+   1.2,
+   "zone fill has copper narrower than the copper target 1.20 mm (1.78 mm2 removed by an opening test)"
   ],
   [
    "MILL-CUT-SPACING",
    "warning",
-   "zone fill F.Cu net GND at (1.30, -42.50)",
-   2.0445707091945,
-   1.5,
-   "zone fill has copper narrower than the copper target 1.50 mm (2.04 mm2 removed by an opening test)"
-  ],
-  [
-   "MILL-CUT-SPACING",
-   "warning",
-   "zone fill F.Cu net GND at (1.31, -45.00)",
-   0.6859167910025,
-   1.5,
-   "zone fill has copper narrower than the copper target 1.50 mm (0.69 mm2 removed by an opening test)"
-  ],
-  [
-   "MILL-CUT-SPACING",
-   "warning",
-   "zone fill F.Cu net GND at (1.31, -47.50)",
-   0.6859168765075,
-   1.5,
-   "zone fill has copper narrower than the copper target 1.50 mm (0.69 mm2 removed by an opening test)"
-  ],
-  [
-   "MILL-CUT-SPACING",
-   "warning",
-   "zone fill F.Cu net GND at (41.14, -48.09)",
-   0.5057810127575,
-   1.5,
-   "zone fill has copper narrower than the copper target 1.50 mm (0.51 mm2 removed by an opening test)"
-  ],
-  [
-   "MILL-CUT-SPACING",
-   "warning",
-   "zone fill F.Cu net GND at (1.33, -52.10)",
-   1.0821889312575,
-   1.5,
-   "zone fill has copper narrower than the copper target 1.50 mm (1.08 mm2 removed by an opening test)"
-  ],
-  [
-   "MILL-CUT-SPACING",
-   "warning",
-   "zone fill F.Cu net GND at (1.30, -56.70)",
-   2.0464498918195,
-   1.5,
-   "zone fill has copper narrower than the copper target 1.50 mm (2.05 mm2 removed by an opening test)"
-  ],
-  [
-   "MILL-CUT-SPACING",
-   "warning",
-   "zone fill F.Cu net GND at (1.31, -59.20)",
-   0.6859167910025,
-   1.5,
-   "zone fill has copper narrower than the copper target 1.50 mm (0.69 mm2 removed by an opening test)"
-  ],
-  [
-   "MILL-CUT-SPACING",
-   "warning",
-   "zone fill F.Cu net GND at (1.31, -61.70)",
-   0.6859168765075,
-   1.5,
-   "zone fill has copper narrower than the copper target 1.50 mm (0.69 mm2 removed by an opening test)"
-  ],
-  [
-   "MILL-CUT-SPACING",
-   "warning",
-   "zone fill F.Cu net GND at (1.31, -64.20)",
-   0.6859168765075,
-   1.5,
-   "zone fill has copper narrower than the copper target 1.50 mm (0.69 mm2 removed by an opening test)"
-  ],
-  [
-   "MILL-CUT-SPACING",
-   "warning",
-   "zone fill F.Cu net GND at (1.31, -66.70)",
-   0.6859155871065,
-   1.5,
-   "zone fill has copper narrower than the copper target 1.50 mm (0.69 mm2 removed by an opening test)"
-  ],
-  [
-   "MILL-CUT-SPACING",
-   "warning",
-   "zone fill F.Cu net GND at (1.32, -69.20)",
-   0.683060002359,
-   1.5,
-   "zone fill has copper narrower than the copper target 1.50 mm (0.68 mm2 removed by an opening test)"
-  ],
-  [
-   "MILL-CUT-SPACING",
-   "warning",
-   "zone fill F.Cu net GND at (1.27, -135.68)",
-   0.948235184329,
-   1.5,
-   "zone fill has copper narrower than the copper target 1.50 mm (0.95 mm2 removed by an opening test)"
-  ],
-  [
-   "MILL-CUT-SPACING",
-   "warning",
-   "zone fill F.Cu net GND at (64.73, -135.68)",
-   0.9482340497605,
-   1.5,
-   "zone fill has copper narrower than the copper target 1.50 mm (0.95 mm2 removed by an opening test)"
-  ],
-  [
-   "MILL-CUT-SPACING",
-   "warning",
-   "zone fill F.Cu net GND at (4.32, -138.73)",
-   0.948239113414,
-   1.5,
-   "zone fill has copper narrower than the copper target 1.50 mm (0.95 mm2 removed by an opening test)"
-  ],
-  [
-   "MILL-CUT-SPACING",
-   "warning",
-   "zone fill F.Cu net GND at (61.68, -138.73)",
-   0.948241127286,
-   1.5,
-   "zone fill has copper narrower than the copper target 1.50 mm (0.95 mm2 removed by an opening test)"
+   "zone fill B.Cu net +3V3_SENS at (56.50, -125.38)",
+   1.7616551094765,
+   1.2,
+   "zone fill has copper narrower than the copper target 1.20 mm (1.76 mm2 removed by an opening test)"
   ],
   [
    "MILL-CUT-SPACING",
    "warning",
    "zone fill B.Cu net GND at (50.00, -104.25)",
    1.6199999532585,
-   1.5,
-   "zone fill has copper narrower than the copper target 1.50 mm (1.62 mm2 removed by an opening test)"
+   1.2,
+   "zone fill has copper narrower than the copper target 1.20 mm (1.62 mm2 removed by an opening test)"
   ],
   [
    "MILL-CUT-SPACING",
    "warning",
-   "zone fill B.Cu net +3V3_SENS at (53.42, -104.94)",
-   6.7689052923605,
-   1.5,
-   "zone fill has copper narrower than the copper target 1.50 mm (6.77 mm2 removed by an opening test)"
+   "zone fill B.Cu net VBAT at (19.99, -51.90)",
+   1.2365521154635,
+   1.2,
+   "zone fill has copper narrower than the copper target 1.20 mm (1.24 mm2 removed by an opening test)"
   ],
   [
    "MILL-CUT-SPACING",
    "warning",
-   "zone fill B.Cu net GND at (4.33, -1.27)",
-   0.9308258667285,
-   1.5,
-   "zone fill has copper narrower than the copper target 1.50 mm (0.93 mm2 removed by an opening test)"
+   "zone fill B.Cu net /LDO_IN at (49.05, -101.47)",
+   0.777516914051,
+   1.2,
+   "zone fill has copper narrower than the copper target 1.20 mm (0.78 mm2 removed by an opening test)"
   ],
   [
    "MILL-CUT-SPACING",
    "warning",
-   "zone fill B.Cu net GND at (61.67, -1.31)",
-   0.930829031745,
-   1.5,
-   "zone fill has copper narrower than the copper target 1.50 mm (0.93 mm2 removed by an opening test)"
+   "zone fill B.Cu net /LDO_IN at (50.95, -101.47)",
+   0.777516914051,
+   1.2,
+   "zone fill has copper narrower than the copper target 1.20 mm (0.78 mm2 removed by an opening test)"
   ],
   [
    "MILL-CUT-SPACING",
    "warning",
-   "zone fill B.Cu net GND at (64.73, -4.33)",
-   0.9308238538795,
-   1.5,
-   "zone fill has copper narrower than the copper target 1.50 mm (0.93 mm2 removed by an opening test)"
-  ],
-  [
-   "MILL-CUT-SPACING",
-   "warning",
-   "zone fill B.Cu net GND at (1.31, -4.33)",
-   0.9308291740505,
-   1.5,
-   "zone fill has copper narrower than the copper target 1.50 mm (0.93 mm2 removed by an opening test)"
-  ],
-  [
-   "MILL-CUT-SPACING",
-   "warning",
-   "zone fill B.Cu net GND at (17.03, -41.98)",
-   1.244271055367,
-   1.5,
-   "zone fill has copper narrower than the copper target 1.50 mm (1.24 mm2 removed by an opening test)"
-  ],
-  [
-   "MILL-CUT-SPACING",
-   "warning",
-   "zone fill B.Cu net GND at (44.96, -42.02)",
-   1.396565989011,
-   1.5,
-   "zone fill has copper narrower than the copper target 1.50 mm (1.40 mm2 removed by an opening test)"
-  ],
-  [
-   "MILL-CUT-SPACING",
-   "warning",
-   "zone fill B.Cu net GND at (1.31, -45.00)",
-   0.6859179515925,
-   1.5,
-   "zone fill has copper narrower than the copper target 1.50 mm (0.69 mm2 removed by an opening test)"
-  ],
-  [
-   "MILL-CUT-SPACING",
-   "warning",
-   "zone fill B.Cu net GND at (1.31, -47.50)",
-   0.6859179515925,
-   1.5,
-   "zone fill has copper narrower than the copper target 1.50 mm (0.69 mm2 removed by an opening test)"
-  ],
-  [
-   "MILL-CUT-SPACING",
-   "warning",
-   "zone fill B.Cu net GND at (5.22, -51.31)",
-   0.5892539102065,
-   1.5,
-   "zone fill has copper narrower than the copper target 1.50 mm (0.59 mm2 removed by an opening test)"
-  ],
-  [
-   "MILL-CUT-SPACING",
-   "warning",
-   "zone fill B.Cu net GND at (1.37, -52.15)",
-   1.083450015867,
-   1.5,
-   "zone fill has copper narrower than the copper target 1.50 mm (1.08 mm2 removed by an opening test)"
-  ],
-  [
-   "MILL-CUT-SPACING",
-   "warning",
-   "zone fill B.Cu net GND at (1.30, -56.70)",
-   2.0480479350825,
-   1.5,
-   "zone fill has copper narrower than the copper target 1.50 mm (2.05 mm2 removed by an opening test)"
-  ],
-  [
-   "MILL-CUT-SPACING",
-   "warning",
-   "zone fill B.Cu net GND at (1.31, -59.20)",
-   0.6859166445765,
-   1.5,
-   "zone fill has copper narrower than the copper target 1.50 mm (0.69 mm2 removed by an opening test)"
-  ],
-  [
-   "MILL-CUT-SPACING",
-   "warning",
-   "zone fill B.Cu net GND at (1.31, -61.70)",
-   0.6859179515925,
-   1.5,
-   "zone fill has copper narrower than the copper target 1.50 mm (0.69 mm2 removed by an opening test)"
-  ],
-  [
-   "MILL-CUT-SPACING",
-   "warning",
-   "zone fill B.Cu net GND at (1.31, -64.20)",
-   0.6859179515925,
-   1.5,
-   "zone fill has copper narrower than the copper target 1.50 mm (0.69 mm2 removed by an opening test)"
-  ],
-  [
-   "MILL-CUT-SPACING",
-   "warning",
-   "zone fill B.Cu net GND at (1.31, -66.70)",
-   0.6859179515925,
-   1.5,
-   "zone fill has copper narrower than the copper target 1.50 mm (0.69 mm2 removed by an opening test)"
-  ],
-  [
-   "MILL-CUT-SPACING",
-   "warning",
-   "zone fill B.Cu net GND at (1.27, -135.67)",
-   0.930827560827,
-   1.5,
-   "zone fill has copper narrower than the copper target 1.50 mm (0.93 mm2 removed by an opening test)"
-  ],
-  [
-   "MILL-CUT-SPACING",
-   "warning",
-   "zone fill B.Cu net GND at (64.73, -135.67)",
-   0.930827050032,
-   1.5,
-   "zone fill has copper narrower than the copper target 1.50 mm (0.93 mm2 removed by an opening test)"
-  ],
-  [
-   "MILL-CUT-SPACING",
-   "warning",
-   "zone fill B.Cu net GND at (4.33, -138.73)",
-   0.9308239350365,
-   1.5,
-   "zone fill has copper narrower than the copper target 1.50 mm (0.93 mm2 removed by an opening test)"
-  ],
-  [
-   "MILL-CUT-SPACING",
-   "warning",
-   "zone fill B.Cu net GND at (61.67, -138.69)",
-   0.9306913127045,
-   1.5,
-   "zone fill has copper narrower than the copper target 1.50 mm (0.93 mm2 removed by an opening test)"
-  ],
-  [
-   "MILL-CUT-SPACING",
-   "warning",
-   "zone fill B.Cu net +5V_CPU at (53.48, -50.30)",
-   2.20819397286,
-   1.5,
-   "zone fill has copper narrower than the copper target 1.50 mm (2.21 mm2 removed by an opening test)"
-  ],
-  [
-   "MILL-CUT-SPACING",
-   "warning",
-   "zone fill B.Cu net /LDO_IN at (49.05, -101.60)",
-   0.927516914051,
-   1.5,
-   "zone fill has copper narrower than the copper target 1.50 mm (0.93 mm2 removed by an opening test)"
-  ],
-  [
-   "MILL-CUT-SPACING",
-   "warning",
-   "zone fill B.Cu net /LDO_IN at (50.95, -101.60)",
-   0.927516914051,
-   1.5,
-   "zone fill has copper narrower than the copper target 1.50 mm (0.93 mm2 removed by an opening test)"
-  ],
-  [
-   "MILL-CUT-SPACING",
-   "warning",
-   "zone fill B.Cu net +3V3_SENS at (56.50, -107.60)",
-   2.065436409392,
-   1.5,
-   "zone fill has copper narrower than the copper target 1.50 mm (2.07 mm2 removed by an opening test)"
-  ],
-  [
-   "MILL-CUT-SPACING",
-   "warning",
-   "zone fill B.Cu net +3V3_SENS at (56.50, -116.60)",
-   2.065435409392,
-   1.5,
-   "zone fill has copper narrower than the copper target 1.50 mm (2.07 mm2 removed by an opening test)"
-  ],
-  [
-   "MILL-CUT-SPACING",
-   "warning",
-   "zone fill B.Cu net +3V3_SENS at (56.50, -125.25)",
-   1.926042675646,
-   1.5,
-   "zone fill has copper narrower than the copper target 1.50 mm (1.93 mm2 removed by an opening test)"
-  ],
-  [
-   "MILL-CUT-SPACING",
-   "warning",
-   "zone fill B.Cu net +5V_SENS at (6.40, -98.62)",
-   1.5674289390615,
-   1.5,
-   "zone fill has copper narrower than the copper target 1.50 mm (1.57 mm2 removed by an opening test)"
-  ],
-  [
-   "MILL-CUT-SPACING",
-   "warning",
-   "zone fill B.Cu net +5V_SENS at (26.65, -69.05)",
-   1.832910475668,
-   1.5,
-   "zone fill has copper narrower than the copper target 1.50 mm (1.83 mm2 removed by an opening test)"
+   "zone fill B.Cu net VBAT at (47.99, -51.90)",
+   1.2365521154635,
+   1.2,
+   "zone fill has copper narrower than the copper target 1.20 mm (1.24 mm2 removed by an opening test)"
   ]
  ],
  "waived": []

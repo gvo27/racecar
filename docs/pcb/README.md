@@ -25,7 +25,7 @@ Layout since 2026-11-16: the KiCad project, the libraries, the tools and the fab
 
 ## Mill prototype
 
-A second board, `pcb/mill/`, is the coarse copy of this board for the lab mill: no LEDs (D2 to D4) and no LED resistors (R1 to R3), wider tracks and gaps. This is a deviation from `power_board_plan.md` for the prototype only. Its rules, its review record and the tuning steps are in the lab directory (`design_rules.toml`, `review/README.md`, `README.md`).
+A second board, `pcb/mill/`, is the coarse copy of this board for the lab mill: no LEDs (D2 to D4) and no LED resistors (R1 to R3), through-hole capacitors for C2 to C8, wider tracks and gaps. This is a deviation from `power_board_plan.md` for the prototype only. Its rules, its review record and the tuning steps are in the lab directory (`design_rules.toml`, `review/README.md`, `README.md`).
 
 ## KiCad version
 

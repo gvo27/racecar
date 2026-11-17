@@ -1,98 +1,115 @@
 # Mill prototype board (`pcb/mill`): review record
 
-Date: 2026-11-16. Board: `pcb/mill/rc_power_board.kicad_pcb`, made by `make pcb-all BOARD=mill` from `pcb/mill/placement.py` and the mill tuning file (`design_rules.toml` in this lab directory). The rev A board (`pcb/fabhouse`) is not changed.
+Date: 2026-11-17. Board: `pcb/mill/rc_power_board.kicad_pcb`, made by `make pcb-all BOARD=mill` from `pcb/mill/placement.py` and the mill tuning file (`design_rules.toml` in this lab directory). The rev A board (`pcb/fabhouse`) is not changed.
 
-Status: first prototype layout. The checks pass. The agent `pcb-reviewer` reviewed the board on 2026-11-16 (no blocker, 2 major and 7 minor findings: all fixed, see "Review findings"). No person reviewed the board. The values of the tuning file are start values (`assumed`).
+Status: second layout, after the lab tech notes (owner, 2026-11-17). The checks pass. The agent `pcb-reviewer` reviewed the first layout on 2026-11-16 (all findings fixed). No person and no review agent reviewed this second layout. The values of the tuning file are `assumed`.
 
-## What is different from rev A
+## Lab tech notes and what the board does
 
-| Item | Rev A (`pcb/fabhouse`) | Mill board (`pcb/mill`) |
+| Note | Board |
+| --- | --- |
+| The mill is not dialed in: error margin, bit size, step tolerance | `horizontal_error` 0.25 mm for each side (was 0.10). `clearance` 0.8 mm = cut width 0.292 mm + 2 x 0.25 mm, rounded up |
+| 2 mm spacing between cuts, 2 mm spacing for components | Pours and planned zones keep a 2.0 mm copper gap from other copper (`zone_clearance`). Pads of two different parts on different nets are 2.0 mm or more apart (smallest: 2.03 mm, C6 to FB1). Where a 2 mm gap is not possible (see "Areas without the 2 mm copper gap"), the rule is 2 mm between cuts: 1.3 mm track + 0.8 mm gap = 2.1 mm |
+| The surface mount ceramic capacitors are too close | C2 to C8 are through-hole ceramic capacitors with 5.0 mm lead pitch (`C_Disc_D5.0mm_W2.5mm_P5.00mm`, top side). The pads of one capacitor are 2.6 mm apart (0805: 0.9 mm). Same values as in the schematic |
+| Check the through-hole capacitors | C1: 2.4 mm between its pads, 2.55 mm to D1. C9: 1.8 mm between its pads (3.5 mm lead pitch, not changed), 7.07 mm to J11 |
+| Thicken the small traces, add general thickness | Every track is 1.3 mm (rev A: 0.5 mm). 1.3 mm is the largest width that leaves an XH pin with 0.8 mm to the next pin. Pour copper is 1.2 mm or wider. The 3.3 V nets are zones of 1.9 to 2.0 mm |
+| Do not worry about the pin headers | The XH headers keep their footprint. Their pads are 0.6 mm apart (listed as `MILL-GAP-FIXED`) |
+| Drop the surface mount LEDs | No D2, D3, D4 and no R1, R2, R3 |
+| Apply the 2 mm rule to the USB pigtail ports | J6 and J7 have no exception. Their pads are 2.18 mm apart and 2.8 mm or more from pads of other parts (J6.2 to TP1). The `+5V_CPU` bar between them moved 2 mm west, in line with the trunk: it is 2.35 mm from the GND pads J6.2 and J7.2 |
+| U1 and U2: add space at VOUT | The GND pour and the GND areas at the modules keep 2.0 mm from the 5 V trunks, which cover the VOUT pads. The VOUT pads are 0.64 mm from the GND pads of the module (pin pitch 2.54 mm): this gap cannot change |
+| Through-hole soldering is difficult | Annular ring 0.8 mm on the THT pads of C1, C2 to C8, J1, J6, J7 (`annular_target`). Not on parts where the pitch gives no room: XH headers, modules, C9 and F1 keep 0.45 mm |
+
+## Areas without the 2 mm copper gap
+
+In these areas a zone has the board clearance (0.8 mm) or the footprint fixes a smaller gap. They are in `pcb/mill/placement.py` (`_NEAR`, `_NEAR_GND`, `_FINE`) and in the `[[exception]]` entries of the tuning file.
+
+| Area | Gap | Cause |
 | --- | --- | --- |
-| Parts | 40 | 34: no D2, D3, D4 (LEDs), no R1, R2, R3 (their resistors). Same footprints for all other parts |
-| Clearance | 0.4 mm | 0.5 mm (cut width 0.292 mm + 2 x 0.10 mm horizontal error) |
-| Default track | 0.5 mm | 1.5 mm target (2.0 mm cut spacing - 0.5 mm clearance) |
-| `+6V_BEC` track | 1.0 mm | 1.5 mm |
-| Pour: smallest width | 0.5 mm | 1.0 mm |
-| Pads of different parts, different nets | 1.10 mm smallest (C6 to C7) | 2.0 mm minimum, U3 included (U3 to C7 and C8: 2.0 mm, U3 to C6: 2.3 mm) |
-| U3 (SOT-23-5) | pour necks of 0.44 to 0.50 mm between the pads | planned zones: `/LDO_IN` bar with two prongs (0.6 mm wide, 1.0 mm long), GND strip under the body (0.6 mm wide) with a 2.0 mm wide end in the pour, `+3V3_SENS` bar. No pour neck between the pads, no sliver. Zone fill is 0.34 to 0.35 mm from the U3 pads |
-| 3.3 V nets | tracks, 0.5 mm | zones: `/LDO_IN` bar 2.0 mm, `+3V3_SENS` bar 2.0 mm with 1.9 mm teeth to J12, J13, J14 |
-| Test points | on stubs | on the rail trunks (TP1, TP2) and on the `+3V3_SENS` bar (TP3) |
-| J9, J11 | x = 3.65 mm | x = 3.75 mm (the GND path to J11.2 measures 1.64 mm against a need of 1.6 mm: 0.04 mm margin) |
-| `U1_PG` jumper stub and rivet at U1 | x = 40.4 mm, 0.5 mm track | x = 39.9 mm, 1.5 mm track |
+| U3 (SOT-23-5): pads, two `/LDO_IN` prongs, GND strip, `+3V3_SENS` bar at U3.5 | 0.34 to 0.35 mm | Pad gap of the footprint. Owner decision: U3 stays |
+| XH headers J3, J4, J5, J8, J9, J11 to J14: pad to pad | 0.6 mm | 2.5 mm pin pitch. Tracks and zones keep 0.8 mm from the pads |
+| Modules U1, U2: pad to pad, VIN neck to GND pads | 0.64 mm | 2.54 mm pin pitch. The necks are as wide as the pads |
+| Left edge, x 0.6 to 12.5 mm, y 27 to 105.5 mm: GND between header pins, tracks and the edge. `+5V_SENS` bar at J8.1/J11.1 and its branch to J9.1 | 0.8 mm | The 2 mm pour leaves no GND copper between the pins and the edge |
+| Right edge, x 58.6 to 65.4 mm, y 103.5 to 132 mm: GND at J12 to J14 and the three `+3V3_SENS` teeth | 0.8 mm | Same |
+| Bottom edge, y 0.6 to 7.4 mm, x 28 to 65.4 mm: GND trunk from J1.2, and the VBAT stub to C1 | 0.8 mm | The trunk needs 6.0 mm. With 2 mm to the C1.1 pad it has 5.4 mm |
+| GND at the module GND pads (x 20.4 to 25.5 and 48.4 to 53.5 mm, y 41 to 51 mm) to the VIN neck | 0.8 mm | With 2 mm on both sides the GND copper there is 1.6 mm wide. It is 1.9 mm now |
+| All tracks (signals, `+6V_BEC`): track to track, track to pad | 0.8 mm | The tracks start at header pins |
 
-Not changed: outline 66 x 140 mm, mounting holes, connector positions (but J9 and J11), modules, fuse, power zones, the F.Cu path of the `U1_PG` jumper on two rivets, the stitching via, the Power5A width (1.6 mm: the Pololu pin pitch limits the necks at the module pads to 1.9 mm) and the edge clearance (0.5 mm).
+All other copper has a 2.0 mm gap: the pour to the VBAT, 5 V, `/LDO_IN` and `+3V3_SENS` zones, and to the pads of C1 to C9, D1, FB1, F1, J1, J6, J7 and the test points.
+
+## Other differences from rev A
+
+- 34 parts (rev A: 40).
+- C2 and C4 (input capacitors of U1 and U2) are north of the pin rows, about 6 mm from the VIN pads, on a VBAT stub. On rev A they are under the modules on the bottom side. A through-hole part has no room under a module.
+- C3 is on the `+5V_CPU` bar north of J7. C5 is on the `+5V_SENS` trunk. C6 and C7 are south of the `/LDO_IN` bar, C8 is on the `+3V3_SENS` bar.
+- Test points TP1, TP2, TP3 are on the rail trunks.
+- J9 and J11 are at x = 4.3 mm (rev A: 3.65 mm).
+- The `U1_PG` stub and its rivet are at x = 39.6 mm (rev A: 40.4 mm).
+- Not changed: outline 66 x 140 mm, mounting holes, modules, fuse, D1 (SMB), FB1 (0805), the other connector positions, Power5A width (1.6 mm), edge clearance (0.5 mm).
 
 ## Check results
 
 | Check | Result |
 | --- | --- |
 | `make erc BOARD=mill` | 0 errors, 3 warnings (`lib_symbol_mismatch`, as rev A) |
-| `make pcb-rules BOARD=mill` | The project files agree with the design rules. 15 values assumed |
-| `make pcb-check BOARD=mill` | DRC: 0 errors, 16 warnings (`lib_footprint_mismatch`, as rev A), 0 unconnected, parity clean. `check_board`: 0 problems |
-| `make pcb-mill-check BOARD=mill` | 0 errors, 0 waived, 62 warnings: 48 `MILL-CUT-SPACING`, 14 `MILL-GAP-FIXED`. No `MILL-SLIVER`, no `MILL-ISLAND` |
+| `make pcb-rules BOARD=mill` | The project files agree with the design rules. 16 values assumed |
+| `make pcb-check BOARD=mill` | DRC: 0 errors, 0 unconnected, parity clean. 117 warnings: 26 `lib_footprint_mismatch` (pads changed by the build), 91 `silk_over_copper` (silkscreen of the library footprints; the milled board has no silkscreen). `check_board`: 0 problems |
+| `make pcb-mill-check BOARD=mill` | 0 errors, 0 waived, 122 warnings: 112 `MILL-GAP-FIXED`, 8 `MILL-CUT-SPACING`, 2 `MILL-CONN-EDGE`. No `MILL-SLIVER`, no `MILL-ISLAND` |
 | `make pcb-fab BOARD=mill` | Outputs in `pcb/mill/fab/`. The target then runs `test_fab.py` on the mill board: 21 tests, OK |
-| `make pcb-test` | 93 + 62 = 155 tests, OK (rev A board and tools, `test_rules.py` also loads the mill board) |
+| `make bom BOARD=mill` | `pcb/mill/bom.csv` |
+| `make pcb-test` | 95 + 62 = 157 tests, OK |
 
 Copper width along the current paths (opening test, B.Cu):
 
 | Path | Need | Measured |
 | --- | --- | --- |
-| GND trunk J1 to the pour at U1 | 6.0 mm | 8.00 mm or more |
-| GND entrance U1, entrance U2 | 1.6 mm | 4.60 mm |
-| GND J6/J7 to U1 | 1.6 mm | 3.96 mm |
-| GND U2 output to J8/J9/J11/C9 | 1.6 mm | 1.64 mm |
+| GND trunk J1 to the pour at U1 | 6.0 mm | 6.80 mm |
+| GND entrance U1, entrance U2 | 1.6 mm | 1.94 mm, 1.88 mm |
+| GND J6/J7 to U1 | 1.6 mm | 1.94 mm |
+| GND U2 output to J8/J9/J11/C9 | 1.6 mm | 1.91 mm |
 | `VBAT_RAW`, `VBAT` trunk | 6.0 mm | 6.18 mm, 6.39 mm |
 | `VBAT` necks at U1 and U2 | 1.6 mm | 1.88 mm |
 | `+5V_CPU` load path, `+5V_SENS` load path | 1.6 mm | 1.99 mm, 1.67 mm |
-| `+5V_CPU` all pads, `+5V_SENS` all pads | 1.5 mm | 1.99 mm, 1.58 mm |
-| `+6V_BEC` J3 to J4 | 1.5 mm | 1.50 mm |
-| `+3V3_SENS` bar to J12/J13/J14 | 1.2 mm | 1.29 mm |
-| `/LDO_IN` bar FB1 to C6/C7 | 1.5 mm | 1.99 mm |
+| `+5V_CPU` all pads, `+5V_SENS` all pads | 1.3 mm | 1.99 mm, 1.67 mm |
+| `+6V_BEC` J3 to J4 | 1.3 mm | 1.29 mm (passes with the 0.01 mm test tolerance) |
+| `+3V3_SENS` bar to J12/J13/J14 | 1.2 mm | 1.88 mm |
+| `/LDO_IN` bar FB1 to C6/C7 | 1.3 mm | 1.99 mm |
+
+The GND entrances were 4.6 mm on the first layout. The 2 mm gap to the 5 V trunks makes them narrower.
 
 ## Warnings to read
 
-The milling check prints positions as (x, -y) in mm from the lower-left corner of the outline. This file gives (x, y).
+The milling check prints positions as (x, -y) in mm from the lower-left corner of the outline.
 
-- **`MILL-GAP-FIXED` (14).** All at U3: gaps of 0.34 to 0.35 mm between two U3 pads, or between a U3 pad and the planned zone fill. They are above the cut width (0.292 mm) and below the cut width plus the horizontal error (0.492 mm). The footprint fixes them. A cut that is 0.1 mm off takes up to about 0.07 mm from a pad, a prong or the strip (0.6 mm wide copper). U3 is the risk item of this board for this mill.
-- **`MILL-CUT-SPACING` (48).** Copper narrower than the 1.5 mm target. No track is in the list (no track is narrower than 1.5 mm).
-  - Zones at U3: the two `/LDO_IN` prongs (0.6 mm), the GND strip (0.6 mm) and the `+3V3_SENS` bar at U3.5 (1.3 mm).
-  - Zone stubs to C3 and C5, the `+5V_SENS` branch to J9, and the teeth to J12, J13, J14: the opening test removes the corners and the pad ends of 1.6 to 1.9 mm wide copper.
-  - GND pour (38 of the 48, without the U3 strip): the ring between the pins of the XH connectors and the board edge, the corners at the mounting holes, the pour between the module pins, and one piece at the `U1_PG` rivet. The pin pitch and the edge distance fix these widths.
-
-## Review findings (`pcb-reviewer`, 2026-11-16) and fixes
-
-| Finding | Fix |
-| --- | --- |
-| Major: `MILL-COMP-GAP` left out U3. U3 to C6 was 1.6 mm, U3 to C7 1.5 mm | The check includes parts with an exception. U3 and C8 moved 0.5 mm north: 2.0 mm or more |
-| Major: a track or a pad of another part near a U3 pad became a `MILL-GAP-FIXED` warning | Fixed gaps are only two pads of one part, or zone fill at a pad of an exception part with `zones = true`. All other gaps below the minimum are `MILL-GAP` errors. The `.kicad_dru` rule does not cover tracks and vias |
-| Zone fill was 0.30 mm from the U3 pads, less than the 0.35 mm pad gap | Exception clearance 0.34 mm. All U3 gaps are 0.34 to 0.35 mm |
-| `MILL-ISLAND` on `+5V_SENS` | Cause: the rev A trunk zone overlaps the end of the FB1 bar zone, and the fill leaves fragments of 0.003 mm2. The mill trunk ends at y 99.2 mm. The finding is gone. The rev A placement has the same overlap (not changed; the rev A milling check prints no island) |
-| `/U1_PG` stub 0.9 mm wide | Stub and rivet moved 0.5 mm west: 1.5 mm wide |
-| `/THROTTLE_PWM` 1.12 mm wide for 2.0 mm at J5 | No design change. The router made 1.5 mm tracks in the next run. A new routing run can make such a narrow piece again: `MILL-CUT-SPACING` lists it |
-| Two `MILL-SLIVER` pieces at the end of the U3 GND strip | The strip ends in a 2.0 mm wide GND zone. No sliver |
-| Tuning file text said "courtyards" for `component_gap` | Text corrected: pads of two parts on different nets |
-| Wrong statements in this file (2.0 mm minimum, "bridge", "0.5 mm copper", test counts) | Corrected |
-
-The reviewer also compared all pad nets of the 34 parts with rev A (0 differences) and found no F.Cu zone copper on a THT pad.
+- **`MILL-GAP-FIXED` (112).** Gaps below 0.792 mm (cut width + 2 x 0.25 mm) that the footprints fix. A THT pad pair counts on both copper layers. Modules U1 and U2: pad to pad and VIN neck to pad, 0.64 mm. XH headers: pad to pad, 0.6 mm. U3: pad to pad and zone to pad, 0.34 to 0.35 mm. With an error of 0.25 mm for each side, a cut at U3 can remove most of a 0.6 mm wide pad, prong or strip. U3 is the risk item of this board.
+- **`MILL-CUT-SPACING` (8).** Copper below 1.2 mm (2.0 mm cut spacing - 0.8 mm clearance): the two `/LDO_IN` prongs (0.6 mm), the U3 GND strip (0.6 mm), the places where the three `+3V3_SENS` teeth meet the bar, and the corners where the two VBAT capacitor stubs meet the necks.
+- **`MILL-CONN-EDGE` (2).** J9 and J11: the courtyard is more than 1.0 mm from the board edge (1.55 mm). The connectors moved in for the GND strip west of their pads.
 
 ## Margins without spare
 
-- `clearance` 0.5 mm against the minimum 0.492 mm (cut width + 2 x 0.10 mm): 0.008 mm. A larger `horizontal_error` makes `MILL-GAP` errors on the whole board. Then raise `clearance` and `zone_clearance` too.
-- `horizontal_error` is used for copper gaps only. The edge clearance (0.5 mm), the annular ring and the holes have no allowance for it.
-- GND path to J11.2: 1.64 mm against 1.6 mm. `+5V_SENS` load path: 1.67 mm against 1.6 mm. `+5V_SENS` all pads: 1.58 mm against 1.5 mm. `+6V_BEC`: 1.50 mm against 1.5 mm. A cut that is 0.1 mm off takes these paths below the need.
+- `clearance` 0.8 mm against the minimum 0.792 mm. If `horizontal_error` goes up, raise `clearance`. The tracks then get narrower than 1.3 mm at the XH pins, or do not fit.
+- `horizontal_error` is used for copper gaps only. The edge clearance (0.5 mm), the annular rings and the holes have no allowance for it.
+- `+5V_SENS` load path: 1.67 mm against 1.6 mm. `+6V_BEC`: 1.29 mm against 1.3 mm.
+- Pad gap C6 to FB1: 2.03 mm against 2.0 mm.
 
 ## Not verified
 
-- No KiCad GUI check of the mill project. No kicad-happy analysis of the mill board.
-- No owner review. The reviewer did not compute the narrowest GND neck at J12.2, J13.2, J14.2 and C8.2 (DRC shows them connected).
-- Rivet and solder access, 3D collisions, wire entry.
-- The routing is made again in each `make pcb-all` run. Two runs with different inputs gave different track shapes.
-- The mill did not cut this board.
-- The schematic PDF of the mill variant is not plotted.
+- No review of this layout by a person or by `pcb-reviewer`. No KiCad GUI check. No kicad-happy analysis.
+- The capacitor type: the footprint is a 5.0 mm pitch disc. The capacitor values of the schematic are TBD (C7, C8: 1 uF). A part with 2.5 mm lead pitch needs formed leads or a different footprint.
+- The effect of the new positions of C2 and C4 (about 6 mm from the VIN pads) was not analyzed. The modules have their own input capacitors.
+- The body height and the body size of the capacitors next to the modules and connectors (courtyards do not overlap in DRC).
+- Rivet and solder access, 3D collisions, wire entry at J9 and J11.
+- The routing is made again in each `make pcb-all` run. The track shapes can change.
+- The mill did not cut this board. The schematic PDF of the mill variant is not plotted.
+- A 2 mm copper gap with a single-pass contour toolpath leaves a loose copper strip of about 1.4 mm between the two cuts. The lab CAM must remove it or leave it. Not checked with the lab.
+
+## Review findings on the first layout (`pcb-reviewer`, 2026-11-16)
+
+No blocker, 2 major, 7 minor. All fixed in commit `adef37b`: the component gap check includes parts with an exception; a track or a pad of another part near a pad of an exception part is a `MILL-GAP` error; U3 zone clearance 0.34 mm; no island fragments on `+5V_SENS`; no sliver at the U3 GND strip. The reviewer compared all pad nets with rev A (0 differences).
 
 ## Questions for the lab tech
 
-1. "Minimum 2 mm spacing between cuts": is this the distance between the centers of two isolation gaps? The tuning file uses this reading (`cut_spacing_min`).
-2. What is the real horizontal error of the mill? The tuning file uses 0.10 mm for each side (`horizontal_error`).
-3. Are the fixed gaps at U3 (0.34 to 0.35 mm, cut width 0.292 mm) acceptable on this mill? A cut that is 0.1 mm off takes about 0.07 mm from 0.6 mm wide copper. If not, U3 needs a different package or a module.
-4. Is 0.6 mm wide copper acceptable at the U3 prongs (1.0 mm long) and the U3 GND strip (about 3 mm long)?
+1. What is the real horizontal error of the mill? The tuning file uses 0.25 mm for each side.
+2. Is a 2 mm copper gap cut as two passes with a loose strip between them, or cleared? Is a loose strip a problem?
+3. Are the gaps at U3 (0.34 to 0.35 mm, cut width 0.292 mm) possible on this mill? If not, U3 needs a different package or a module.
+4. Which through-hole ceramic capacitors are in stock (lead pitch, values up to 1 uF or more, voltage)?
+5. Is a 0.8 mm ring sufficient for hand soldering on holes without plating? Is 0.45 mm at the XH headers and the modules acceptable?

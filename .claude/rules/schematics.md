@@ -18,10 +18,12 @@ paths:
 - Each board has design rules: `design_rules.toml` in the board directory. A board without that file uses `design_rules.toml` of the lab directory (the mill tuning file). Loader: `pcb/tools/rules.py`. The tools and the milling check read all limits from it. Do not add a limit as a constant to a tool.
 - `make pcb-rules BOARD=<board>` compares the `.kicad_pro` and the `.kicad_dru` with the design rules. `PCB_RULES_ARGS=--write` changes them. Do not edit the net class widths, the clearances or the `.kicad_dru` by hand.
 - `pcb/fabhouse/` is the rev A board for a fab house. Its design rules are the rev A values. Do not change this board for the mill.
-- `pcb/mill/` is the mill prototype: same parts and footprints, without the parts in `[parts] exclude`, with wider tracks and gaps. Its schematic is made by `make pcb-sch BOARD=mill` from the rev A schematic (`on_board no`, `dnp yes` for the excluded parts). Do not edit it by hand.
+- `pcb/mill/` is the mill prototype: the same circuit, without the parts in `[parts] exclude`, with the footprints of `[parts.footprint]`, and with wider tracks and gaps. Its schematic is made by `make pcb-sch BOARD=mill` from the rev A schematic (`on_board no`, `dnp yes` for the excluded parts). Do not edit it by hand.
 - `pcb/<board>/placement.py` holds the part positions, the planned zones and the path rows of one board. `pcb/mill/placement.py` loads the rev A file and changes it. The design rules do not move parts: when a check fails after a rule change, change the placement file.
 - After a change of the mill tuning file run `make pcb-all BOARD=mill` (schematic variant, rules, build, route, fab outputs, review files, checks), then `make pcb-mill-check BOARD=mill`. `pcb-all` builds the board again from `placement.py` with `--force`: manual edits of `pcb/mill/rc_power_board.kicad_pcb` are lost.
-- A zone at a part with an `[[exception]]` (`zones = true`) can be 0.3 mm from a pad of that part. Two zones of different nets always keep the board clearance. Lesson from U3 on the mill board.
+- A zone at a part with an `[[exception]]` (`zones = true`) can be as near to a pad of that part as the exception clearance. Two zones of different nets keep the larger of their two clearances, and never less than the board clearance. Lesson from U3 on the mill board.
+- On the mill board the pours keep `zone_clearance` (2 mm) from other copper. Where that leaves no copper (pin headers, module pins, the GND trunk), `pcb/mill/placement.py` has zones with their own clearance (`_NEAR`, `_NEAR_GND`, `_FINE`). Add such a zone only where a check fails with 2 mm, and list it in the review record of the lab directory.
+- `[parts.footprint]` of the design rules gives a part a different footprint on a board variant (mill board: through-hole capacitors). Do not edit the footprint in the mill schematic by hand.
 - Review files of the mill board: `review/` in the lab directory.
 
 ## Sources of truth

@@ -68,6 +68,12 @@ unit = "mm"
 status = "confirmed"
 source = "rc_power_board.kicad_pro min_via_annular_width"
 
+[annular_target]
+value = 0.45
+unit = "mm"
+status = "confirmed"
+source = "rev A design: same as annular_min (no larger rings)"
+
 [netclass.Default]
 track_width = 0.5
 status = "confirmed"

@@ -1,7 +1,7 @@
 """Make the schematic of a board variant from the schematic of the base board. Make target: pcb-sch.
 
 A variant has the same circuit as the base board (pcb/fabhouse) without the parts in `[parts] exclude` of its design
-rules. For each excluded part the copy has `(on_board no)`, `(in_bom no)` and `(dnp yes)`: the part stays in the
+rules, and with the footprints of `[parts.footprint]` (same part value, a package that the variant can make). For each excluded part the copy has `(on_board no)`, `(in_bom no)` and `(dnp yes)`: the part stays in the
 drawing, is crossed out, and has no footprint and no BOM row. Nothing else changes, so the variant cannot drift from
 the base schematic. Do not edit the variant schematic by hand: edit the base schematic, then run `make pcb-sch`.
 
@@ -23,14 +23,22 @@ FLAGS = (("on_board", "no"), ("in_bom", "no"), ("dnp", "yes"))
 COPY_ONCE = (paths.STEM + ".kicad_pro", "sym-lib-table", "fp-lib-table", ".gitignore")
 
 
-def make_variant(text, exclude):
-    """Return (new text, references that were changed)."""
+def make_variant(text, exclude, footprints=None):
+    """Return (new text, references that were changed). `footprints`: ref -> footprint of the variant."""
     done = []
+    footprints = footprints or {}
 
     def patch(m):
         block = m.group(0)
         ref = REF.search(block)
-        if not ref or ref.group(1) not in exclude:
+        if not ref:
+            return block
+        if ref.group(1) in footprints:
+            block, n = re.subn(r'\(property "Footprint" "[^"]*"', '(property "Footprint" "%s"' % footprints[ref.group(1)], block, count=1)
+            if n != 1:
+                raise RuntimeError("symbol %s has no Footprint property" % ref.group(1))
+            done.append(ref.group(1))
+        if ref.group(1) not in exclude:
             return block
         for key, val in FLAGS:
             block, n = re.subn(r"\(%s (yes|no)\)" % key, "(%s %s)" % (key, val), block, count=1)
@@ -50,18 +58,19 @@ def run(base_dir, board_dir):
     os.makedirs(board_dir, exist_ok=True)
     name = paths.STEM + ".kicad_sch"
     with open(os.path.join(base_dir, name), encoding="utf-8") as fh:
-        text, done = make_variant(fh.read(), set(r.exclude))
-    missing = sorted(set(r.exclude) - set(done))
+        text, done = make_variant(fh.read(), set(r.exclude), r.footprint)
+    missing = sorted((set(r.exclude) | set(r.footprint)) - set(done))
     if missing:
-        print("pcb-sch: [parts] exclude names parts that are not in the base schematic: %s" % ", ".join(missing), file=sys.stderr)
+        print("pcb-sch: [parts] names parts that are not in the base schematic: %s" % ", ".join(missing), file=sys.stderr)
         return 1
     with open(os.path.join(board_dir, name), "w", encoding="utf-8") as fh:
         fh.write(text)
     for f in COPY_ONCE:
         if not os.path.exists(os.path.join(board_dir, f)):
             shutil.copyfile(os.path.join(base_dir, f), os.path.join(board_dir, f))
-    print("pcb-sch: wrote %s from %s, not on this board: %s" % (
-        os.path.relpath(os.path.join(board_dir, name), paths.REPO_ROOT), os.path.basename(base_dir), ", ".join(sorted(done)) or "-"))
+    print("pcb-sch: wrote %s from %s, not on this board: %s, other footprint: %s" % (
+        os.path.relpath(os.path.join(board_dir, name), paths.REPO_ROOT), os.path.basename(base_dir),
+        ", ".join(sorted(r.exclude)) or "-", ", ".join(sorted(r.footprint)) or "-"))
     return 0
 
 

@@ -193,6 +193,114 @@ DRILL_0.8
 100
 AcDbCircle
  10
+31.9234
+ 20
+65.5900
+ 30
+0.0
+ 40
+0.4000
+  0
+CIRCLE
+  5
+22
+100
+AcDbEntity
+  8
+DRILL_0.8
+100
+AcDbCircle
+ 10
+31.9234
+ 20
+70.5900
+ 30
+0.0
+ 40
+0.4000
+  0
+CIRCLE
+  5
+23
+100
+AcDbEntity
+  8
+DRILL_0.8
+100
+AcDbCircle
+ 10
+42.9234
+ 20
+60.5900
+ 30
+0.0
+ 40
+0.4000
+  0
+CIRCLE
+  5
+24
+100
+AcDbEntity
+  8
+DRILL_0.8
+100
+AcDbCircle
+ 10
+42.9234
+ 20
+67.9900
+ 30
+0.0
+ 40
+0.4000
+  0
+CIRCLE
+  5
+25
+100
+AcDbEntity
+  8
+DRILL_0.8
+100
+AcDbCircle
+ 10
+47.9234
+ 20
+60.5900
+ 30
+0.0
+ 40
+0.4000
+  0
+CIRCLE
+  5
+26
+100
+AcDbEntity
+  8
+DRILL_0.8
+100
+AcDbCircle
+ 10
+47.9234
+ 20
+67.9900
+ 30
+0.0
+ 40
+0.4000
+  0
+CIRCLE
+  5
+27
+100
+AcDbEntity
+  8
+DRILL_0.8
+100
+AcDbCircle
+ 10
 49.6234
  20
 26.9900
@@ -203,7 +311,7 @@ AcDbCircle
   0
 CIRCLE
   5
-22
+28
 100
 AcDbEntity
   8
@@ -221,7 +329,151 @@ AcDbCircle
   0
 CIRCLE
   5
-23
+29
+100
+AcDbEntity
+  8
+DRILL_0.8
+100
+AcDbCircle
+ 10
+68.7234
+ 20
+63.9900
+ 30
+0.0
+ 40
+0.4000
+  0
+CIRCLE
+  5
+2A
+100
+AcDbEntity
+  8
+DRILL_0.8
+100
+AcDbCircle
+ 10
+68.7234
+ 20
+68.9900
+ 30
+0.0
+ 40
+0.4000
+  0
+CIRCLE
+  5
+2B
+100
+AcDbEntity
+  8
+DRILL_0.8
+100
+AcDbCircle
+ 10
+80.9234
+ 20
+41.0400
+ 30
+0.0
+ 40
+0.4000
+  0
+CIRCLE
+  5
+2C
+100
+AcDbEntity
+  8
+DRILL_0.8
+100
+AcDbCircle
+ 10
+80.9234
+ 20
+46.0400
+ 30
+0.0
+ 40
+0.4000
+  0
+CIRCLE
+  5
+2D
+100
+AcDbEntity
+  8
+DRILL_0.8
+100
+AcDbCircle
+ 10
+90.3234
+ 20
+31.7900
+ 30
+0.0
+ 40
+0.4000
+  0
+CIRCLE
+  5
+2E
+100
+AcDbEntity
+  8
+DRILL_0.8
+100
+AcDbCircle
+ 10
+90.3234
+ 20
+36.7900
+ 30
+0.0
+ 40
+0.4000
+  0
+CIRCLE
+  5
+2F
+100
+AcDbEntity
+  8
+DRILL_0.8
+100
+AcDbCircle
+ 10
+90.3234
+ 20
+59.7900
+ 30
+0.0
+ 40
+0.4000
+  0
+CIRCLE
+  5
+30
+100
+AcDbEntity
+  8
+DRILL_0.8
+100
+AcDbCircle
+ 10
+90.3234
+ 20
+64.7900
+ 30
+0.0
+ 40
+0.4000
+  0
+CIRCLE
+  5
+31
 100
 AcDbEntity
   8
@@ -239,7 +491,7 @@ AcDbCircle
   0
 CIRCLE
   5
-24
+32
 100
 AcDbEntity
   8
@@ -257,7 +509,7 @@ AcDbCircle
   0
 CIRCLE
   5
-25
+33
 100
 AcDbEntity
   8
@@ -275,7 +527,7 @@ AcDbCircle
   0
 CIRCLE
   5
-26
+34
 100
 AcDbEntity
   8
@@ -293,7 +545,7 @@ AcDbCircle
   0
 CIRCLE
   5
-27
+35
 100
 AcDbEntity
   8
@@ -311,7 +563,7 @@ AcDbCircle
   0
 CIRCLE
   5
-28
+36
 100
 AcDbEntity
   8
@@ -329,7 +581,7 @@ AcDbCircle
   0
 CIRCLE
   5
-29
+37
 100
 AcDbEntity
   8
@@ -339,7 +591,7 @@ AcDbCircle
  10
 41.5234
  20
-17.7400
+18.2900
  30
 0.0
  40
@@ -347,7 +599,7 @@ AcDbCircle
   0
 CIRCLE
   5
-2A
+38
 100
 AcDbEntity
   8
@@ -357,7 +609,7 @@ AcDbCircle
  10
 44.0234
  20
-17.7400
+18.2900
  30
 0.0
  40
@@ -365,7 +617,7 @@ AcDbCircle
   0
 CIRCLE
   5
-2B
+39
 100
 AcDbEntity
   8
@@ -375,7 +627,7 @@ AcDbCircle
  10
 50.6234
  20
-17.7400
+18.2900
  30
 0.0
  40
@@ -383,7 +635,7 @@ AcDbCircle
   0
 CIRCLE
   5
-2C
+3A
 100
 AcDbEntity
   8
@@ -393,7 +645,7 @@ AcDbCircle
  10
 53.1234
  20
-17.7400
+18.2900
  30
 0.0
  40
@@ -401,7 +653,7 @@ AcDbCircle
   0
 CIRCLE
   5
-2D
+3B
 100
 AcDbEntity
   8
@@ -419,7 +671,7 @@ AcDbCircle
   0
 CIRCLE
   5
-2E
+3C
 100
 AcDbEntity
   8
@@ -437,7 +689,7 @@ AcDbCircle
   0
 CIRCLE
   5
-2F
+3D
 100
 AcDbEntity
   8
@@ -455,7 +707,7 @@ AcDbCircle
   0
 CIRCLE
   5
-30
+3E
 100
 AcDbEntity
   8
@@ -473,7 +725,7 @@ AcDbCircle
   0
 CIRCLE
   5
-31
+3F
 100
 AcDbEntity
   8
@@ -491,7 +743,7 @@ AcDbCircle
   0
 CIRCLE
   5
-32
+40
 100
 AcDbEntity
   8
@@ -509,7 +761,7 @@ AcDbCircle
   0
 CIRCLE
   5
-33
+41
 100
 AcDbEntity
   8
@@ -527,7 +779,7 @@ AcDbCircle
   0
 CIRCLE
   5
-34
+42
 100
 AcDbEntity
   8
@@ -545,7 +797,7 @@ AcDbCircle
   0
 CIRCLE
   5
-35
+43
 100
 AcDbEntity
   8
@@ -563,7 +815,7 @@ AcDbCircle
   0
 CIRCLE
   5
-36
+44
 100
 AcDbEntity
   8
@@ -581,7 +833,7 @@ AcDbCircle
   0
 CIRCLE
   5
-37
+45
 100
 AcDbEntity
   8
@@ -599,7 +851,7 @@ AcDbCircle
   0
 CIRCLE
   5
-38
+46
 100
 AcDbEntity
   8
@@ -617,7 +869,7 @@ AcDbCircle
   0
 CIRCLE
   5
-39
+47
 100
 AcDbEntity
   8
@@ -635,7 +887,7 @@ AcDbCircle
   0
 CIRCLE
   5
-3A
+48
 100
 AcDbEntity
   8
@@ -653,7 +905,7 @@ AcDbCircle
   0
 CIRCLE
   5
-3B
+49
 100
 AcDbEntity
   8
@@ -671,7 +923,7 @@ AcDbCircle
   0
 CIRCLE
   5
-3C
+4A
 100
 AcDbEntity
   8
@@ -689,7 +941,7 @@ AcDbCircle
   0
 CIRCLE
   5
-3D
+4B
 100
 AcDbEntity
   8
@@ -707,7 +959,7 @@ AcDbCircle
   0
 CIRCLE
   5
-3E
+4C
 100
 AcDbEntity
   8
@@ -725,7 +977,7 @@ AcDbCircle
   0
 CIRCLE
   5
-3F
+4D
 100
 AcDbEntity
   8
@@ -743,7 +995,7 @@ AcDbCircle
   0
 CIRCLE
   5
-40
+4E
 100
 AcDbEntity
   8
@@ -761,7 +1013,7 @@ AcDbCircle
   0
 CIRCLE
   5
-41
+4F
 100
 AcDbEntity
   8
@@ -779,7 +1031,7 @@ AcDbCircle
   0
 CIRCLE
   5
-42
+50
 100
 AcDbEntity
   8
@@ -797,7 +1049,7 @@ AcDbCircle
   0
 CIRCLE
   5
-43
+51
 100
 AcDbEntity
   8
@@ -815,7 +1067,7 @@ AcDbCircle
   0
 CIRCLE
   5
-44
+52
 100
 AcDbEntity
   8
@@ -833,7 +1085,7 @@ AcDbCircle
   0
 CIRCLE
   5
-45
+53
 100
 AcDbEntity
   8
@@ -851,7 +1103,7 @@ AcDbCircle
   0
 CIRCLE
   5
-46
+54
 100
 AcDbEntity
   8
@@ -869,7 +1121,7 @@ AcDbCircle
   0
 CIRCLE
   5
-47
+55
 100
 AcDbEntity
   8
@@ -887,7 +1139,7 @@ AcDbCircle
   0
 CIRCLE
   5
-48
+56
 100
 AcDbEntity
   8
@@ -905,7 +1157,7 @@ AcDbCircle
   0
 CIRCLE
   5
-49
+57
 100
 AcDbEntity
   8
@@ -923,7 +1175,7 @@ AcDbCircle
   0
 CIRCLE
   5
-4A
+58
 100
 AcDbEntity
   8
@@ -941,7 +1193,7 @@ AcDbCircle
   0
 CIRCLE
   5
-4B
+59
 100
 AcDbEntity
   8
@@ -959,7 +1211,7 @@ AcDbCircle
   0
 CIRCLE
   5
-4C
+5A
 100
 AcDbEntity
   8
@@ -977,7 +1229,7 @@ AcDbCircle
   0
 CIRCLE
   5
-4D
+5B
 100
 AcDbEntity
   8
@@ -995,7 +1247,7 @@ AcDbCircle
   0
 CIRCLE
   5
-4E
+5C
 100
 AcDbEntity
   8
@@ -1013,7 +1265,7 @@ AcDbCircle
   0
 CIRCLE
   5
-4F
+5D
 100
 AcDbEntity
   8
@@ -1031,7 +1283,7 @@ AcDbCircle
   0
 CIRCLE
   5
-50
+5E
 100
 AcDbEntity
   8
@@ -1049,7 +1301,7 @@ AcDbCircle
   0
 CIRCLE
   5
-51
+5F
 100
 AcDbEntity
   8
@@ -1067,7 +1319,7 @@ AcDbCircle
   0
 CIRCLE
   5
-52
+60
 100
 AcDbEntity
   8
@@ -1085,7 +1337,7 @@ AcDbCircle
   0
 CIRCLE
   5
-53
+61
 100
 AcDbEntity
   8
@@ -1103,7 +1355,7 @@ AcDbCircle
   0
 CIRCLE
   5
-54
+62
 100
 AcDbEntity
   8
@@ -1121,7 +1373,7 @@ AcDbCircle
   0
 CIRCLE
   5
-55
+63
 100
 AcDbEntity
   8
@@ -1139,7 +1391,7 @@ AcDbCircle
   0
 CIRCLE
   5
-56
+64
 100
 AcDbEntity
   8
@@ -1157,7 +1409,7 @@ AcDbCircle
   0
 CIRCLE
   5
-57
+65
 100
 AcDbEntity
   8
@@ -1175,7 +1427,7 @@ AcDbCircle
   0
 CIRCLE
   5
-58
+66
 100
 AcDbEntity
   8
@@ -1193,7 +1445,7 @@ AcDbCircle
   0
 CIRCLE
   5
-59
+67
 100
 AcDbEntity
   8
@@ -1203,7 +1455,7 @@ AcDbCircle
  10
 93.1234
  20
-53.8900
+53.5900
  30
 0.0
  40
@@ -1211,7 +1463,7 @@ AcDbCircle
   0
 CIRCLE
   5
-5A
+68
 100
 AcDbEntity
   8
@@ -1229,7 +1481,7 @@ AcDbCircle
   0
 CIRCLE
   5
-5B
+69
 100
 AcDbEntity
   8
@@ -1247,7 +1499,7 @@ AcDbCircle
   0
 CIRCLE
   5
-5C
+6A
 100
 AcDbEntity
   8
@@ -1265,7 +1517,7 @@ AcDbCircle
   0
 CIRCLE
   5
-5D
+6B
 100
 AcDbEntity
   8
@@ -1283,7 +1535,7 @@ AcDbCircle
   0
 CIRCLE
   5
-5E
+6C
 100
 AcDbEntity
   8
@@ -1301,7 +1553,7 @@ AcDbCircle
   0
 CIRCLE
   5
-5F
+6D
 100
 AcDbEntity
   8
@@ -1319,7 +1571,7 @@ AcDbCircle
   0
 CIRCLE
   5
-60
+6E
 100
 AcDbEntity
   8
@@ -1337,7 +1589,7 @@ AcDbCircle
   0
 CIRCLE
   5
-61
+6F
 100
 AcDbEntity
   8
@@ -1355,7 +1607,7 @@ AcDbCircle
   0
 CIRCLE
   5
-62
+70
 100
 AcDbEntity
   8
@@ -1373,7 +1625,7 @@ AcDbCircle
   0
 CIRCLE
   5
-63
+71
 100
 AcDbEntity
   8
@@ -1391,7 +1643,7 @@ AcDbCircle
   0
 CIRCLE
   5
-64
+72
 100
 AcDbEntity
   8
@@ -1409,7 +1661,7 @@ AcDbCircle
   0
 CIRCLE
   5
-65
+73
 100
 AcDbEntity
   8
@@ -1427,7 +1679,7 @@ AcDbCircle
   0
 CIRCLE
   5
-66
+74
 100
 AcDbEntity
   8
@@ -1445,7 +1697,7 @@ AcDbCircle
   0
 CIRCLE
   5
-67
+75
 100
 AcDbEntity
   8
@@ -1463,7 +1715,7 @@ AcDbCircle
   0
 CIRCLE
   5
-68
+76
 100
 AcDbEntity
   8
@@ -1481,7 +1733,7 @@ AcDbCircle
   0
 CIRCLE
   5
-69
+77
 100
 AcDbEntity
   8
@@ -1499,7 +1751,7 @@ AcDbCircle
   0
 CIRCLE
   5
-6A
+78
 100
 AcDbEntity
   8
@@ -1517,7 +1769,7 @@ AcDbCircle
   0
 CIRCLE
   5
-6B
+79
 100
 AcDbEntity
   8
@@ -1535,7 +1787,7 @@ AcDbCircle
   0
 CIRCLE
   5
-6C
+7A
 100
 AcDbEntity
   8
@@ -1553,7 +1805,7 @@ AcDbCircle
   0
 CIRCLE
   5
-6D
+7B
 100
 AcDbEntity
   8
@@ -1571,7 +1823,7 @@ AcDbCircle
   0
 CIRCLE
   5
-6E
+7C
 100
 AcDbEntity
   8

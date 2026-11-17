@@ -51,13 +51,20 @@ class TestLoad(unittest.TestCase):
         self.assertAlmostEqual(r.copper_target, r.cut_spacing_min - r.clearance)
         self.assertAlmostEqual(r.gap_min(0.292), 0.292 + 2 * r.horizontal_error)
         self.assertTrue(r.exception_for("U3").zones)
+        self.assertTrue(r.exception_for("J5").own_pads)          # pin headers: one entry with a refs list
+        self.assertFalse(r.exception_for("J5").zones)
+        self.assertIsNone(r.exception_for("J6"))                 # the USB pigtail terminals have no exception
+        self.assertEqual(set(r.footprint), {"C2", "C3", "C4", "C5", "C6", "C7", "C8"})
+        self.assertGreater(r.annular_target, r.annular_min)
 
     def test_bad_files_are_rejected(self):
-        for old, new in (('[clearance]\nvalue = 0.5', '[clearance]\nvalue = 50'),            # out of range
-                         ('[clearance]\nvalue = 0.5', '[clearence]\nvalue = 0.5'),           # unknown key, missing key
-                         ('status = "assumed"\nsource = "start value (owner', 'source = "start value (owner'),  # no status
-                         ('[netclass.Default]\ntrack_width = 1.5', '[netclass.Default]\ntrack_width = 0.2'),  # below track_min
-                         ('[zone_clearance]\nvalue = 0.5', '[zone_clearance]\nvalue = 0.2')):  # below clearance
+        for old, new in (('[clearance]\nvalue = 0.8', '[clearance]\nvalue = 50'),            # out of range
+                         ('[clearance]\nvalue = 0.8', '[clearence]\nvalue = 0.8'),           # unknown key, missing key
+                         ('unit = "mm"\nstatus = "assumed"\n', 'unit = "mm"\n'),  # no status
+                         ('[netclass.Default]\ntrack_width = 1.3', '[netclass.Default]\ntrack_width = 0.2'),  # below track_min
+                         ('[zone_clearance]\nvalue = 2.0', '[zone_clearance]\nvalue = 0.2'),                # below clearance
+                         ('[annular_target]\nvalue = 0.8', '[annular_target]\nvalue = 0.2'),                # below annular_min
+                         ('own_pads = true', 'own_pad = true')):                                            # unknown exception field
             with self.subTest(new=new), self.assertRaises(ValueError):
                 rules.load(edited(MILL_RULES, old, new))
 
@@ -104,11 +111,18 @@ class TestVariant(unittest.TestCase):
         diff = [(x.strip(), y.strip()) for x, y in zip(a, b) if x != y]
         self.assertEqual(sorted(diff), sorted([("(in_bom yes)", "(in_bom no)"), ("(on_board yes)", "(on_board no)"), ("(dnp no)", "(dnp yes)")] * 2))
 
+    def test_footprint_of_a_part_changes_and_nothing_else(self):
+        text, done = variant.make_variant(self.base, set(), {"C6": "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm"})
+        self.assertEqual(done, ["C6"])
+        diff = [(x.strip(), y.strip()) for x, y in zip(self.base.splitlines(), text.splitlines()) if x != y]
+        self.assertEqual(diff, [('(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"', '(property "Footprint" "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm"')])
+
     def test_no_exclude_list_gives_the_base_schematic(self):
         self.assertEqual(variant.make_variant(self.base, set())[0], self.base)
 
     def test_committed_mill_schematic_is_current(self):
-        want = variant.make_variant(self.base, set(rules.load(MILL_RULES).exclude))[0]
+        r = rules.load(MILL_RULES)
+        want = variant.make_variant(self.base, set(r.exclude), r.footprint)[0]
         self.assertEqual(open(os.path.join(MILL, paths.STEM + ".kicad_sch"), encoding="utf-8").read(), want, "run make pcb-sch BOARD=mill")
 
 
@@ -131,6 +145,18 @@ class TestMillBoard(unittest.TestCase):
         self.assertFalse(refs & set(self.rules.exclude))
         self.assertTrue({"U3", "C6", "C7", "C8", "FB1", "TP3"} <= refs)
 
+    def test_capacitors_are_through_hole_with_the_ring_target(self):
+        import pcbnew
+        for ref in ("C2", "C3", "C4", "C5", "C6", "C7", "C8"):
+            fp = self.board.FindFootprintByReference(ref)
+            self.assertEqual(str(fp.GetFPID().GetLibItemName()), "C_Disc_D5.0mm_W2.5mm_P5.00mm")
+            for p in fp.Pads():
+                ring = (pcbnew.ToMM(p.GetSize(pcbnew.B_Cu).x) - pcbnew.ToMM(p.GetDrillSize().x)) / 2.0
+                self.assertAlmostEqual(ring, self.rules.annular_target, places=2)
+        # C9 (3.5 mm pitch) keeps the minimum ring: a larger pad brings its two pads nearer than component_gap
+        p = next(iter(self.board.FindFootprintByReference("C9").Pads()))
+        self.assertAlmostEqual((pcbnew.ToMM(p.GetSize(pcbnew.B_Cu).x) - pcbnew.ToMM(p.GetDrillSize().x)) / 2.0, self.rules.annular_min, places=2)
+
     def test_board_has_no_milling_error_with_the_committed_rules(self):
         self.assertEqual(self.errors(self.rules), [])
 
@@ -140,20 +166,26 @@ class TestMillBoard(unittest.TestCase):
         self.assertIn("MILL-CUT-SPACING", ids)     # copper below the copper target
 
     def test_a_larger_horizontal_error_makes_gap_errors(self):
-        r = dataclasses.replace(self.rules, horizontal_error=0.2)  # needs 0.692 mm, the board has 0.5 mm gaps
+        r = dataclasses.replace(self.rules, horizontal_error=0.5)  # needs 1.292 mm, tracks and pads are 0.8 mm apart
         self.assertIn("MILL-GAP", {f[0] for f in self.errors(r)})
 
     def test_gap_at_an_exception_pad_is_fixed_only_for_its_own_pads_and_zone_fill(self):
         fixed = [f for f in self.mc.check(self.board, self.lim, self.rules) if f[0] == "MILL-GAP-FIXED"]
         self.assertTrue(fixed)
+        zone_refs = {e.ref for e in self.rules.exceptions if e.zones}
+        ref = lambda s: s.split()[1].split(".")[0] if s.startswith("pad ") else None  # noqa: E731
         for f in fixed:
             a, b = f[2].split(" | ")
-            self.assertIn("pad U3.", a + b)
-            self.assertTrue(("pad U3." in a and "pad U3." in b) or "zone fill" in a + b, f[2])
             self.assertNotIn("track", f[2])
+            if "zone fill" in a + b:   # zone fill only at a pad of a part with zones = true (U3, the modules)
+                self.assertIn(ref(a) or ref(b), zone_refs, f[2])
+            else:                      # else two pads of one part
+                self.assertEqual(ref(a), ref(b), f[2])
+        self.assertTrue(any("pad U3." in f[2] for f in fixed))
+        self.assertTrue(any("pad J5." in f[2] for f in fixed))
 
     def test_exception_part_is_in_the_component_gap_check(self):
-        r = dataclasses.replace(self.rules, component_gap=2.6)  # U3 to C7 and C8 is about 2.0 mm
+        r = dataclasses.replace(self.rules, component_gap=2.6)  # U3 to C6 is 2.55 mm
         hits = [f[2] for f in self.errors(r) if f[0] == "MILL-COMP-GAP"]
         self.assertTrue(any("pad U3." in h for h in hits), hits)
 
