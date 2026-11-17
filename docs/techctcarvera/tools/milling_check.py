@@ -209,7 +209,8 @@ def check_gaps(ctx, out):
     # design rules: the mill has a horizontal error on each side of a gap, so a gap must be wider than the cut
     rules = ctx.rules
     need = rules.gap_min(wmin) if rules else wmin
-    exc = {e.ref for e in rules.exceptions} if rules else set()
+    # a part with an [[exception]] that has zones = true: planned zone fill can be close to its pads
+    exc_zone = {e.ref for e in rules.exceptions if e.zones} if rules else set()
     reach = FromMM(max(wmax, need)) + 1000
     for layer in copper_layers(ctx.b):
         items = collect(ctx, layer)
@@ -230,8 +231,9 @@ def check_gaps(ctx, out):
                     out.append(("MILL-GAP", "error", where, d, wmin,
                                 "gap %.3f mm is below the narrowest bit cut width %.3f mm at worst-case depth %.2f mm" % (d, wmin, lim.depth_worst)))
                 elif d < need - 1e-6:
-                    # a gap that a footprint fixes (two pads of one part) or a part with an [[exception]]: listed, not an error
-                    fixed = (a.ref and a.ref == c.ref) or a.ref in exc or c.ref in exc
+                    # a gap that the footprint fixes: two pads of one part, or zone fill at a pad of an exception part
+                    # with zones = true. Listed, not an error. A track or a pad of another part near such a pad is an error.
+                    fixed = bool(a.ref and a.ref == c.ref) or (a.kind == "zone" and c.ref in exc_zone) or (c.kind == "zone" and a.ref in exc_zone)
                     out.append(("MILL-GAP-FIXED" if fixed else "MILL-GAP", "warning" if fixed else "error", where, d, need,
                                 "gap %.3f mm is below cut width %.3f mm + 2 x horizontal error %.2f mm = %.3f mm%s" % (
                                     d, wmin, rules.horizontal_error, need, " (gap fixed by the footprint or an exception)" if fixed else "")))
@@ -457,16 +459,15 @@ def check_cut_spacing(ctx, out):
 
 def check_component_gap(ctx, out):
     """Design rules: pads of two different parts on different nets are at least component_gap apart on each copper layer.
-    The mill cuts between them, so close parts need an accurate cut. A part with an [[exception]] is left out: its own
-    pad gaps are the smaller ones, and MILL-GAP-FIXED lists them."""
+    The mill cuts between them, so close parts need an accurate cut. Two pads of one part are not checked here:
+    MILL-GAP and MILL-GAP-FIXED check them."""
     rules = ctx.rules
     if not rules or rules.component_gap <= 0:
         return
     gap = FromMM(rules.component_gap)
-    exc = {e.ref for e in rules.exceptions}
     seen = {}
     for layer in copper_layers(ctx.b):
-        pads = [it for it in collect(ctx, layer) if it.kind == "pad" and it.ref not in exc]
+        pads = [it for it in collect(ctx, layer) if it.kind == "pad"]
         for i, a in enumerate(pads):
             abb = a.bbox.GetInflated(gap)
             for c in pads[i + 1:]:

@@ -143,6 +143,20 @@ class TestMillBoard(unittest.TestCase):
         r = dataclasses.replace(self.rules, horizontal_error=0.2)  # needs 0.692 mm, the board has 0.5 mm gaps
         self.assertIn("MILL-GAP", {f[0] for f in self.errors(r)})
 
+    def test_gap_at_an_exception_pad_is_fixed_only_for_its_own_pads_and_zone_fill(self):
+        fixed = [f for f in self.mc.check(self.board, self.lim, self.rules) if f[0] == "MILL-GAP-FIXED"]
+        self.assertTrue(fixed)
+        for f in fixed:
+            a, b = f[2].split(" | ")
+            self.assertIn("pad U3.", a + b)
+            self.assertTrue(("pad U3." in a and "pad U3." in b) or "zone fill" in a + b, f[2])
+            self.assertNotIn("track", f[2])
+
+    def test_exception_part_is_in_the_component_gap_check(self):
+        r = dataclasses.replace(self.rules, component_gap=2.6)  # U3 to C7 and C8 is about 2.0 mm
+        hits = [f[2] for f in self.errors(r) if f[0] == "MILL-COMP-GAP"]
+        self.assertTrue(any("pad U3." in h for h in hits), hits)
+
     def test_a_larger_component_gap_makes_errors(self):
         r = dataclasses.replace(self.rules, component_gap=4.0)
         self.assertIn("MILL-COMP-GAP", {f[0] for f in self.errors(r)})

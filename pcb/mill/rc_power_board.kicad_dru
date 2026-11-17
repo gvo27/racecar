@@ -3,8 +3,8 @@
 # Made by pcb/tools/gen_rules.py from the [[exception]] entries of the design rules (design_rules.toml).
 # Do not edit: change the design rules, then run `make pcb-rules`. Zone fill is not covered: a pour keeps the
 # zone clearance from these pads, unless the exception has zones = true.
-# U3: AP2112K, SOT-23-5: the gap between its own pads is 0.35 mm. Owner 2026-11-16: U3 stays SOT-23-5
+# U3: AP2112K, SOT-23-5: the gap between its own pads is 0.35 mm. Owner 2026-11-16: U3 stays SOT-23-5. 0.34 mm keeps the zone fill as far from the pads as the pads are from each other (0.01 mm for rounding)
 (rule U3_fine
-	(condition "A.Type == 'Pad' && A.Reference == 'U3'")
-	(constraint clearance (min 0.3mm))
+	(condition "A.Type == 'Pad' && A.Reference == 'U3' && B.Type != 'Track' && B.Type != 'Via'")
+	(constraint clearance (min 0.34mm))
 )

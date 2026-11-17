@@ -28,7 +28,7 @@ The mill is not accurate in X and Y. The board `pcb/mill` is a coarse copy of th
 
 | Key | Effect |
 | --- | --- |
-| `horizontal_error` | Position error of a cut for each side. The milling check needs gap >= cut width + 2 x this value (`MILL-GAP`) |
+| `horizontal_error` | Position error of a cut for each side. The milling check needs gap >= cut width + 2 x this value (`MILL-GAP`). It is used for copper gaps only, not for the edge clearance, the annular ring or the holes. If you raise it, raise `clearance` and `zone_clearance` to at least cut width + 2 x this value |
 | `cut_spacing_min` | Smallest distance between the centers of two isolation gaps. Copper between two gaps must be `cut_spacing_min` - `clearance` wide. `MILL-CUT-SPACING` lists thinner copper |
 | `clearance`, `zone_clearance` | Copper gap between two nets, and between a pour and other copper |
 | `track_min` | Hard minimum track width |

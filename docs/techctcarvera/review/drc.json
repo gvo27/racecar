@@ -1,7 +1,7 @@
 {
     "$schema": "https://schemas.kicad.org/drc.v1.json",
     "coordinate_units": "mm",
-    "date": "2026-11-17T03:40:50",
+    "date": "2026-11-17T04:17:45",
     "ignored_checks": [
         {
             "description": "Footprint has no courtyard defined",
@@ -35,96 +35,6 @@
     "unconnected_items": [],
     "violations": [
         {
-            "description": "Footprint 'JST_XH_B2B-XH-A_1x02_P2.50mm_Vertical' does not match copy in library 'Connector_JST'",
-            "items": [
-                {
-                    "description": "Footprint J11",
-                    "pos": {
-                        "x": 63.75,
-                        "y": 90.2
-                    },
-                    "uuid": "072c8f23-4d02-49d2-94d2-e30ac14746e3"
-                }
-            ],
-            "severity": "warning",
-            "type": "lib_footprint_mismatch"
-        },
-        {
-            "description": "Footprint 'FuseHolder_Blade_ATO_Littelfuse_FLR_178.6165' does not match copy in library 'Fuse'",
-            "items": [
-                {
-                    "description": "Footprint F1",
-                    "pos": {
-                        "x": 82.2,
-                        "y": 160.5
-                    },
-                    "uuid": "1ec50743-5ada-4cd3-8df2-76dc1b88e3a4"
-                }
-            ],
-            "severity": "warning",
-            "type": "lib_footprint_mismatch"
-        },
-        {
-            "description": "Footprint 'MountingHole_3.2mm_M3' does not match copy in library 'MountingHole'",
-            "items": [
-                {
-                    "description": "Footprint H3",
-                    "pos": {
-                        "x": 63.5,
-                        "y": 43.5
-                    },
-                    "uuid": "2beda31d-55bf-4359-ba6f-577bac2a2612"
-                }
-            ],
-            "severity": "warning",
-            "type": "lib_footprint_mismatch"
-        },
-        {
-            "description": "Footprint 'JST_XH_B2B-XH-A_1x02_P2.50mm_Vertical' does not match copy in library 'Connector_JST'",
-            "items": [
-                {
-                    "description": "Footprint J12",
-                    "pos": {
-                        "x": 121.1,
-                        "y": 72.4
-                    },
-                    "uuid": "442daf63-53fa-4041-bdb9-e9cd76bed32a"
-                }
-            ],
-            "severity": "warning",
-            "type": "lib_footprint_mismatch"
-        },
-        {
-            "description": "Footprint 'JST_XH_B3B-XH-A_1x03_P2.50mm_Vertical' does not match copy in library 'Connector_JST'",
-            "items": [
-                {
-                    "description": "Footprint J4",
-                    "pos": {
-                        "x": 64.5,
-                        "y": 144.0
-                    },
-                    "uuid": "4ea8d97f-9c20-4399-b14e-ce0f52a1d7ba"
-                }
-            ],
-            "severity": "warning",
-            "type": "lib_footprint_mismatch"
-        },
-        {
-            "description": "Footprint 'SolderWire-2.5sqmm_1x02_P8.8mm_D2.4mm_OD4.4mm' does not match copy in library 'Connector_Wire'",
-            "items": [
-                {
-                    "description": "Footprint J1",
-                    "pos": {
-                        "x": 83.7,
-                        "y": 176.5
-                    },
-                    "uuid": "5a88e69e-a77a-4ed0-92ec-f2b13246faac"
-                }
-            ],
-            "severity": "warning",
-            "type": "lib_footprint_mismatch"
-        },
-        {
             "description": "Footprint 'MountingHole_3.2mm_M3' does not match copy in library 'MountingHole'",
             "items": [
                 {
@@ -133,67 +43,7 @@
                         "x": 122.5,
                         "y": 176.5
                     },
-                    "uuid": "6b6aec4f-390f-4396-8a26-7daa44212ff6"
-                }
-            ],
-            "severity": "warning",
-            "type": "lib_footprint_mismatch"
-        },
-        {
-            "description": "Footprint 'JST_XH_B4B-XH-A_1x04_P2.50mm_Vertical' does not match copy in library 'Connector_JST'",
-            "items": [
-                {
-                    "description": "Footprint J8",
-                    "pos": {
-                        "x": 64.5,
-                        "y": 96.8
-                    },
-                    "uuid": "8f9f740a-0756-4925-99db-19accff87deb"
-                }
-            ],
-            "severity": "warning",
-            "type": "lib_footprint_mismatch"
-        },
-        {
-            "description": "Footprint 'JST_XH_B2B-XH-A_1x02_P2.50mm_Vertical' does not match copy in library 'Connector_JST'",
-            "items": [
-                {
-                    "description": "Footprint J14",
-                    "pos": {
-                        "x": 121.1,
-                        "y": 54.4
-                    },
-                    "uuid": "9bb78f4f-8e1c-401c-b55c-eac783866b65"
-                }
-            ],
-            "severity": "warning",
-            "type": "lib_footprint_mismatch"
-        },
-        {
-            "description": "Footprint 'CP_Radial_D8.0mm_P3.50mm' does not match copy in library 'Capacitor_THT'",
-            "items": [
-                {
-                    "description": "Footprint C9",
-                    "pos": {
-                        "x": 73.0,
-                        "y": 90.2
-                    },
-                    "uuid": "a3e05320-b19f-44d2-9203-ea42bc28bc71"
-                }
-            ],
-            "severity": "warning",
-            "type": "lib_footprint_mismatch"
-        },
-        {
-            "description": "Footprint 'MountingHole_3.2mm_M3' does not match copy in library 'MountingHole'",
-            "items": [
-                {
-                    "description": "Footprint H4",
-                    "pos": {
-                        "x": 122.5,
-                        "y": 43.5
-                    },
-                    "uuid": "aead3276-42e2-45b1-9b34-40b4842adb34"
+                    "uuid": "10ade339-45c6-49fb-85d6-fccb8de5eed3"
                 }
             ],
             "severity": "warning",
@@ -208,7 +58,22 @@
                         "x": 63.4,
                         "y": 137.5
                     },
-                    "uuid": "b1a848ee-9ad6-4377-9506-f1723de7eb5a"
+                    "uuid": "1b1c3c36-47bd-45b1-bf11-a6e97bee1614"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_mismatch"
+        },
+        {
+            "description": "Footprint 'MountingHole_3.2mm_M3' does not match copy in library 'MountingHole'",
+            "items": [
+                {
+                    "description": "Footprint H4",
+                    "pos": {
+                        "x": 122.5,
+                        "y": 43.5
+                    },
+                    "uuid": "1bfea459-1d99-43fb-b4ab-45e020e76bfe"
                 }
             ],
             "severity": "warning",
@@ -223,7 +88,7 @@
                         "x": 63.4,
                         "y": 123.3
                     },
-                    "uuid": "cdcdc6a2-9b27-45ce-9cee-ec96633b6093"
+                    "uuid": "30fa3f23-52c5-420b-9c08-23d991f964a9"
                 }
             ],
             "severity": "warning",
@@ -238,7 +103,22 @@
                         "x": 121.1,
                         "y": 63.4
                     },
-                    "uuid": "d5fb498f-e047-4e93-92ed-d4e38b5e0cb7"
+                    "uuid": "420a5197-7722-453c-b800-efe1c45d842a"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_mismatch"
+        },
+        {
+            "description": "Footprint 'JST_XH_B4B-XH-A_1x04_P2.50mm_Vertical' does not match copy in library 'Connector_JST'",
+            "items": [
+                {
+                    "description": "Footprint J8",
+                    "pos": {
+                        "x": 64.5,
+                        "y": 96.8
+                    },
+                    "uuid": "581cc11f-c7d5-4fd4-a50f-9e553743b7d6"
                 }
             ],
             "severity": "warning",
@@ -248,12 +128,57 @@
             "description": "Footprint 'JST_XH_B2B-XH-A_1x02_P2.50mm_Vertical' does not match copy in library 'Connector_JST'",
             "items": [
                 {
-                    "description": "Footprint J9",
+                    "description": "Footprint J12",
                     "pos": {
-                        "x": 63.75,
-                        "y": 81.1
+                        "x": 121.1,
+                        "y": 72.4
                     },
-                    "uuid": "fa5cba0e-5938-4cdb-bfe9-11386531b9e3"
+                    "uuid": "5cec7573-ec03-4908-b93c-b6b691e81327"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_mismatch"
+        },
+        {
+            "description": "Footprint 'SolderWire-2.5sqmm_1x02_P8.8mm_D2.4mm_OD4.4mm' does not match copy in library 'Connector_Wire'",
+            "items": [
+                {
+                    "description": "Footprint J1",
+                    "pos": {
+                        "x": 83.7,
+                        "y": 176.5
+                    },
+                    "uuid": "5dca3650-0d50-4112-a56a-193a9138f0c4"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_mismatch"
+        },
+        {
+            "description": "Footprint 'JST_XH_B3B-XH-A_1x03_P2.50mm_Vertical' does not match copy in library 'Connector_JST'",
+            "items": [
+                {
+                    "description": "Footprint J4",
+                    "pos": {
+                        "x": 64.5,
+                        "y": 144.0
+                    },
+                    "uuid": "5f741198-1efd-43f0-a388-c0773397742b"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_mismatch"
+        },
+        {
+            "description": "Footprint 'FuseHolder_Blade_ATO_Littelfuse_FLR_178.6165' does not match copy in library 'Fuse'",
+            "items": [
+                {
+                    "description": "Footprint F1",
+                    "pos": {
+                        "x": 82.2,
+                        "y": 160.5
+                    },
+                    "uuid": "62b05767-281a-4a41-b266-c8b18261c6f3"
                 }
             ],
             "severity": "warning",
@@ -268,7 +193,82 @@
                         "x": 63.5,
                         "y": 176.5
                     },
-                    "uuid": "fded4db2-a1dc-4660-8c83-58a19a2b5c6d"
+                    "uuid": "99d0a97f-4566-400f-92a8-5c678b2f46b6"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_mismatch"
+        },
+        {
+            "description": "Footprint 'CP_Radial_D8.0mm_P3.50mm' does not match copy in library 'Capacitor_THT'",
+            "items": [
+                {
+                    "description": "Footprint C9",
+                    "pos": {
+                        "x": 73.0,
+                        "y": 90.2
+                    },
+                    "uuid": "ba95bc8b-ceee-409c-8cbd-e47dd8a50099"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_mismatch"
+        },
+        {
+            "description": "Footprint 'JST_XH_B2B-XH-A_1x02_P2.50mm_Vertical' does not match copy in library 'Connector_JST'",
+            "items": [
+                {
+                    "description": "Footprint J9",
+                    "pos": {
+                        "x": 63.75,
+                        "y": 81.1
+                    },
+                    "uuid": "c56943a5-01b9-41c2-9e89-f4e3cf021dba"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_mismatch"
+        },
+        {
+            "description": "Footprint 'JST_XH_B2B-XH-A_1x02_P2.50mm_Vertical' does not match copy in library 'Connector_JST'",
+            "items": [
+                {
+                    "description": "Footprint J14",
+                    "pos": {
+                        "x": 121.1,
+                        "y": 54.4
+                    },
+                    "uuid": "d472cdae-ae4d-4d8b-a8e4-b9d7f5344894"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_mismatch"
+        },
+        {
+            "description": "Footprint 'MountingHole_3.2mm_M3' does not match copy in library 'MountingHole'",
+            "items": [
+                {
+                    "description": "Footprint H3",
+                    "pos": {
+                        "x": 63.5,
+                        "y": 43.5
+                    },
+                    "uuid": "e97af125-c13b-4b77-b0a2-85725a123371"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_mismatch"
+        },
+        {
+            "description": "Footprint 'JST_XH_B2B-XH-A_1x02_P2.50mm_Vertical' does not match copy in library 'Connector_JST'",
+            "items": [
+                {
+                    "description": "Footprint J11",
+                    "pos": {
+                        "x": 63.75,
+                        "y": 90.2
+                    },
+                    "uuid": "fa268864-12a9-4bbb-bd3c-2e7a8c4001b3"
                 }
             ],
             "severity": "warning",

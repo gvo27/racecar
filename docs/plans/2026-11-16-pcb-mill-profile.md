@@ -26,5 +26,4 @@ The lab mill is not accurate in X and Y. The owner wants one config file that de
 ## Follow-up
 - Lab tech: confirm the values of the tuning file (questions in `review/README.md` of the lab directory).
 - Review of the mill board by `pcb-reviewer` and by the owner.
-- `MILL-ISLAND` warning on `+5V_SENS`: examine.
 - Lessons for `.claude/skills/pcb-design-check/lessons.md` after the review.

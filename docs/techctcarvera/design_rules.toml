@@ -50,7 +50,8 @@ unit = "mm"
 status = "assumed"
 source = "same as clearance"
 
-# Smallest gap between the courtyards of two parts on one side of the board (rule MILL-COMP-GAP). 0 = no check.
+# Smallest gap between pads of two different parts on different nets, on one copper layer (rule MILL-COMP-GAP).
+# Not a courtyard gap: 2 mm between all courtyards does not fit the outline. 0 = no check.
 [component_gap]
 value = 2.0
 unit = "mm"
@@ -106,8 +107,8 @@ source = "rev A value. Not raised: the Pololu pin pitch (2.54 mm) limits the nec
 # Parts with a pad gap that the footprint fixes. The clearance of these parts is lower. The checks list them, never hide them.
 [[exception]]
 ref = "U3"
-clearance = 0.3
-reason = "AP2112K, SOT-23-5: the gap between its own pads is 0.35 mm. Owner 2026-11-16: U3 stays SOT-23-5"
+clearance = 0.34
+reason = "AP2112K, SOT-23-5: the gap between its own pads is 0.35 mm. Owner 2026-11-16: U3 stays SOT-23-5. 0.34 mm keeps the zone fill as far from the pads as the pads are from each other (0.01 mm for rounding)"
 zones = true  # the planned zones at U3 (placement.py of the board) use this clearance
 
 # Parts of the schematic that are not on a board with these rules.
