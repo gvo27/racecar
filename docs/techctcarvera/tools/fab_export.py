@@ -19,7 +19,7 @@ import pcbnew
 from pcbnew import FromMM, ToMM
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(1, os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "pcb", "tools")))  # lab.py, paths.py, placement.py
+sys.path.insert(1, os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "pcb", "libraries")))  # lab.py, paths.py, placement.py
 import lab  # noqa: E402
 import paths  # noqa: E402
 import placement  # noqa: E402
@@ -262,7 +262,7 @@ def export(board_path, out_dir):
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("board", nargs="?", default=os.path.join(SCH_DIR, STEM + ".kicad_pcb"))
-    ap.add_argument("--out", default=os.path.join(SCH_DIR, "fab"))
+    ap.add_argument("--out", default=os.path.join(paths.REPO_ROOT, "build", "fab", os.path.relpath(SCH_DIR, paths.PCB_DIR)))
     args = ap.parse_args(argv)
     hs = export(args.board, args.out)
     for n, d, use in tools(hs):

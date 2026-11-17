@@ -29,7 +29,7 @@ Everything hangs off one fused `VBAT` bus: a single replaceable main fuse protec
 
 **What a good review draft contains:** a clean, readable schematic PDF; the KiCad project folder (zipped or in git); the power budget table below; and a list of open questions. Reviewers spend their time on design when the drawing itself is tidy, so the formatting section matters as much as the electrical one.
 
-> **Repo note:** the KiCad project is in `pcb/fabhouse/`; see `README.md` next to this file. The invariant "ESP32 powers nothing" from the project rules is what this board makes true.
+> **Repo note:** the KiCad project is in `pcb/releases/rev_A/`; see `README.md` next to this file. The invariant "ESP32 powers nothing" from the project rules is what this board makes true.
 
 ## Electrical background for a first board
 

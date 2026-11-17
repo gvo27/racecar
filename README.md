@@ -183,4 +183,4 @@ docs/              setup.md, docker_ros_plan.md, proposal, datasheets/
 Makefile           every command (make help)
 ```
 
-Bench checklist (the procedure that verified phase 2): [docs/setup.md](docs/setup.md#phase-2-bench-checklist-user-run). Roadmap: [docs/docker_ros_plan.md](docs/docker_ros_plan.md). Firmware design: [docs/esp32-firmware-proposal.md](docs/esp32-firmware-proposal.md).
+Bench checklist (the procedure that verified phase 2): [docs/setup.md](docs/setup.md#phase-2-bench-checklist-user-run). Roadmap: [docs/docker_ros_plan.md](docs/docker_ros_plan.md). Firmware design (historical, phase 1): [docs/archive/esp32-firmware-proposal.md](docs/archive/esp32-firmware-proposal.md).

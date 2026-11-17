@@ -6,7 +6,7 @@
     "name": "RC Car Power Distribution Board"
   },
   "analysis": {
-    "output_dir": "../../docs/pcb/analysis",
+    "output_dir": "../../../docs/pcb/analysis",
     "retention": 5,
     "auto_diff": true,
     "track_in_git": false

@@ -19,7 +19,7 @@ from pcbnew import FromMM, ToMM
 
 import os
 
-sys.path.insert(1, os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "pcb", "tools")))  # lab.py
+sys.path.insert(1, os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "pcb", "libraries")))  # lab.py
 import lab  # noqa: E402
 
 # Finding = (rule_id, severity "error"|"warning", where, value, limit, message)

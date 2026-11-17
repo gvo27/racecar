@@ -2,27 +2,27 @@
 
 Draft KiCad project for the car's power board. A 2S LiPo comes in; the board puts out `VBAT`, `+5V_CPU`, `+5V_SENS` and `+3V3_SENS` on a common `GND`, and routes `+6V_BEC` from the ESC to the servo. The ESC's own battery power is off-board. This is a **review draft**: every value marked `TBD` is unconfirmed (project rule: no unconfirmed parameters).
 
-Layout since 2026-11-16: the KiCad project, the libraries, the tools and the fab outputs are in `pcb/` (one directory for each board, now `pcb/fabhouse/`). This directory holds the context of the board and the schematic. The lab directory holds the lab facts and the mill tools. A path without a directory in the table is in this directory.
+Layout since 2026-11-16: the KiCad projects, the libraries and the tools are in `pcb/` (rev A: `pcb/releases/rev_A/`). Fab outputs are not committed (`make pcb-fab` writes `build/fab/<BOARD>/`). Stale docs are in `docs/archive/pcb/`. This directory holds the context of the board and the schematic. The lab directory holds the lab facts and the mill tools. A path without a directory in the table is in this directory.
 
 | File | What it is |
 | --- | --- |
 | `design_overview.md` | The design meeting summary: one short entry per feature, the power budget and the decisions wanted. |
 | `bom.md` | How the BOM is made (`make bom`, symbol fields), fuse notes, stock notes. |
-| `pcb/fabhouse/bom.csv` | BOM exported from the schematic fields by `make bom` (generated; commit it). |
+| `pcb/releases/rev_A/bom.csv` | BOM exported from the schematic fields by `make bom` (generated; commit it). |
 | `bom_offboard.csv` | Hand-kept BOM of parts with no symbol (XH housings, crimps, stock, J6/J7 options). |
 | `fab_handoff.md` | Rev A CNC-milling handoff (Makera Carvera) plus later-revision fab checklist: DRC/net classes, rivets, holes, IPC-2221 table, connector table, export, sign-off. |
 | `power_board_plan.md` | The build guide and background: rails, power budget, trace widths, a step-by-step KiCad guide and open questions. Exported from the live doc linked at its top. |
 | `power_architecture.png` | Block diagram used by the plan. |
 | `reverse_polarity_proposal.md` | Reverse-polarity protection (P-FET Q1 + R4): the proposal and its status. |
-| `pcb/fabhouse/rc_power_board.kicad_pro` / `.kicad_sch` | KiCad project and the one-sheet A3 schematic (regions A to E plus notes). |
-| `pcb/lib/rc_power.kicad_sym` + `pcb/fabhouse/sym-lib-table` | Project symbol library: `D36V50F5` (all 12 module pins, used by U1 and U2), `REG_MODULE` (generic VIN/GND/VOUT/EN, no longer used on the board) and one power symbol per rail. |
-| `pcb/fabhouse/rc_power_board.kicad_pcb` / `.kicad_dru` | Rev A board, routed, for review only (no Gerber or CAM files). The `.kicad_dru` holds rule `U3_fine`. |
-| `pcb/lib/rc_power.pretty/` + `pcb/fabhouse/fp-lib-table` | Project footprint library: `Pololu_D36V50Fx` (U1 and U2: 12 pads and the full 25.4 x 25.4 mm body, from Pololu's drawing; facts in `docs/datasheets/regulator_pololu_d36v50f5.md`). |
+| `pcb/releases/rev_A/rc_power_board.kicad_pro` / `.kicad_sch` | KiCad project and the one-sheet A3 schematic (regions A to E plus notes). |
+| `pcb/lib/rc_power.kicad_sym` + `pcb/releases/rev_A/sym-lib-table` | Project symbol library: `D36V50F5` (all 12 module pins, used by U1 and U2), `REG_MODULE` (generic VIN/GND/VOUT/EN, no longer used on the board) and one power symbol per rail. |
+| `pcb/releases/rev_A/rc_power_board.kicad_pcb` / `.kicad_dru` | Rev A board, routed, for review only (no Gerber or CAM files). The `.kicad_dru` holds rule `U3_fine`. |
+| `pcb/lib/rc_power.pretty/` + `pcb/releases/rev_A/fp-lib-table` | Project footprint library: `Pololu_D36V50Fx` (U1 and U2: 12 pads and the full 25.4 x 25.4 mm body, from Pololu's drawing; facts in `docs/datasheets/regulator_pololu_d36v50f5.md`). |
 | `milling_waivers.toml` (lab directory) | The waiver list for the milling check. The milling limits (`milling.toml`), the mill tools (`tools/milling_check.py`, `tools/fab_export.py`) and the lab CAM example are also in the lab directory ([`lab:` in `.claude/CLAUDE.md`](../../.claude/CLAUDE.md)). |
-| `pcb/tools/` | Python tools and tests that run in the KiCad image: `paths.py` (repo layout), `lab.py` (path of the lab directory), `build_pcb.py`, `placement.py`, `route_pcb.py`, `check_board.py`, `review_plots.py`. |
+| `pcb/libraries/` | Python tools and tests that run in the KiCad image: `paths.py` (repo layout), `lab.py` (path of the lab directory), `build_pcb.py`, `placement.py`, `route_pcb.py`, `check_board.py`, `review_plots.py`. |
 | `review/` | Review package: DRC report, milling check, layer PDF, 1:1 PDF, `README.md`. |
-| `pcb/fabhouse/rc_power_board.pdf` | Plot of the sheet, for review without KiCad. |
-| `pcb/fabhouse/.kicad-happy.json` | Config for the kicad-happy Claude plugin (analysis output in `analysis/`, gitignored except the manifest). |
+| `pcb/releases/rev_A/rc_power_board.pdf` | Plot of the sheet, for review without KiCad. |
+| `pcb/releases/rev_A/.kicad-happy.json` | Config for the kicad-happy Claude plugin (analysis output in `analysis/`, gitignored except the manifest). |
 
 ## KiCad version
 
@@ -41,7 +41,7 @@ Previous revision: the meeting-cleanup revision was generated in KiCad 7 format,
 - Both modules use the symbol `rc_power:D36V50F5` and the footprint `rc_power:Pololu_D36V50Fx`. The footprint shows the real 25.4 x 25.4 mm body (the first rev A layout used a plain pin header and put the body over J6 and J7). U2 EN, VRP and PG have no-connect flags, as U1 EN and VRP.
 - **Flag:** dropout is about 1.0 V at 5 A (Pololu graph). Near the 6.0 V cutoff the +5V_SENS output can fall below 5 V, and the Mapper needs at least 4.8 V. Bench check at J11 during Mapper startup.
 - Decisions on 2026-11-11 (owner): reverse-polarity protection (status: `reverse_polarity_proposal.md`); U3 keeps the stock SOT-23-5 footprint with the `U3_fine` DRC rule.
-- Plan: `docs/plans/2026-11-11-power-board-pcb-rev-a.md` (Task 7c).
+- Plan (done, archived): `docs/archive/plans/2026-11-11-power-board-pcb-rev-a.md` (Task 7c).
 
 ## Rev A PCB (review only)
 
@@ -138,4 +138,4 @@ The previous revision was checked with KiCad 7.0.11 `kicad-cli`, the kicad-happy
 
 ## Working on this folder with Claude Code
 
-The repo enables the kicad-happy plugin (`.claude/settings.json`). Rules for this folder are in `.claude/rules/schematics.md`. Typical asks are "review pcb/fabhouse", "check the power budget against the schematic" and "simulate the subcircuits". SPICE needs `ngspice` installed on the host.
+The repo enables the kicad-happy plugin (`.claude/settings.json`). Rules for this folder are in `.claude/rules/schematics.md`. Typical asks are "review pcb/releases/rev_A", "check the power budget against the schematic" and "simulate the subcircuits". SPICE needs `ngspice` installed on the host.

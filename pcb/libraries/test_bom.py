@@ -11,10 +11,12 @@ import tempfile
 import unittest
 from pathlib import Path
 
+import paths  # noqa: E402
+
 import bom_total
 
 PCB_DIR = Path(__file__).resolve().parent.parent
-SCH_DIR = Path(os.environ.get("BOARD_DIR") or PCB_DIR / "fabhouse").resolve()  # board directory (see paths.py)
+SCH_DIR = Path(paths.board_dir())  # board directory (see paths.py)
 SCH = SCH_DIR / "rc_power_board.kicad_sch"
 BOM = SCH_DIR / "bom.csv"
 OFFBOARD = PCB_DIR.parent / "docs" / "pcb" / "bom_offboard.csv"

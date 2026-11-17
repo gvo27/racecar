@@ -5,13 +5,13 @@ description: Use when the lab machine, drill or end-mill set, isolation bits, cu
 
 # Lab config (one file for the machine and the lab inventory)
 
-All lab facts that the board depends on are in one file: `milling.toml` in the lab directory. The checks read it: `tools/milling_check.py` and `tools/fab_export.py` in the lab directory, `pcb/tools/check_board.py` and `pcb/tools/placement.py`. Documents cite it. No tool and no document keeps its own copy of a lab value.
+All lab facts that the board depends on are in one file: `milling.toml` in the lab directory. The checks read it: `tools/milling_check.py` and `tools/fab_export.py` in the lab directory, `pcb/libraries/check_board.py` and `pcb/libraries/placement.py`. Documents cite it. No tool and no document keeps its own copy of a lab value.
 
 A move to a different machine or a change of inventory is then one change of this file, followed by the checks.
 
 ## Lab directory (one pointer)
 - The `lab:` line of `.claude/CLAUDE.md` is the only place that names the lab directory. Documents, rules, skills and agents write "the lab directory" and point to that line. They do not write the path.
-- Code reads the line through `pcb/tools/lab.py`. The environment variable `LAB_DIR` overrides it.
+- Code reads the line through `pcb/libraries/lab.py`. The environment variable `LAB_DIR` overrides it.
 - Contents: `milling.toml` (the lab file), `README.md` (index), `example/` (the lab CAM file and its `README.md`), `example/fusion_export/` (setup sheet, tool library, sketch DXFs and screenshots that the owner exports from the CAM tool).
 - The lab directory holds lab facts and lab files only. Board files stay in the board directory.
 - To use the lab in a different project or repo, copy the lab directory and set the `lab:` line there.

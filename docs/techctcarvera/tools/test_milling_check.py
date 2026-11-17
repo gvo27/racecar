@@ -9,7 +9,7 @@ import pcbnew
 from pcbnew import FromMM, VECTOR2I
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(1, os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "pcb", "tools")))  # lab.py, paths.py, placement.py
+sys.path.insert(1, os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "pcb", "libraries")))  # lab.py, paths.py, placement.py
 import lab  # noqa: E402
 import milling_check as mc  # noqa: E402
 
