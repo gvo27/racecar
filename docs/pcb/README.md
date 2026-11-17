@@ -13,6 +13,7 @@ Layout since 2026-11-16: the KiCad project, the libraries, the tools and the fab
 | `fab_handoff.md` | Rev A CNC-milling handoff (Makera Carvera) plus later-revision fab checklist: DRC/net classes, rivets, holes, IPC-2221 table, connector table, export, sign-off. |
 | `power_board_plan.md` | The build guide and background: rails, power budget, trace widths, a step-by-step KiCad guide and open questions. Exported from the live doc linked at its top. |
 | `power_architecture.png` | Block diagram used by the plan. |
+| `reverse_polarity_proposal.md` | Archived proposal for reverse-polarity protection (P-FET Q1 + R4). Not on rev A (owner 2026-11-11). |
 | `pcb/fabhouse/rc_power_board.kicad_pro` / `.kicad_sch` | KiCad project and the one-sheet A3 schematic (regions A to E plus notes). |
 | `pcb/lib/rc_power.kicad_sym` + `pcb/fabhouse/sym-lib-table` | Project symbol library: `D36V50F5` (all 12 module pins, used by U1 and U2), `REG_MODULE` (generic VIN/GND/VOUT/EN, no longer used on the board) and one power symbol per rail. |
 | `pcb/fabhouse/rc_power_board.kicad_pcb` / `.kicad_dru` | Rev A board, routed, for review only (no Gerber or CAM files). The `.kicad_dru` holds rule `U3_fine`. |

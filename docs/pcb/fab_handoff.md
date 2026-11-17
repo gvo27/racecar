@@ -225,7 +225,7 @@ Not the rev A path. Essentials if the board goes to a fab house:
 # Open items before publish
 
 1. F1: 15 A decided by the load (ATO/ATC blade in FLR holder assumed).
-2. Reverse-polarity decision: the proposal (P-FET) is in the PR, not on the board.
+2. Reverse-polarity decision: the proposal (P-FET) is in `reverse_polarity_proposal.md`, not on the board. Owner decision 2026-11-11: not on rev A.
 3. U2 = Pololu D36V50F5, the same part as U1 (owner 2026-11-12; two modules owned). Footprint `rc_power:Pololu_D36V50Fx` from the Pololu drawing: VIN, VOUT and GND each use a pin pair (about 2.45 A per VOUT pin at 4.9 A). About 7.4 A at 6.6 V in, where the graph curve starts (no data below 6.6 V), and about 7.7 A at 8.4 V in (Pololu graph), so the 6 A need is met from 6.6 V to 8.4 V in. Below 6.6 V the dropout decides: about 1.0 V at 5 A, so 5 A needs about 6.0 V in and the output can fall below 5 V near the 6.0 V cutoff. The same dropout applies to U1 (`+5V_CPU`): the Pi can brown out (bench check in `docs/datasheets/regulator_pololu_d36v50f5.md`). Check the footprint against the real module (1:1 print) before milling. Details: `docs/datasheets/regulator_pololu_d36v50f5.md`. Verify >= 4.8 V at the Mapper during startup (U2 tolerance TBD, about 0.03-0.05 V pigtail drop at 1.6 A).
 4. All `TBD` values in the schematic.
 5. U1 EN stays unconnected until the rev 2 prototype board.

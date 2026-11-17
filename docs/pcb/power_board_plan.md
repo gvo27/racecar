@@ -93,7 +93,7 @@ Both turn a higher voltage into a lower one. A **linear regulator** (LDO) burns 
 - **Fuse:** a sacrificial link that opens on overcurrent so a short burns the fuse, not the wiring or the battery. Size it above normal peak current and below what the copper and wire can carry. Placeholders here are `TBD`.
 - **Bulk and decoupling capacitors:** a big electrolytic capacitor on `VBAT` absorbs the ESC's current spikes; small ceramic capacitors at each regulator's input and output keep it stable. Values come from each regulator's datasheet. Ceramic capacitors lose much of their capacitance under DC voltage ("DC bias"): a 22 µF 10 V part on a 5 V rail may act like 10 µF or less, so check its bias curve or choose a higher voltage rating.
 - **TVS diode** (transient-voltage suppressor): clamps voltage spikes on `VBAT` caused by the motor. Its standoff voltage must be above 8.4 V.
-- **Reverse-polarity protection:** the T-plug is keyed, but a hand-soldered pigtail can still be wired backwards. Proposal (open, not drawn): one P-channel MOSFET between F1 and `VBAT` with a gate resistor to GND, about 0.3 W of loss at 7 A. Details are in the PR.
+- **Reverse-polarity protection:** the T-plug is keyed, but a hand-soldered pigtail can still be wired backwards. Proposal (open, not drawn): one P-channel MOSFET between F1 and `VBAT` with a gate resistor to GND, about 0.3 W of loss at 7 A. Details are in `reverse_polarity_proposal.md`.
 - **Power LEDs and test points** on each rail let you see and probe what's alive during bring-up.
 
 ### Why the extra capacitors, LEDs and test points
@@ -342,7 +342,7 @@ A **symbol** is the logical drawing; a **footprint** is the copper pads and hole
 | U1 D36V50F5 | `rc_power:Pololu_D36V50Fx` (pin numbering in Step 7; was the plain `PinHeader_2x06_P2.54mm`, which has no body outline) | Drawn from Pololu's dimension drawing, with the 25.4 mm body; header pins are 3 A each |
 | U2 D36V50F5 | `rc_power:Pololu_D36V50Fx` | Same module and footprint as U1 (owner 2026-11-12) |
 | U3 LDO | The footprint its symbol suggests (SOT-23-5) |  |
-| Q1 (only if the PR's reverse-polarity proposal is adopted) | PowerPAK SO-8 (P-FET) |  |
+| Q1 (only if the reverse-polarity proposal, `reverse_polarity_proposal.md`, is adopted) | PowerPAK SO-8 (P-FET) |  |
 | J3, J4 servo/ESC | `JST_XH_B3B-XH-A_1x03_P2.50mm_Vertical` | 2.5 mm XH: does not mate with stock 2.54 mm servo plugs; XHP-3 re-termination or an adapter lead, 22 AWG (BEC pin at the 3 A XH limit) |
 | J5 signals to ESP32 | `JST_XH_B6B-XH-A_1x06_P2.50mm_Vertical` |  |
 | J6, J7 USB-C pigtails | `TerminalBlock` 5.08 mm, 2 pin | Clamps 20 AWG; ≥ 5 A per pin |
@@ -402,7 +402,7 @@ Put these in your hand-off message, numbered, so the reviewer can answer by numb
 3. **Compute rail and the Pi:** the Pi 5 and ESP32 need about 5.5 A. The Pi takes power through a 2-wire USB-C pigtail, so it keeps its USB-C input protection but gets no USB-PD 5 A offer: it limits its USB ports to about 0.6 A total unless set in `config.txt`. Is that acceptable?
 4. **Regulator U1:** the D36V50F5 outputs 5.0 V ± 4 % (not the Pi's preferred 5.1 V) and is rated 5.5 A typical. What is its dropout at 5.5 A with the battery near 6.0 V? Its VRP output is deliberately unused (the sensor buck stays on `VBAT`, because VRP would push about 9 A through U1's 6 A-rated VIN pin pair).
 5. **IMU noise:** is the LDO's noise rejection enough at the sensor buck's switching frequency, or should the ferrite-bead filter in front of it stay?
-6. **Protection:** U1 has its own reverse protection to 40 V; U2 (Pololu D36V50F5) has built-in reverse-voltage protection. The rest (C1, D1) is exposed. The PR proposed Q1 (P-FET) + R4 between F1 and `VBAT`; owner decision 2026-11-11: not on rev A. TVS proposed: SMBJ10A.
+6. **Protection:** U1 has its own reverse protection to 40 V; U2 (Pololu D36V50F5) has built-in reverse-voltage protection. The rest (C1, D1) is exposed. The archived proposal (`reverse_polarity_proposal.md`) adds Q1 (P-FET) + R4 between F1 and `VBAT`; owner decision 2026-11-11: not on rev A. TVS proposed: SMBJ10A.
 7. **Low battery:** the ESC's low-voltage cutoff stops the motor, but the regulators keep draining the pack. Add a resistor divider from `VBAT` to an ESP32 ADC pin so firmware can warn or shut down? A 100k / 33k divider gives about 2.1 V at 8.4 V.
 8. **ESP32 back-feed:** the ESP32 gets 5 V on its left USB-C port (J7) and may also be connected by USB on its right COM port (to the laptop now, the Pi later). Does the dev board keep the two USB power inputs apart, or is a diode or a data-only cable needed?
 9. **Cameras:** cameras plugged into the Pi draw from `+5V_CPU`. Move them to a powered USB hub on `+5V_SENS` (J9)?
