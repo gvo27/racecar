@@ -25,6 +25,8 @@ paths:
 - A zone at a part with an `[[exception]]` (`zones = true`) can be as near to a pad of that part as the exception clearance. Two zones of different nets keep the larger of their two clearances, and never less than the board clearance. Lesson from U3 on the mill board. `zones = true` applies to all pours at all pads of the part, not only to the planned zones. Use it only when no other form is possible (lesson from U1 and U2: use `own_pads = true` and `_NEAR` necks).
 - On the mill board the pours keep `zone_clearance` (2 mm) from other copper. Where that leaves no copper (pin headers, module pins, the GND trunk), `pcb/mill/placement.py` has zones with their own clearance (`_NEAR`, `_NEAR_GND`, `_FINE`). Add such a zone only where a check fails with 2 mm, and list it in the review record of the lab directory.
 - `[parts.footprint]` of the design rules gives a part a different footprint on a board variant (mill board: through-hole capacitors). `make pcb-sch` then sets the part fields of that part to TBD (the base part number is for the base footprint). Do not edit the footprint in the mill schematic by hand.
+- `[parts.wire]` (`refs`, `reason`) gives a JST XH header of a variant the solder-wire footprint with the same pads (`rc_power:SolderWire_1xNN_P2.50mm`) and no part. Use it only for a temporary exception, and write the end condition in `reason`. A ref in `[parts.wire]` must not be in `[parts.footprint]` or `exclude`.
+- `pcb/releases/<rev>/` holds a frozen release with its own `design_rules.toml`. Do not tune a release. Do not run `make pcb-all` or `make pcb-sch` on it.
 - Review files of the mill board: `review/` in the lab directory.
 
 ## Sources of truth

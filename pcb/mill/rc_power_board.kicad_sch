@@ -5769,7 +5769,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Connector_JST:JST_XH_B4B-XH-A_1x04_P2.50mm_Vertical"
+		(property "Footprint" "rc_power:SolderWire_1x04_P2.50mm"
 			(at 130.81 236.22 0)
 			(hide yes)
 			(show_name no)
@@ -5801,7 +5801,7 @@
 				)
 			)
 		)
-		(property "BOM Comments" "Price est. Pins match Garmin 1-4: 1 +5V_SENS (red; VIN 4.75-5.25 V, 85 mA acquiring), 2 GND (black), 3 I2C_SDA (white), 4 I2C_SCL (green). I2C address 0x62; internal 13 kohm pull-ups to 3.3 V, so no external pull-ups or level shifter. Source: branch rangefinder (5b409d0), not merged" (at 0 0 0)
+		(property "BOM Comments" "Temporary (first mill print round): wires soldered to the pads, no header. Base board part B4B-XH-A(LF)(SN) ([parts.wire] of the design rules)" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5817,7 +5817,7 @@
 				(hide yes)
 			)
 		)
-		(property "Unit cost USD" "0.15" (at 0 0 0)
+		(property "Unit cost USD" "" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5825,7 +5825,7 @@
 				(hide yes)
 			)
 		)
-		(property "Status" "proposed" (at 0 0 0)
+		(property "Status" "none" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5833,7 +5833,7 @@
 				(hide yes)
 			)
 		)
-		(property "Manufacturer" "JST" (at 0 0 0)
+		(property "Manufacturer" "none" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5841,7 +5841,7 @@
 				(hide yes)
 			)
 		)
-		(property "MPN" "B4B-XH-A(LF)(SN)" (at 0 0 0)
+		(property "MPN" "none" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6108,7 +6108,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Connector_JST:JST_XH_B6B-XH-A_1x06_P2.50mm_Vertical"
+		(property "Footprint" "rc_power:SolderWire_1x06_P2.50mm"
 			(at 172.72 78.74 0)
 			(hide yes)
 			(show_name no)
@@ -6140,7 +6140,7 @@
 				)
 			)
 		)
-		(property "BOM Comments" "Price est. Pins: 1 U1_PG (GPIO TBD), 2 THROTTLE_PWM GPIO5, 3 STEER_PWM GPIO4, 4 I2C_SDA GPIO8, 5 I2C_SCL GPIO9, 6 GND" (at 0 0 0)
+		(property "BOM Comments" "Temporary (first mill print round): wires soldered to the pads, no header. Base board part B6B-XH-A(LF)(SN) ([parts.wire] of the design rules)" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6156,7 +6156,7 @@
 				(hide yes)
 			)
 		)
-		(property "Unit cost USD" "0.15" (at 0 0 0)
+		(property "Unit cost USD" "" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6164,7 +6164,7 @@
 				(hide yes)
 			)
 		)
-		(property "Status" "proposed" (at 0 0 0)
+		(property "Status" "none" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6172,7 +6172,7 @@
 				(hide yes)
 			)
 		)
-		(property "Manufacturer" "JST" (at 0 0 0)
+		(property "Manufacturer" "none" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6180,7 +6180,7 @@
 				(hide yes)
 			)
 		)
-		(property "MPN" "B6B-XH-A(LF)(SN)" (at 0 0 0)
+		(property "MPN" "none" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6325,7 +6325,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Connector_JST:JST_XH_B2B-XH-A_1x02_P2.50mm_Vertical"
+		(property "Footprint" "rc_power:SolderWire_1x02_P2.50mm"
 			(at 128.27 198.12 0)
 			(hide yes)
 			(show_name no)
@@ -6357,7 +6357,7 @@
 				)
 			)
 		)
-		(property "BOM Comments" "Price est. 3 A per pin" (at 0 0 0)
+		(property "BOM Comments" "Temporary (first mill print round): wires soldered to the pads, no header. Base board part B2B-XH-A(LF)(SN) ([parts.wire] of the design rules)" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6365,7 +6365,7 @@
 				(hide yes)
 			)
 		)
-		(property "Supplier link" "https://www.mouser.com/ProductDetail/JST-Commercial/B2B-XH-ALFSN?qs=cdbOS8ANM9DdcSn9qRmfCw%3D%3D" (at 0 0 0)
+		(property "Supplier link" "" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6373,7 +6373,7 @@
 				(hide yes)
 			)
 		)
-		(property "Unit cost USD" "0.10" (at 0 0 0)
+		(property "Unit cost USD" "" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6381,7 +6381,7 @@
 				(hide yes)
 			)
 		)
-		(property "Status" "proposed" (at 0 0 0)
+		(property "Status" "none" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6389,7 +6389,7 @@
 				(hide yes)
 			)
 		)
-		(property "Manufacturer" "JST" (at 0 0 0)
+		(property "Manufacturer" "none" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6397,7 +6397,7 @@
 				(hide yes)
 			)
 		)
-		(property "MPN" "B2B-XH-A(LF)(SN)" (at 0 0 0)
+		(property "MPN" "none" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7030,7 +7030,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Connector_JST:JST_XH_B3B-XH-A_1x03_P2.50mm_Vertical"
+		(property "Footprint" "rc_power:SolderWire_1x03_P2.50mm"
 			(at 127 95.25 0)
 			(hide yes)
 			(show_name no)
@@ -7062,7 +7062,7 @@
 				)
 			)
 		)
-		(property "BOM Comments" "Price est. 3 A/pin with 22 AWG only (lower for thinner wire); the BEC pin may carry up to the 3 A BEC limit = 100 % of the XH rating; servo stall 2.3 A = 77 %. Re-terminate ESC and servo leads only if they are 22 AWG (gauge TBD, measure); otherwise use a 22 AWG adapter lead. XH (2.50 mm) does not mate with stock 2.54 mm servo plugs. Pins: 1 GND, 2 +6V_BEC, 3 signal (see fab_handoff.md)" (at 0 0 0)
+		(property "BOM Comments" "Temporary (first mill print round): wires soldered to the pads, no header. Base board part B3B-XH-A(LF)(SN) ([parts.wire] of the design rules)" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7078,7 +7078,7 @@
 				(hide yes)
 			)
 		)
-		(property "Unit cost USD" "0.15" (at 0 0 0)
+		(property "Unit cost USD" "" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7086,7 +7086,7 @@
 				(hide yes)
 			)
 		)
-		(property "Status" "proposed" (at 0 0 0)
+		(property "Status" "none" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7094,7 +7094,7 @@
 				(hide yes)
 			)
 		)
-		(property "Manufacturer" "JST" (at 0 0 0)
+		(property "Manufacturer" "none" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7102,7 +7102,7 @@
 				(hide yes)
 			)
 		)
-		(property "MPN" "B3B-XH-A(LF)(SN)" (at 0 0 0)
+		(property "MPN" "none" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7622,7 +7622,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Connector_JST:JST_XH_B2B-XH-A_1x02_P2.50mm_Vertical"
+		(property "Footprint" "rc_power:SolderWire_1x02_P2.50mm"
 			(at 285.75 213.36 0)
 			(hide yes)
 			(show_name no)
@@ -7654,7 +7654,7 @@
 				)
 			)
 		)
-		(property "BOM Comments" "Price est. 3 A per pin" (at 0 0 0)
+		(property "BOM Comments" "Temporary (first mill print round): wires soldered to the pads, no header. Base board part B2B-XH-A(LF)(SN) ([parts.wire] of the design rules)" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7662,7 +7662,7 @@
 				(hide yes)
 			)
 		)
-		(property "Supplier link" "https://www.mouser.com/ProductDetail/JST-Commercial/B2B-XH-ALFSN?qs=cdbOS8ANM9DdcSn9qRmfCw%3D%3D" (at 0 0 0)
+		(property "Supplier link" "" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7670,7 +7670,7 @@
 				(hide yes)
 			)
 		)
-		(property "Unit cost USD" "0.10" (at 0 0 0)
+		(property "Unit cost USD" "" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7678,7 +7678,7 @@
 				(hide yes)
 			)
 		)
-		(property "Status" "proposed" (at 0 0 0)
+		(property "Status" "none" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7686,7 +7686,7 @@
 				(hide yes)
 			)
 		)
-		(property "Manufacturer" "JST" (at 0 0 0)
+		(property "Manufacturer" "none" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7694,7 +7694,7 @@
 				(hide yes)
 			)
 		)
-		(property "MPN" "B2B-XH-A(LF)(SN)" (at 0 0 0)
+		(property "MPN" "none" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7955,7 +7955,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Connector_JST:JST_XH_B3B-XH-A_1x03_P2.50mm_Vertical"
+		(property "Footprint" "rc_power:SolderWire_1x03_P2.50mm"
 			(at 125.73 58.42 0)
 			(hide yes)
 			(show_name no)
@@ -7987,7 +7987,7 @@
 				)
 			)
 		)
-		(property "BOM Comments" "Price est. 3 A/pin with 22 AWG only (lower for thinner wire); the BEC pin may carry up to the 3 A BEC limit = 100 % of the XH rating; servo stall 2.3 A = 77 %. Re-terminate ESC and servo leads only if they are 22 AWG (gauge TBD, measure); otherwise use a 22 AWG adapter lead. XH (2.50 mm) does not mate with stock 2.54 mm servo plugs. Pins: 1 GND, 2 +6V_BEC, 3 signal (see fab_handoff.md)" (at 0 0 0)
+		(property "BOM Comments" "Temporary (first mill print round): wires soldered to the pads, no header. Base board part B3B-XH-A(LF)(SN) ([parts.wire] of the design rules)" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8003,7 +8003,7 @@
 				(hide yes)
 			)
 		)
-		(property "Unit cost USD" "0.15" (at 0 0 0)
+		(property "Unit cost USD" "" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8011,7 +8011,7 @@
 				(hide yes)
 			)
 		)
-		(property "Status" "proposed" (at 0 0 0)
+		(property "Status" "none" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8019,7 +8019,7 @@
 				(hide yes)
 			)
 		)
-		(property "Manufacturer" "JST" (at 0 0 0)
+		(property "Manufacturer" "none" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8027,7 +8027,7 @@
 				(hide yes)
 			)
 		)
-		(property "MPN" "B3B-XH-A(LF)(SN)" (at 0 0 0)
+		(property "MPN" "none" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11519,7 +11519,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Connector_JST:JST_XH_B2B-XH-A_1x02_P2.50mm_Vertical"
+		(property "Footprint" "rc_power:SolderWire_1x02_P2.50mm"
 			(at 128.27 213.36 0)
 			(hide yes)
 			(show_name no)
@@ -11551,7 +11551,7 @@
 				)
 			)
 		)
-		(property "BOM Comments" "Price est. 3 A per pin" (at 0 0 0)
+		(property "BOM Comments" "Temporary (first mill print round): wires soldered to the pads, no header. Base board part B2B-XH-A(LF)(SN) ([parts.wire] of the design rules)" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11559,7 +11559,7 @@
 				(hide yes)
 			)
 		)
-		(property "Supplier link" "https://www.mouser.com/ProductDetail/JST-Commercial/B2B-XH-ALFSN?qs=cdbOS8ANM9DdcSn9qRmfCw%3D%3D" (at 0 0 0)
+		(property "Supplier link" "" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11567,7 +11567,7 @@
 				(hide yes)
 			)
 		)
-		(property "Unit cost USD" "0.10" (at 0 0 0)
+		(property "Unit cost USD" "" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11575,7 +11575,7 @@
 				(hide yes)
 			)
 		)
-		(property "Status" "proposed" (at 0 0 0)
+		(property "Status" "none" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11583,7 +11583,7 @@
 				(hide yes)
 			)
 		)
-		(property "Manufacturer" "JST" (at 0 0 0)
+		(property "Manufacturer" "none" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11591,7 +11591,7 @@
 				(hide yes)
 			)
 		)
-		(property "MPN" "B2B-XH-A(LF)(SN)" (at 0 0 0)
+		(property "MPN" "none" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11647,7 +11647,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Connector_JST:JST_XH_B2B-XH-A_1x02_P2.50mm_Vertical"
+		(property "Footprint" "rc_power:SolderWire_1x02_P2.50mm"
 			(at 285.75 182.88 0)
 			(hide yes)
 			(show_name no)
@@ -11679,7 +11679,7 @@
 				)
 			)
 		)
-		(property "BOM Comments" "Price est. 3 A per pin" (at 0 0 0)
+		(property "BOM Comments" "Temporary (first mill print round): wires soldered to the pads, no header. Base board part B2B-XH-A(LF)(SN) ([parts.wire] of the design rules)" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11687,7 +11687,7 @@
 				(hide yes)
 			)
 		)
-		(property "Supplier link" "https://www.mouser.com/ProductDetail/JST-Commercial/B2B-XH-ALFSN?qs=cdbOS8ANM9DdcSn9qRmfCw%3D%3D" (at 0 0 0)
+		(property "Supplier link" "" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11695,7 +11695,7 @@
 				(hide yes)
 			)
 		)
-		(property "Unit cost USD" "0.10" (at 0 0 0)
+		(property "Unit cost USD" "" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11703,7 +11703,7 @@
 				(hide yes)
 			)
 		)
-		(property "Status" "proposed" (at 0 0 0)
+		(property "Status" "none" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11711,7 +11711,7 @@
 				(hide yes)
 			)
 		)
-		(property "Manufacturer" "JST" (at 0 0 0)
+		(property "Manufacturer" "none" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11719,7 +11719,7 @@
 				(hide yes)
 			)
 		)
-		(property "MPN" "B2B-XH-A(LF)(SN)" (at 0 0 0)
+		(property "MPN" "none" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12134,7 +12134,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Connector_JST:JST_XH_B2B-XH-A_1x02_P2.50mm_Vertical"
+		(property "Footprint" "rc_power:SolderWire_1x02_P2.50mm"
 			(at 285.75 198.12 0)
 			(hide yes)
 			(show_name no)
@@ -12166,7 +12166,7 @@
 				)
 			)
 		)
-		(property "BOM Comments" "Price est. 3 A per pin" (at 0 0 0)
+		(property "BOM Comments" "Temporary (first mill print round): wires soldered to the pads, no header. Base board part B2B-XH-A(LF)(SN) ([parts.wire] of the design rules)" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12174,7 +12174,7 @@
 				(hide yes)
 			)
 		)
-		(property "Supplier link" "https://www.mouser.com/ProductDetail/JST-Commercial/B2B-XH-ALFSN?qs=cdbOS8ANM9DdcSn9qRmfCw%3D%3D" (at 0 0 0)
+		(property "Supplier link" "" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12182,7 +12182,7 @@
 				(hide yes)
 			)
 		)
-		(property "Unit cost USD" "0.10" (at 0 0 0)
+		(property "Unit cost USD" "" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12190,7 +12190,7 @@
 				(hide yes)
 			)
 		)
-		(property "Status" "proposed" (at 0 0 0)
+		(property "Status" "none" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12198,7 +12198,7 @@
 				(hide yes)
 			)
 		)
-		(property "Manufacturer" "JST" (at 0 0 0)
+		(property "Manufacturer" "none" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12206,7 +12206,7 @@
 				(hide yes)
 			)
 		)
-		(property "MPN" "B2B-XH-A(LF)(SN)" (at 0 0 0)
+		(property "MPN" "none" (at 0 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)

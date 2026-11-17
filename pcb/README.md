@@ -3,7 +3,8 @@
 | Path | Content |
 | --- | --- |
 | `releases/rev_A/` | The rev A board, the base board: KiCad project (`rc_power_board.kicad_sch`, `.kicad_pcb`, `.kicad_pro`, `.kicad_dru`), lib tables, `bom.csv` (from `make bom`), schematic plot, `placement.py`, `design_rules.toml` |
-| `mill/` | The mill prototype: the rev A circuit without the LEDs and their resistors, with through-hole capacitors for C2 to C8, and with wider tracks and gaps for the lab mill. Made by `make pcb-all BOARD=mill` from `mill/placement.py` and the mill tuning file (`design_rules.toml` in the lab directory) |
+| `releases/rev_B/` | Rev B release: a frozen copy of the mill prototype with the JST XH headers, with its own `design_rules.toml` (2026-11-17). Do not tune it |
+| `mill/` | The mill prototype (now with temporary wire solder pads for the first print round, `[parts.wire]` of the mill tuning file): the rev A circuit without the LEDs and their resistors, with through-hole capacitors for C2 to C8, and with wider tracks and gaps for the lab mill. Made by `make pcb-all BOARD=mill` from `mill/placement.py` and the mill tuning file (`design_rules.toml` in the lab directory) |
 | `lib/` | Symbol and footprint libraries, shared by all boards (`rc_power.kicad_sym`, `rc_power.pretty/`) |
 | `libraries/` | Board tools, their Python libraries and tests. They run in the KiCad image through `make`. `paths.py` holds this layout |
 | `COLCON_IGNORE` | Keeps this directory out of the ROS 2 build |

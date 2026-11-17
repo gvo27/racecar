@@ -46,10 +46,39 @@ def clear_part_fields(block, ref, footprint):
     return block
 
 
-def make_variant(text, exclude, footprints=None):
-    """Return (new text, references that were changed). `footprints`: ref -> footprint of the variant."""
+WIRE_FP = "rc_power:SolderWire_1x%02d_P2.50mm"   # pcb/lib/rc_power.pretty: the pads of a JST XH header, no body
+WIRE_FIELDS = (("MPN", "none"), ("Manufacturer", "none"), ("Supplier link", ""), ("Status", "none"), ("Unit cost USD", ""))
+
+
+def wire_footprint(block, ref):
+    """The solder-wire footprint for a JST XH 1xNN header of the base schematic (same pad positions)."""
+    m = re.search(r'\(property "Footprint" "Connector_JST:JST_XH_[^"]*_1x(\d+)_P2\.50mm[^"]*"', block)
+    if not m:
+        raise RuntimeError("symbol %s: [parts.wire] needs a JST XH 2.50 mm header footprint in the base schematic" % ref)
+    return WIRE_FP % int(m.group(1))
+
+
+def set_wire_fields(block, ref):
+    """Part fields of a header that becomes wire pads: no part. BOM Comments keeps the base part number."""
+    old = re.search(PROP % "MPN", block)
+    for name, val in WIRE_FIELDS:
+        block, n = re.subn(PROP % re.escape(name), lambda m, name=name, val=val: '(property "%s" "%s"' % (name, val), block, count=1)
+        if n != 1:
+            raise RuntimeError("symbol %s has no %s property" % (ref, name))
+    note = ("Temporary (first mill print round): wires soldered to the pads, no header. "
+            "Base board part %s ([parts.wire] of the design rules)" % (old.group(1) if old else "-"))
+    block, n = re.subn(PROP % "BOM Comments", lambda m: '(property "BOM Comments" "%s"' % note, block, count=1)
+    if n != 1:
+        raise RuntimeError("symbol %s has no BOM Comments property" % ref)
+    return block
+
+
+def make_variant(text, exclude, footprints=None, wires=None):
+    """Return (new text, references that were changed). `footprints`: ref -> footprint of the variant.
+    `wires`: refs whose JST XH header becomes solder-wire pads ([parts.wire])."""
     done = []
     footprints = footprints or {}
+    wires = wires or set()
 
     def patch(m):
         block = m.group(0)
@@ -61,6 +90,11 @@ def make_variant(text, exclude, footprints=None):
             if n != 1:
                 raise RuntimeError("symbol %s has no Footprint property" % ref.group(1))
             block = clear_part_fields(block, ref.group(1), footprints[ref.group(1)])
+            done.append(ref.group(1))
+        if ref.group(1) in wires:
+            fp = wire_footprint(block, ref.group(1))
+            block = re.sub(r'\(property "Footprint" "[^"]*"', '(property "Footprint" "%s"' % fp, block, count=1)
+            block = set_wire_fields(block, ref.group(1))
             done.append(ref.group(1))
         if ref.group(1) not in exclude:
             return block
@@ -82,8 +116,8 @@ def run(base_dir, board_dir):
     os.makedirs(board_dir, exist_ok=True)
     name = paths.STEM + ".kicad_sch"
     with open(os.path.join(base_dir, name), encoding="utf-8") as fh:
-        text, done = make_variant(fh.read(), set(r.exclude), r.footprint)
-    missing = sorted((set(r.exclude) | set(r.footprint)) - set(done))
+        text, done = make_variant(fh.read(), set(r.exclude), r.footprint, set(r.wire))
+    missing = sorted((set(r.exclude) | set(r.footprint) | set(r.wire)) - set(done))
     if missing:
         print("pcb-sch: [parts] names parts that are not in the base schematic: %s" % ", ".join(missing), file=sys.stderr)
         return 1
@@ -92,9 +126,9 @@ def run(base_dir, board_dir):
     for f in COPY_ONCE:
         if not os.path.exists(os.path.join(board_dir, f)):
             shutil.copyfile(os.path.join(base_dir, f), os.path.join(board_dir, f))
-    print("pcb-sch: wrote %s from %s, not on this board: %s, other footprint: %s" % (
+    print("pcb-sch: wrote %s from %s, not on this board: %s, other footprint: %s, wire pads (temporary): %s" % (
         os.path.relpath(os.path.join(board_dir, name), paths.REPO_ROOT), os.path.basename(base_dir),
-        ", ".join(sorted(r.exclude)) or "-", ", ".join(sorted(r.footprint)) or "-"))
+        ", ".join(sorted(r.exclude)) or "-", ", ".join(sorted(r.footprint)) or "-", ", ".join(sorted(r.wire)) or "-"))
     return 0
 
 

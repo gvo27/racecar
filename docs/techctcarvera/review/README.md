@@ -1,6 +1,17 @@
 # Mill prototype board (`pcb/mill`): review record
 
-Date: 2026-11-17. Board: `pcb/mill/rc_power_board.kicad_pcb`, made by `make pcb-all BOARD=mill` from `pcb/mill/placement.py` and the mill tuning file (`design_rules.toml` in this lab directory). The rev A board (`pcb/fabhouse`) is not changed.
+Date: 2026-11-17. Board: `pcb/mill/rc_power_board.kicad_pcb`, made by `make pcb-all BOARD=mill` from `pcb/mill/placement.py` and the mill tuning file (`design_rules.toml` in this lab directory). The rev A board (`pcb/releases/rev_A`) is not changed.
+
+Release: rev B (`pcb/releases/rev_B`) is a frozen copy of this board with the JST XH headers and its own copy of the design rules (2026-11-17). After that copy, `pcb/mill` got the temporary solder-wire pads (next section). The checks of rev B give the results of the second layout: 96 milling warnings, BOM 91.83 USD.
+
+## Temporary exception: wires soldered to the board (first print round only)
+
+The owner (2026-11-17): for the first print round, solder the wires to the board directly. Do not fit the JST XH headers. The exception and its status are in `[parts.wire]` of the mill tuning file. Remove that table for the next round.
+
+- J3, J4, J5, J8, J9, J11, J12, J13 and J14 get `rc_power:SolderWire_1xNN_P2.50mm` (`pcb/lib/rc_power.pretty`). The pads, the drills (1.0 mm for 2 pins, 0.95 mm for 3, 4 and 6 pins, then the lab drill set) and the pad positions are those of the XH footprint. The header body is not on the footprint. So the copper and the routing stay as they were.
+- `make pcb-sch` sets MPN, Manufacturer and Status of these parts to `none`, the unit cost and the supplier link to empty. `BOM Comments` keeps the base part number. The XH housings and crimps of `docs/pcb/bom_offboard.csv` are not necessary for this round.
+- Put the wire in from the top. Solder it on the bottom (B.Cu). A 1.0 mm hole takes stranded 22 AWG or thinner wire. 20 AWG wire does not fit without a larger drill. No strain relief is on the board: use glue or a cable tie.
+- The courtyard of the wire pads is smaller than the header body. Thus 7 more `MILL-CONN-EDGE` warnings (J3, J4, J5, J8, J12, J13, J14). The wires still leave the board at the same edge.
 
 Status: second layout, after the lab tech notes (owner, 2026-11-17). The checks pass. The agent `pcb-reviewer` reviewed the first layout on 2026-11-16 and the second layout on 2026-11-17 (model: Claude Opus 5.5). The findings of both reviews are fixed, except the items for the owner (see "Review findings on the second layout"). No person reviewed this layout. The values of the tuning file are `assumed`.
 
@@ -43,6 +54,7 @@ All other copper has a 2.0 mm gap: the pours to the VBAT, 5 V, `/LDO_IN` and `+3
 - C2 and C4 (input capacitors of U1 and U2) are north of the pin rows, about 6 mm from the VIN pads, on a VBAT stub. On rev A they are under the modules on the bottom side. A through-hole part has no room under a module.
 - C3 is on the `+5V_CPU` bar north of J7. C5 is on the `+5V_SENS` trunk. C6 and C7 are south of the `/LDO_IN` bar, C8 is on the `+3V3_SENS` bar.
 - Test points TP1, TP2, TP3 are on the rail trunks.
+- First print round only: wire solder pads in place of the JST XH headers (see the section above).
 - J9 and J11 are at x = 4.3 mm (rev A: 3.65 mm).
 - The `U1_PG` stub and its rivet are at x = 39.6 mm (rev A: 40.4 mm).
 - The schematic variant sets MPN, Manufacturer, Supplier link and Status of C2 to C8 to TBD, and the unit cost to empty. The rev A part numbers are 0805 parts. `BOM Comments` keeps the rev A part number and note.
@@ -55,11 +67,12 @@ All other copper has a 2.0 mm gap: the pours to the VBAT, 5 V, `/LDO_IN` and `+3
 | `make erc BOARD=mill` | 0 errors, 3 warnings (`lib_symbol_mismatch`, as rev A) |
 | `make pcb-rules BOARD=mill` | The project files agree with the design rules. 16 values assumed |
 | `make pcb-check BOARD=mill` | DRC: 0 errors, 0 unconnected, parity clean. 117 warnings: 26 `lib_footprint_mismatch` (pads changed by the build), 91 `silk_over_copper` (silkscreen of the library footprints; the milled board has no silkscreen). `check_board`: 0 problems |
-| `make pcb-mill-check BOARD=mill` | 0 errors, 0 waived, 96 warnings: 85 `MILL-GAP-FIXED`, 9 `MILL-CUT-SPACING`, 2 `MILL-CONN-EDGE`. No `MILL-SLIVER`, no `MILL-ISLAND` |
-| `make pcb-fab BOARD=mill` | Outputs in `build/fab/mill/` (not committed). The target then runs `test_fab.py` on the mill board: 21 tests, OK |
-| `make bom BOARD=mill` | `pcb/mill/bom.csv`. C2 to C8: part number TBD, no cost. Total 91.83 USD |
-| `make pcb-test` | 99 + 62 = 161 tests, OK |
-| Rev A (`make pcb-check pcb-mill-check pcb-fab`, base board) | Same as before: DRC 0 errors, `check_board` 0 problems, milling check 0 errors and 2 `MILL-SLIVER` warnings. No change in `pcb/fabhouse` |
+| `make pcb-mill-check BOARD=mill` | 0 errors, 0 waived, 103 warnings: 85 `MILL-GAP-FIXED`, 9 `MILL-CUT-SPACING`, 9 `MILL-CONN-EDGE`. No `MILL-SLIVER`, no `MILL-ISLAND` |
+| `make pcb-fab BOARD=mill` | Outputs in `build/fab/mill/` (not committed). The target then runs `test_fab.py` on the mill board: 20 tests, OK |
+| `make bom BOARD=mill` | `pcb/mill/bom.csv`. C2 to C8: part number TBD, no cost. Wire pads: no part. Total 90.73 USD |
+| `make pcb-test` | 103 + 61 = 164 tests, OK |
+| Rev B (`BOARD=releases/rev_B`) | `pcb-rules` agree, ERC 0 errors, DRC 0 errors, 0 unconnected, parity clean, `check_board` 0 problems, milling check 0 errors and 96 warnings, BOM 91.83 USD |
+| Rev A (`make pcb-check pcb-mill-check pcb-fab`, base board) | Same as before: DRC 0 errors, `check_board` 0 problems, milling check 0 errors and 2 `MILL-SLIVER` warnings. No change in `pcb/releases/rev_A` |
 
 Copper width along the current paths (opening test, B.Cu):
 
@@ -85,7 +98,7 @@ The milling check prints positions as (x, -y) in mm from the lower-left corner o
 
 - **`MILL-GAP-FIXED` (85).** Gaps below 0.792 mm (cut width + 2 x 0.25 mm) that the footprints fix. A THT pad pair counts on both copper layers. Modules U1 and U2: pad to pad, 0.64 mm. XH headers: pad to pad, 0.6 mm. U3: pad to pad and zone to pad, 0.34 to 0.35 mm. With an error of 0.25 mm for each side, a cut at U3 can remove most of a 0.6 mm wide pad, prong or strip. U3 is the risk item of this board.
 - **`MILL-CUT-SPACING` (9).** Copper below 1.2 mm (2.0 mm cut spacing - 0.8 mm clearance): the two `/LDO_IN` prongs (0.6 mm), the U3 GND strip (0.6 mm), the places where the three `+3V3_SENS` teeth meet the bar, the corners where the two VBAT capacitor stubs meet the necks, and a GND tongue of 0.6 mm south of U2.9 (between the 2 mm gap to VBAT prong B and the 0.8 mm gap to the `+5V_SENS` neck). A smaller GND area leaves a sliver below 0.5 mm there.
-- **`MILL-CONN-EDGE` (2).** J9 and J11: the courtyard is more than 1.0 mm from the board edge (1.45 mm). The connectors moved in for the GND strip west of their pads.
+- **`MILL-CONN-EDGE` (9).** J9 and J11: the courtyard is more than 1.0 mm from the board edge (1.45 mm). The connectors moved in for the GND strip west of their pads. J3, J4, J5, J8, J12, J13 and J14: the courtyard of the wire pads is smaller than the header body (temporary exception).
 
 ## Margins without spare
 
@@ -101,6 +114,7 @@ The milling check prints positions as (x, -y) in mm from the lower-left corner o
 - The effect of the new positions of C2 and C4 (about 6 mm from the VIN pads) was not analyzed. The modules have their own input capacitors.
 - The body height and the body size of the capacitors next to the modules and connectors (courtyards do not overlap in DRC).
 - Rivet and solder access, 3D collisions, wire entry at J9 and J11.
+- The wire solder pads: wire gauge of each harness, hole fit and strain relief. Not checked on real wires.
 - The routing is made again in each `make pcb-all` run. Freerouting now runs with one thread (`-mt 1`): the same DSN gives the same route (3 runs). The DSN export of two builds is not identical, so the track shapes can still change. Two builds in a row passed all checks.
 - The mill did not cut this board. The schematic PDF of the mill variant is not plotted.
 - A 2 mm copper gap with a single-pass contour toolpath leaves a loose copper strip of about 1.4 mm between the two cuts. A 0.8 mm gap leaves a strip of 0.8 - 2 x 0.292 = 0.22 mm. The lab CAM must remove the strips or leave them. Not checked with the lab.

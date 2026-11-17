@@ -17,6 +17,8 @@ import variant  # noqa: E402
 BASE = paths.base_board_dir()
 MILL = os.path.join(paths.PCB_DIR, "mill")
 MILL_RULES = os.path.join(lab.lab_dir(), rules.FILE_NAME)
+REV_B = os.path.join(paths.PCB_DIR, "releases", "rev_B")
+XH = {"J3", "J4", "J5", "J8", "J9", "J11", "J12", "J13", "J14"}
 
 
 def edited(path, old, new):
@@ -58,6 +60,14 @@ class TestLoad(unittest.TestCase):
         self.assertFalse(r.exception_for("U2").zones)
         self.assertEqual(set(r.footprint), {"C2", "C3", "C4", "C5", "C6", "C7", "C8"})
         self.assertGreater(r.annular_target, r.annular_min)
+        self.assertEqual(set(r.wire), XH)                         # temporary: wires soldered to the pads, first print round
+        self.assertIn("temporary", r.wire_reason.lower())
+
+    def test_rev_b_is_the_mill_board_with_the_headers(self):
+        r = rules.load(rules.rules_file(REV_B))
+        self.assertEqual(os.path.dirname(r.path), REV_B)          # frozen copy, not the lab tuning file
+        self.assertEqual(r.wire, ())
+        self.assertEqual(set(r.footprint), {"C2", "C3", "C4", "C5", "C6", "C7", "C8"})
 
     def test_bad_files_are_rejected(self):
         for old, new in (('[clearance]\nvalue = 0.8', '[clearance]\nvalue = 50'),            # out of range
@@ -67,7 +77,9 @@ class TestLoad(unittest.TestCase):
                          ('[zone_clearance]\nvalue = 2.0', '[zone_clearance]\nvalue = 0.2'),                # below clearance
                          ('[annular_target]\nvalue = 0.8', '[annular_target]\nvalue = 0.2'),                # below annular_min
                          ('own_pads = true  # only the pads of one header', 'own_pad = true'),              # unknown exception field
-                         ('own_pads = true  # only the pads of one header', 'own_pads = true\nzones = true')):  # both forms
+                         ('own_pads = true  # only the pads of one header', 'own_pads = true\nzones = true'),  # both forms
+                         ('[parts.wire]\nrefs = [', '[parts.wire]\nrefs = ["C2", '),             # wire and other footprint
+                         ('[parts.wire]\nrefs = [', '[parts.wire]\nrefz = [')):                     # unknown wire field
             with self.subTest(new=new), self.assertRaises(ValueError):
                 rules.load(edited(MILL_RULES, old, new))
 
@@ -87,7 +99,7 @@ class TestBaseBoard(unittest.TestCase):
 
 class TestGenRules(unittest.TestCase):
     def test_project_files_of_both_boards_agree_with_their_rules(self):
-        for board in (BASE, MILL):
+        for board in (BASE, MILL, REV_B):
             with self.subTest(board=board):
                 self.assertEqual(gen_rules.run(board, write=False), 0, "run make pcb-rules BOARD=%s PCB_RULES_ARGS=--write" % os.path.basename(board))
 
@@ -133,13 +145,30 @@ class TestVariant(unittest.TestCase):
         self.assertEqual((new["MPN"], new["Manufacturer"], new["Status"], new["Unit cost USD"]), ("TBD", "TBD", "TBD", ""))
         self.assertIn("Base board part", new["BOM Comments"])
 
+    def test_wire_part_gets_solder_pads_and_no_part_number(self):
+        text, done = variant.make_variant(self.base, set(), wires={"J11", "J5"})
+        self.assertEqual(sorted(done), ["J11", "J5"])
+        diff = [y.strip() for x, y in zip(self.base.splitlines(), text.splitlines()) if x != y]
+        self.assertIn('(property "Footprint" "rc_power:SolderWire_1x02_P2.50mm"', diff)   # pin count from the XH footprint
+        self.assertIn('(property "Footprint" "rc_power:SolderWire_1x06_P2.50mm"', diff)
+        new = [(y.split('"')[1], y.split('"')[3]) for y in diff if not y.startswith('(property "Footprint"')]
+        self.assertEqual(sorted(set(n for n, _ in new)), ["BOM Comments", "MPN", "Manufacturer", "Status", "Supplier link", "Unit cost USD"])
+        self.assertTrue(all(v in ("none", "") for n, v in new if n != "BOM Comments"))
+        notes = [v for n, v in new if n == "BOM Comments"]
+        self.assertTrue(all(v.startswith("Temporary (first mill print round)") and ("B2B-XH-A" in v or "B6B-XH-A" in v) for v in notes))
+
     def test_no_exclude_list_gives_the_base_schematic(self):
         self.assertEqual(variant.make_variant(self.base, set())[0], self.base)
 
     def test_committed_mill_schematic_is_current(self):
         r = rules.load(MILL_RULES)
-        want = variant.make_variant(self.base, set(r.exclude), r.footprint)[0]
+        want = variant.make_variant(self.base, set(r.exclude), r.footprint, set(r.wire))[0]
         self.assertEqual(open(os.path.join(MILL, paths.STEM + ".kicad_sch"), encoding="utf-8").read(), want, "run make pcb-sch BOARD=mill")
+
+    def test_committed_rev_b_schematic_is_current(self):
+        r = rules.load(rules.rules_file(REV_B))
+        want = variant.make_variant(self.base, set(r.exclude), r.footprint, set(r.wire))[0]
+        self.assertEqual(open(os.path.join(REV_B, paths.STEM + ".kicad_sch"), encoding="utf-8").read(), want)
 
 
 class TestRingAndWidth(unittest.TestCase):

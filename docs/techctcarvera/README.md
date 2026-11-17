@@ -41,6 +41,7 @@ The mill is not accurate in X and Y. The board `pcb/mill` is a coarse copy of th
 | `[[exception]]` | A part whose footprint fixes a smaller gap (`ref` or a `refs` list). `clearance` is that gap. `own_pads = true` (pin headers): only the pads of the part are that close, tracks and zones keep the board clearance. `zones = true` (U3): planned zones and pours can also use the lower clearance at all its pads. Use one of the two forms |
 | `[parts] exclude` | Parts of the schematic that are not on the board |
 | `[parts.footprint]` | Parts that have a different footprint on this board (same value). `make pcb-sch` writes it into the mill schematic. A new footprint needs a position in `pcb/mill/placement.py` |
+| `[parts.wire]` | Temporary: JST XH headers that become wire solder pads (`refs`, `reason`). Same pads and positions as the header, no part in the BOM. Remove the table to get the headers back |
 
 The values are start values with `status = "assumed"`. `make pcb-rules BOARD=mill` prints the assumed keys. A value must not be below the lab limit of the same name in `milling.toml`.
 

@@ -148,3 +148,11 @@ C5 = "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm"
 C6 = "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm"
 C7 = "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm"
 C8 = "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm"
+
+# TEMPORARY exception for the first print round only (owner 2026-11-17): the JST XH headers are not fitted. The wires
+# are soldered to the pads directly. `make pcb-sch` gives each part the footprint rc_power:SolderWire_1xNN_P2.50mm
+# (same pads and drills as the header, no body) and no part number. Rev B (pcb/releases/rev_B) keeps the headers.
+# Remove this table for the next print round.
+[parts.wire]
+refs = ["J3", "J4", "J5", "J8", "J9", "J11", "J12", "J13", "J14"]
+reason = "temporary, first mill print round only (owner 2026-11-17): solder the wires to the board directly instead of the JST XH headers. Next round: remove this table to get the headers back (rev B)"

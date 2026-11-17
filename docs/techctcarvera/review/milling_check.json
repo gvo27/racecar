@@ -6,6 +6,118 @@
   [
    "MILL-GAP-FIXED",
    "warning",
+   "pad J9.1 F.Cu net +5V_SENS at (4.30, -98.90) | pad J9.2 F.Cu net GND at (4.30, -101.40)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J12.1 F.Cu net +3V3_SENS at (61.10, -107.60) | pad J12.2 F.Cu net GND at (61.10, -110.10)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J11.1 F.Cu net +5V_SENS at (4.30, -89.80) | pad J11.2 F.Cu net GND at (4.30, -92.30)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J5.1 F.Cu net /U1_PG at (3.40, -56.70) | pad J5.2 F.Cu net /THROTTLE_PWM at (3.40, -59.20)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J5.2 F.Cu net /THROTTLE_PWM at (3.40, -59.20) | pad J5.3 F.Cu net /STEER_PWM at (3.40, -61.70)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J5.3 F.Cu net /STEER_PWM at (3.40, -61.70) | pad J5.4 F.Cu net /I2C_SDA at (3.40, -64.20)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J5.4 F.Cu net /I2C_SDA at (3.40, -64.20) | pad J5.5 F.Cu net /I2C_SCL at (3.40, -66.70)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J5.5 F.Cu net /I2C_SCL at (3.40, -66.70) | pad J5.6 F.Cu net GND at (3.40, -69.20)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J3.1 F.Cu net GND at (3.40, -42.50) | pad J3.2 F.Cu net +6V_BEC at (3.40, -45.00)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J3.2 F.Cu net +6V_BEC at (3.40, -45.00) | pad J3.3 F.Cu net /THROTTLE_PWM at (3.40, -47.50)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J13.1 F.Cu net +3V3_SENS at (61.10, -116.60) | pad J13.2 F.Cu net GND at (61.10, -119.10)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J8.1 F.Cu net +5V_SENS at (4.50, -83.20) | pad J8.2 F.Cu net GND at (4.50, -80.70)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J8.2 F.Cu net GND at (4.50, -80.70) | pad J8.3 F.Cu net /I2C_SDA at (4.50, -78.20)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J8.3 F.Cu net /I2C_SDA at (4.50, -78.20) | pad J8.4 F.Cu net /I2C_SCL at (4.50, -75.70)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
    "pad U2.1 F.Cu net unconnected-(U2-PG-Pad1) at (14.35, -43.89) | pad U2.2 F.Cu net unconnected-(U2-EN-Pad2) at (14.35, -46.43)",
    0.640016,
    0.7923760430703402,
@@ -86,7 +198,7 @@
   [
    "MILL-GAP-FIXED",
    "warning",
-   "pad J5.1 F.Cu net /U1_PG at (3.40, -56.70) | pad J5.2 F.Cu net /THROTTLE_PWM at (3.40, -59.20)",
+   "pad J14.1 F.Cu net +3V3_SENS at (61.10, -125.60) | pad J14.2 F.Cu net GND at (61.10, -128.10)",
    0.600018,
    0.7923760430703402,
    "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
@@ -94,7 +206,7 @@
   [
    "MILL-GAP-FIXED",
    "warning",
-   "pad J5.2 F.Cu net /THROTTLE_PWM at (3.40, -59.20) | pad J5.3 F.Cu net /STEER_PWM at (3.40, -61.70)",
+   "pad J4.1 F.Cu net GND at (4.50, -36.00) | pad J4.2 F.Cu net +6V_BEC at (4.50, -33.50)",
    0.600018,
    0.7923760430703402,
    "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
@@ -102,71 +214,7 @@
   [
    "MILL-GAP-FIXED",
    "warning",
-   "pad J5.3 F.Cu net /STEER_PWM at (3.40, -61.70) | pad J5.4 F.Cu net /I2C_SDA at (3.40, -64.20)",
-   0.600018,
-   0.7923760430703402,
-   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
-  ],
-  [
-   "MILL-GAP-FIXED",
-   "warning",
-   "pad J5.4 F.Cu net /I2C_SDA at (3.40, -64.20) | pad J5.5 F.Cu net /I2C_SCL at (3.40, -66.70)",
-   0.600018,
-   0.7923760430703402,
-   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
-  ],
-  [
-   "MILL-GAP-FIXED",
-   "warning",
-   "pad J5.5 F.Cu net /I2C_SCL at (3.40, -66.70) | pad J5.6 F.Cu net GND at (3.40, -69.20)",
-   0.600018,
-   0.7923760430703402,
-   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
-  ],
-  [
-   "MILL-GAP-FIXED",
-   "warning",
-   "pad J12.1 F.Cu net +3V3_SENS at (61.10, -107.60) | pad J12.2 F.Cu net GND at (61.10, -110.10)",
-   0.600018,
-   0.7923760430703402,
-   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
-  ],
-  [
-   "MILL-GAP-FIXED",
-   "warning",
-   "pad J11.1 F.Cu net +5V_SENS at (4.30, -89.80) | pad J11.2 F.Cu net GND at (4.30, -92.30)",
-   0.600018,
-   0.7923760430703402,
-   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
-  ],
-  [
-   "MILL-GAP-FIXED",
-   "warning",
-   "pad J9.1 F.Cu net +5V_SENS at (4.30, -98.90) | pad J9.2 F.Cu net GND at (4.30, -101.40)",
-   0.600018,
-   0.7923760430703402,
-   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
-  ],
-  [
-   "MILL-GAP-FIXED",
-   "warning",
-   "pad J8.1 F.Cu net +5V_SENS at (4.50, -83.20) | pad J8.2 F.Cu net GND at (4.50, -80.70)",
-   0.600018,
-   0.7923760430703402,
-   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
-  ],
-  [
-   "MILL-GAP-FIXED",
-   "warning",
-   "pad J8.2 F.Cu net GND at (4.50, -80.70) | pad J8.3 F.Cu net /I2C_SDA at (4.50, -78.20)",
-   0.600018,
-   0.7923760430703402,
-   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
-  ],
-  [
-   "MILL-GAP-FIXED",
-   "warning",
-   "pad J8.3 F.Cu net /I2C_SDA at (4.50, -78.20) | pad J8.4 F.Cu net /I2C_SCL at (4.50, -75.70)",
+   "pad J4.2 F.Cu net +6V_BEC at (4.50, -33.50) | pad J4.3 F.Cu net /STEER_PWM at (4.50, -31.00)",
    0.600018,
    0.7923760430703402,
    "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
@@ -254,7 +302,7 @@
   [
    "MILL-GAP-FIXED",
    "warning",
-   "pad J14.1 F.Cu net +3V3_SENS at (61.10, -125.60) | pad J14.2 F.Cu net GND at (61.10, -128.10)",
+   "pad J9.1 B.Cu net +5V_SENS at (4.30, -98.90) | pad J9.2 B.Cu net GND at (4.30, -101.40)",
    0.600018,
    0.7923760430703402,
    "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
@@ -262,7 +310,7 @@
   [
    "MILL-GAP-FIXED",
    "warning",
-   "pad J3.1 F.Cu net GND at (3.40, -42.50) | pad J3.2 F.Cu net +6V_BEC at (3.40, -45.00)",
+   "pad J12.1 B.Cu net +3V3_SENS at (61.10, -107.60) | pad J12.2 B.Cu net GND at (61.10, -110.10)",
    0.600018,
    0.7923760430703402,
    "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
@@ -270,7 +318,7 @@
   [
    "MILL-GAP-FIXED",
    "warning",
-   "pad J3.2 F.Cu net +6V_BEC at (3.40, -45.00) | pad J3.3 F.Cu net /THROTTLE_PWM at (3.40, -47.50)",
+   "pad J11.1 B.Cu net +5V_SENS at (4.30, -89.80) | pad J11.2 B.Cu net GND at (4.30, -92.30)",
    0.600018,
    0.7923760430703402,
    "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
@@ -278,7 +326,7 @@
   [
    "MILL-GAP-FIXED",
    "warning",
-   "pad J4.1 F.Cu net GND at (4.50, -36.00) | pad J4.2 F.Cu net +6V_BEC at (4.50, -33.50)",
+   "pad J5.1 B.Cu net /U1_PG at (3.40, -56.70) | pad J5.2 B.Cu net /THROTTLE_PWM at (3.40, -59.20)",
    0.600018,
    0.7923760430703402,
    "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
@@ -286,7 +334,7 @@
   [
    "MILL-GAP-FIXED",
    "warning",
-   "pad J4.2 F.Cu net +6V_BEC at (4.50, -33.50) | pad J4.3 F.Cu net /STEER_PWM at (4.50, -31.00)",
+   "pad J5.2 B.Cu net /THROTTLE_PWM at (3.40, -59.20) | pad J5.3 B.Cu net /STEER_PWM at (3.40, -61.70)",
    0.600018,
    0.7923760430703402,
    "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
@@ -294,7 +342,71 @@
   [
    "MILL-GAP-FIXED",
    "warning",
-   "pad J13.1 F.Cu net +3V3_SENS at (61.10, -116.60) | pad J13.2 F.Cu net GND at (61.10, -119.10)",
+   "pad J5.3 B.Cu net /STEER_PWM at (3.40, -61.70) | pad J5.4 B.Cu net /I2C_SDA at (3.40, -64.20)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J5.4 B.Cu net /I2C_SDA at (3.40, -64.20) | pad J5.5 B.Cu net /I2C_SCL at (3.40, -66.70)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J5.5 B.Cu net /I2C_SCL at (3.40, -66.70) | pad J5.6 B.Cu net GND at (3.40, -69.20)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J3.1 B.Cu net GND at (3.40, -42.50) | pad J3.2 B.Cu net +6V_BEC at (3.40, -45.00)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J3.2 B.Cu net +6V_BEC at (3.40, -45.00) | pad J3.3 B.Cu net /THROTTLE_PWM at (3.40, -47.50)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J13.1 B.Cu net +3V3_SENS at (61.10, -116.60) | pad J13.2 B.Cu net GND at (61.10, -119.10)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J8.1 B.Cu net +5V_SENS at (4.50, -83.20) | pad J8.2 B.Cu net GND at (4.50, -80.70)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J8.2 B.Cu net GND at (4.50, -80.70) | pad J8.3 B.Cu net /I2C_SDA at (4.50, -78.20)",
+   0.600018,
+   0.7923760430703402,
+   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-GAP-FIXED",
+   "warning",
+   "pad J8.3 B.Cu net /I2C_SDA at (4.50, -78.20) | pad J8.4 B.Cu net /I2C_SCL at (4.50, -75.70)",
    0.600018,
    0.7923760430703402,
    "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
@@ -382,7 +494,7 @@
   [
    "MILL-GAP-FIXED",
    "warning",
-   "pad J5.1 B.Cu net /U1_PG at (3.40, -56.70) | pad J5.2 B.Cu net /THROTTLE_PWM at (3.40, -59.20)",
+   "pad J14.1 B.Cu net +3V3_SENS at (61.10, -125.60) | pad J14.2 B.Cu net GND at (61.10, -128.10)",
    0.600018,
    0.7923760430703402,
    "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
@@ -390,7 +502,7 @@
   [
    "MILL-GAP-FIXED",
    "warning",
-   "pad J5.2 B.Cu net /THROTTLE_PWM at (3.40, -59.20) | pad J5.3 B.Cu net /STEER_PWM at (3.40, -61.70)",
+   "pad J4.1 B.Cu net GND at (4.50, -36.00) | pad J4.2 B.Cu net +6V_BEC at (4.50, -33.50)",
    0.600018,
    0.7923760430703402,
    "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
@@ -398,71 +510,7 @@
   [
    "MILL-GAP-FIXED",
    "warning",
-   "pad J5.3 B.Cu net /STEER_PWM at (3.40, -61.70) | pad J5.4 B.Cu net /I2C_SDA at (3.40, -64.20)",
-   0.600018,
-   0.7923760430703402,
-   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
-  ],
-  [
-   "MILL-GAP-FIXED",
-   "warning",
-   "pad J5.4 B.Cu net /I2C_SDA at (3.40, -64.20) | pad J5.5 B.Cu net /I2C_SCL at (3.40, -66.70)",
-   0.600018,
-   0.7923760430703402,
-   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
-  ],
-  [
-   "MILL-GAP-FIXED",
-   "warning",
-   "pad J5.5 B.Cu net /I2C_SCL at (3.40, -66.70) | pad J5.6 B.Cu net GND at (3.40, -69.20)",
-   0.600018,
-   0.7923760430703402,
-   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
-  ],
-  [
-   "MILL-GAP-FIXED",
-   "warning",
-   "pad J12.1 B.Cu net +3V3_SENS at (61.10, -107.60) | pad J12.2 B.Cu net GND at (61.10, -110.10)",
-   0.600018,
-   0.7923760430703402,
-   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
-  ],
-  [
-   "MILL-GAP-FIXED",
-   "warning",
-   "pad J11.1 B.Cu net +5V_SENS at (4.30, -89.80) | pad J11.2 B.Cu net GND at (4.30, -92.30)",
-   0.600018,
-   0.7923760430703402,
-   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
-  ],
-  [
-   "MILL-GAP-FIXED",
-   "warning",
-   "pad J9.1 B.Cu net +5V_SENS at (4.30, -98.90) | pad J9.2 B.Cu net GND at (4.30, -101.40)",
-   0.600018,
-   0.7923760430703402,
-   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
-  ],
-  [
-   "MILL-GAP-FIXED",
-   "warning",
-   "pad J8.1 B.Cu net +5V_SENS at (4.50, -83.20) | pad J8.2 B.Cu net GND at (4.50, -80.70)",
-   0.600018,
-   0.7923760430703402,
-   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
-  ],
-  [
-   "MILL-GAP-FIXED",
-   "warning",
-   "pad J8.2 B.Cu net GND at (4.50, -80.70) | pad J8.3 B.Cu net /I2C_SDA at (4.50, -78.20)",
-   0.600018,
-   0.7923760430703402,
-   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
-  ],
-  [
-   "MILL-GAP-FIXED",
-   "warning",
-   "pad J8.3 B.Cu net /I2C_SDA at (4.50, -78.20) | pad J8.4 B.Cu net /I2C_SCL at (4.50, -75.70)",
+   "pad J4.2 B.Cu net +6V_BEC at (4.50, -33.50) | pad J4.3 B.Cu net /STEER_PWM at (4.50, -31.00)",
    0.600018,
    0.7923760430703402,
    "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
@@ -550,54 +598,6 @@
   [
    "MILL-GAP-FIXED",
    "warning",
-   "pad J14.1 B.Cu net +3V3_SENS at (61.10, -125.60) | pad J14.2 B.Cu net GND at (61.10, -128.10)",
-   0.600018,
-   0.7923760430703402,
-   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
-  ],
-  [
-   "MILL-GAP-FIXED",
-   "warning",
-   "pad J3.1 B.Cu net GND at (3.40, -42.50) | pad J3.2 B.Cu net +6V_BEC at (3.40, -45.00)",
-   0.600018,
-   0.7923760430703402,
-   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
-  ],
-  [
-   "MILL-GAP-FIXED",
-   "warning",
-   "pad J3.2 B.Cu net +6V_BEC at (3.40, -45.00) | pad J3.3 B.Cu net /THROTTLE_PWM at (3.40, -47.50)",
-   0.600018,
-   0.7923760430703402,
-   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
-  ],
-  [
-   "MILL-GAP-FIXED",
-   "warning",
-   "pad J4.1 B.Cu net GND at (4.50, -36.00) | pad J4.2 B.Cu net +6V_BEC at (4.50, -33.50)",
-   0.600018,
-   0.7923760430703402,
-   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
-  ],
-  [
-   "MILL-GAP-FIXED",
-   "warning",
-   "pad J4.2 B.Cu net +6V_BEC at (4.50, -33.50) | pad J4.3 B.Cu net /STEER_PWM at (4.50, -31.00)",
-   0.600018,
-   0.7923760430703402,
-   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
-  ],
-  [
-   "MILL-GAP-FIXED",
-   "warning",
-   "pad J13.1 B.Cu net +3V3_SENS at (61.10, -116.60) | pad J13.2 B.Cu net GND at (61.10, -119.10)",
-   0.600018,
-   0.7923760430703402,
-   "gap 0.600 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
-  ],
-  [
-   "MILL-GAP-FIXED",
-   "warning",
    "pad U3.1 B.Cu net /LDO_IN at (50.95, -102.66) | pad U3.2 B.Cu net GND at (50.00, -102.66)",
    0.350007,
    0.7923760430703402,
@@ -671,17 +671,33 @@
    "MILL-GAP-FIXED",
    "warning",
    "pad U3.5 B.Cu net +3V3_SENS at (50.95, -104.94) | zone fill B.Cu net GND",
-   0.340515,
+   0.350007,
    0.7923760430703402,
-   "gap 0.341 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+   "gap 0.350 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
   ],
   [
    "MILL-GAP-FIXED",
    "warning",
    "pad U3.5 B.Cu net +3V3_SENS at (50.95, -104.94) | zone fill B.Cu net GND",
-   0.350007,
+   0.340515,
    0.7923760430703402,
-   "gap 0.350 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+   "gap 0.341 mm is below cut width 0.292 mm + 2 x horizontal error 0.25 mm = 0.792 mm (gap fixed by the footprint or an exception)"
+  ],
+  [
+   "MILL-CONN-EDGE",
+   "warning",
+   "footprint J9 at (4.30, -98.90)",
+   null,
+   1.0,
+   "connector courtyard is more than 1.0 mm from the board edge"
+  ],
+  [
+   "MILL-CONN-EDGE",
+   "warning",
+   "footprint J12 at (61.10, -107.60)",
+   null,
+   1.0,
+   "connector courtyard is more than 1.0 mm from the board edge"
   ],
   [
    "MILL-CONN-EDGE",
@@ -694,18 +710,50 @@
   [
    "MILL-CONN-EDGE",
    "warning",
-   "footprint J9 at (4.30, -98.90)",
+   "footprint J5 at (3.40, -56.70)",
    null,
    1.0,
    "connector courtyard is more than 1.0 mm from the board edge"
   ],
   [
-   "MILL-CUT-SPACING",
+   "MILL-CONN-EDGE",
    "warning",
-   "zone fill B.Cu net /LDO_IN at (50.95, -101.47)",
-   0.777516914051,
-   1.2,
-   "zone fill has copper narrower than the copper target 1.20 mm (0.78 mm2 removed by an opening test)"
+   "footprint J3 at (3.40, -42.50)",
+   null,
+   1.0,
+   "connector courtyard is more than 1.0 mm from the board edge"
+  ],
+  [
+   "MILL-CONN-EDGE",
+   "warning",
+   "footprint J13 at (61.10, -116.60)",
+   null,
+   1.0,
+   "connector courtyard is more than 1.0 mm from the board edge"
+  ],
+  [
+   "MILL-CONN-EDGE",
+   "warning",
+   "footprint J8 at (4.50, -83.20)",
+   null,
+   1.0,
+   "connector courtyard is more than 1.0 mm from the board edge"
+  ],
+  [
+   "MILL-CONN-EDGE",
+   "warning",
+   "footprint J14 at (61.10, -125.60)",
+   null,
+   1.0,
+   "connector courtyard is more than 1.0 mm from the board edge"
+  ],
+  [
+   "MILL-CONN-EDGE",
+   "warning",
+   "footprint J4 at (4.50, -36.00)",
+   null,
+   1.0,
+   "connector courtyard is more than 1.0 mm from the board edge"
   ],
   [
    "MILL-CUT-SPACING",
@@ -734,7 +782,15 @@
   [
    "MILL-CUT-SPACING",
    "warning",
-   "zone fill B.Cu net /LDO_IN at (49.05, -101.47)",
+   "zone fill B.Cu net GND at (50.00, -104.25)",
+   1.6199999532585,
+   1.2,
+   "zone fill has copper narrower than the copper target 1.20 mm (1.62 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "zone fill B.Cu net /LDO_IN at (50.95, -101.47)",
    0.777516914051,
    1.2,
    "zone fill has copper narrower than the copper target 1.20 mm (0.78 mm2 removed by an opening test)"
@@ -746,6 +802,14 @@
    0.5965446686595,
    1.2,
    "zone fill has copper narrower than the copper target 1.20 mm (0.60 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-CUT-SPACING",
+   "warning",
+   "zone fill B.Cu net /LDO_IN at (49.05, -101.47)",
+   0.777516914051,
+   1.2,
+   "zone fill has copper narrower than the copper target 1.20 mm (0.78 mm2 removed by an opening test)"
   ],
   [
    "MILL-CUT-SPACING",
@@ -762,14 +826,6 @@
    1.2263091448305,
    1.2,
    "zone fill has copper narrower than the copper target 1.20 mm (1.23 mm2 removed by an opening test)"
-  ],
-  [
-   "MILL-CUT-SPACING",
-   "warning",
-   "zone fill B.Cu net GND at (50.00, -104.25)",
-   1.6199999532585,
-   1.2,
-   "zone fill has copper narrower than the copper target 1.20 mm (1.62 mm2 removed by an opening test)"
   ]
  ],
  "waived": []

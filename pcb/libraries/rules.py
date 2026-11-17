@@ -62,6 +62,8 @@ class Rules:
     exceptions: list = field(default_factory=list)
     exclude: tuple = ()
     footprint: dict = field(default_factory=dict)     # ref -> footprint of this board (not the footprint of the base schematic)
+    wire: tuple = ()                                  # refs whose header becomes wire solder pads ([parts.wire], temporary)
+    wire_reason: str = ""
     status: dict = field(default_factory=dict)        # key -> assumed|confirmed
 
     @property
@@ -135,9 +137,16 @@ def load(path=None):
         for ref in refs:
             exc.append(Exception_(ref, float(e["clearance"]), e["reason"], bool(e.get("zones", False)), bool(e.get("own_pads", False))))
     parts = raw.get("parts", {})
-    if set(parts) - {"exclude", "reason", "footprint", "footprint_reason"}:
+    if set(parts) - {"exclude", "reason", "footprint", "footprint_reason", "wire"}:
         raise ValueError("%s: [parts] has unknown keys" % path)
-    r = Rules(path=path, track_width=widths, exceptions=exc, exclude=tuple(parts.get("exclude", [])), footprint=dict(parts.get("footprint", {})), status=status, **vals)
+    wire = parts.get("wire", {})
+    if set(wire) - {"refs", "reason"} or (wire and not wire.get("reason")):
+        raise ValueError("%s: [parts.wire] needs refs and reason, no other field" % path)
+    both = set(wire.get("refs", [])) & (set(parts.get("footprint", {})) | set(parts.get("exclude", [])))
+    if both:
+        raise ValueError("%s: [parts.wire] and [parts.footprint] or exclude both name %s" % (path, ", ".join(sorted(both))))
+    r = Rules(path=path, track_width=widths, exceptions=exc, exclude=tuple(parts.get("exclude", [])), footprint=dict(parts.get("footprint", {})),
+              wire=tuple(wire.get("refs", [])), wire_reason=wire.get("reason", ""), status=status, **vals)
     if r.annular_target < r.annular_min - 1e-9:
         raise ValueError("%s: annular_target %.2f is below annular_min %.2f" % (path, r.annular_target, r.annular_min))
     if r.zone_clearance < r.clearance - 1e-9:
@@ -168,6 +177,8 @@ def main(argv=None):
         print("  parts not on this board: %s" % ", ".join(r.exclude))
     for ref, fp in sorted(r.footprint.items()):
         print("  footprint %-5s %s" % (ref, fp))
+    if r.wire:
+        print("  wire solder pads (temporary): %s" % ", ".join(r.wire))
     return 0
 
 
