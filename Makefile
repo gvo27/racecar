@@ -49,7 +49,7 @@ COMPOSE  := docker compose -f deploy/car/compose.yaml --env-file deploy/car/.env
 .PHONY: help open close check-host setup clean build pcb-rules pcb-sch pcb-all flash monitor fw-image config models compiledb unit check-dev dev-setup \
         ros-image ros-test ros-test-image ros-test-run ros-shell car-up car-down car-ps car-logs car-pull \
         car-shutdown install-host teleop calibrate tune test rangefinder viz lidar-imu lidar-snapshot lidar-record mcu unit-run \
-        drivers-stop drivers-start lidar-hw-test kicad-image erc pcb-build pcb-route pcb-check pcb-mill-check pcb-review pcb-fab pcb-test bom \
+        drivers-stop drivers-start lidar-hw-test kicad-image erc pcb-build pcb-route pcb-check pcb-mill-check pcb-review pcb-fab pcb-test pcb-gate bom \
         _kicad-cfg _clean-build _need-config _need-stack _need-stack-down _need-drivers-down
 
 help:            ## list targets (grouped in README.md)
@@ -250,6 +250,16 @@ pcb-mill-check: _kicad-cfg  ## milling check of the board vs the lab limits (mil
 pcb-fab: _kicad-cfg  ## DXF (F.Cu, B.Cu, Edge.Cuts), Excellon and drill-map DXF for the lab's Fusion 360 template -> build/fab/<BOARD>/ (not committed), then test_fab
 	$(KICAD_RUN) python3 $(LAB_TOOLS)/fab_export.py rc_power_board.kicad_pcb --out "$(CURDIR)/build/fab/$(BOARD)"
 	$(KICAD_RUN) python3 -m unittest discover -s $(LAB_TOOLS) -p 'test_fab.py' -v
+
+# kicad-happy plugin directory (the installed version, ref in .claude/settings.json); override with KICAD_HAPPY=<dir>
+KICAD_HAPPY      ?= $(lastword $(sort $(wildcard $(HOME)/.claude/plugins/cache/kicad-happy/kicad-happy/*)))
+# fab = fab house (Gerbers checked), mill = the lab mill (no Gerbers). The working mill board is mill.
+METHOD           ?= $(if $(filter mill,$(BOARD)),mill,fab)
+pcb-gate: _kicad-cfg  ## kicad-happy analyzers + fab release gate of BOARD -> build/gate/<BOARD>/ (METHOD=fab|mill; needs the kicad-happy plugin)
+	@test -n "$(KICAD_HAPPY)" -a -d "$(KICAD_HAPPY)/skills/kicad/scripts" || { echo "pcb-gate: kicad-happy plugin not found. Run: claude plugin install kicad-happy@kicad-happy --scope project, or set KICAD_HAPPY=<dir>"; exit 1; }
+	docker run --rm --user $(shell id -u):$(shell id -g) -e HOME=/tmp -e XDG_CONFIG_HOME=$(KICAD_CFG) \
+	  -v "$(CURDIR)":"$(CURDIR)" -v "$(KICAD_HAPPY)":"$(KICAD_HAPPY)":ro -w "$(CURDIR)/$(BOARD_DIR)" $(KICAD_IMAGE) \
+	  sh $(PCB_LIBS)/pcb_gate.sh "$(KICAD_HAPPY)" "$(CURDIR)/build/gate/$(BOARD)" "$(METHOD)"
 
 pcb-test: _kicad-cfg  ## unit tests for the PCB libraries and the mill tools (stdlib unittest, image python3)
 	$(KICAD_RUN) python3 -m unittest discover -s $(PCB_LIBS) -p 'test_*.py' -v
