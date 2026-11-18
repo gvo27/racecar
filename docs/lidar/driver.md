@@ -27,3 +27,11 @@ Facts about the lidar driver (`rccar_drivers`, `rccar_description`). The rules a
 
 ## Power path
 - `+5V_SENS` XH header (J11 to J14), XHP-2 housing, USB-A male 2-wire pigtail (red +, black GND), the Mapper USB-A "5V DC" socket (power input only, no data).
+
+## Hardware test (`make lidar-hw-test`)
+- A launch_testing run: `rccar_drivers/test_hw/test_mapper_hw.py`. Criteria and thresholds: `rccar_drivers/hw_criteria.py` (pytest: `test/test_hw_criteria.py`). Report: `logs/hw_test_lidar_<UTC>.json`, with `status` for each criterion.
+- Each criterion is PASS, FAIL or NA ("not provided"). NA never fails. OVERALL is PASS only if no criterion is FAIL.
+- IMU gyro-at-rest is NA when its bit is absent from `imu_avail_bitmap` (read from /diagnostics). acc-units is NA when its bit is absent or the driver marks acceleration as not provided (`imu_trust_acc` false, the default).
+- `rccar_drivers/test_hw/` is not under `test/`. `conftest.py` ignores it unless `RCCAR_HW_TEST=1`, so `colcon test` and CI never collect it. `setup.py` installs it to `share/rccar_drivers/test_hw/` for the runtime image.
+- The test runs its own driver, so `drivers` must be stopped. It leaves `drivers` stopped and says so.
+- Work loop: `make drivers-stop`, edit, `make ros-test` (fake Mapper), `make ros-image`, `make lidar-hw-test`.

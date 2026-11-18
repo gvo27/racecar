@@ -14,7 +14,7 @@ Plugin `kicad-happy@kicad-happy` (aklofas/kicad-happy, ref in `.claude/settings.
 | Subcircuits | `spice` | only with `ngspice`. Without it, write "SPICE not run" |
 | Board | `analyze_pcb.py`, `analyze_emc.py`, `analyze_thermal.py` | `make pcb-gate` |
 | Before an order | `analyze_gerbers.py`, `fab_release_gate.py` | `make pcb-gate METHOD=fab` (skill `pcb-fab`) |
-| Between two reviews | `diff_analysis.py --run OLD --run NEW` | on two output directories of `make pcb-gate` |
+| Between two reviews | `diff_analysis.py <old>.json <new>.json --text` | `make pcb-gate` overwrites `build/gate/<BOARD>/`: copy it to `build/gate-old/<BOARD>/` before the next run, then compare `schematic.json`, `pcb.json` and `emc.json` one pair at a time |
 
 ## Run one script alone
 The scripts use the Python standard library. Run them with `python3` in the KiCad image, with the plugin directory mounted read-only. Write the output below `build/`.

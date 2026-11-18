@@ -38,7 +38,7 @@ Reference facts (build, tasks, pins, limits, command grammar): `docs/firmware/RE
 - The ESP32 supplies no power to peripherals.
 
 ## Protocol and config
-- A new or renamed command, `SET` key or interface changes all of these together: `rccar_msgs`, `firmware/esp32/extra_packages` (diff -r clean), `rccar_mcu_bridge` (`FIRMWARE_KEYS`, commands), `tuning.toml` and `docs/`. `test_tuning.py` checks `FIRMWARE_KEYS` against `tuning.toml` and `main.cpp`.
+- A new or renamed command or interface follows `.claude/rules/msgs.md`. A `SET` key change follows `.claude/rules/tuning.md`.
 - Keep every reply within `REPLY_CAP` (384). `test_tuning.py` checks the worst case.
 - `D` (drive) goes only through the `/rccar/mcu/drive` subscription, never through the service.
 - A change to the `Config` layout must bump `CFG_MAGIC`.

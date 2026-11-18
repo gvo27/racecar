@@ -23,7 +23,7 @@ Reference (plugins, LSP, session targets, hook, test scopes): `docs/claude-tooli
 - Project text follows `.claude/rules/writing.md`.
 - After you edit `.py`, `.cpp` or `.h`: read the LSP diagnostics and fix the new ones. Judge pyright warnings about rclpy and rccar_msgs with `make ros-test`.
 - Every PR body uses `.github/pull_request_template.md` with the user-run bench checklist. Agents never tick hardware boxes.
-- A new sensor gets `.claude/rules/<sensor>.md` (software name) and `docs/datasheets/<sensor>_<model>.md`. Model names appear only in the datasheet docs and in the README inventory and wiring.
+- A new sensor gets `.claude/rules/<sensor>.md` (software name) and `docs/datasheets/<kind>_<model>.md` (form: skill `pcb-parts`). Model names appear only in the datasheet docs and in the README inventory and wiring.
 
 ## Plugins and tools
 - `enabledPlugins` in `.claude/settings.json` is the only owner of the default plugin set. Enable a plugin for one session with local scope (`.claude/rules/plugins.md`).

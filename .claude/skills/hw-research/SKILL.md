@@ -1,6 +1,6 @@
 ---
 name: hw-research
-description: Use when you research an electronic part for this car - a sensor, module, connector, regulator, fuse or other component, its datasheet, pinout, ratings, errata or a replacement - or an ESP32 firmware, micro-ROS or ROS 2 API at the pinned stack version (arduino-esp32 2.0.17, ESP-IDF 4.4.7, PlatformIO espressif32 6.9.0, ROS 2 Jazzy, micro-ROS jazzy). In this repo it replaces upstream-research for these topics and applies the source rules of upstream-research. For general software tools, libraries, repos or agent tooling, use upstream-research.
+description: Use when you research the facts of an electronic part for this car - a sensor, module, connector, regulator, fuse or other component, its datasheet, pinout, ratings or errata - or an ESP32 firmware, micro-ROS or ROS 2 API at the pinned stack version (arduino-esp32 2.0.17, ESP-IDF 4.4.7, PlatformIO espressif32 6.9.0, ROS 2 Jazzy, micro-ROS jazzy). In this repo it replaces upstream-research for these topics and applies its source rules. To choose, replace or check a part for a KiCad board or the BOM, use pcb-parts. For general software tools, libraries, repos or agent tooling, use upstream-research.
 ---
 
 # Hardware and firmware research
@@ -30,7 +30,7 @@ The plugin `kicad-happy@kicad-happy` is off by default. Enable it for the sessio
 3. Read the extraction as a lead. Check each value that the project uses against the PDF page, and write the page number.
 
 ## Output into the repo
-- One summary for each part: `docs/datasheets/<role>_<model>.md` (for example `rangefinder_lidar_lite_v4.md`). It has the source link, the revision and the date, the specs the project uses with the page, the pinout as the project wires it, and a map from datasheet values to `tuning.toml` keys if the part has keys.
+- One note for each part model: `docs/datasheets/<kind>_<model>.md` (for example `rangefinder_lidar_lite_v4.md`). The form of the note is owned by skill `pcb-parts`, section "Store a datasheet note". A part with `tuning.toml` keys also gets a map from datasheet values to the keys.
 - A new sensor also gets `.claude/rules/<sensor>.md` (`.claude/rules/claude-tooling.md`).
 - A value goes into `tuning.toml` or a schematic field only when it is confirmed. Unknown stays `TBD`.
 - Part choice for a board: hand over to the skill `pcb-parts` with the summary.

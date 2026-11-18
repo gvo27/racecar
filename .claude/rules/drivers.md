@@ -9,7 +9,6 @@ paths:
   - "docs/lidar/**"
 ---
 
-
 # Lidar driver (rccar_drivers, rccar_description)
 
 The software name is "lidar" or "mapper". The model name appears only in the datasheet docs. Reference (protocol, viz, bench values, power path): `docs/lidar/driver.md`. Status and open items: `docs/lidar/README.md`. Topics and QoS: `.claude/rules/ros2.md`. Hardware test rules: `.claude/rules/hw-testing.md`.

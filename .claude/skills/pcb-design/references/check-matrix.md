@@ -5,7 +5,7 @@ A clean ERC and a clean DRC show that the files agree with their own rules. They
 | Scope | Command | Pass condition | Manual review (the command cannot find this) |
 | --- | --- | --- | --- |
 | Schematic | `make erc` | 0 errors. Each warning has a written reason | Pin-to-net against each datasheet note. PWR_FLAG on nets behind a fuse or a ferrite. Wires between parts in one region (labels only between regions) |
-| Schematic | kicad-happy `kicad`: `analyze_schematic.py` | Each finding has a verdict | Known false positives: `.claude/rules/schematics.md` and `docs/pcb/review/README.md` |
+| Schematic | kicad-happy `kicad`: `analyze_schematic.py` | Each finding has a verdict | Known false positives: `docs/pcb/review/README.md` and `.claude/skills/pcb-fab/references/fab-gate.md` |
 | Parts | `make bom`, then `git diff --stat pcb/<BOARD>/bom.csv` | No diff. No part without `Status` | Skill `pcb-parts`: budget, ratings, mating connectors, lifecycle |
 | Board | `make pcb-check` | DRC 0 errors, 0 unconnected items, parity clean. `check_board` 0 problems | Each DRC warning type has a written reason. Copper width along each current path is in `PATH_ROWS` |
 | Board | `make pcb-mill-check` (method "mill") | 0 errors that are not waived | Skill `pcb-milling-check`. Solder access and rivet access |
