@@ -1,0 +1,24 @@
+{
+ "errors": [],
+ "questions": [],
+ "bits": [],
+ "warnings": [
+  [
+   "MILL-SLIVER",
+   "warning",
+   "zone fill B.Cu net GND at (47.20, -110.00)",
+   0.5032408807125,
+   0.5,
+   "zone fill has copper narrower than 0.50 mm (0.50 mm2 removed by an opening test)"
+  ],
+  [
+   "MILL-SLIVER",
+   "warning",
+   "zone fill B.Cu net GND at (44.86, -110.00)",
+   0.378047803045,
+   0.5,
+   "zone fill has copper narrower than 0.50 mm (0.38 mm2 removed by an opening test)"
+  ]
+ ],
+ "waived": []
+}

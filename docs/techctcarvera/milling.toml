@@ -1,0 +1,159 @@
+# Lab config: milling limits, machine and lab inventory (Makera Carvera, in-house isolation milling).
+# This is the one file for lab facts. Its directory is the lab directory: the pointer is the `lab:` line of
+# .claude/CLAUDE.md. Maintain it with the skill .claude/skills/pcb-lab-config/SKILL.md.
+# Every value has status = "confirmed" or "assumed" and a source.
+# Assumed values stay assumed until the lab tech confirms them. Do not change a limit to make a board pass.
+# Checked by tools/milling_check.py (make pcb-mill-check). Skill: .claude/skills/pcb-milling-check/SKILL.md
+
+[copper_thickness]
+value = 0.070
+unit = "mm"
+status = "confirmed"
+source = "Kepro P22-465G, 2 oz (fab_handoff.md; owner stock list)"
+
+# Stock for this board: 4" x 6" Kepro P22-465G, 2 oz, double-sided, 1.57 mm. X runs along the long side.
+[stock]
+width = 152.4
+height = 101.6
+thickness = 1.57
+unit = "mm"
+status = "confirmed"
+source = "lab .f3z (Fusion stock 152.4 x 101.6 mm; Fusion Sketch1 6 x 4 in, example/fusion_export/, 2026-11-15); owner 2026-11-12 (4x6 in blank, P22-465G); example/README.md"
+
+# Dowel holes: bored in Setup A with the 3.175 mm end mill, for 4.0 mm pins. Centers from the stock lower-left corner.
+[dowel]
+diameter = 4.191
+pin = 4.0
+centers = [[3.2766, 3.81], [149.1234, 3.81]]
+unit = "mm"
+status = "confirmed"
+source = "lab .f3z (Bore1 toolpath; hole 0.165 in; centers +-72.9234 / -46.99 from the stock center); Fusion Measure and Sketch10 (owner 2026-11-15, example/fusion_export/): diameter 0.165 in, centers (0.129, 0.15) and (5.871, 0.15) in, distance 5.742 in; owner 2026-11-12 (4.0 mm pins)"
+
+# Isolation bits: cut width at depth d = tip + 2 * d * tan(angle / 2)
+# The lab bit is tool T2 "0.1mm Tip Engraving Metal": tip 0.2 mm, Fusion taper 30. Fusion "taper" is the angle per side
+# (from the tool axis), so the included angle is 60 deg. The 30 deg included reading was removed 2026-11-15.
+# Only bits the lab CAM uses are listed here. The 60deg/0.1 bit of the Makera pack is under [inventory.cam_tools].
+[[isolation_bit]]
+name = "60deg/0.2"
+angle_deg = 60.0
+tip_mm = 0.2
+status = "confirmed"
+source = "Fusion tool library export (owner 2026-11-15, example/fusion_export/tool_library.json: TA 30, tip-diameter 0.2, 'Inclusive angle' empty). The tool drawing (tool2_vbit_geometry.png) shows the cone from the 0.2 mm tip to the 3.175 mm shank in about 2.6 mm of length: 30 deg per side (30 deg included would need about 5.6 mm)"
+
+[cut_depth_min]
+value = 0.08
+unit = "mm"
+status = "confirmed"
+source = "lab .f3z (2D contour isolation, 1 pass, depth 0.08 mm); lab tech 2026-11-13: the 0.01 mm margin is acceptable; if necessary, the lab adds a second, deeper pass in the CAM file"
+
+[cut_depth_max]
+value = 0.08
+unit = "mm"
+status = "confirmed"
+source = "lab .f3z (2D contour isolation, 1 pass, depth 0.08 mm); lab tech 2026-11-13: the 0.01 mm margin is acceptable; if necessary, the lab adds a second, deeper pass in the CAM file"
+
+[cut_depth_error]
+value = 0.00
+unit = "mm"
+status = "confirmed"
+source = "owner 2026-11-12: the blank is even (depth error 0)"
+
+[drill_set]
+value = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0]
+unit = "mm"
+status = "confirmed"
+source = "owner photo 2026-11-12: drill bits 0.1 to 2.0 mm in 0.1 mm steps (the lab CAM uses 0.9, 1.0, 1.1)"
+
+[endmill_min]
+value = 3.175
+unit = "mm"
+status = "confirmed"
+source = "lab .f3z (the only end mill is 1/8 in = 3.175 mm; it bores the dowels)"
+
+# A hole larger than the largest drill is bored with the end mill (helix). Smallest hole = tool + 0.125 mm.
+[milled_hole_min]
+value = 3.3
+unit = "mm"
+status = "assumed"
+source = "end mill 3.175 mm + 0.125 mm; lab tech to confirm. A hole between the largest drill (2.0) and this value cannot be made"
+
+[via_drill]
+value = 1.1
+unit = "mm"
+status = "confirmed"
+source = "rivet stock = LPKF EasyContac kit 0.6/0.8/1.0/1.2 mm + setting tool (owner photo 2026-11-13); rule drill = rivet OD + 0.1 mm (lab tech 2026-11-13; the lab widens the hole in a second pass if the rivet does not fit); EasyContac 0.8 rivet OD 1.0 mm (owner caliper 2026-11-13, measured on the shaft: 0.8 bag 1.0 mm, 1.0 bag 1.45 mm, 1.2 bag 1.6 mm OD (old caliper, small error possible); bag label = inner diameter) -> 1.1 mm bit (drill set, owner photo 2026-11-12)"
+
+[via_pad]
+value = 2.1
+unit = "mm"
+status = "assumed"
+source = "1.1 mm drill + 2 x 0.5 mm annular ring (pad kept at 2.1 mm)"
+
+[annular_min]
+value = 0.45
+unit = "mm"
+status = "assumed"
+source = "rc_power_board.kicad_pro min_via_annular_width"
+
+[track_min]
+value = 0.5
+unit = "mm"
+status = "assumed"
+source = "rc_power_board.kicad_pro min_track_width"
+
+[edge_clearance]
+value = 0.5
+unit = "mm"
+status = "assumed"
+source = "rc_power_board.kicad_pro min_copper_edge_clearance"
+
+[connector_edge_distance]
+value = 1.0
+unit = "mm"
+status = "assumed"
+source = "owner/main session 2026-11-11: each J* courtyard within 1.0 mm of the board edge (wire entry outward)"
+
+# ---- Machine and lab inventory (skill pcb-lab-config). The checks do not read these tables. ----
+# To move to a different machine or lab: change this file, then run make pcb-test pcb-check pcb-mill-check.
+[machine]
+manufacturer = "Makera"
+model = "Carvera (standard, not Carvera Air)"
+axes = 3
+work_area = [360.0, 240.0, 140.0]
+spindle_w = 200
+spindle_rpm_max = 15000
+collet = "1/8 in (3.175 mm) shank"
+tool_slots = 6
+cam = "Autodesk Fusion 360, post Carvera.cps, lab template example/ in the lab directory"
+unit = "mm"
+status = "confirmed"
+source = "model: owner, PR #3 2026-11-02 (Makera Carvera Standard) and lab .f3z (Carvera, 3 axes, Carvera.cps); work area, spindle, collet: makera.com/products/carvera and global.makera.com/products/carvera, read 2026-11-15; tool_slots: retailer listing (core-electronics.com.au), not from the Makera table"
+
+[inventory.rivets]
+kit = "LPKF EasyContac"
+sizes_label = [0.6, 0.8, 1.0, 1.2]
+od_measured = { "0.8" = 1.0, "1.0" = 1.45, "1.2" = 1.6 }
+setting_tool = true
+unit = "mm"
+status = "confirmed"
+source = "owner photo 2026-11-13 (kit and setting tool); owner caliper 2026-11-13 (OD on the shaft, old caliper, small error possible); the bag label is the inner diameter"
+
+[inventory.blanks]
+part = "Kepro P22-465G"
+copper_oz = 2
+sides = 2
+size_in = [4, 6]
+status = "confirmed"
+source = "owner photo, PR #3 2026-11-02; owner 2026-11-12"
+
+[inventory.cam_tools]
+isolation = "T2 chamfer mill '0.1mm Tip Engraving Metal': tip 0.2 mm, taper 30 deg per side (60 deg included), shank 3.175 mm, 1 flute, carbide, 12000 rpm, feed 500, plunge 200, ramp 300 mm/min"
+drills_in_cam = [0.9, 1.0, 1.1]
+drill_tool_number = "T4, the same number as the end mill (setup sheets): each drill is a manual tool change"
+end_mill = "T4 flat end mill '12mm Flute End Mill Metal': 3.175 mm, flute 12 mm, 1 flute, carbide; tool library: 12000 rpm, feed 500, plunge 200 (the Bore1 operation in the .f3z uses 10000 rpm)"
+available_not_in_cam = "Makera PCB bit pack: 60 deg V-bit, 0.1 mm tip (cut 0.192 mm at 0.08 mm depth). The lab CAM does not use it, so the milling check does not use it (removed from [[isolation_bit]] 2026-11-15, Fable review)."
+face = "T5 chamfer mill '0.3mm Tip Solder Mask Removal': tip 0.3 mm, taper 15 deg per side, 6000 rpm, feed 400, stepover 0.2 mm"
+setups = "Setup sheets (Fusion CAM 2706.1.17, 2026-11-15, example/fusion_export/): A = Bore1 (T4, 10000 rpm, through), WCS stock center, Z0 stock top, 20 s. B = 2D Contour2/3 (T2), Drill1/2/4 (0.9/1.0/1.1 mm, all as T4, 10000 rpm, 100 mm/min), Face2 (T5), WCS dowel center, Z0 stock bottom, 36 min. C = 2D Contour4/5 (T2), Face3 (T5), WCS dowel center, Z0 stock bottom, 22 min. Isolation min Z 0.055 in under a 0.0585 in top: about 0.08 mm deep at the 0.001 in rounding"
+post = "Carvera.cps: not received (owner 2026-11-15). No NC code yet"
+status = "confirmed"
+source = "lab .f3z (example/README.md); Fusion tool library and setup sheet export (owner 2026-11-15, example/fusion_export/)"

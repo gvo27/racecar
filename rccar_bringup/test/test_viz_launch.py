@@ -1,0 +1,93 @@
+"""
+launch_testing: viz.launch.py starts foxglove_bridge and opens its websocket port.
+
+Skipped automatically where ROS 2 / launch_testing / foxglove_bridge are missing.
+"""
+import os
+import socket
+import time
+import unittest
+
+import pytest
+
+pytest.importorskip('launch_testing')
+pytest.importorskip('rclpy')
+
+import launch  # noqa: E402,I100,I201,I202
+from launch.actions import IncludeLaunchDescription  # noqa: E402,I100,I201,I202
+from launch.launch_description_sources import (  # noqa: E402,I100,I201,I202
+    PythonLaunchDescriptionSource)
+import launch_testing  # noqa: E402,I100,I201,I202
+import launch_testing.actions  # noqa: E402,I100,I201,I202
+
+
+def _have_bridge():
+    try:
+        from ament_index_python.packages import get_package_prefix
+        get_package_prefix('foxglove_bridge')
+        return True
+    except Exception:
+        return False
+
+
+# no module-level skip: it hides every other test of the package from colcon's pytest run
+HAVE_BRIDGE = _have_bridge()
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+LAUNCH = os.path.join(HERE, '..', 'launch', 'viz.launch.py')
+PORT = 18765
+
+
+@pytest.mark.launch_test
+def generate_test_description():
+    if not HAVE_BRIDGE:
+        return launch.LaunchDescription([launch_testing.actions.ReadyToTest()])
+    return launch.LaunchDescription([
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(LAUNCH),
+            launch_arguments={'port': str(PORT)}.items()),
+        launch_testing.actions.ReadyToTest(),
+    ])
+
+
+@unittest.skipUnless(HAVE_BRIDGE, 'foxglove_bridge not installed (rosdep installs it in CI)')
+class TestViz(unittest.TestCase):
+    """The bridge listens on localhost."""
+
+    def test_port_opens(self):
+        end = time.monotonic() + 20.0
+        err = None
+        while time.monotonic() < end:
+            try:
+                with socket.create_connection(('127.0.0.1', PORT), timeout=1.0):
+                    return
+            except OSError as exc:
+                err = exc
+                time.sleep(0.2)
+        self.fail(f'foxglove_bridge did not open 127.0.0.1:{PORT}: {err}')
+
+    def test_bridge_is_read_only(self):
+        """Capabilities exclude clientPublish/services/parameters (would bypass the supervisor)."""
+        from rcl_interfaces.srv import GetParameters
+        import rclpy
+        rclpy.init()
+        node = rclpy.create_node('viz_param_probe')
+        try:
+            cli = node.create_client(GetParameters, '/foxglove_bridge/get_parameters')
+            self.assertTrue(cli.wait_for_service(timeout_sec=20.0), 'no parameter service')
+            req = GetParameters.Request()
+            req.names = ['capabilities', 'client_topic_whitelist',
+                         'service_whitelist', 'param_whitelist']
+            fut = cli.call_async(req)
+            rclpy.spin_until_future_complete(node, fut, timeout_sec=10.0)
+            self.assertTrue(fut.done(), 'get_parameters timed out')
+            caps, client_wl, service_wl, param_wl = [
+                list(v.string_array_value) for v in fut.result().values]
+        finally:
+            node.destroy_node()
+            rclpy.shutdown()
+        for forbidden in ('clientPublish', 'services', 'parameters', 'parametersSubscribe'):
+            self.assertNotIn(forbidden, caps)
+        self.assertEqual(client_wl, ['^$'])
+        self.assertEqual(service_wl, ['^$'])
+        self.assertEqual(param_wl, ['^$'])

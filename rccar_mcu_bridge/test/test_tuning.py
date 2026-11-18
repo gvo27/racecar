@@ -99,3 +99,47 @@ def test_resolve_tuning_path_order(monkeypatch):
     monkeypatch.setenv('RCCAR_TUNING', '/env/t.toml')
     assert t.resolve_tuning_path('') == Path('/env/t.toml')
     assert t.resolve_tuning_path('/param/t.toml') == Path('/param/t.toml')
+
+
+def test_rangefinder_keys_present_and_max_before_min():
+    cmds = [cmd for (table, _k), cmd in t.FIRMWARE_KEYS if table == 'rangefinder']
+    assert set(cmds) == {
+        'SET rf_driver', 'SET rf_addr', 'SET rf_period_ms', 'SET rf_scale_m',
+        'SET rf_no_return', 'SET rf_min_m', 'SET rf_max_m', 'SET rf_fov_rad',
+        'SET rf_radiation'}
+    assert cmds.index('SET rf_max_m') < cmds.index('SET rf_min_m')
+
+
+_WIDTH = {'u': 10, 'd': 11, 'x': 8, 's': 16}
+
+
+def _worst_case_len(fmt):
+    """Length of ``fmt`` with every conversion at its worst-case width."""
+    def width(m):
+        prec = m.group(1)
+        conv = m.group(2)
+        if conv == 'f':
+            return 'x' * (8 + int(prec or 6))
+        return 'x' * _WIDTH[conv]
+    out = re.sub(r'%(?:0?\d*)?(?:\.(\d+))?(?:ll|l)?([udxsf])', width, fmt.replace('%%', '%'))
+    return len(out.replace('\\n', '\n'))
+
+
+def _joined_literal(src, marker):
+    """Adjacent C string literals of the statement whose first literal starts with marker."""
+    start = src.index('"' + marker)
+    end = src.index(',\n', start)
+    lits = re.findall(r'"((?:[^"\\]|\\.)*)"', src[start:end])
+    return ''.join(lits)
+
+
+def test_cfg_and_sens_lines_fit_reply_cap():
+    src = _firmware_source()
+    start = src.index('static void printConfig(')
+    cfg = _joined_literal(src[start:src.index('\n}\n', start)], 'CFG ')
+    assert cfg.startswith('CFG ') and cfg.count('%') > 10
+    assert _worst_case_len(cfg) <= 384, 'printConfig reply exceeds the 384-char cap'
+    start = src.index('static void handleLine(')
+    sens = _joined_literal(src[start:src.index('\n}\n', start)], 'SENS rangefinder ')
+    assert sens.count('%') > 10
+    assert _worst_case_len(sens) <= 384, 'SENS rangefinder reply exceeds the 384-char cap'

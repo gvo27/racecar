@@ -3,20 +3,25 @@ scope: infrastructure + comms layer (actuation, safety, host link, logging); ML 
 chassis: tamiya_tt02_1:10
 goals: [sensor_fusion, object_detection, semantic_slam, racing_trajectory_optimization]
 compute: {high_level: raspberry_pi_5 (ros2 jazzy in docker, deploy/car), real_time: esp32-s3-n16r8 (micro-ros client)}
-phase: 2 complete (ros2 actuator path, bench-verified)  # pi: mcu-agent+core(supervisor,mcu_bridge) -usb/micro-ros-> esp32 -pwm-> servo+esc; legacy ascii path removed
-next: phase 3 recorder/backup, phase 4 sensors
+phase: 2 complete (ros2 actuator path, bench-verified); phase 4 lidar in progress (branch lidar: rccar_drivers mapper_driver + drivers container, compile/CI only, bench pending); phase 4 started: rangefinder driver (compile-only, awaiting bench)  # pi: mcu-agent+core(supervisor,mcu_bridge) -usb/micro-ros-> esp32 -pwm-> servo+esc; legacy ascii path removed
+next: power board rev A PCB: owner review and open items (docs/pcb/review/README.md), lab tech limits; phase 4 lidar bench (power from +5V_SENS, wlan0 on SLAMWARE AP, make viz checks), then phase 3 recorder/backup, phase 4 sensors (imu/encoder/battery, camera)
 plan: docs/docker_ros_plan.md
+sim: {repo: gvo27/racecar-sim (pins this repo via .repos), contract: docs/sensor_contract.md, skill: sim-parity, car.launch sim:=true = same nodes (mcu_bridge pushes tuning to the virtual esp32)}
 stack:
   mcu: {build: platformio in docker (docker/firmware.Dockerfile, image rccar-fw, make build/flash/monitor, FW_ENV=esp32s3), platform: espressif32@6.9.0, framework: arduino-esp32-2.0.17, comms: micro_ros_platformio jazzy serial uart0 (libdeps cached in .pio/libdeps), lang: c++gnu11}
-  ros: {distro: jazzy, image: docker/ros.Dockerfile (ros:jazzy-ros-base by digest, rosdep+colcon, target test/runtime), stack: deploy/car/compose.yaml (mcu-agent, core, tools), pkgs: [rccar_msgs, rccar_supervisor, rccar_mcu_bridge, rccar_teleop, rccar_calibration, rccar_bringup], make: [config, dev-setup, ros-image, car-up, car-down, ros-test, unit, teleop, calibrate, tune, test, mcu]}
+  ros: {distro: jazzy, image: docker/ros.Dockerfile (ros:jazzy-ros-base by digest, rosdep+colcon, target test/runtime), stack: deploy/car/compose.yaml (mcu-agent, core, drivers, tools), pkgs: [rccar_msgs, rccar_supervisor, rccar_mcu_bridge, rccar_teleop, rccar_calibration, rccar_bringup, rccar_drivers, rccar_description], make: [config, dev-setup, ros-image, car-up, car-down, drivers-stop, drivers-start, lidar-hw-test, ros-test, unit, teleop, calibrate, tune, test, mcu, rangefinder, viz, lidar-imu, lidar-snapshot, lidar-record, kicad-image, erc, pcb-build, pcb-route, pcb-check, pcb-mill-check, pcb-review, pcb-fab, pcb-test, bom]}
   host: {prereqs: [git, make, docker+compose+buildx, uv], groups: [docker, dialout], python: no system python; host dev tools only via uv (.venv from uv.lock: ruff, pyright, pytest; make setup runs make dev-setup = uv sync --frozen + direnv allow); make config runs in ros image, make unit in ros test image}
-hw: {steer: ds3225mg@gpio4, throttle: thw1060_esc@gpio5, battery: 2s_lipo}
+hw: {steer: ds3225mg@gpio4, throttle: thw1060_esc@gpio5, battery: 2s_lipo, rangefinder: garmin_lidar_lite_v4_led@esp32 i2c gpio8(sda,garmin pin3,white)/gpio9(scl,garmin pin4,green) 0x62, vin(pin1,red) 5v sensor rail, gnd(pin2,black)}
 usb_ports: {left_USB: native, planned regulated power input; right_COM: ch343 uart0, flashing + host link}
 layout: .claude/layout.yaml
+lab: docs/techctcarvera/  # the one pointer to the mill lab config (milling.toml: machine, bits, stock, rivets, limits; example/: lab CAM file + Fusion exports). Docs, rules, skills and agents name "the lab directory" and point here; tools read this line (pcb/libraries/lab.py); mill tools + waivers: tools/, milling_waivers.toml there. Another lab or repo => change this line only
+convention: .claude/ = general rules, skills, agents (no site values); docs/ = specific config and facts that change (lab, parts, board); this file = pointers between them, no config values
 cmd: make help
-plugins: .claude/settings.json  # superpowers, pyright-lsp, clangd-lsp, embedded-skills, ros2-engineering; no project mcp servers
-rules: .claude/rules/{firmware,dependencies,deploy,models,repos,claude-tooling,ros2,msgs,mcu_bridge,supervisor,calibration,tuning}.md  # path-scoped, see paths: frontmatter
-agents: .claude/agents/ros2-reviewer.md  # review diffs vs rules + ros2-engineering refs + stop-path checklist
+hooks: .claude/hooks/hw_guard.{sh,py}  # PreToolUse guard (sh launcher -> .venv python, make dev-setup; no .venv => ask): asks before hardware (re)starts, denies driver edits/rebuilds while drivers runs
+plugins: .claude/settings.json  # superpowers, pyright-lsp, clangd-lsp, embedded-skills, ros2-engineering, asd-ste100, claude-md-management, code-simplifier, caveman, kicad-happy; no project mcp servers
+rules: .claude/rules/{hw-testing,drivers,firmware,dependencies,deploy,models,repos,claude-tooling,ros2,msgs,mcu_bridge,supervisor,calibration,tuning,rangefinder,writing,schematics}.md  # path-scoped, see paths: frontmatter
+agents: .claude/agents/{ros2-reviewer,pcb-designer,pcb-worker,pcb-reviewer}.md  # ros2-reviewer: review diffs vs rules + ros2-engineering refs + stop-path checklist; pcb-designer: main-session kicad lead (claude --agent pcb-designer), dispatches pcb-worker (iterate) + pcb-reviewer (read-only review)
+skills: .claude/skills/{sim-parity,pcb-lab-config,pcb-parts,pcb-design-check,pcb-milling-check}/SKILL.md  # pcb-*: lab file (milling.toml in the lab directory, see lab:), parts + bom, check matrix + lessons.md, mill limits
 invariants:
   - esp32 role: actuator pwm + host comms only; powers nothing
   - sensors on separate power rail, common ground, <=3.3v signals
@@ -24,10 +29,13 @@ invariants:
   - protocol/interface change => rccar_msgs + firmware/esp32/extra_packages (diff -r clean) + main.cpp + rccar_mcu_bridge + docs
   - tuning key change => tuning.toml + rccar_mcu_bridge.tuning.FIRMWARE_KEYS + main.cpp setKey (test-enforced: rccar_mcu_bridge/test/test_tuning.py)
   - supervisor = sole publisher of /rccar/mcu/drive; brake/disarm latch, arm = Reset(incident) -> armed but stationary
-  - agents never run hardware fault-injection tests (kill core, unplug usb, motor runs); bench checklist is user-run (docs/setup.md)
+  - agents never run hardware fault-injection tests (kill core, unplug usb, motor runs); bench checklist is user-run (docs/setup.md). Exception: read-only `make lidar-hw-test`, `make lidar-snapshot`, `make lidar-record` (launch_testing vs the physical lidar, stationary car) IS allowed on the Pi
+  - lidar: `make drivers-stop` before changing/rebuilding rccar_drivers|rccar_description (hook-enforced)
+  - no hardware (re)start (drivers-start, car-up, flash, compose up/restart, systemctl, reboot) without explicit human approval, regardless of auto mode (hook asks)
   - usb replug => make car-down && make car-up (device node in mcu-agent container goes stale)
   - software stop is not safety-rated; esc power switch = hardware stop
   - no unconfirmed parameters in tuning.toml
+  - new sensor => .claude/rules/<sensor>.md linking all docs/datasheets + docs/datasheets/<sensor>_<model>.md; sensor characteristics are tuning params, device protocol in a driver file
   - new deps => package.xml (rosdep) or a Dockerfile, never host; host dev tools => uv dev group (pyproject.toml + uv.lock); pin versions, no :latest
   - firmware paths: firmware/esp32/**
 workflow:  # details: .claude/rules/claude-tooling.md
@@ -35,4 +43,6 @@ workflow:  # details: .claude/rules/claude-tooling.md
   - non-trivial change => superpowers brainstorming -> writing-plans (docs/plans/) -> test-driven-development -> requesting-code-review
   - bug => superpowers systematic-debugging first
   - tests: no system python (host dev tools via uv only); deploy/ python => make unit (ros test image); ros => make ros-test (colcon test in docker); firmware => make build (compile, CI) + bench make test (hardware, user-run; never claim without output)
+  - every PR body = .github/pull_request_template.md with user-run bench checklist (deploy + deps + feature checks)
+  - all project text (docs, .claude/*, PR/commit/review text, user-facing strings) => asd-ste100 STE: strict for .claude/procedures/errors, ste-flavored for prose; keep facts+hedges; .claude/rules/writing.md
   - after code edits => check lsp diagnostics (pyright, clangd; make compiledb for firmware)
