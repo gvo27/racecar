@@ -1,6 +1,6 @@
-# Design rules of the rev B release: a frozen copy of the mill tuning file (design_rules.toml in the lab directory)
-# on 2026-11-17, when pcb/mill was copied to pcb/releases/rev_B. Do not tune this file: tune the lab file and pcb/mill.
-# Rev B uses the JST XH headers. The solder-wire pads of the first print round (pcb/mill) are not in this release.
+# Design rules of the rev2 release: a frozen copy of the mill tuning file (design_rules.toml in the lab directory)
+# on 2026-11-17, when pcb/mill was copied to pcb/releases/rev2. Do not tune this file: tune the lab file and pcb/mill.
+# Rev2 uses the JST XH headers. The solder-wire pads of the first print round (pcb/mill) are not in this release.
 # Keys and checks: pcb/libraries/rules.py. milling.toml of the lab directory holds the machine facts.
 # A value here must not be below the lab limit of the same name in milling.toml.
 # Each value has status = "confirmed" or "assumed" and a source. Assumed values stay assumed until the lab tech confirms them.
@@ -62,19 +62,19 @@ source = "owner 2026-11-16: increase the spacing between different components, 2
 value = 2.0
 unit = "mm"
 status = "assumed"
-source = "rev A value 1.5 mm, raised to component_gap"
+source = "rev1 value 1.5 mm, raised to component_gap"
 
 [edge_clearance]
 value = 0.5
 unit = "mm"
 status = "assumed"
-source = "rev A value (lab limit edge_clearance). Not raised: the GND strip west of J11 needs the room"
+source = "rev1 value (lab limit edge_clearance). Not raised: the GND strip west of J11 needs the room"
 
 [edge_band]
 value = 2.0
 unit = "mm"
 status = "assumed"
-source = "rev A value (route_pcb.py): the router keeps tracks out of this band along the outline"
+source = "rev1 value (route_pcb.py): the router keeps tracks out of this band along the outline"
 
 # Annular ring of a pad with a hole. XH pins (2.5 mm pitch) limit this value: a larger ring closes the gap between the pins.
 [annular_min]
@@ -101,17 +101,17 @@ source = "largest width that leaves an XH pin (2.5 mm pitch, 1.95 mm pad) with 0
 [netclass.HighCurrent]
 track_width = 6.0
 status = "assumed"
-source = "rev A value (copper for the F1 rating)"
+source = "rev1 value (copper for the F1 rating)"
 
 [netclass.Power3A]
 track_width = 1.3
 status = "assumed"
-source = "rev A value 1.0 mm, raised to the Default target (J3.2 and J4.2 are XH pins)"
+source = "rev1 value 1.0 mm, raised to the Default target (J3.2 and J4.2 are XH pins)"
 
 [netclass.Power5A]
 track_width = 1.6
 status = "assumed"
-source = "rev A value. Not raised: the Pololu pin pitch (2.54 mm) limits the necks at the module pads to 1.9 mm"
+source = "rev1 value. Not raised: the Pololu pin pitch (2.54 mm) limits the necks at the module pads to 1.9 mm"
 
 # Parts with a pad gap that the footprint fixes: the 2 mm copper gap is not possible at their pads. `clearance` is the gap
 # that a pour or a planned zone keeps from their pads (zones = true), or the gap between the pads of one part only

@@ -1,4 +1,4 @@
-"""Write the review files for the rev A board into the review directory of the board (paths.review_dir()). Make target: pcb-review.
+"""Write the review files for the rev1 board into the review directory of the board (paths.review_dir()). Make target: pcb-review.
 
   drc.json                     kicad-cli DRC with schematic parity
   milling_check.json           milling check (groups: errors, waived, questions, bits, warnings)

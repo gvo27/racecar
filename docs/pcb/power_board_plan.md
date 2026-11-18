@@ -25,11 +25,11 @@ Everything hangs off one fused `VBAT` bus: a single replaceable main fuse protec
 
 **How the work flows.** You draw the schematic (a logical wiring diagram), assign each symbol a physical footprint, lay out the PCB (where copper actually goes), and export Gerber files that a fab house (JLCPCB, PCBWay, OSH Park) turns into a board. This guide gets you through the schematic in detail and sketches the later steps so you and the reviewer share vocabulary.
 
-> **Rev A is milled in-house** on the lab's Makera Carvera from 2 oz double-sided FR-4 (no plated holes; vias are LPKF EasyContac 0.8 mm rivets from the lab kit, 1.1 mm drill, 2.0 mm pad). The repo's `docs/pcb/fab_handoff.md` part A has the milling workflow; the fab-house steps in this guide apply to later revisions.
+> **Rev1 is milled in-house** on the lab's Makera Carvera from 2 oz double-sided FR-4 (no plated holes; vias are LPKF EasyContac 0.8 mm rivets from the lab kit, 1.1 mm drill, 2.0 mm pad). The repo's `docs/pcb/fab_handoff.md` part A has the milling workflow; the fab-house steps in this guide apply to later revisions.
 
 **What a good review draft contains:** a clean, readable schematic PDF; the KiCad project folder (zipped or in git); the power budget table below; and a list of open questions. Reviewers spend their time on design when the drawing itself is tidy, so the formatting section matters as much as the electrical one.
 
-> **Repo note:** the KiCad project is in `pcb/releases/rev_A/`; see `README.md` next to this file. The invariant "ESP32 powers nothing" from the project rules is what this board makes true.
+> **Repo note:** the KiCad project is in `pcb/releases/rev1/`; see `README.md` next to this file. The invariant "ESP32 powers nothing" from the project rules is what this board makes true.
 
 ## Electrical background for a first board
 
@@ -376,7 +376,7 @@ The widths assume 2 oz copper and a 10 to 20 °C rise, from the table in the bac
 
 1. **File → Fabrication Outputs → Gerbers (.gbr)…**, click **Plot**, then **Generate Drill Files…** in the same window.
 2. Open the output in KiCad's **Gerber Viewer** to check that every layer looks right.
-3. Later revisions only (rev A is CNC-milled, see fab\_handoff.md part A): zip the folder and upload it to a fab such as JLCPCB, PCBWay or OSH Park. Choose 2 layers, 1.6 mm thickness, **2 oz outer copper**, HASL or ENIG finish.
+3. Later revisions only (rev1 is CNC-milled, see fab\_handoff.md part A): zip the folder and upload it to a fab such as JLCPCB, PCBWay or OSH Park. Choose 2 layers, 1.6 mm thickness, **2 oz outer copper**, HASL or ENIG finish.
 4. Order a small batch (often 5) first and bring it up one rail at a time with a bench supply and current limit before ever connecting the LiPo.
 
 ## Before you send it, and what to ask

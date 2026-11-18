@@ -1,18 +1,18 @@
-# Design rules of the rev A board (fab house quality). Format and keys: pcb/libraries/rules.py, docs in docs/pcb/README.md.
-# These are the values of the rev A design. `make pcb-rules` (base board) checks that the KiCad project files agree.
+# Design rules of the rev1 board (fab house quality). Format and keys: pcb/libraries/rules.py, docs in docs/pcb/README.md.
+# These are the values of the rev1 design. `make pcb-rules` (base board) checks that the KiCad project files agree.
 # The mill prototype uses a different file: design_rules.toml in the lab directory.
 
 [horizontal_error]
 value = 0.0
 unit = "mm"
 status = "confirmed"
-source = "rev A design: no allowance for a horizontal error of the mill"
+source = "rev1 design: no allowance for a horizontal error of the mill"
 
 [cut_spacing_min]
 value = 0.9
 unit = "mm"
 status = "confirmed"
-source = "rev A design: track_min 0.5 + clearance 0.4"
+source = "rev1 design: track_min 0.5 + clearance 0.4"
 
 [clearance]
 value = 0.4
@@ -30,25 +30,25 @@ source = "rc_power_board.kicad_pro min_track_width"
 value = 0.5
 unit = "mm"
 status = "confirmed"
-source = "build_pcb.py add_zone (rev A)"
+source = "build_pcb.py add_zone (rev1)"
 
 [zone_clearance]
 value = 0.4
 unit = "mm"
 status = "confirmed"
-source = "build_pcb.py add_zone (rev A)"
+source = "build_pcb.py add_zone (rev1)"
 
 [component_gap]
 value = 0.0
 unit = "mm"
 status = "confirmed"
-source = "rev A design: no minimum courtyard gap (0 = no check). Courtyards must not overlap"
+source = "rev1 design: no minimum courtyard gap (0 = no check). Courtyards must not overlap"
 
 [module_gap]
 value = 1.5
 unit = "mm"
 status = "confirmed"
-source = "check_board.py MODULE_GAP_MM (rev A): body gap >= 2.0 mm, +-0.3 mm edge tolerance, heat"
+source = "check_board.py MODULE_GAP_MM (rev1): body gap >= 2.0 mm, +-0.3 mm edge tolerance, heat"
 
 [edge_clearance]
 value = 0.5
@@ -60,7 +60,7 @@ source = "rc_power_board.kicad_pro min_copper_edge_clearance"
 value = 2.0
 unit = "mm"
 status = "confirmed"
-source = "route_pcb.py EDGE_BAND (rev A): the router keeps tracks out of this band along the outline"
+source = "route_pcb.py EDGE_BAND (rev1): the router keeps tracks out of this band along the outline"
 
 [annular_min]
 value = 0.45
@@ -72,7 +72,7 @@ source = "rc_power_board.kicad_pro min_via_annular_width"
 value = 0.45
 unit = "mm"
 status = "confirmed"
-source = "rev A design: same as annular_min (no larger rings)"
+source = "rev1 design: same as annular_min (no larger rings)"
 
 [netclass.Default]
 track_width = 0.5

@@ -1,4 +1,4 @@
-"""Placement of the rev A power board (pcb/releases/rev_A). First-build data for build_pcb.py.
+"""Placement of the rev1 power board (pcb/releases/rev1). First-build data for build_pcb.py.
 
 Board data only. pcb/libraries/placement.py loads this file and adds the lab frame.
 

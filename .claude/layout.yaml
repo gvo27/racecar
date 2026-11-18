@@ -30,7 +30,7 @@ paths:
   docs/: {role: setup.md, docker_ros_plan.md, tuning-notes.txt; stale docs and done plans in docs/archive/, colcon_ignore: true}
   docs/sensor_contract.md: {role: "hardware-boundary ssot: topics, types, frames, qos, tf, device facts; racecar-sim copies it", rules: .claude/skills/sim-parity/SKILL.md, invariants: ["active rows == code (deploy/tests/test_contract.py)", "boundary change => contract + Sim impact PR section"]}
   .claude/skills/sim-parity/: {role: project skill; boundary change -> contract rows + racecar-sim artifacts + Sim impact}
-  pcb/: {role: "power distribution board: kicad project per board (rev A release = pcb/releases/rev_A, the base board; rev B release = pcb/releases/rev_B, frozen mill board with headers; pcb/mill = mill prototype, made by make pcb-all BOARD=mill, temporary wire pads), design_rules.toml per board (mill: lab directory), shared lib (pcb/lib), board tools and python libraries (pcb/libraries); COLCON_IGNORE", rules: .claude/rules/schematics.md, phase: 1}
+  pcb/: {role: "power distribution board: kicad project per board (rev1 release = pcb/releases/rev1, the base board; rev2 release = pcb/releases/rev2, frozen mill board with headers; pcb/mill = mill prototype, made by make pcb-all BOARD=mill, temporary wire pads), design_rules.toml per board (mill: lab directory), shared lib (pcb/lib), board tools and python libraries (pcb/libraries); COLCON_IGNORE", rules: .claude/rules/schematics.md, phase: 1}
   docs/pcb/: {role: power board context (power_board_plan.md = spec, overview, bom notes, review, analysis), rules: .claude/rules/schematics.md, phase: 1}
   docs/datasheets/: {role: "archived datasheets + summaries (ds3225_servo.md, thw-1060-brushed-esc.md, rangefinder_lidar_lite_v4.md) + components_list.xlsx (ground truth inventory)", rules: .claude/rules/rangefinder.md}
   docs/rangefinder/: {role: "rangefinder bench status (owner), findings, open items", rules: .claude/rules/rangefinder.md, phase: 4}
@@ -46,7 +46,7 @@ paths:
   .claude/agents/pcb-reviewer.md: {role: project subagent; read-only review of schematic, board, bom, fab outputs; punch list with evidence, rules: .claude/rules/schematics.md, phase: 1}
   .claude/skills/pcb-lab-config/: {role: project skill; keeps the lab file milling.toml in the lab directory (lab: in .claude/CLAUDE.md; machine, bits, stock, rivets, limits; status + source per value), phase: 1}
   .claude/skills/pcb-parts/: {role: project skill; part choice, datasheet notes (docs/datasheets), bom in symbol fields (make bom), compatibility checks, phase: 1}
-  .claude/skills/pcb-design-check/: {role: project skill; check matrix (schematic, board, parts, fab outputs, principles) + lessons.md (lessons of the rev A board), phase: 1}
+  .claude/skills/pcb-design-check/: {role: project skill; check matrix (schematic, board, parts, fab outputs, principles) + lessons.md (lessons of the rev1 board), phase: 1}
   .claude/skills/pcb-milling-check/: {role: project skill; board vs the mill limits (make pcb-mill-check), phase: 1}
   "lab directory (lab: in .claude/CLAUDE.md)": {role: "mill lab config: milling.toml (milling limits + machine + lab inventory; one source for lab facts), example/ (lab CAM file + Fusion exports); copy it to seed another project", rules: .claude/skills/pcb-lab-config/SKILL.md, phase: 1}
   pcb/libraries/lab.py: {role: "reads the lab: line of .claude/CLAUDE.md (LAB_DIR env overrides); the only code path to the lab directory", phase: 1}

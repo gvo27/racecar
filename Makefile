@@ -22,9 +22,9 @@ ROS_BUILD_ARGS ?=
 # KiCad 10 + Freerouting for the power board (pcb/); images pinned by digest
 KICAD_IMAGE      ?= rccar-kicad:local
 FREEROUTING_IMAGE := ghcr.io/freerouting/freerouting:2.5.0@sha256:6c195891c9b1d62620c140784ab91285b9350d12d905693defe0162eb128cf8e
-# pcb/<BOARD>/ = one KiCad project (default: the rev A release). Shared Python libraries: pcb/libraries. Mill tools: tools/ of the lab directory (lab: in .claude/CLAUDE.md)
+# pcb/<BOARD>/ = one KiCad project (default: the rev1 release). Shared Python libraries: pcb/libraries. Mill tools: tools/ of the lab directory (lab: in .claude/CLAUDE.md)
 # base board = DEFAULT_BOARD in pcb/libraries/paths.py (test_rules checks that they agree)
-BASE_BOARD       := releases/rev_A
+BASE_BOARD       := releases/rev1
 BOARD            ?= $(BASE_BOARD)
 BOARD_DIR        := pcb/$(BOARD)
 PCB_LIBS         := $(CURDIR)/pcb/libraries
@@ -188,7 +188,7 @@ lidar-hw-test: _need-config _need-drivers-down  ## automated launch_testing agai
 	  -e RCCAR_HW_TEST=1 tools launch_test /ws/install/share/rccar_drivers/test_hw/test_mapper_hw.py || rc=$$?; \
 	  echo "drivers left stopped; restarting it is a hardware restart: ask the user (make drivers-start)"; exit $$rc
 
-# ---- power board (KiCad 10 in docker, pcb/<BOARD>, default releases/rev_A; no hardware) ------------------------
+# ---- power board (KiCad 10 in docker, pcb/<BOARD>, default releases/rev1; no hardware) ------------------------
 kicad-image:     ## build the KiCad 10 image (docker/kicad.Dockerfile -> rccar-kicad:local)
 	docker build -f docker/kicad.Dockerfile -t $(KICAD_IMAGE) .
 

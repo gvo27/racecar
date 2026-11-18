@@ -26,7 +26,7 @@ EDGE_BAND = float(os.environ.get("ROUTE_EDGE_BAND", RULES.edge_band))
 BOARD_CLEARANCE_UM = int(round(RULES.clearance * 1000))
 ROUTER_CLEARANCE_UM = BOARD_CLEARANCE_UM + 30  # the router rounds, so give it 0.03 mm more than the board clearance
 # Widen in steps: a track that cannot get its full net-class width gets the largest width that fits. Off for a board with
-# track_min = Default width (rev A: all or nothing, as routed).
+# track_min = Default width (rev1: all or nothing, as routed).
 STEP_WIDEN = RULES.track_width["Default"] > RULES.track_min + 1e-9
 
 
@@ -175,12 +175,12 @@ def fit_width(want, floor, step, collides):
 
 def widen_tracks(board):
     """The router narrows tracks near pads. Set each track back to its net-class width where that keeps the board
-    clearance to other-net copper on its layer. Rev A (STEP_WIDEN off): the full width or the router width.
+    clearance to other-net copper on its layer. Rev1 (STEP_WIDEN off): the full width or the router width.
     Board with STEP_WIDEN: the largest width that fits (steps of 0.1 mm), down to track_min. Such a track can get
     narrower than the router made it. A track that does not fit at its smallest width is printed (DRC finds it too)."""
     ns = board.GetDesignSettings().m_NetSettings
     clr = FromMM(RULES.clearance + 0.005)
-    # an [[exception]] lowers the clearance of a track to a pad only in the rev A form (not own_pads, not zones)
+    # an [[exception]] lowers the clearance of a track to a pad only in the rev1 form (not own_pads, not zones)
     clr_exc = {e.ref: FromMM(e.clearance + 0.005) for e in RULES.exceptions if not e.own_pads and not e.zones}
     items = {pcbnew.F_Cu: [], pcbnew.B_Cu: []}
     for layer in items:

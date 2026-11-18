@@ -17,7 +17,7 @@ import variant  # noqa: E402
 BASE = paths.base_board_dir()
 MILL = os.path.join(paths.PCB_DIR, "mill")
 MILL_RULES = os.path.join(lab.lab_dir(), rules.FILE_NAME)
-REV_B = os.path.join(paths.PCB_DIR, "releases", "rev_B")
+REV_B = os.path.join(paths.PCB_DIR, "releases", "rev2")
 XH = {"J3", "J4", "J5", "J8", "J9", "J11", "J12", "J13", "J14"}
 
 
@@ -196,7 +196,7 @@ class TestRingAndWidth(unittest.TestCase):
         self.assertEqual(route_pcb.fit_width(13, 5, 1, lambda w: w > 9), (9, True))
         self.assertEqual(route_pcb.fit_width(13, 5, 1, lambda w: False), (13, True))
         self.assertEqual(route_pcb.fit_width(13, 5, 1, lambda w: True), (5, False))   # floor collides: reported
-        self.assertEqual(route_pcb.fit_width(13, 5, 8, lambda w: w > 5), (5, True))   # rev A: full width or floor
+        self.assertEqual(route_pcb.fit_width(13, 5, 8, lambda w: w > 5), (5, True))   # rev1: full width or floor
         self.assertEqual(route_pcb.fit_width(5, 5, 1, lambda w: False), (5, True))
 
 

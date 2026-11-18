@@ -62,19 +62,19 @@ source = "owner 2026-11-16: increase the spacing between different components, 2
 value = 2.0
 unit = "mm"
 status = "assumed"
-source = "rev A value 1.5 mm, raised to component_gap"
+source = "rev1 value 1.5 mm, raised to component_gap"
 
 [edge_clearance]
 value = 0.5
 unit = "mm"
 status = "assumed"
-source = "rev A value (lab limit edge_clearance). Not raised: the GND strip west of J11 needs the room"
+source = "rev1 value (lab limit edge_clearance). Not raised: the GND strip west of J11 needs the room"
 
 [edge_band]
 value = 2.0
 unit = "mm"
 status = "assumed"
-source = "rev A value (route_pcb.py): the router keeps tracks out of this band along the outline"
+source = "rev1 value (route_pcb.py): the router keeps tracks out of this band along the outline"
 
 # Annular ring of a pad with a hole. XH pins (2.5 mm pitch) limit this value: a larger ring closes the gap between the pins.
 [annular_min]
@@ -101,17 +101,17 @@ source = "largest width that leaves an XH pin (2.5 mm pitch, 1.95 mm pad) with 0
 [netclass.HighCurrent]
 track_width = 6.0
 status = "assumed"
-source = "rev A value (copper for the F1 rating)"
+source = "rev1 value (copper for the F1 rating)"
 
 [netclass.Power3A]
 track_width = 1.3
 status = "assumed"
-source = "rev A value 1.0 mm, raised to the Default target (J3.2 and J4.2 are XH pins)"
+source = "rev1 value 1.0 mm, raised to the Default target (J3.2 and J4.2 are XH pins)"
 
 [netclass.Power5A]
 track_width = 1.6
 status = "assumed"
-source = "rev A value. Not raised: the Pololu pin pitch (2.54 mm) limits the necks at the module pads to 1.9 mm"
+source = "rev1 value. Not raised: the Pololu pin pitch (2.54 mm) limits the necks at the module pads to 1.9 mm"
 
 # Parts with a pad gap that the footprint fixes: the 2 mm copper gap is not possible at their pads. `clearance` is the gap
 # that a pour or a planned zone keeps from their pads (zones = true), or the gap between the pads of one part only
@@ -151,8 +151,8 @@ C8 = "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm"
 
 # TEMPORARY exception for the first print round only (owner 2026-11-17): the JST XH headers are not fitted. The wires
 # are soldered to the pads directly. `make pcb-sch` gives each part the footprint rc_power:SolderWire_1xNN_P2.50mm
-# (same pads and drills as the header, no body) and no part number. Rev B (pcb/releases/rev_B) keeps the headers.
+# (same pads and drills as the header, no body) and no part number. Rev2 (pcb/releases/rev2) keeps the headers.
 # Remove this table for the next print round.
 [parts.wire]
 refs = ["J3", "J4", "J5", "J8", "J9", "J11", "J12", "J13", "J14"]
-reason = "temporary, first mill print round only (owner 2026-11-17): solder the wires to the board directly instead of the JST XH headers. Next round: remove this table to get the headers back (rev B)"
+reason = "temporary, first mill print round only (owner 2026-11-17): solder the wires to the board directly instead of the JST XH headers. Next round: remove this table to get the headers back (rev2)"

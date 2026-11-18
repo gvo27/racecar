@@ -1,6 +1,6 @@
-"""Placement of the rev B release (a copy of pcb/mill on 2026-11-17, JST XH headers). It starts from the rev A placement (placement.py of the base board, paths.base_board_dir()) and changes it.
+"""Placement of the rev2 release (a copy of pcb/mill on 2026-11-17, JST XH headers). It starts from the rev1 placement (placement.py of the base board, paths.base_board_dir()) and changes it.
 
-Differences from rev A: no LEDs and LED resistors (`[parts] exclude` of the design rules). C2 to C8 are through-hole
+Differences from rev1: no LEDs and LED resistors (`[parts] exclude` of the design rules). C2 to C8 are through-hole
 capacitors with 5.0 mm lead pitch on the top side (`[parts.footprint]`). The 3.3 V nets are planned zones. Pads of
 two different parts on different nets are at least component_gap apart. Coordinates: mm from the outline's lower-left
 corner (x to the right, y up). pcb/libraries/placement.py loads this file.
@@ -62,7 +62,7 @@ _FINE = {"clearance": 0.34, "min_w": 0.5}
 _NEAR = {"clearance": 0.8, "min_w": 1.2}
 _NEAR_GND = {"clearance": 0.8, "min_w": 1.2, "keepout": False}
 
-# rev A zone rows that this board does not have or draws again: (net, x0, y0) of the rectangle
+# rev1 zone rows that this board does not have or draws again: (net, x0, y0) of the rectangle
 _DROP = {("+5V_CPU", 52.8, 49.4), ("+5V_CPU", 51.8, 52.2), ("+5V_CPU", 52.2, 54.4),          # C3, TP1, R1
          ("+5V_SENS", 27.2, 68.5), ("+5V_SENS", 27.2, 73.0), ("+5V_SENS", 27.2, 75.6),       # C5, TP2, R2
          ("+5V_SENS", 3.5, 82.3), ("+5V_SENS", 5.3, 87.5), ("+5V_SENS", 4.0, 98.1),          # J8/J11 bar, J9 branch
@@ -94,7 +94,7 @@ BUS_ZONES = [
     ("GND", _rect(20.4, 41.0, 25.5, 51.0), _NEAR),
     ("GND", _rect(48.4, 41.0, 53.5, 51.0), _NEAR),
 ] + [row for row in _base["BUS_ZONES"] if _keep(row)] + [
-    # +5V_SENS trunk: ends 0.1 mm inside the FB1 bar (y 99.1 to 100.9). The rev A trunk overlaps the whole bar end, and
+    # +5V_SENS trunk: ends 0.1 mm inside the FB1 bar (y 99.1 to 100.9). The rev1 trunk overlaps the whole bar end, and
     # the fill then leaves fragments of 0.003 mm2 there (MILL-ISLAND)
     ("+5V_SENS", _rect(26.1, 49.0, 28.0, 99.2)),
     ("+5V_CPU", _rect(54.0, 49.0, 56.0, 57.4)),
@@ -107,7 +107,7 @@ BUS_ZONES = [
     ("+5V_SENS", _rect(3.5, 82.3, 6.2, 90.5), _NEAR),
     ("+5V_SENS", _rect(5.9, 87.5, 7.7, 99.5), _NEAR),
     ("+5V_SENS", _rect(4.6, 98.1, 6.3, 99.7), _NEAR),
-    # VBAT at the module pins. The VIN necks are as wide as the pads (rev A rows) and go on north of the pin row to the
+    # VBAT at the module pins. The VIN necks are as wide as the pads (rev1 rows) and go on north of the pin row to the
     # stubs of the input capacitors. Board clearance (_NEAR): the GND pads are 0.64 mm from the VIN pads, and the GND
     # copper between the VIN neck and the 5 V trunk is then 2.8 mm wide. North of y 50.5 the neck is 1.3 mm wide: the
     # full width would be 1.2 mm from the GND pad of the input capacitor (C4.2, C2.2). 1.3 mm is above min_w
@@ -117,9 +117,9 @@ BUS_ZONES = [
     ("VBAT", _rect(46.2, 50.4, 47.5, 53.0), _NEAR),
     ("VBAT", _rect(16.6, 51.4, 20.38, 53.8)),           # C4.1
     ("VBAT", _rect(44.6, 51.4, 48.38, 53.8)),           # C2.1
-    ("VBAT", _rect(37.5, 7.9, 39.5, 11.5), _NEAR),      # stub to C1 (rev A row)
+    ("VBAT", _rect(37.5, 7.9, 39.5, 11.5), _NEAR),      # stub to C1 (rev1 row)
     # +5V_CPU: the bar from J6.1 to J7.1 is in line with the trunk (x 54 to 56), 2 mm from the GND pads J6.2 and J7.2
-    # (rev A: x 56 to 58). It goes on north of J7 to C3.1
+    # (rev1: x 56 to 58). It goes on north of J7 to C3.1
     ("+5V_CPU", _rect(54.0, 55.6, 56.0, 75.4)),
     ("+5V_CPU", _rect(54.0, 67.0, 60.1, 69.6)),
     # /LDO_IN: bar from FB1.2 to C6.1 and C7.1, and the two prongs to U3.1 and U3.3 (pad wide)
@@ -137,14 +137,14 @@ BUS_ZONES = [
     ("+3V3_SENS", _rect(57.0, 124.65, 61.6, 126.55), _NEAR),
 ]
 
-# Copper width rows: the rev A rows, plus the 3.3 V chain (planned zones on this board).
+# Copper width rows: the rev1 rows, plus the 3.3 V chain (planned zones on this board).
 PATH_ROWS = list(_base["PATH_ROWS"]) + [
     ("+3V3_SENS", "+3V3_SENS bar - J12/J13/J14", ["C8.1", "TP3.1", "J12.1", "J13.1", "J14.1"], 1.2),
     ("/LDO_IN", "LDO_IN bar FB1 - C6/C7", ["FB1.2", "C6.1", "C7.1"], "Default"),
 ]
 
-# U1_PG jumper: the B.Cu stub and its rivet are 0.8 mm further west than on rev A. The stub then has the Default width
-# with the board clearance to U1.2. Rev A: x = 40.4, 0.5 mm track.
+# U1_PG jumper: the B.Cu stub and its rivet are 0.8 mm further west than on rev1. The stub then has the Default width
+# with the board clearance to U1.2. Rev1: x = 40.4, 0.5 mm track.
 JUMPERS = [
     {"net": "/U1_PG", "pad_a": ("U1", "1"), "via_a": (39.6, 49.8),
      "stub_a": [(39.6, 43.89)],

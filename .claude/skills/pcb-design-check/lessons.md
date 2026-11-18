@@ -1,4 +1,4 @@
-# Lessons from the rev A power board
+# Lessons from the rev1 power board
 
 Each lesson has the event that caused it. Sources: PR #3, `docs/pcb/README.md`, `docs/pcb/review/README.md`, the git history of `pcb/` (before 2026-11-16 the project was in the schematics directory under `docs/`). Add a lesson when a review finds an error that a rule could prevent.
 

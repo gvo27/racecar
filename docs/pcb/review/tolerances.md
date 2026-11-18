@@ -1,4 +1,4 @@
-# Rev A power board: tolerances, margins, minimum spacing, trace widths
+# Rev1 power board: tolerances, margins, minimum spacing, trace widths
 
 Date: 2026-11-16. Board: `rc_power_board.kicad_pcb` on branch `schematic` at `91c04d0`.
 

@@ -22,7 +22,7 @@ DRU_RULE = re.compile(r'\(rule\s+(\S+)\s+\(condition\s+"([^"]*)"\)\s+\(constrain
 
 
 def condition(e):
-    """zones = false (rev A): the lower clearance is for the pads of the part against pads, tracks and vias, not zone fill.
+    """zones = false (rev1): the lower clearance is for the pads of the part against pads, tracks and vias, not zone fill.
     zones = true: against pads and zone fill, not tracks and vias. Note: build_pcb.py also puts the lower clearance on
     the pads then (the zone filler needs it), and KiCad DRC uses that pad value for tracks too. The milling check
     (MILL-GAP) reports a track that is too near such a pad."""
