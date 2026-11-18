@@ -1,6 +1,6 @@
 # Lab directory: in-house isolation milling (Makera Carvera)
 
-This directory holds the facts and files of one lab: the mill, its tools, the copper stock, the rivet kit and the lab CAM template. It also holds the mill tools and the waiver list of the milling check. It holds no board files. A board project reads it through one pointer: the `lab:` line of `.claude/CLAUDE.md`. In this repo, the board tools read that line through `pcb/tools/lab.py`. The environment variable `LAB_DIR` overrides it.
+This directory holds the facts and files of one lab: the mill, its tools, the copper stock, the rivet kit and the lab CAM template. It also holds the mill tools and the waiver list of the milling check. It holds no board files. A board project reads it through one pointer: the `lab:` line of `.claude/CLAUDE.md`. In this repo, the board tools read that line through `pcb/libraries/lab.py`. The environment variable `LAB_DIR` overrides it.
 
 ## Contents
 
@@ -10,7 +10,7 @@ This directory holds the facts and files of one lab: the mill, its tools, the co
 | `design_rules.toml` | The mill tuning file: the design rules for a board that this lab mills. See "Tune a prototype" below |
 | `review/` | Review files of the mill board `pcb/mill` (`make pcb-review BOARD=mill`, `make pcb-mill-check BOARD=mill`) and `README.md` with the results |
 | `milling_waivers.toml` | The waiver list for the milling check (skill `pcb-milling-check`) |
-| `tools/milling_check.py`, `tools/fab_export.py` | The mill tools: the milling check of a board against the lab file, and the fab export (DXF, Excellon) in the frame of the lab CAM template. Their tests are `tools/test_*.py`. They run in the KiCad image (`make pcb-mill-check`, `make pcb-fab`, `make pcb-test`) and import `lab.py`, `paths.py` and `placement.py` from `pcb/tools/` |
+| `tools/milling_check.py`, `tools/fab_export.py` | The mill tools: the milling check of a board against the lab file, and the fab export (DXF, Excellon) in the frame of the lab CAM template. Their tests are `tools/test_*.py`. They run in the KiCad image (`make pcb-mill-check`, `make pcb-fab`, `make pcb-test`) and import `lab.py`, `paths.py` and `placement.py` from `pcb/libraries/`. `pcb/libraries/placement.py` loads the board data from `placement.py` in the board directory (for example `pcb/mill/placement.py`) |
 | `example/README.md` | Facts read from the lab CAM file, the Fusion exports of the owner, and how to read a `.f3z` on Linux |
 | `example/Pcb DXF's amd copper plate.f3z` | The lab's calibrated Fusion 360 CAM template (demo panel of 6 boards, setups A, B and C) |
 | `example/demo_toolpaths_setupB.png` | Decoded toolpaths of setup B of the demo panel |

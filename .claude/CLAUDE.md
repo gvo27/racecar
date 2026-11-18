@@ -16,10 +16,10 @@ usb_ports: {left_USB: native, planned regulated power input; right_COM: ch343 ua
 layout: .claude/layout.yaml
 lab: docs/techctcarvera/  # the one pointer to the mill lab config (milling.toml: machine, bits, stock, rivets, limits; example/: lab CAM file + Fusion exports). Docs, rules, skills and agents name "the lab directory" and point here; tools read this line (pcb/libraries/lab.py); mill tools + waivers + mill tuning file: tools/, milling_waivers.toml, design_rules.toml there. Another lab or repo => change this line only
 convention: .claude/ = general rules, skills, agents (no site values); docs/ = specific config and facts that change (lab, parts, board); this file = pointers between them, no config values
-cmd: make help
+cmd: make help  # Claude Code session: make open (start), make close (end), scripts/{open,close}.py; car setup: make setup (once per host, builds images)
 hooks: .claude/hooks/hw_guard.{sh,py}  # PreToolUse guard (sh launcher -> .venv python, make dev-setup; no .venv => ask): asks before hardware (re)starts, denies driver edits/rebuilds while drivers runs
-plugins: .claude/settings.json  # superpowers, pyright-lsp, clangd-lsp, embedded-skills, ros2-engineering, asd-ste100, claude-md-management, code-simplifier, caveman, kicad-happy; no project mcp servers
-rules: .claude/rules/{hw-testing,drivers,firmware,dependencies,deploy,models,repos,claude-tooling,ros2,msgs,mcu_bridge,supervisor,calibration,tuning,rangefinder,writing,schematics}.md  # path-scoped, see paths: frontmatter
+plugins: .claude/settings.json  # owner of the default set (enabledPlugins); plugins that are off by default, enable per folder: .claude/rules/plugins.md; no project mcp servers
+rules: .claude/rules/{hw-testing,drivers,firmware,dependencies,deploy,models,repos,claude-tooling,ros2,msgs,mcu_bridge,supervisor,calibration,tuning,rangefinder,writing,schematics,plugins}.md  # path-scoped, see paths: frontmatter
 agents: .claude/agents/{ros2-reviewer,pcb-designer,pcb-worker,pcb-reviewer}.md  # ros2-reviewer: review diffs vs rules + ros2-engineering refs + stop-path checklist; pcb-designer: main-session kicad lead (claude --agent pcb-designer), dispatches pcb-worker (iterate) + pcb-reviewer (read-only review)
 skills: .claude/skills/{sim-parity,pcb-lab-config,pcb-parts,pcb-design-check,pcb-milling-check}/SKILL.md  # pcb-*: lab file (milling.toml in the lab directory, see lab:), parts + bom, check matrix + lessons.md, mill limits
 invariants:

@@ -37,10 +37,16 @@ REVIEW_DIR       := $(if $(filter $(BASE_BOARD),$(BOARD)),$(PCB_DOCS)/review,$(L
 KICAD_CFG        := $(CURDIR)/build/kicad-cfg
 KICAD_RUN        = docker run --rm --user $(shell id -u):$(shell id -g) -e HOME=/tmp -e XDG_CONFIG_HOME=$(KICAD_CFG) \
                    -e BOARD_DIR="$(CURDIR)/$(BOARD_DIR)" -v "$(CURDIR)":"$(CURDIR)" -w "$(CURDIR)/$(BOARD_DIR)" $(KICAD_IMAGE)
+# Session targets (make open / make close, template: skill setup-shop). Host tools outside the uv .venv.
+REQUIRED    := git make uv direnv docker
+RECOMMENDED := gh
+PYTHON_MIN  := 3.12
+# Other git repos that open and close also sync and check (fast-forward only).
+EXTRA_REPOS :=
 COMPOSE  := docker compose -f deploy/car/compose.yaml --env-file deploy/car/.env.generated
 
 .DEFAULT_GOAL := help
-.PHONY: help setup clean build pcb-rules pcb-sch pcb-all flash monitor fw-image config models compiledb unit check-dev dev-setup \
+.PHONY: help open close check-host setup clean build pcb-rules pcb-sch pcb-all flash monitor fw-image config models compiledb unit check-dev dev-setup \
         ros-image ros-test ros-test-image ros-test-run ros-shell car-up car-down car-ps car-logs car-pull \
         car-shutdown install-host teleop calibrate tune test rangefinder viz lidar-imu lidar-snapshot lidar-record mcu unit-run \
         drivers-stop drivers-start lidar-hw-test kicad-image erc pcb-build pcb-route pcb-check pcb-mill-check pcb-review pcb-fab pcb-test bom \
@@ -48,6 +54,36 @@ COMPOSE  := docker compose -f deploy/car/compose.yaml --env-file deploy/car/.env
 
 help:            ## list targets (grouped in README.md)
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-21s %s\n", $$1, $$2}'
+
+# ---- Claude Code session (not the car setup: that is make setup) -----------------------------
+open: check-host  ## start a Claude Code session: git fast-forward, uv sync + direnv allow, missing plugins, checklist; safe to rerun
+	uv run --no-project python scripts/open.py . $(EXTRA_REPOS)
+
+close:           ## end a Claude Code session: clean caches, report uncommitted/unpushed work and done plans; safe to rerun
+	uv run --no-project python scripts/close.py . $(EXTRA_REPOS)
+
+check-host:      ## check the host tools outside .venv (git, make, uv, direnv, docker); fails if a required one is missing
+	@fail=0; \
+	for c in $(REQUIRED); do \
+	  if command -v $$c >/dev/null; then echo "OK      $$c"; \
+	  elif [ $$c = uv ] && [ -x "$$HOME/.local/bin/uv" ]; then echo "MISSING uv on PATH: add ~/.local/bin to PATH"; fail=1; \
+	  else echo "MISSING $$c"; fail=1; fi; \
+	done; \
+	for c in $(RECOMMENDED); do \
+	  command -v $$c >/dev/null && echo "OK      $$c" || echo "WARN    $$c not found (recommended)"; \
+	done; \
+	if command -v uv >/dev/null; then \
+	  if p=$$(uv python find --system --no-project '>=$(PYTHON_MIN)' 2>/dev/null); then echo "OK      python>=$(PYTHON_MIN) ($$p)"; \
+	  else echo "MISSING system python>=$(PYTHON_MIN)"; fail=1; fi; \
+	fi; \
+	case " $(REQUIRED) " in *" docker "*) \
+	  if command -v docker >/dev/null && ! docker info >/dev/null 2>&1; then \
+	    echo "MISSING docker daemon access: start docker, or add your user to the docker group"; fail=1; fi;; \
+	esac; \
+	if command -v direnv >/dev/null && ! grep -qs 'direnv hook' ~/.bashrc ~/.zshrc ~/.config/fish/config.fish; then \
+	  echo "WARN    direnv hook not in shell rc: .venv will not load in your shell"; fi; \
+	if command -v gh >/dev/null && ! gh auth status >/dev/null 2>&1; then echo "WARN    gh not logged in: run gh auth login"; fi; \
+	exit $$fail
 
 # ---- setup / config -------------------------------------------------------------------------
 setup:           ## check host prereqs (git, make, docker + compose/buildx, uv), dev tools into .venv (dev-setup), build the firmware and ROS images; safe to rerun
