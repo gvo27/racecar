@@ -14,7 +14,9 @@ This project turns a 1:10 Tamiya TT-02 into a self-driving research platform. It
 | Simulation and training | separate repo [racecar-sim](https://github.com/gvo27/racecar-sim). The sim uses the topics in [docs/sensor_contract.md](docs/sensor_contract.md) |
 | All targets | `make help` |
 
-**Claude Code plugins.** `.claude/settings.json` lists the project plugins: superpowers, pyright-lsp, clangd-lsp, embedded-skills, ros2-engineering, asd-ste100, claude-md-management, code-simplifier and caveman. Accept the trust prompt, or install each one by hand. Then run `/reload-plugins`:
+**Claude Code session.** Start a session: `make open`. End a session: `make close`. These targets are for the Claude Code session only. `make setup` prepares the car host. `make open` needs `direnv` and `docker` on the host (`make check-host`). Install a missing host tool with your package manager, for example `sudo apt install direnv`.
+
+**Claude Code plugins.** `.claude/settings.json` (`enabledPlugins`) sets the plugins of a new session. Some domain plugins are off by default. `.claude/rules/plugins.md` tells which folder needs which plugin. To enable a plugin for one session, run `claude plugin enable <plugin> --scope local`, then `/reload-plugins`. `make open` installs the enabled plugins that are missing. To install one by hand, accept the trust prompt or run:
 
 ```bash
 claude plugin marketplace add JuliusBrussee/caveman@v4.1.0
