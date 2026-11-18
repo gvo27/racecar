@@ -1,4 +1,4 @@
-# Lessons from the rev A power board
+# Lessons from the rev1 power board
 
 Each lesson has the event that caused it. Sources: PR #3, `docs/pcb/README.md`, `docs/pcb/review/README.md`, the git history of `pcb/` (before 2026-11-16 the project was in the schematics directory under `docs/`). Add a lesson when a review finds an error that a rule could prevent.
 
@@ -57,3 +57,5 @@ Each lesson has the event that caused it. Sources: PR #3, `docs/pcb/README.md`, 
 41. **A check uses only the tools that the lab CAM uses.** The gap check used a 0.1 mm tip bit that the lab CAM does not have.
 42. **Isolation milling leaves the copper between the contours.** Ask the lab for a pocket operation where a floating piece lies between pads of different nets. Bare copper on the two faces needs insulation from the chassis and from module undersides.
 43. **Do not commit build debris.** A 90 MB Python core dump (file `core.1` in the schematics directory) was committed with a tool change. Run `git status` and read the file list before each commit.
+44. **Measure the gaps after a clearance exception.** A pad clearance applies to all zones of other nets, not only to the planned zone. The U1 and U2 exception (`zones = true`, 0.64 mm) let the GND pours come to 0.64 mm of the VOUT, VIN and VRP pads. DRC and the milling check passed, because the exception allowed it. Scan the gaps of the pours and the zones at the part after each exception.
+45. **Make the router result repeatable before a fix of a routed track.** Freerouting with more than one thread gives a different route from one run to the next. A fix that passed in one run failed in the next. Use `-mt 1`, then fix the placement.

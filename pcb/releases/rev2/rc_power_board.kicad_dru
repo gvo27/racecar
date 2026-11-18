@@ -1,0 +1,65 @@
+(version 1)
+
+# Made by pcb/libraries/gen_rules.py from the [[exception]] entries of the design rules (design_rules.toml).
+# Do not edit: change the design rules, then run `make pcb-rules`. Zone fill is not covered: a pour keeps the
+# zone clearance from these pads, unless the exception has zones = true.
+# U3: AP2112K, SOT-23-5: the gap between its own pads is 0.35 mm. Owner 2026-11-16: U3 stays SOT-23-5. 0.34 mm keeps the zone fill as far from the pads as the pads are from each other (0.01 mm for rounding)
+(rule U3_fine
+	(condition "A.Type == 'Pad' && A.Reference == 'U3' && B.Type != 'Track' && B.Type != 'Via'")
+	(constraint clearance (min 0.34mm))
+)
+# J3: JST-XH pin headers, 2.5 mm pitch, 0.6 mm between two pads. Lab tech notes: do not change the pin headers. Owner 2026-11-17: leave pin headers standardized
+(rule J3_fine
+	(condition "A.Type == 'Pad' && B.Type == 'Pad' && A.Reference == 'J3' && B.Reference == 'J3'")
+	(constraint clearance (min 0.6mm))
+)
+# J4: JST-XH pin headers, 2.5 mm pitch, 0.6 mm between two pads. Lab tech notes: do not change the pin headers. Owner 2026-11-17: leave pin headers standardized
+(rule J4_fine
+	(condition "A.Type == 'Pad' && B.Type == 'Pad' && A.Reference == 'J4' && B.Reference == 'J4'")
+	(constraint clearance (min 0.6mm))
+)
+# J5: JST-XH pin headers, 2.5 mm pitch, 0.6 mm between two pads. Lab tech notes: do not change the pin headers. Owner 2026-11-17: leave pin headers standardized
+(rule J5_fine
+	(condition "A.Type == 'Pad' && B.Type == 'Pad' && A.Reference == 'J5' && B.Reference == 'J5'")
+	(constraint clearance (min 0.6mm))
+)
+# J8: JST-XH pin headers, 2.5 mm pitch, 0.6 mm between two pads. Lab tech notes: do not change the pin headers. Owner 2026-11-17: leave pin headers standardized
+(rule J8_fine
+	(condition "A.Type == 'Pad' && B.Type == 'Pad' && A.Reference == 'J8' && B.Reference == 'J8'")
+	(constraint clearance (min 0.6mm))
+)
+# J9: JST-XH pin headers, 2.5 mm pitch, 0.6 mm between two pads. Lab tech notes: do not change the pin headers. Owner 2026-11-17: leave pin headers standardized
+(rule J9_fine
+	(condition "A.Type == 'Pad' && B.Type == 'Pad' && A.Reference == 'J9' && B.Reference == 'J9'")
+	(constraint clearance (min 0.6mm))
+)
+# J11: JST-XH pin headers, 2.5 mm pitch, 0.6 mm between two pads. Lab tech notes: do not change the pin headers. Owner 2026-11-17: leave pin headers standardized
+(rule J11_fine
+	(condition "A.Type == 'Pad' && B.Type == 'Pad' && A.Reference == 'J11' && B.Reference == 'J11'")
+	(constraint clearance (min 0.6mm))
+)
+# J12: JST-XH pin headers, 2.5 mm pitch, 0.6 mm between two pads. Lab tech notes: do not change the pin headers. Owner 2026-11-17: leave pin headers standardized
+(rule J12_fine
+	(condition "A.Type == 'Pad' && B.Type == 'Pad' && A.Reference == 'J12' && B.Reference == 'J12'")
+	(constraint clearance (min 0.6mm))
+)
+# J13: JST-XH pin headers, 2.5 mm pitch, 0.6 mm between two pads. Lab tech notes: do not change the pin headers. Owner 2026-11-17: leave pin headers standardized
+(rule J13_fine
+	(condition "A.Type == 'Pad' && B.Type == 'Pad' && A.Reference == 'J13' && B.Reference == 'J13'")
+	(constraint clearance (min 0.6mm))
+)
+# J14: JST-XH pin headers, 2.5 mm pitch, 0.6 mm between two pads. Lab tech notes: do not change the pin headers. Owner 2026-11-17: leave pin headers standardized
+(rule J14_fine
+	(condition "A.Type == 'Pad' && B.Type == 'Pad' && A.Reference == 'J14' && B.Reference == 'J14'")
+	(constraint clearance (min 0.6mm))
+)
+# U1: Pololu D36V50F5, 2.54 mm pin pitch, 0.64 mm between two pads. The planned necks at the module pads keep the board clearance, and the pours keep zone_clearance (review 2026-11-17: with zones = true the GND pours came 0.64 mm near the VOUT, VIN and VRP pads)
+(rule U1_fine
+	(condition "A.Type == 'Pad' && B.Type == 'Pad' && A.Reference == 'U1' && B.Reference == 'U1'")
+	(constraint clearance (min 0.64mm))
+)
+# U2: Pololu D36V50F5, 2.54 mm pin pitch, 0.64 mm between two pads. The planned necks at the module pads keep the board clearance, and the pours keep zone_clearance (review 2026-11-17: with zones = true the GND pours came 0.64 mm near the VOUT, VIN and VRP pads)
+(rule U2_fine
+	(condition "A.Type == 'Pad' && B.Type == 'Pad' && A.Reference == 'U2' && B.Reference == 'U2'")
+	(constraint clearance (min 0.64mm))
+)

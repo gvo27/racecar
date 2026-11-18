@@ -1,0 +1,158 @@
+# Mill tuning file: design rules for a board that this lab mills. EDIT THIS FILE to tune a prototype.
+# A board directory without its own design_rules.toml uses this file (pcb/mill). Keys and checks: pcb/libraries/rules.py.
+# After a change: `make pcb-all BOARD=mill` (rules -> zones -> route -> checks -> fab outputs).
+# milling.toml holds the machine facts (bit, depth, drills, stock). This file holds what the design must keep because the
+# mill is not accurate in X and Y. A value here must not be below the lab limit of the same name in milling.toml.
+# Each value has status = "confirmed" or "assumed" and a source. Assumed values stay assumed until the lab tech confirms them.
+
+# Position error of a cut in X or Y, for each side of a copper edge. The milling check needs
+# gap >= cut width + 2 x horizontal_error (rule MILL-GAP).
+[horizontal_error]
+value = 0.25
+unit = "mm"
+status = "assumed"
+source = "owner 2026-11-17 from the lab tech notes: the mill is not dialed in, assume a larger error than usual. Lab tech to measure"
+
+# Smallest distance between the centers of two isolation gaps. Copper between two gaps is then at least
+# cut_spacing_min - clearance wide ("copper_target"). Thinner copper is listed by rule MILL-CUT-SPACING.
+[cut_spacing_min]
+value = 2.0
+unit = "mm"
+status = "assumed"
+source = "lab tech notes (owner 2026-11-17): 2 mm spacing between cuts. Owner: this is the standard for areas that cannot have a 2 mm copper gap (pin headers, modules, U3)"
+
+# Copper gap between two nets (KiCad clearance, all net classes).
+[clearance]
+value = 0.8
+unit = "mm"
+status = "assumed"
+source = "cut width 0.292 mm + 2 x 0.25 mm horizontal error = 0.792 mm, rounded up. Tracks and pads. The pours use zone_clearance"
+
+# Hard minimum track width (DRC error below it). The router narrows a track to this width only at a pad that is
+# smaller than the track (0805, SOT-23-5).
+[track_min]
+value = 0.5
+unit = "mm"
+status = "assumed"
+source = "lab limit track_min (milling.toml). The target widths are in [netclass.*]"
+
+# Smallest width of zone copper (necks of the pours).
+[zone_min_width]
+value = 1.2
+unit = "mm"
+status = "assumed"
+source = "owner 2026-11-17: thicker copper. 1.5 mm removes the GND copper between the pins of an XH header and the board edge (1.45 mm), so 1.2 mm"
+
+# Gap between a pour and other copper.
+[zone_clearance]
+value = 2.0
+unit = "mm"
+status = "assumed"
+source = "owner 2026-11-17: 2 mm copper gap wherever possible. The pours and the planned zones keep 2 mm from other copper. Parts with an [[exception]] keep less at their pads"
+
+# Smallest gap between pads of two different parts on different nets, on one copper layer (rule MILL-COMP-GAP).
+# Not a courtyard gap: 2 mm between all courtyards does not fit the outline. 0 = no check.
+[component_gap]
+value = 2.0
+unit = "mm"
+status = "assumed"
+source = "owner 2026-11-16: increase the spacing between different components, 2 mm target"
+
+[module_gap]
+value = 2.0
+unit = "mm"
+status = "assumed"
+source = "rev1 value 1.5 mm, raised to component_gap"
+
+[edge_clearance]
+value = 0.5
+unit = "mm"
+status = "assumed"
+source = "rev1 value (lab limit edge_clearance). Not raised: the GND strip west of J11 needs the room"
+
+[edge_band]
+value = 2.0
+unit = "mm"
+status = "assumed"
+source = "rev1 value (route_pcb.py): the router keeps tracks out of this band along the outline"
+
+# Annular ring of a pad with a hole. XH pins (2.5 mm pitch) limit this value: a larger ring closes the gap between the pins.
+[annular_min]
+value = 0.45
+unit = "mm"
+status = "assumed"
+source = "lab limit annular_min (milling.toml). Not raised: JST-XH pin pitch"
+
+# Target track width for each net class. The router uses it where it fits and narrows only at small pads.
+# Annular ring that a THT pad gets when its part has room (hand soldering on holes without plating). build_pcb.py makes
+# the ring smaller, down to annular_min, until the pads of the part are component_gap apart. A part with an [[exception]]
+# keeps its pads.
+[annular_target]
+value = 0.8
+unit = "mm"
+status = "assumed"
+source = "owner 2026-11-17 from the lab tech notes: through-hole soldering is difficult. Start value"
+
+[netclass.Default]
+track_width = 1.3
+status = "assumed"
+source = "largest width that leaves an XH pin (2.5 mm pitch, 1.95 mm pad) with 0.8 mm to the next pin. 1.3 + 0.8 = 2.1 mm between cuts"
+
+[netclass.HighCurrent]
+track_width = 6.0
+status = "assumed"
+source = "rev1 value (copper for the F1 rating)"
+
+[netclass.Power3A]
+track_width = 1.3
+status = "assumed"
+source = "rev1 value 1.0 mm, raised to the Default target (J3.2 and J4.2 are XH pins)"
+
+[netclass.Power5A]
+track_width = 1.6
+status = "assumed"
+source = "rev1 value. Not raised: the Pololu pin pitch (2.54 mm) limits the necks at the module pads to 1.9 mm"
+
+# Parts with a pad gap that the footprint fixes: the 2 mm copper gap is not possible at their pads. `clearance` is the gap
+# that a pour or a planned zone keeps from their pads (zones = true), or the gap between the pads of one part only
+# (own_pads = true). Use one of the two forms. The checks list the smaller gaps, never hide them.
+[[exception]]
+ref = "U3"
+clearance = 0.34
+reason = "AP2112K, SOT-23-5: the gap between its own pads is 0.35 mm. Owner 2026-11-16: U3 stays SOT-23-5. 0.34 mm keeps the zone fill as far from the pads as the pads are from each other (0.01 mm for rounding)"
+zones = true  # the planned zones at U3 (placement.py of the board) use this clearance
+
+[[exception]]
+refs = ["J3", "J4", "J5", "J8", "J9", "J11", "J12", "J13", "J14"]
+clearance = 0.6
+reason = "JST-XH pin headers, 2.5 mm pitch, 0.6 mm between two pads. Lab tech notes: do not change the pin headers. Owner 2026-11-17: leave pin headers standardized"
+own_pads = true  # only the pads of one header are 0.6 mm apart. Tracks and zones keep the board clearance from them
+
+[[exception]]
+refs = ["U1", "U2"]
+clearance = 0.64
+reason = "Pololu D36V50F5, 2.54 mm pin pitch, 0.64 mm between two pads. The planned necks at the module pads keep the board clearance, and the pours keep zone_clearance (review 2026-11-17: with zones = true the GND pours came 0.64 mm near the VOUT, VIN and VRP pads)"
+own_pads = true  # only the pads of one module are 0.64 mm apart
+
+# Parts of the schematic that are not on a board with these rules.
+[parts]
+exclude = ["D2", "D3", "D4", "R1", "R2", "R3"]
+reason = "lab tech by the owner 2026-11-16: no surface mount LEDs on the milled board. R1 to R3 are the LED resistors"
+footprint_reason = "owner 2026-11-17: replace the 0805 capacitors (0.9 mm between the pads) with through-hole ceramic capacitors, 5.0 mm lead pitch (radial MLCC or disc, usual lab stock). The values stay as in the schematic"
+
+[parts.footprint]
+C2 = "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm"
+C3 = "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm"
+C4 = "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm"
+C5 = "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm"
+C6 = "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm"
+C7 = "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm"
+C8 = "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm"
+
+# TEMPORARY exception for the first print round only (owner 2026-11-17): the JST XH headers are not fitted. The wires
+# are soldered to the pads directly. `make pcb-sch` gives each part the footprint rc_power:SolderWire_1xNN_P2.50mm
+# (same pads and drills as the header, no body) and no part number. Rev2 (pcb/releases/rev2) keeps the headers.
+# Remove this table for the next print round.
+[parts.wire]
+refs = ["J3", "J4", "J5", "J8", "J9", "J11", "J12", "J13", "J14"]
+reason = "temporary, first mill print round only (owner 2026-11-17): solder the wires to the board directly instead of the JST XH headers. Next round: remove this table to get the headers back (rev2)"

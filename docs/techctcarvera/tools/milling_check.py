@@ -8,6 +8,7 @@ Exit: 0 = no unwaived error, 1 = unwaived errors (MILL-DEPTH counts), 2 = the ch
 Runs with the python3 of the KiCad image (pcbnew).
 """
 import argparse
+import dataclasses
 import json
 import math
 import sys
@@ -26,6 +27,7 @@ import lab  # noqa: E402
 FORBIDDEN_WAIVERS = ("MILL-FCU-THT", "MILL-RIVET-ACCESS")
 EPS = 1000  # 0.001 mm in nm: "touching" tolerance
 SLIVER_MIN_AREA_MM2 = 0.05  # ignores corner rounding of the opening test (0.013 mm2 per corner)
+THIN_MIN_AREA_MM2 = 0.5  # MILL-CUT-SPACING: ignores corners and pad necks of zone fills
 
 
 @dataclass
@@ -135,9 +137,10 @@ def triage(findings, waivers):
 
 
 class Ctx:
-    def __init__(self, board, lim):
+    def __init__(self, board, lim, rules=None):
         self.b = board
         self.lim = lim
+        self.rules = rules  # design rules of the board (pcb/libraries/rules.py) or None: lab limits only
         o = board.GetDesignSettings().GetAuxOrigin()
         self.ox, self.oy = o.x, o.y
 
@@ -146,8 +149,9 @@ class Ctx:
 
 
 class Item:
-    def __init__(self, shape, net, desc, pos, kind, layer):
+    def __init__(self, shape, net, desc, pos, kind, layer, ref=None):
         self.shape, self.net, self.desc, self.pos, self.kind, self.layer = shape, net, desc, pos, kind, layer
+        self.ref = ref  # footprint reference of a pad
         self.bbox = shape.BBox()
 
 
@@ -173,7 +177,7 @@ def collect(ctx, layer):
                 continue
             items.append(Item(p.GetEffectiveShape(layer), p.GetNetCode(),
                               "pad %s.%s %s net %s at %s" % (fp.GetReference(), p.GetNumber(), lname, p.GetNetname() or "-", ctx.xy(p.GetPosition())),
-                              p.GetPosition(), "pad", layer))
+                              p.GetPosition(), "pad", layer, fp.GetReference()))
     for z in b.Zones():
         if z.GetIsRuleArea() or not z.IsOnLayer(layer) or not z.IsFilled():
             continue
@@ -202,7 +206,12 @@ def check_gaps(ctx, out):
     widths = [(bt, cut_width(bt.tip, bt.angle, lim.depth_worst)) for bt in lim.bits]
     wmin = min(w for _, w in widths)
     wmax = max(w for _, w in widths)
-    reach = FromMM(wmax) + 1000
+    # design rules: the mill has a horizontal error on each side of a gap, so a gap must be wider than the cut
+    rules = ctx.rules
+    need = rules.gap_min(wmin) if rules else wmin
+    # a part with an [[exception]] that has zones = true: planned zone fill can be close to its pads
+    exc_zone = {e.ref for e in rules.exceptions if e.zones} if rules else set()
+    reach = FromMM(max(wmax, need)) + 1000
     for layer in copper_layers(ctx.b):
         items = collect(ctx, layer)
         for i in range(len(items)):
@@ -221,6 +230,13 @@ def check_gaps(ctx, out):
                 if d < wmin - 1e-6:
                     out.append(("MILL-GAP", "error", where, d, wmin,
                                 "gap %.3f mm is below the narrowest bit cut width %.3f mm at worst-case depth %.2f mm" % (d, wmin, lim.depth_worst)))
+                elif d < need - 1e-6:
+                    # a gap that the footprint fixes: two pads of one part, or zone fill at a pad of an exception part
+                    # with zones = true. Listed, not an error. A track or a pad of another part near such a pad is an error.
+                    fixed = bool(a.ref and a.ref == c.ref) or (a.kind == "zone" and c.ref in exc_zone) or (c.kind == "zone" and a.ref in exc_zone)
+                    out.append(("MILL-GAP-FIXED" if fixed else "MILL-GAP", "warning" if fixed else "error", where, d, need,
+                                "gap %.3f mm is below cut width %.3f mm + 2 x horizontal error %.2f mm = %.3f mm%s" % (
+                                    d, wmin, rules.horizontal_error, need, " (gap fixed by the footprint or an exception)" if fixed else "")))
                 elif d < wmax - 1e-6:
                     fits = [bt.name for bt, w in widths if w <= d + 1e-6]
                     out.append(("MILL-GAP-BIT", "warning", where, d, wmax,
@@ -398,6 +414,76 @@ def check_zones(ctx, out):
                                 area, lim.track_min, "zone fill has copper narrower than %.2f mm (%.2f mm2 removed by an opening test)" % (lim.track_min, area)))
 
 
+def check_cut_spacing(ctx, out):
+    """Design rules: copper between two isolation gaps must be at least copper_target wide (cut_spacing_min - clearance),
+    so that two cuts are cut_spacing_min apart. Lists tracks and zone copper that are thinner. Warnings: the owner and
+    the lab tech decide (a track is thin only where a small pad or a pin row gives no room)."""
+    rules = ctx.rules
+    if not rules or rules.copper_target <= rules.track_min + 1e-9:
+        return
+    target = rules.copper_target
+    for t in ctx.b.GetTracks():
+        if t.Type() == pcbnew.PCB_VIA_T:
+            continue
+        w = ToMM(t.GetWidth())
+        if w < target - 1e-6:
+            out.append(("MILL-CUT-SPACING", "warning", "track %s net %s at %s" % (ctx.b.GetLayerName(t.GetLayer()), t.GetNetname(), ctx.xy(t.GetStart())),
+                        w, target, "track %.2f mm wide, %.1f mm long: below the copper target %.2f mm (cut spacing %.1f mm - clearance %.2f mm)" % (
+                            w, ToMM(t.GetLength()), target, rules.cut_spacing_min, rules.clearance)))
+    r = FromMM(target / 2.0)
+    me = FromMM(0.005)
+    for z in ctx.b.Zones():
+        if z.GetIsRuleArea():
+            continue
+        for layer in copper_layers(ctx.b):
+            if not z.IsOnLayer(layer) or not z.IsFilled():
+                continue
+            fill = z.GetFilledPolysList(layer)
+            if fill.OutlineCount() == 0:
+                continue
+            a = pcbnew.SHAPE_POLY_SET(fill)
+            a.Inflate(FromMM(0.001), pcbnew.CORNER_STRATEGY_ROUND_ALL_CORNERS, me)
+            a.Deflate(FromMM(0.001), pcbnew.CORNER_STRATEGY_ROUND_ALL_CORNERS, me)
+            o = pcbnew.SHAPE_POLY_SET(a)
+            o.Deflate(r, pcbnew.CORNER_STRATEGY_ROUND_ALL_CORNERS, me)
+            o.Inflate(r, pcbnew.CORNER_STRATEGY_ROUND_ALL_CORNERS, me)
+            a.BooleanSubtract(o)
+            for i in range(a.OutlineCount()):
+                one = pcbnew.SHAPE_POLY_SET()
+                one.AddOutline(a.COutline(i))
+                area = abs(one.Area()) / 1e12
+                if area >= THIN_MIN_AREA_MM2:
+                    out.append(("MILL-CUT-SPACING", "warning", "zone fill %s net %s at %s" % (ctx.b.GetLayerName(layer), z.GetNetname(), ctx.xy(one.BBox().Centre())),
+                                area, target, "zone fill has copper narrower than the copper target %.2f mm (%.2f mm2 removed by an opening test)" % (target, area)))
+
+
+def check_component_gap(ctx, out):
+    """Design rules: pads of two different parts on different nets are at least component_gap apart on each copper layer.
+    The mill cuts between them, so close parts need an accurate cut. Two pads of one part are not checked here:
+    MILL-GAP and MILL-GAP-FIXED check them."""
+    rules = ctx.rules
+    if not rules or rules.component_gap <= 0:
+        return
+    gap = FromMM(rules.component_gap)
+    seen = {}
+    for layer in copper_layers(ctx.b):
+        pads = [it for it in collect(ctx, layer) if it.kind == "pad"]
+        for i, a in enumerate(pads):
+            abb = a.bbox.GetInflated(gap)
+            for c in pads[i + 1:]:
+                if a.ref == c.ref or (a.net != 0 and a.net == c.net) or not abb.Intersects(c.bbox):
+                    continue
+                if not a.shape.Collide(c.shape, gap - 1000):
+                    continue
+                d = distance_nm(a.shape, c.shape, gap)
+                key = tuple(sorted((a.ref, c.ref)))
+                if key not in seen or d < seen[key][0]:
+                    seen[key] = (d, "%s | %s" % (a.desc, c.desc))
+    for (ra, rb), (d, where) in sorted(seen.items()):
+        out.append(("MILL-COMP-GAP", "error", where, d, rules.component_gap,
+                    "pad gap %.2f mm between %s and %s is below the component gap %.2f mm" % (d, ra, rb, rules.component_gap)))
+
+
 def check_islands(ctx, out):
     """Per layer and net: union the fills of all same-net zones, then report
     each connected piece that touches no pad, track or via of the net."""
@@ -428,8 +514,14 @@ def check_islands(ctx, out):
                                 abs(isl.Area()) / 1e12, None, "zone island touches no item of net %s" % name))
 
 
-def check(board, limits):
-    ctx = Ctx(board, limits)
+def check(board, limits, rules=None):
+    """All findings. `rules` = the design rules of the board (pcb/libraries/rules.py). With them, the track, edge and ring
+    limits of the design replace the lab limits (they are never below them), and the design-rule checks run."""
+    if rules is not None:
+        limits = dataclasses.replace(limits, track_min=max(limits.track_min, rules.track_min),
+                                     edge_clear=max(limits.edge_clear, rules.edge_clearance),
+                                     annular_min=max(limits.annular_min, rules.annular_min))
+    ctx = Ctx(board, limits, rules)
     out = []
     check_depth(ctx, out)
     check_gaps(ctx, out)
@@ -440,6 +532,8 @@ def check(board, limits):
     check_edges(ctx, out)
     check_zones(ctx, out)
     check_islands(ctx, out)
+    check_cut_spacing(ctx, out)
+    check_component_gap(ctx, out)
     return out
 
 
@@ -465,9 +559,9 @@ def report(groups):
     return "\n".join(lines)
 
 
-def run(board_path, limits_path, waivers_path=None):
+def run(board_path, limits_path, waivers_path=None, rules=None):
     board = pcbnew.LoadBoard(board_path)
-    findings = check(board, load_limits(limits_path))
+    findings = check(board, load_limits(limits_path), rules)
     waivers = load_waivers(waivers_path) if waivers_path else []
     return findings, triage(findings, waivers)
 
@@ -477,10 +571,12 @@ def main(argv=None):
     ap.add_argument("board")
     ap.add_argument("--limits", default=None, help="default: milling.toml in the lab directory (lab.py)")
     ap.add_argument("--waivers")
+    ap.add_argument("--rules", default=None, help="design rules of the board. Default: design_rules.toml of the board directory, else of the lab directory")
     ap.add_argument("--json")
     args = ap.parse_args(argv)
     try:
-        findings, groups = run(args.board, args.limits or lab.limits_file(), args.waivers)
+        import rules as design_rules  # pcb/libraries
+        findings, groups = run(args.board, args.limits or lab.limits_file(), args.waivers, design_rules.load(args.rules))
     except Exception as exc:  # noqa: BLE001 - exit 2 = the check could not run
         print("milling-check: cannot run: %s" % exc, file=sys.stderr)
         return 2

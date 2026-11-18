@@ -22,13 +22,17 @@ ROS_BUILD_ARGS ?=
 # KiCad 10 + Freerouting for the power board (pcb/); images pinned by digest
 KICAD_IMAGE      ?= rccar-kicad:local
 FREEROUTING_IMAGE := ghcr.io/freerouting/freerouting:2.5.0@sha256:6c195891c9b1d62620c140784ab91285b9350d12d905693defe0162eb128cf8e
-# pcb/<BOARD>/ = one KiCad project (default: the rev A release). Shared Python libraries: pcb/libraries. Mill tools: tools/ of the lab directory (lab: in .claude/CLAUDE.md)
-BOARD            ?= releases/rev_A
+# pcb/<BOARD>/ = one KiCad project (default: the rev1 release). Shared Python libraries: pcb/libraries. Mill tools: tools/ of the lab directory (lab: in .claude/CLAUDE.md)
+# base board = DEFAULT_BOARD in pcb/libraries/paths.py (test_rules checks that they agree)
+BASE_BOARD       := releases/rev1
+BOARD            ?= $(BASE_BOARD)
 BOARD_DIR        := pcb/$(BOARD)
 PCB_LIBS         := $(CURDIR)/pcb/libraries
 PCB_DOCS         := docs/pcb
 LAB_DIR          := $(patsubst %/,%,$(shell sed -n "s/^lab:[[:space:]]*\\([^[:space:]]*\\).*/\\1/p" .claude/CLAUDE.md))
 LAB_TOOLS        := $(CURDIR)/$(LAB_DIR)/tools
+# review files: docs/pcb/review for the base board, review/ of the lab directory for a mill board (paths.review_dir)
+REVIEW_DIR       := $(if $(filter $(BASE_BOARD),$(BOARD)),$(PCB_DOCS)/review,$(LAB_DIR)/review)
 # global lib tables: kicad-cli in a bare container finds no stock libraries (false ERC warnings), so copy the templates
 KICAD_CFG        := $(CURDIR)/build/kicad-cfg
 KICAD_RUN        = docker run --rm --user $(shell id -u):$(shell id -g) -e HOME=/tmp -e XDG_CONFIG_HOME=$(KICAD_CFG) \
@@ -42,7 +46,7 @@ EXTRA_REPOS :=
 COMPOSE  := docker compose -f deploy/car/compose.yaml --env-file deploy/car/.env.generated
 
 .DEFAULT_GOAL := help
-.PHONY: help open close check-host setup clean build flash monitor fw-image config models compiledb unit check-dev dev-setup \
+.PHONY: help open close check-host setup clean build pcb-rules pcb-sch pcb-all flash monitor fw-image config models compiledb unit check-dev dev-setup \
         ros-image ros-test ros-test-image ros-test-run ros-shell car-up car-down car-ps car-logs car-pull \
         car-shutdown install-host teleop calibrate tune test rangefinder viz lidar-imu lidar-snapshot lidar-record mcu unit-run \
         drivers-stop drivers-start lidar-hw-test kicad-image erc pcb-build pcb-route pcb-check pcb-mill-check pcb-review pcb-fab pcb-test bom \
@@ -184,7 +188,7 @@ lidar-hw-test: _need-config _need-drivers-down  ## automated launch_testing agai
 	  -e RCCAR_HW_TEST=1 tools launch_test /ws/install/share/rccar_drivers/test_hw/test_mapper_hw.py || rc=$$?; \
 	  echo "drivers left stopped; restarting it is a hardware restart: ask the user (make drivers-start)"; exit $$rc
 
-# ---- power board (KiCad 10 in docker, pcb/<BOARD>, default releases/rev_A; no hardware) ------------------------
+# ---- power board (KiCad 10 in docker, pcb/<BOARD>, default releases/rev1; no hardware) ------------------------
 kicad-image:     ## build the KiCad 10 image (docker/kicad.Dockerfile -> rccar-kicad:local)
 	docker build -f docker/kicad.Dockerfile -t $(KICAD_IMAGE) .
 
@@ -192,6 +196,22 @@ _kicad-cfg:
 	@test -f $(KICAD_CFG)/kicad/10.0/sym-lib-table || { mkdir -p $(KICAD_CFG)/kicad/10.0 && \
 	  docker run --rm --user $(shell id -u):$(shell id -g) -v "$(KICAD_CFG)":/cfg $(KICAD_IMAGE) \
 	  sh -c 'cp /usr/share/kicad/template/sym-lib-table /usr/share/kicad/template/fp-lib-table /cfg/kicad/10.0/'; }
+
+pcb-rules: _kicad-cfg  ## check the KiCad project files of BOARD against its design rules (design_rules.toml); PCB_RULES_ARGS=--write changes them
+	$(KICAD_RUN) python3 $(PCB_LIBS)/gen_rules.py $(PCB_RULES_ARGS)
+
+pcb-sch: _kicad-cfg  ## make the schematic of a board variant (BOARD=mill) from the base schematic (BASE_BOARD) and its [parts] exclude list
+	$(KICAD_RUN) python3 $(PCB_LIBS)/variant.py
+
+# One command after a change of the design rules. The part positions stay (placement.py of the board is the source).
+pcb-all:         ## BOARD=mill: schematic variant, rules into the project, build from placement.py, route, checks, fab outputs, review files
+	$(MAKE) pcb-sch BOARD=$(BOARD)
+	$(MAKE) pcb-rules BOARD=$(BOARD) PCB_RULES_ARGS=--write
+	$(MAKE) pcb-build BOARD=$(BOARD) PCB_BUILD_ARGS=--force
+	$(MAKE) pcb-route BOARD=$(BOARD)
+	$(MAKE) pcb-fab BOARD=$(BOARD)
+	$(MAKE) pcb-review BOARD=$(BOARD)
+	$(MAKE) pcb-check BOARD=$(BOARD)
 
 erc: _kicad-cfg  ## KiCad ERC on the power board schematic (0 errors required; warnings are printed)
 	@mkdir -p "$(CURDIR)/build/erc"
@@ -209,7 +229,7 @@ pcb-route: _kicad-cfg  ## route the board from scratch (Freerouting 2.5.0): B.Cu
 	$(KICAD_RUN) python3 $(PCB_LIBS)/route_pcb.py dsn rc_power_board.kicad_pcb --dsn "$(CURDIR)/build/route/in.dsn"
 	docker run --rm --user $(shell id -u):$(shell id -g) -v "$(CURDIR)/build/route":/data --entrypoint java $(FREEROUTING_IMAGE) \
 	  -jar /app/freerouting-executable.jar --gui-enabled=false --api_server-enabled=false --user_data_path=/data/user \
-	  -de /data/in.dsn -do /data/out.ses -mp 40 > "$(CURDIR)/build/route/freerouting.log" 2>&1; tail -n 3 "$(CURDIR)/build/route/freerouting.log"
+	  -de /data/in.dsn -do /data/out.ses -mp 40 -mt 1 > "$(CURDIR)/build/route/freerouting.log" 2>&1; tail -n 3 "$(CURDIR)/build/route/freerouting.log"
 	$(KICAD_RUN) python3 $(PCB_LIBS)/route_pcb.py ses rc_power_board.kicad_pcb --ses "$(CURDIR)/build/route/out.ses"
 
 pcb-check: _kicad-cfg  ## DRC (with schematic parity) + board checks + milling check; fails on DRC errors, unconnected items, check_board problems
@@ -219,13 +239,13 @@ pcb-check: _kicad-cfg  ## DRC (with schematic parity) + board checks + milling c
 	$(KICAD_RUN) python3 $(PCB_LIBS)/drc_summary.py "$(CURDIR)/build/drc/drc.json"
 	$(KICAD_RUN) python3 $(PCB_LIBS)/check_board.py rc_power_board.kicad_pcb
 
-pcb-review: _kicad-cfg  ## write docs/pcb/review/: drc.json, milling_check.json, layer PDF, 1:1 PDF
+pcb-review: _kicad-cfg  ## write the review directory of BOARD (docs/pcb/review, or review/ of the lab directory for BOARD=mill): drc.json, milling_check.json, layer PDF, 1:1 PDF
 	$(KICAD_RUN) python3 $(PCB_LIBS)/review_plots.py
 
 pcb-mill-check: _kicad-cfg  ## milling check of the board vs the lab limits (milling.toml in the lab directory, waivers); exit 1 = unwaived errors
-	@mkdir -p "$(CURDIR)/$(PCB_DOCS)/review"
+	@mkdir -p "$(CURDIR)/$(REVIEW_DIR)"
 	$(KICAD_RUN) python3 $(LAB_TOOLS)/milling_check.py rc_power_board.kicad_pcb \
-	  --waivers "$(CURDIR)/$(LAB_DIR)/milling_waivers.toml" --json "$(CURDIR)/$(PCB_DOCS)/review/milling_check.json"
+	  --waivers "$(CURDIR)/$(LAB_DIR)/milling_waivers.toml" --json "$(CURDIR)/$(REVIEW_DIR)/milling_check.json"
 
 pcb-fab: _kicad-cfg  ## DXF (F.Cu, B.Cu, Edge.Cuts), Excellon and drill-map DXF for the lab's Fusion 360 template -> build/fab/<BOARD>/ (not committed), then test_fab
 	$(KICAD_RUN) python3 $(LAB_TOOLS)/fab_export.py rc_power_board.kicad_pcb --out "$(CURDIR)/build/fab/$(BOARD)"

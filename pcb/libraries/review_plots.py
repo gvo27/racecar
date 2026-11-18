@@ -1,4 +1,4 @@
-"""Write the review files for the rev A board into docs/pcb/review/. Make target: pcb-review.
+"""Write the review files for the rev1 board into the review directory of the board (paths.review_dir()). Make target: pcb-review.
 
   drc.json                     kicad-cli DRC with schematic parity
   milling_check.json           milling check (groups: errors, waived, questions, bits, warnings)
@@ -17,6 +17,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import lab  # noqa: E402
 import paths  # noqa: E402
+import rules  # noqa: E402
 import drc_summary  # noqa: E402
 import milling_check as mc  # noqa: E402
 
@@ -30,7 +31,7 @@ def run(cmd):
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--board", default=os.path.join(SCH_DIR, "rc_power_board.kicad_pcb"))
-    ap.add_argument("--out", default=os.path.join(paths.DOCS_DIR, "review"))
+    ap.add_argument("--out", default=paths.review_dir())
     args = ap.parse_args(argv)
     os.makedirs(args.out, exist_ok=True)
     drc = os.path.join(args.out, "drc.json")
@@ -41,7 +42,7 @@ def main(argv=None):
     run(["kicad-cli", "pcb", "export", "pdf", "--mode-single", "--layers", "Edge.Cuts,F.Fab,B.Fab", "--scale", "1",
          "--sketch-pads-on-fab-layers", "--drill-shape-opt", "2", "--black-and-white",
          "-o", os.path.join(args.out, "rc_power_board_1to1.pdf"), args.board])
-    findings, groups = mc.run(args.board, lab.limits_file(), lab.waivers_file())
+    findings, groups = mc.run(args.board, lab.limits_file(), lab.waivers_file(), rules.load())
     ser = {k: [list(f) for f in v] for k, v in groups.items() if k != "waived"}
     ser["waived"] = [{"finding": list(f), "waiver": w} for f, w in groups["waived"]]
     with open(os.path.join(args.out, "milling_check.json"), "w", encoding="utf-8") as fh:

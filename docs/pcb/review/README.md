@@ -1,4 +1,4 @@
-# Rev A power board: review package
+# Rev1 power board: review package
 
 Scope (owner, 2026-11-11): a valid, DRC-clean, routed KiCad PCB **for review only**. Task 9 (2026-11-13) adds the board fit to the lab's Fusion 360 template and the fab files (DXF, Excellon; `make pcb-fab`, written to `build/fab/<BOARD>/`, not committed). The CAM stays in the lab template. The milling rules still apply to the board.
 
@@ -55,7 +55,7 @@ Rebuild: `make kicad-image pcb-review`. All tools run in the pinned KiCad 10.0.8
 | DRC with schematic parity | 0 errors, 0 unconnected items, parity clean; 16 `lib_footprint_mismatch` warnings (see below) |
 | `make pcb-check` (`check_board.py`) | 0 problems: no F.Cu copper on a THT pad, every hole in the drill set or a bored hole of at least 3.3 mm in `MILLED_HOLES`, all vias 1.1/2.1 mm, no narrow HighCurrent track |
 | `make pcb-mill-check` | 0 unwaived errors, 0 waived, 0 MILL-GAP-BIT areas, 2 MILL-SLIVER warnings, 0 MILL-ISLAND warnings, 0 owner/lab-tech questions |
-| `make pcb-fab` | 5 files in `build/fab/releases/rev_A/`; `test_fab.py` 20 tests pass (copper area, holes vs `kicad-cli pcb export drill`, dowels) |
+| `make pcb-fab` | 5 files in `build/fab/releases/rev1/`; `test_fab.py` 20 tests pass (copper area, holes vs `kicad-cli pcb export drill`, dowels) |
 | `make pcb-test` | 131 tests pass |
 
 **MILL-DEPTH (resolved, Task 9).** The lab CAM cuts 0.08 mm deep in one pass (lab CAM file) and the owner says the blank is even (depth error 0). The minimum depth 0.08 mm is above the copper thickness of 0.070 mm, so the check passes. The margin is only 0.01 mm: a real depth error above 0.01 mm leaves copper in the isolation cut. The lab tech accepts this margin (2026-11-13). If necessary, the lab adds a second, deeper pass in the CAM file. No board change.

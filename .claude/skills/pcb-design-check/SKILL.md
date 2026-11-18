@@ -29,7 +29,7 @@ All commands run in the pinned KiCad 10 image (`make kicad-image` first). A resu
 The scripts use the Python standard library. Use the plugin directory of the installed version (`installPath` of `kicad-happy@kicad-happy` in `~/.claude/plugins/installed_plugins.json`). Run them with `python3` in the KiCad image, with the plugin directory mounted read-only. Write the output below `build/` or `docs/pcb/analysis/` (run directories are in `.gitignore`).
 
 ```
-docker run --rm --user $(id -u):$(id -g) -e HOME=/tmp -v "$PWD":"$PWD" -v "$KH":"$KH":ro -w "$PWD/pcb/releases/rev_A" rccar-kicad:local \
+docker run --rm --user $(id -u):$(id -g) -e HOME=/tmp -v "$PWD":"$PWD" -v "$KH":"$KH":ro -w "$PWD/pcb/releases/rev1" rccar-kicad:local \
   python3 "$KH/skills/kicad/scripts/analyze_pcb.py" rc_power_board.kicad_pcb --output "$PWD/build/analysis/pcb.json"
 ```
 

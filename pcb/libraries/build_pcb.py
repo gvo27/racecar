@@ -20,6 +20,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import lab  # noqa: E402
 import paths  # noqa: E402
 import placement  # noqa: E402
+import rules  # noqa: E402
 
 SCH_DIR = paths.board_dir()
 SCHEMATIC = "rc_power_board.kicad_sch"
@@ -27,11 +28,13 @@ BOARD_FILE = "rc_power_board.kicad_pcb"
 FP_DIR = os.environ.get("KICAD10_FOOTPRINT_DIR", "/usr/share/kicad/footprints")
 LIMITS_FILE = lab.limits_file()
 with open(LIMITS_FILE, "rb") as _fh:
-    DRILL_SET = sorted(tomllib.load(_fh)["drill_set"]["value"])  # owner's bit set (lab milling.toml)
-VIA_DRILL, VIA_PAD = 1.1, 2.1  # EasyContac 0.8 rivet
-ANNULAR_MIN = 0.45
+    _LAB = tomllib.load(_fh)
+DRILL_SET = sorted(_LAB["drill_set"]["value"])  # owner's bit set (lab milling.toml)
+VIA_DRILL, VIA_PAD = _LAB["via_drill"]["value"], _LAB["via_pad"]["value"]  # rivet via (lab milling.toml)
+RULES = rules.load()  # design rules of the board (design_rules.toml)
+ANNULAR_MIN = RULES.annular_min
 COPPER_MM = 0.070
-EDGE_INSET = 0.6
+EDGE_INSET = RULES.edge_clearance + 0.1  # the pour stops 0.1 mm inside the edge clearance (fill rounding)
 PIECE_MIN_MM2 = 200  # F.Cu pour pieces smaller than this are dropped unless connected (strips along the edge, slivers)
 BOARD_MM = 1.57
 # board position of the outline's lower-left corner (KiCad coordinates, y down, mm)
@@ -176,6 +179,63 @@ def fit_pad(pad, ref="", lib_pad=None):
         pad.SetSize(new)
 
 
+def ring_for(pads, target, minimum, gap):
+    """The largest annular ring from `target` down to `minimum` (steps of 0.05 mm) that keeps two pads of different
+    nets `gap` apart. pads: (x, y, drill, size_x, size_y, net) in mm. Pads of one net can touch (example: F1)."""
+    def size(p, ring):
+        return max(p[3], p[2] + 2 * ring), max(p[4], p[2] + 2 * ring)
+
+    ring = target
+    while ring > minimum + 1e-9:
+        ok = True
+        for i, a in enumerate(pads):
+            for c in pads[i + 1:]:
+                if a[5] == c[5]:
+                    continue
+                dist = ((a[0] - c[0]) ** 2 + (a[1] - c[1]) ** 2) ** 0.5
+                if dist - (max(size(a, ring)) + max(size(c, ring))) / 2.0 < gap - 1e-6:
+                    ok = False
+        if ok:
+            break
+        ring = round(ring - 0.05, 2)
+    return max(ring, minimum)
+
+
+def grow_rings(fp, ref):
+    """Design rules: give the THT pads of a part the larger annular ring `annular_target` (hand soldering on holes
+    without plating). The ring gets smaller in steps of 0.05 mm, down to `annular_min`, until the pads of different
+    nets of the part are `component_gap` apart (ring_for). A part with an [[exception]] (pin header, module) keeps its
+    pads."""
+    if RULES.annular_target <= ANNULAR_MIN + 1e-9 or RULES.exception_for(ref) is not None:
+        return
+    pads = [p for p in fp.Pads() if p.HasHole() and p.GetAttribute() != pcbnew.PAD_ATTRIB_NPTH]
+    if not pads:
+        return
+    holes = [(ToMM(p.GetPosition().x), ToMM(p.GetPosition().y), ToMM(p.GetDrillSize().x) / 2.0)
+             for p in fp.Pads() if p.GetAttribute() == pcbnew.PAD_ATTRIB_NPTH]
+    rows = []
+    for p in pads:
+        s = p.GetSize(pcbnew.F_Cu)
+        net = p.GetNetCode() if p.GetNetCode() > 0 else "pad%s" % p.GetNumber()  # no net: a net of its own
+        rows.append((ToMM(p.GetPosition().x), ToMM(p.GetPosition().y), max(ToMM(p.GetDrillSize().x), ToMM(p.GetDrillSize().y)),
+                     ToMM(s.x), ToMM(s.y), net))
+    ring = ring_for(rows, RULES.annular_target, ANNULAR_MIN, RULES.component_gap)
+    for p, r in zip(pads, rows):
+        cap = npth_cap(r, holes, RULES.component_gap)
+        p.SetSize(VECTOR2I(FromMM(max(r[3], min(r[2] + 2 * ring, cap))), FromMM(max(r[4], min(r[2] + 2 * ring, cap)))))
+
+
+def npth_cap(pad, holes, gap):
+    """Largest round pad size (mm) that keeps a pad `gap` from each unplated hole of its part, or the library gap if
+    that is smaller (example: F1, holder center hole). pad: (x, y, drill, size_x, size_y, net); holes: (x, y, radius)."""
+    cap = float("inf")
+    for hx, hy, hr in holes:
+        dist = ((pad[0] - hx) ** 2 + (pad[1] - hy) ** 2) ** 0.5
+        now = dist - hr - max(pad[3], pad[4]) / 2.0     # gap of the library pad
+        cap = min(cap, 2.0 * (dist - hr - min(gap, max(now, 0.0))))
+    return cap
+
+
 def add_outline(board):
     r = pcbnew.PCB_SHAPE(board)
     r.SetShape(pcbnew.SHAPE_T_RECT)
@@ -187,7 +247,7 @@ def add_outline(board):
     board.Add(r)
 
 
-def add_zone(board, net, layer, pts, connection, clearance=0.4, min_w=0.5, prio=0, name="", island_area_mm2=None):
+def add_zone(board, net, layer, pts, connection, clearance=RULES.zone_clearance, min_w=RULES.zone_min_width, prio=0, name="", island_area_mm2=None):
     z = pcbnew.ZONE(board)
     z.SetLayer(layer)
     z.SetNet(net)
@@ -242,8 +302,12 @@ def add_power_zones(board, netinfo):
     # F.Cu islands below PIECE_MIN_MM2 are removed (the pour joins B.Cu GND only through rivet vias).
     add_zone(board, gnd, pcbnew.F_Cu, outline, pcbnew.ZONE_CONNECTION_NONE, prio=0, name="GND_F", island_area_mm2=PIECE_MIN_MM2)
     add_zone(board, gnd, pcbnew.B_Cu, outline, pcbnew.ZONE_CONNECTION_FULL, prio=0, name="GND_B")
-    for i, (net, pts) in enumerate(placement.BUS_ZONES):
-        add_zone(board, netinfo[net], pcbnew.B_Cu, pts, pcbnew.ZONE_CONNECTION_FULL, prio=10 + i, name="BUS_%s_%d" % (net.lstrip("/"), i))
+    # a BUS_ZONES row is (net, points) or (net, points, {"clearance": mm, "min_w": mm, "keepout": bool}): a zone with
+    # its own clearance and width. "keepout": False = the router can put tracks in the area (route_pcb.py)
+    for i, row in enumerate(placement.BUS_ZONES):
+        net, pts, opts = row[0], row[1], dict(row[2] if len(row) > 2 else {})
+        opts.pop("keepout", None)
+        add_zone(board, netinfo[net], pcbnew.B_Cu, pts, pcbnew.ZONE_CONNECTION_FULL, prio=10 + i, name="BUS_%s_%d" % (net.lstrip("/"), i), **opts)
 
 
 def draw_stock(board):
@@ -299,7 +363,7 @@ def sync_zones(board_path):
     """Rebuild all zones of an existing board from placement.py and refill them. Parts, tracks and vias stay."""
     board = pcbnew.LoadBoard(board_path)
     old = list(board.Zones())
-    netinfo = {n: board.FindNet(n) for n in {"GND"} | {n for n, _ in placement.BUS_ZONES}}
+    netinfo = {n: board.FindNet(n) for n in {"GND"} | {row[0] for row in placement.BUS_ZONES}}
     add_power_zones(board, netinfo)
     for z in old:  # (the old zones go last: pcbnew Python loses the ZONE type after the last zone is removed)
         board.Remove(z)
@@ -313,6 +377,10 @@ def build(out_path, sch_dir=SCH_DIR):
     xml = os.path.join(tmp, "net.xml")
     export_netlist(sch_dir, xml)
     comps, nets = parse_netlist(xml)
+    # parts that are not on a board with these design rules ([parts] exclude): no footprint, no pad on a net
+    comps = {r: c for r, c in comps.items() if r not in RULES.exclude}
+    nets = {n: [(r, p) for r, p in nodes if r not in RULES.exclude] for n, nodes in nets.items()}
+    nets = {n: nodes for n, nodes in nets.items() if nodes}
 
     # project files next to the board: the net classes and rules of the .kicad_pro load with it
     out_dir = os.path.dirname(os.path.abspath(out_path))
@@ -357,6 +425,12 @@ def build(out_path, sch_dir=SCH_DIR):
             if net is not None and pad.GetNumber() != "":
                 pad.SetNet(net)
             fit_pad(pad, ref)
+            # [[exception]] with zones = true: the pad carries the lower clearance, so the zone filler uses it too
+            # (pcbnew Python fills zones without the custom rules of the .kicad_dru)
+            exc = RULES.exception_for(ref)
+            if exc is not None and exc.zones:
+                pad.SetLocalClearance(FromMM(exc.clearance))
+        grow_rings(fp, ref)
         x, y, rot, side = placement.PLACEMENT[ref]
         fp.SetPosition(pt(x, y))
         fp.SetOrientationDegrees(rot)

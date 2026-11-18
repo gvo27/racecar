@@ -2,7 +2,7 @@
 
 This file is the one source for the status of this proposal. Other docs point here and do not repeat the status.
 
-Status: **rejected for rev A.** Decision (owner, 2026-11-11): ship rev A with the keyed connector only. This file keeps the proposal for a later revision. Source: the body of PR #3 (2026-11-11), copied here before the merge into `main`.
+Status: **rejected for rev1.** Decision (owner, 2026-11-11): ship rev1 with the keyed connector only. This file keeps the proposal for a later revision. Source: the body of PR #3 (2026-11-11), copied here before the merge into `main`.
 
 Changes since the proposal:
 - U2 is now the Pololu D36V50F5, the same part as U1 (owner 2026-11-12). Both modules have their own reverse-voltage protection (`docs/datasheets/regulator_pololu_d36v50f5.md`).

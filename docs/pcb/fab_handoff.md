@@ -1,8 +1,8 @@
-# Layout and fab handoff (Rev A, KiCad 10)
+# Layout and fab handoff (Rev1, KiCad 10)
 
 For the owner doing layout. Parts: `bom.csv` and `bom_offboard.csv` (made by `make bom`; notes in `bom.md`). Design intent: `design_overview.md`. Widths come from the IPC tables in `power_board_plan.md`; nothing here is a verified machine or fab limit. **Provisional** = derived from the tool geometry below, not yet confirmed with the lab tech. Repo rule: unconfirmed => `TBD`.
 
-# A. Prototype rev A: in-house CNC (Makera Carvera)
+# A. Prototype rev1: in-house CNC (Makera Carvera)
 
 V-bit isolation milling in the lab's calibrated Fusion 360 template (`example/` in the lab directory ([`lab:` in `.claude/CLAUDE.md`](../../.claude/CLAUDE.md))), with DXF and Excellon files from `make pcb-fab` (`build/fab/<BOARD>/`, not committed; frame and file list: the docstring of `tools/fab_export.py` in the lab directory). The board is not fabricated by a fab house for this revision.
 
@@ -45,7 +45,7 @@ The project DRC rules in `rc_power_board.kicad_pro` are set to match: `min_clear
 
 **U3 flag (owner decides).** AP2112K SOT-23-5 pads are 0.6 mm wide at 0.95 mm pitch, so the gap is 0.35 mm, below 0.4 mm. Options: (1) custom U3 footprint with pads about 0.5 mm wide (gap about 0.45 mm); (2) accept a local DRC exception: Board Setup > Design Rules > Custom Rules, `(version 1) (rule U3_fine (condition "A.memberOfFootprint('U3') || B.memberOfFootprint('U3')") (constraint clearance (min 0.3mm)))`. Either way, mill U3 with the 60°/0.1 mm bit. 0805 passives are fine. XH pads (1.7 x 2.0 mm at 2.5 mm pitch) leave a 0.8 mm gap.
 
-## Rev A KiCad board (review only, 2026-11-11)
+## Rev1 KiCad board (review only, 2026-11-11)
 
 `rc_power_board.kicad_pcb` is built and routed headless in the pinned KiCad 10.0.8 image. It is for owner review. `make pcb-fab` makes the DXF and Excellon files for the lab's Fusion 360 template (Task 9). The CAM stays in the lab template and has not run for this board. The Gerber and MakeraCAM steps below are an older plan. Values marked "assumed" wait for the lab tech.
 
@@ -185,7 +185,7 @@ Verified against the kicad-cli netlist of `rc_power_board.kicad_sch`. J3/J4 curr
 
 **Layout rule:** place XH headers on the board edge, wire entry facing outward, pin 1 at the same end for all headers; leave slack in harness lengths until layout fixes positions.
 
-**Rev A exception (pending owner approval):** the B.Cu routing without rivets needs other turns. On the left edge, pin 1 is at the bottom, except J4 and J8 (pin 1 at the top). J6 and J7 are on the right edge with pin 1 at the top. J1 is turned 180 degrees (GND on the left, BAT+ on the right). The pin numbers of each connector and the crimp table are unchanged; only the orientation on the board changed. Header pin N still mates with housing cavity N, so crimping is not affected. J8 turned means the Garmin pins 1 to 4 run from the top to the bottom of the board.
+**Rev1 exception (pending owner approval):** the B.Cu routing without rivets needs other turns. On the left edge, pin 1 is at the bottom, except J4 and J8 (pin 1 at the top). J6 and J7 are on the right edge with pin 1 at the top. J1 is turned 180 degrees (GND on the left, BAT+ on the right). The pin numbers of each connector and the crimp table are unchanged; only the orientation on the board changed. Header pin N still mates with housing cavity N, so crimping is not affected. J8 turned means the Garmin pins 1 to 4 run from the top to the bottom of the board.
 
 ## External connections: JST PCB headers
 
@@ -209,7 +209,7 @@ Suggested top-entry vertical through-hole headers; MPNs are proposals. XH is 2.5
 
 # B. Later revisions: fab house
 
-Not the rev A path. Essentials if the board goes to a fab house:
+Not the rev1 path. Essentials if the board goes to a fab house:
 
 - Use the fab's published 2-layer capabilities or DRC rules file (not KiCad defaults); 1.6 mm board, 2 oz outer copper for HighCurrent; plated vias replace the rivets (restore small via sizes and 0.2 mm class clearance at that point).
 - Plot: F.Cu, B.Cu, F/B.Mask, F/B.Silkscreen, Edge.Cuts (F/B.Paste only if the fab assembles); Excellon drill plus drill map; zip and view in a Gerber viewer before upload.
@@ -217,7 +217,7 @@ Not the rev A path. Essentials if the board goes to a fab house:
 # Sign-off (both paths)
 
 - [ ] ERC clean (KiCad 10, owner-run)
-- [ ] DRC clean (rev A: table above)
+- [ ] DRC clean (rev1: table above)
 - [ ] 3D view check
 - [ ] Footprints vs real parts: U1 and U2 (D36V50F5 body 25.4 x 25.4 mm on the 1:1 print, standoff over the F.Cu pour, 1.8 mm parts under the module), J1 drill (12 AWG), F1 holder (FLR 178.6165) pins, XH header footprints
 - [ ] BOM reviewed (`bom.csv`, `bom_offboard.csv`)
@@ -230,4 +230,4 @@ Not the rev A path. Essentials if the board goes to a fab house:
 4. All `TBD` values in the schematic.
 5. U1 EN stays unconnected until the rev 2 prototype board.
 6. I2C pull-ups: bus is pulled up only by the Garmin's internal 13 kΩ; consider two DNP 0805 4.7-10 kΩ pull-up footprints to `+3V3_SENS` for a future IMU. Not drawn.
-7. Rev A CNC: bit list (incl. 1.1 mm for rivet holes), U3 footprint option.
+7. Rev1 CNC: bit list (incl. 1.1 mm for rivet holes), U3 footprint option.
