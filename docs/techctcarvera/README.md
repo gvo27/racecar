@@ -18,13 +18,36 @@ This directory holds the facts and files of one lab: the mill, its tools, the co
 
 ## Tune a prototype
 
-The mill is not accurate in X and Y. The board `pcb/mill` is a coarse copy of the rev A board for this mill. `design_rules.toml` holds all values that make it coarse. To change the board for the next prototype:
+The mill is not accurate in X and Y. The board `pcb/mill` is a coarse copy of the rev1 board for this mill. `design_rules.toml` holds all values that make it coarse. To change the board for the next prototype:
 
-1. Edit `design_rules.toml`. Set `status` and `source` of each value that you change.
-2. Run `make pcb-all BOARD=mill`. It makes the schematic variant, writes the rules into the KiCad project, builds the board from `pcb/mill/placement.py`, routes it, writes the fab outputs and the review files, and runs the checks.
-3. Run `make pcb-mill-check BOARD=mill`. Read the errors and the warnings.
-4. If a check fails, the parts or the planned zones do not fit the new values. Change `pcb/mill/placement.py`, then go to step 2.
-5. Commit `design_rules.toml`, `pcb/mill/` and `review/`.
+1. Run `make pcb-fab BOARD=mill` and mill the board from `build/fab/mill/` (DXF for F.Cu, B.Cu and Edge.Cuts, Excellon drill file, in the frame of the lab CAM template). The parts list is `pcb/mill/bom.csv`.
+2. Examine the board: bridges between nets, copper that lifted, pads that the cut damaged, holes that are off center, joints that were hard to solder. Use the symptom table below.
+3. Edit `design_rules.toml`. Set `status` and `source` of each value that you change (for example `status = "confirmed"`, `source = "lab tech 2026-11-20, prototype 1"`).
+4. Run `make pcb-all BOARD=mill`. It makes the schematic variant, writes the rules into the KiCad project, builds the board from `pcb/mill/placement.py`, routes it, writes the fab outputs and the review files, and runs the checks.
+5. Run `make pcb-mill-check BOARD=mill`. Errors stop the board. Warnings list the thin copper and the gaps that a footprint fixes.
+6. If a check fails, the parts or the planned zones do not fit the new values. Change `pcb/mill/placement.py`, then go to step 4.
+7. Commit `design_rules.toml`, `pcb/mill/` and `review/`.
+
+Rules for the loop:
+- `make pcb-all` builds the board again from `placement.py` with `--force`. Manual edits of `pcb/mill/rc_power_board.kicad_pcb` in the KiCad GUI are lost. Put each change into `placement.py` or `design_rules.toml`.
+- Do not edit the mill schematic, the net classes of the `.kicad_pro` or the `.kicad_dru` by hand. `make pcb-sch` and `make pcb-rules` make them.
+- Machine facts (bit, cut depth, drills, stock) are in `milling.toml`, not in the tuning file.
+- Do not tune a release in `pcb/releases/`. It has its own copy of the design rules.
+
+What to change for each symptom:
+
+| Symptom on the milled board | Key to change | Note |
+| --- | --- | --- |
+| Bridges, or cuts that touch the wrong copper | `horizontal_error` up, then `clearance` up to at least cut width + 2 x `horizontal_error` | Above 0.8 mm clearance the 1.3 mm tracks do not fit between XH pins: make `[netclass.*] track_width` smaller too |
+| Copper areas too near each other | `zone_clearance` | Pours and planned zones. Areas with a smaller gap are in `pcb/mill/placement.py` (`_NEAR`, `_NEAR_GND`, `_FINE`) |
+| Thin tracks lift or break | `[netclass.Default] track_width`, `cut_spacing_min` | `MILL-CUT-SPACING` lists copper below `cut_spacing_min` - `clearance` |
+| Thin pour copper lifts | `zone_min_width` | 1.5 mm removes the GND copper between the XH pins and the board edge |
+| Parts too close to cut between or to solder | `component_gap` | Pad to pad on different nets. Needs new positions in `pcb/mill/placement.py` |
+| Pads lift during hand soldering | `annular_target` | Only pads of different nets limit the ring. XH headers, modules, C9 and the four F1 pads at the holder hole keep 0.45 mm |
+| A part is too small for the mill | `[parts.footprint]` | A different footprint on the mill board. Needs a position in `placement.py` |
+| A part must be left out | `[parts] exclude` | |
+| Headers are not fitted for one round | `[parts.wire]` | Temporary. Remove the table to get the headers back |
+| A footprint has a gap that cannot grow | `[[exception]]` | The checks list these gaps as `MILL-GAP-FIXED` |
 
 | Key | Effect |
 | --- | --- |
