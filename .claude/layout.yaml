@@ -35,6 +35,7 @@ paths:
   docs/datasheets/: {role: "archived datasheets + summaries (ds3225_servo.md, thw-1060-brushed-esc.md, rangefinder_lidar_lite_v4.md) + components_list.xlsx (ground truth inventory)", rules: .claude/rules/rangefinder.md}
   docs/rangefinder/: {role: "rangefinder bench status (owner), findings, open items", rules: .claude/rules/rangefinder.md, phase: 4}
   docs/lidar/: {role: "lidar bench status (owner), findings, open items; roadmap.md (walled track, 3d lidar, odometry, sim)", rules: .claude/rules/drivers.md, phase: 4}
+  docs/sim/: {role: "car-side sim findings and open items; sim plan + status live in racecar-sim", rules: .claude/skills/sim-parity/SKILL.md}
   .github/pull_request_template.md: {role: PR body template incl. user-run bench checklist (deploy + feature checks), rules: .claude/rules/claude-tooling.md, phase: 4}
   .github/workflows/firmware.yml: {role: ci firmware build env esp32s3 in container, libdeps cache, firmware.bin artifact, phase: 1}
   .claude/: {role: CLAUDE.md, layout.yaml, rules/*.md, agents/*.md, settings.json}
