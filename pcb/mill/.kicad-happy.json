@@ -26,6 +26,15 @@
       "rule_id": "GP-004",
       "nets": ["GND"],
       "reason": "Owner decision 2026-11-17: pours keep a 2.0 mm copper gap for the lab mill (zone_clearance), so the GND fill ratio is low by design (docs/techctcarvera/review/README.md)"
+    },
+    {
+      "rule_id": "PM-002",
+      "components": ["J1"],
+      "reason": "False positive (pcb-reviewer 2026-11-18): J1 pad copper is 1.0 mm from the edge, above edge_clearance 0.5 mm. The courtyard at 0.8 mm is what connector_edge_distance (1.0 mm or less) needs: the battery wires leave at the edge (docs/techctcarvera/review/README.md, kicad-happy analysis)"
+    },
+    {
+      "rule_id": "TE-001",
+      "reason": "False positive in practice (pcb-reviewer 2026-11-18): TP1 to TP3 are on the three rails, and every signal ends on a bare B.Cu wire pad of J3, J4, J5 or J8, which are probe points (docs/techctcarvera/review/README.md, kicad-happy analysis)"
     }
   ]
 }

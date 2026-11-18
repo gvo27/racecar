@@ -125,7 +125,7 @@ The milling check prints positions as (x, -y) in mm from the lower-left corner o
 
 ## Not verified
 
-- No review of this layout by a person. No KiCad GUI check. No kicad-happy analysis. No second `pcb-reviewer` run after the fixes of 2026-11-17.
+- No review of this layout by a person. No KiCad GUI check. No second `pcb-reviewer` run after the fixes of 2026-11-17 (the kicad-happy review of 2026-11-18 changed no board file).
 - The capacitor type: the footprint is a 5.0 mm pitch disc. The capacitor values of the schematic are TBD (C7, C8: 1 uF). A part with 2.5 mm lead pitch needs formed leads or a different footprint.
 - The effect of the new positions of C2 and C4 (about 6 mm from the VIN pads) was not analyzed. The modules have their own input capacitors.
 - The body height and the body size of the capacitors next to the modules and connectors (courtyards do not overlap in DRC).
@@ -139,6 +139,23 @@ The milling check prints positions as (x, -y) in mm from the lower-left corner o
 ## Review findings on the first layout (`pcb-reviewer`, 2026-11-16)
 
 No blocker, 2 major, 7 minor. All fixed in commit `adef37b`: the component gap check includes parts with an exception; a track or a pad of another part near a pad of an exception part is a `MILL-GAP` error; U3 zone clearance 0.34 mm; no island fragments on `+5V_SENS`; no sliver at the U3 GND strip. The reviewer compared all pad nets with rev1 (0 differences).
+
+## kicad-happy analysis (`make pcb-gate BOARD=mill`, kicad-happy 2.3.2, 2026-11-18)
+
+Gate: FAIL from the count false positive and WARN for the silkscreen (`.claude/skills/pcb-fab/references/fab-gate.md`). EMC score 71.5/100 with `analyze_pcb --full`. Verdicts from `pcb-reviewer` (2026-11-18), checked in the raw board file. Suppressed findings are in `pcb/mill/.kicad-happy.json`, each with its reason.
+
+| Finding | Verdict | Evidence | Action |
+| --- | --- | --- | --- |
+| GP-001 (error) `/THROTTLE_PWM`, `/I2C_SCL`, `/I2C_SDA`, `/STEER_PWM` | True geometry, the mechanism does not apply | The tracks are on B.Cu. The F.Cu pour `GND_F` has `connect_pads no` and joins GND at one rivet (68.1, 42.1), about 80 mm away, so it is not a return conductor. The return is the B.Cu GND beside the tracks (STEER 90 %, SDA 79 %, SCL 74 %, THROTTLE 0 % within 2.5 mm) and the harness GND. Servo PWM and I2C at 400 kHz or less, tracks 12 to 41 mm. The J5 pin order (rule C: 1 PG, 2 THROTTLE, 3 STEER) forces the crossing of the F.Cu `U1_PG` jumper | Owner decision: accept, or change the J5 pin order (schematic, harness, crimp table) |
+| GP-001 (warning) `/U1_PG`, RP-001 `/U1_PG` | True, no EMC effect | PG is a static open-drain status line. The nearest GND via is about 85 mm from the PG rivets. Next to the west rivet there is no legal site for a GND rivet (J3.3 is 2.3 mm away) | Owner decision: accept |
+| VS-001 | True | The board has one GND rivet | Owner decision: one GND rivet north of each module GND pad pair (open question 3) |
+| DC-001 C4/U2, C2/U1 | True | 6.38 mm centre to centre, 4.23 mm pad edge to pad edge. 3 mm is not possible within `component_gap` 2.0 mm. The smallest legal distance is 3.32 mm (C4 pad 1 at placement (19.43, 49.75), C2 at (47.43, 49.75)), but the `U1_PG` jumper at y 130.2 must move north first. The gain is small: the modules are not bare ICs | Owner decision: one jumper re-route, or accept. A lab-confirmed lower `component_gap` changes the result |
+| PM-002 J1 | False positive | Pad copper 1.0 mm from the edge (edge_clearance 0.5 mm). The courtyard at 0.8 mm meets connector_edge_distance (1.0 mm or less). The 3.4 mm bored hole leaves a 1.8 mm FR-4 web to the edge: the strain relief must be on the harness | Suppressed |
+| TE-001 | False positive in practice | TP1 to TP3 are on the rails. Each signal ends on a bare B.Cu wire pad (J3, J4, J5, J8), which is a probe point | Suppressed |
+| PU-001 U1 PG, U3 EN | False positive | `power_board_plan.md`, AP2112 datasheet | Suppressed. Open item: `firmware/esp32/include/pins.h` has no PG input with a pull-up yet, so J5.1 floats until the firmware has one (a GPIO that is not a strapping pin) |
+| GP-004 GND fill | Owner decision | The 2.0 mm copper gap (`zone_clearance`, owner 2026-11-17) | Suppressed |
+
+The analyzer also reports 9 GND islands in its connectivity graph. This is an analyzer artifact (overlapping zones of one net, and the F.Cu pour with `connect_pads no`). DRC reports 0 unconnected items.
 
 ## Review findings on the second layout (`pcb-reviewer`, 2026-11-17)
 
