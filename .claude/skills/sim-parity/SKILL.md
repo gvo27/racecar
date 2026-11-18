@@ -5,7 +5,7 @@ description: Use when a change touches the hardware boundary of the car - firmwa
 
 # Sim parity checklist
 
-The sim repo (racecar-sim) replaces the ESP32 and the Mapper with virtual devices. The real car nodes run unchanged in sim. If the boundary changes and the sim does not follow, the sim gives wrong results and no test fails in the sim repo. This checklist prevents that.
+The sim repo (racecar-sim) replaces the ESP32 and the Mapper with virtual devices. The real car nodes run unchanged in sim. Car-side findings and open items: `docs/sim/README.md`. If the boundary changes and the sim does not follow, the sim gives wrong results and no test fails in the sim repo. This checklist prevents that.
 
 ## Steps
 1. Run `git diff --name-only <base>...HEAD`. Find each changed path in the table below.

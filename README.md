@@ -27,7 +27,7 @@ claude plugin install <plugin>@<marketplace> --scope project
 
 | Layer | Hardware | Role | Status |
 | --- | --- | --- | --- |
-| High level | Raspberry Pi 5 | autonomy stack: ROS 2 Jazzy in Docker (`deploy/car/`), supervisor + micro-ROS agent, sends `DriveCmd` (heading, throttle) | phase 2 complete (bench-verified); phase 4 rangefinder + lidar (Slamtec Mapper, `make viz`): compile-only, not bench-verified |
+| High level | Raspberry Pi 5 | autonomy stack: ROS 2 Jazzy in Docker (`deploy/car/`), supervisor + micro-ROS agent, sends `DriveCmd` (heading, throttle) | phase 2 complete (bench-verified); phase 4 rangefinder: sensor bench checks pass, full vehicle not tested ([status](docs/rangefinder/README.md)); phase 4 lidar (Slamtec Mapper, `make viz`): driver runs on the real Mapper, mapping not accepted ([status](docs/lidar/README.md)) |
 | Real time | ESP32-S3-N16R8 | hardware PWM to servo/ESC, failsafe, telemetry; micro-ROS client over UART0 | this repo, `firmware/esp32/` (env `esp32s3`, micro-ROS) |
 
 ## Current inventory

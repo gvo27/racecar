@@ -6,6 +6,7 @@ paths:
   - "rccar_calibration/**/rangefinder*"
   - "docs/datasheets/*rangefinder*"
   - "docs/datasheets/LIDAR-Lite*"
+  - "docs/rangefinder/**"
   - "tuning.toml"
 ---
 
@@ -16,6 +17,7 @@ The software name is always "rangefinder". The model name appears only in docs/d
 ## Docs (read these, keep them in sync)
 - datasheet PDF: `docs/datasheets/LIDAR-Lite LED v4 Instructions_EN-US.pdf` (source https://static.garmin.com/pumac/LIDAR-Lite%20LED%20v4%20Instructions_EN-US.pdf, Garmin code https://github.com/garmin/)
 - summary + datasheet->tuning key map: `docs/datasheets/rangefinder_lidar_lite_v4.md`
+- bench status + findings + open items (status owner): `docs/rangefinder/README.md`
 - wiring + pin map (== pins.h): README.md "Pin map", "Rangefinder wiring"
 - bring-up + I2C note: docs/setup.md "Rangefinder"
 - firmware rules (pins, tasks, rccar.meta, FW version): .claude/rules/firmware.md
