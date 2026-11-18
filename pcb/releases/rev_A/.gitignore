@@ -1,0 +1,12 @@
+# KiCad local caches and backups
+*-backups/
+*.lck
+_autosave-*
+fp-info-cache
+*.kicad_prl
+# kicad-happy: the analysis output is in docs/pcb/analysis (see .kicad-happy.json and docs/pcb/.gitignore)
+datasheets/*.pdf
+spice/
+# core dumps of the tools (python3 in the KiCad image)
+core
+core.[0-9]*

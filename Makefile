@@ -19,16 +19,67 @@ ROS_IMAGE      ?= rccar-ros:local
 ROS_TEST_IMAGE ?= rccar-ros-test:local
 ROS_TEST_OUT   ?= build/ros-test
 ROS_BUILD_ARGS ?=
+# KiCad 10 + Freerouting for the power board (pcb/); images pinned by digest
+KICAD_IMAGE      ?= rccar-kicad:local
+FREEROUTING_IMAGE := ghcr.io/freerouting/freerouting:2.5.0@sha256:6c195891c9b1d62620c140784ab91285b9350d12d905693defe0162eb128cf8e
+# pcb/<BOARD>/ = one KiCad project (default: the rev A release). Shared Python libraries: pcb/libraries. Mill tools: tools/ of the lab directory (lab: in .claude/CLAUDE.md)
+BOARD            ?= releases/rev_A
+BOARD_DIR        := pcb/$(BOARD)
+PCB_LIBS         := $(CURDIR)/pcb/libraries
+PCB_DOCS         := docs/pcb
+LAB_DIR          := $(patsubst %/,%,$(shell sed -n "s/^lab:[[:space:]]*\\([^[:space:]]*\\).*/\\1/p" .claude/CLAUDE.md))
+LAB_TOOLS        := $(CURDIR)/$(LAB_DIR)/tools
+# global lib tables: kicad-cli in a bare container finds no stock libraries (false ERC warnings), so copy the templates
+KICAD_CFG        := $(CURDIR)/build/kicad-cfg
+KICAD_RUN        = docker run --rm --user $(shell id -u):$(shell id -g) -e HOME=/tmp -e XDG_CONFIG_HOME=$(KICAD_CFG) \
+                   -e BOARD_DIR="$(CURDIR)/$(BOARD_DIR)" -v "$(CURDIR)":"$(CURDIR)" -w "$(CURDIR)/$(BOARD_DIR)" $(KICAD_IMAGE)
+# Session targets (make open / make close, template: skill setup-shop). Host tools outside the uv .venv.
+REQUIRED    := git make uv direnv docker
+RECOMMENDED := gh
+PYTHON_MIN  := 3.12
+# Other git repos that open and close also sync and check (fast-forward only).
+EXTRA_REPOS :=
 COMPOSE  := docker compose -f deploy/car/compose.yaml --env-file deploy/car/.env.generated
 
 .DEFAULT_GOAL := help
-.PHONY: help setup clean build flash monitor fw-image config models compiledb unit check-dev dev-setup \
+.PHONY: help open close check-host setup clean build flash monitor fw-image config models compiledb unit check-dev dev-setup \
         ros-image ros-test ros-test-image ros-test-run ros-shell car-up car-down car-ps car-logs car-pull \
-        car-shutdown install-host teleop calibrate tune test rangefinder mcu unit-run \
-        _clean-build _need-config _need-stack _need-stack-down
+        car-shutdown install-host teleop calibrate tune test rangefinder viz lidar-imu lidar-snapshot lidar-record mcu unit-run \
+        drivers-stop drivers-start lidar-hw-test kicad-image erc pcb-build pcb-route pcb-check pcb-mill-check pcb-review pcb-fab pcb-test bom \
+        _kicad-cfg _clean-build _need-config _need-stack _need-stack-down _need-drivers-down
 
 help:            ## list targets (grouped in README.md)
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-21s %s\n", $$1, $$2}'
+
+# ---- Claude Code session (not the car setup: that is make setup) -----------------------------
+open: check-host  ## start a Claude Code session: git fast-forward, uv sync + direnv allow, missing plugins, checklist; safe to rerun
+	uv run --no-project python scripts/open.py . $(EXTRA_REPOS)
+
+close:           ## end a Claude Code session: clean caches, report uncommitted/unpushed work and done plans; safe to rerun
+	uv run --no-project python scripts/close.py . $(EXTRA_REPOS)
+
+check-host:      ## check the host tools outside .venv (git, make, uv, direnv, docker); fails if a required one is missing
+	@fail=0; \
+	for c in $(REQUIRED); do \
+	  if command -v $$c >/dev/null; then echo "OK      $$c"; \
+	  elif [ $$c = uv ] && [ -x "$$HOME/.local/bin/uv" ]; then echo "MISSING uv on PATH: add ~/.local/bin to PATH"; fail=1; \
+	  else echo "MISSING $$c"; fail=1; fi; \
+	done; \
+	for c in $(RECOMMENDED); do \
+	  command -v $$c >/dev/null && echo "OK      $$c" || echo "WARN    $$c not found (recommended)"; \
+	done; \
+	if command -v uv >/dev/null; then \
+	  if p=$$(uv python find --system --no-project '>=$(PYTHON_MIN)' 2>/dev/null); then echo "OK      python>=$(PYTHON_MIN) ($$p)"; \
+	  else echo "MISSING system python>=$(PYTHON_MIN)"; fail=1; fi; \
+	fi; \
+	case " $(REQUIRED) " in *" docker "*) \
+	  if command -v docker >/dev/null && ! docker info >/dev/null 2>&1; then \
+	    echo "MISSING docker daemon access: start docker, or add your user to the docker group"; fail=1; fi;; \
+	esac; \
+	if command -v direnv >/dev/null && ! grep -qs 'direnv hook' ~/.bashrc ~/.zshrc ~/.config/fish/config.fish; then \
+	  echo "WARN    direnv hook not in shell rc: .venv will not load in your shell"; fi; \
+	if command -v gh >/dev/null && ! gh auth status >/dev/null 2>&1; then echo "WARN    gh not logged in: run gh auth login"; fi; \
+	exit $$fail
 
 # ---- setup / config -------------------------------------------------------------------------
 setup:           ## check host prereqs (git, make, docker + compose/buildx, uv), dev tools into .venv (dev-setup), build the firmware and ROS images; safe to rerun
@@ -62,7 +113,7 @@ install-host:    ## sudo: install udev rule (/dev/rccar-esp32) + systemd unit rc
 	@echo "install-host: done. The stack now starts at boot. Start it now: make car-up. Unplug/replug the USB cable once for the udev symlink."
 
 # ---- car stack (ROS 2 in docker) ------------------------------------------------------------
-ros-image:       ## build the ROS 2 image (docker/ros.Dockerfile -> rccar-ros:local)
+ros-image: _need-drivers-down  ## build the ROS 2 image (docker/ros.Dockerfile -> rccar-ros:local)
 	docker build -f docker/ros.Dockerfile $(ROS_BUILD_ARGS) -t $(ROS_IMAGE) .
 
 ros-test-image:  ## build the ROS test image (target test: colcon build, all test deps)
@@ -74,7 +125,7 @@ ros-test-run:    ## run colcon test in an already built test image; results in b
 
 ros-test: ros-test-image ros-test-run  ## build the test image + colcon test + test-result (no hardware)
 
-car-up: config   ## render config, start mcu-agent + core (docker compose up -d)
+car-up: config   ## render config, start mcu-agent + core + drivers (docker compose up -d)
 	$(COMPOSE) up -d
 	@echo "car-up: check health with: make car-ps   logs: make car-logs"
 
@@ -113,6 +164,80 @@ _need-stack-down:
 	@if $(COMPOSE) ps --status running -q 2>/dev/null | grep -q .; then \
 	  echo "car stack is running and holds the serial port: make car-down first"; exit 1; fi
 
+# lidar driver container: stop before editing/rebuilding rccar_drivers (guard hook: .claude/hooks/hw_guard.py)
+drivers-stop: _need-config  ## stop only the lidar driver container (safe; required before editing/rebuilding rccar_drivers)
+	$(COMPOSE) stop drivers
+
+drivers-start: _need-config  ## start the lidar driver container (hardware restart: humans/explicitly approved only)
+	$(COMPOSE) up -d drivers
+
+# no-op without a rendered config or a usable compose (CI, laptops)
+_need-drivers-down:
+	@if [ -f deploy/car/.env.generated ] && [ -n "$$($(COMPOSE) ps --status running -q drivers 2>/dev/null)" ]; then \
+	  echo "lidar driver container is running: make drivers-stop first (before editing/rebuilding rccar_drivers)"; exit 1; fi
+
+# Physical-Mapper acceptance (launch_testing, rccar_drivers/test_hw; criteria rccar_drivers/hw_criteria.py).
+# Runs its own driver instance, so the compose service must be stopped. Never starts anything afterwards.
+lidar-hw-test: _need-config _need-drivers-down  ## automated launch_testing against the PHYSICAL Mapper (read-only; car stationary); JSON report in logs/
+	@echo "lidar-hw-test: car stationary, ESC power OFF. Read-only (getters only). Report: logs/hw_test_lidar_<UTC>.json"
+	@rc=0; $(COMPOSE) run --rm -e MAPPER_HOST=$${MAPPER_HOST:-192.168.11.1} -e RCCAR_GIT_SHA=$(shell git rev-parse --short HEAD 2>/dev/null) \
+	  -e RCCAR_HW_TEST=1 tools launch_test /ws/install/share/rccar_drivers/test_hw/test_mapper_hw.py || rc=$$?; \
+	  echo "drivers left stopped; restarting it is a hardware restart: ask the user (make drivers-start)"; exit $$rc
+
+# ---- power board (KiCad 10 in docker, pcb/<BOARD>, default releases/rev_A; no hardware) ------------------------
+kicad-image:     ## build the KiCad 10 image (docker/kicad.Dockerfile -> rccar-kicad:local)
+	docker build -f docker/kicad.Dockerfile -t $(KICAD_IMAGE) .
+
+_kicad-cfg:
+	@test -f $(KICAD_CFG)/kicad/10.0/sym-lib-table || { mkdir -p $(KICAD_CFG)/kicad/10.0 && \
+	  docker run --rm --user $(shell id -u):$(shell id -g) -v "$(KICAD_CFG)":/cfg $(KICAD_IMAGE) \
+	  sh -c 'cp /usr/share/kicad/template/sym-lib-table /usr/share/kicad/template/fp-lib-table /cfg/kicad/10.0/'; }
+
+erc: _kicad-cfg  ## KiCad ERC on the power board schematic (0 errors required; warnings are printed)
+	@mkdir -p "$(CURDIR)/build/erc"
+	$(KICAD_RUN) kicad-cli sch erc --format json --severity-all \
+	  -o "$(CURDIR)/build/erc/erc.json" rc_power_board.kicad_sch > "$(CURDIR)/build/erc/erc.txt"; rc=$$?; cat "$(CURDIR)/build/erc/erc.txt"; \
+	  $(KICAD_RUN) python3 $(PCB_LIBS)/erc_summary.py "$(CURDIR)/build/erc/erc.json"; s=$$?; \
+	  if [ $$s -ne 0 ]; then echo "erc: FAIL"; exit 1; fi; echo "erc: PASS (0 errors)"
+
+pcb-build: _kicad-cfg  ## bootstrap pcb/<BOARD>/rc_power_board.kicad_pcb from the schematic (first build; refuses to overwrite, --force destroys manual edits)
+	$(KICAD_RUN) python3 $(PCB_LIBS)/build_pcb.py $(PCB_BUILD_ARGS)
+
+# Freerouting runs in its own image; pcbnew (DSN export, SES import) runs in the KiCad image
+pcb-route: _kicad-cfg  ## route the board from scratch (Freerouting 2.5.0): B.Cu, planned F.Cu jumpers on rivets (placement.py), stitching via for the F.Cu pour
+	@mkdir -p "$(CURDIR)/build/route/user" && rm -f "$(CURDIR)/build/route/in.dsn" "$(CURDIR)/build/route/out.ses"
+	$(KICAD_RUN) python3 $(PCB_LIBS)/route_pcb.py dsn rc_power_board.kicad_pcb --dsn "$(CURDIR)/build/route/in.dsn"
+	docker run --rm --user $(shell id -u):$(shell id -g) -v "$(CURDIR)/build/route":/data --entrypoint java $(FREEROUTING_IMAGE) \
+	  -jar /app/freerouting-executable.jar --gui-enabled=false --api_server-enabled=false --user_data_path=/data/user \
+	  -de /data/in.dsn -do /data/out.ses -mp 40 > "$(CURDIR)/build/route/freerouting.log" 2>&1; tail -n 3 "$(CURDIR)/build/route/freerouting.log"
+	$(KICAD_RUN) python3 $(PCB_LIBS)/route_pcb.py ses rc_power_board.kicad_pcb --ses "$(CURDIR)/build/route/out.ses"
+
+pcb-check: _kicad-cfg  ## DRC (with schematic parity) + board checks + milling check; fails on DRC errors, unconnected items, check_board problems
+	@mkdir -p "$(CURDIR)/build/drc"
+	$(KICAD_RUN) kicad-cli pcb drc --schematic-parity --severity-all --all-track-errors --format json \
+	  -o "$(CURDIR)/build/drc/drc.json" rc_power_board.kicad_pcb > /dev/null
+	$(KICAD_RUN) python3 $(PCB_LIBS)/drc_summary.py "$(CURDIR)/build/drc/drc.json"
+	$(KICAD_RUN) python3 $(PCB_LIBS)/check_board.py rc_power_board.kicad_pcb
+
+pcb-review: _kicad-cfg  ## write docs/pcb/review/: drc.json, milling_check.json, layer PDF, 1:1 PDF
+	$(KICAD_RUN) python3 $(PCB_LIBS)/review_plots.py
+
+pcb-mill-check: _kicad-cfg  ## milling check of the board vs the lab limits (milling.toml in the lab directory, waivers); exit 1 = unwaived errors
+	@mkdir -p "$(CURDIR)/$(PCB_DOCS)/review"
+	$(KICAD_RUN) python3 $(LAB_TOOLS)/milling_check.py rc_power_board.kicad_pcb \
+	  --waivers "$(CURDIR)/$(LAB_DIR)/milling_waivers.toml" --json "$(CURDIR)/$(PCB_DOCS)/review/milling_check.json"
+
+pcb-fab: _kicad-cfg  ## DXF (F.Cu, B.Cu, Edge.Cuts), Excellon and drill-map DXF for the lab's Fusion 360 template -> build/fab/<BOARD>/ (not committed), then test_fab
+	$(KICAD_RUN) python3 $(LAB_TOOLS)/fab_export.py rc_power_board.kicad_pcb --out "$(CURDIR)/build/fab/$(BOARD)"
+	$(KICAD_RUN) python3 -m unittest discover -s $(LAB_TOOLS) -p 'test_fab.py' -v
+
+pcb-test: _kicad-cfg  ## unit tests for the PCB libraries and the mill tools (stdlib unittest, image python3)
+	$(KICAD_RUN) python3 -m unittest discover -s $(PCB_LIBS) -p 'test_*.py' -v
+	$(KICAD_RUN) python3 -m unittest discover -s $(LAB_TOOLS) -p 'test_*.py' -v
+
+bom: _kicad-cfg  ## export pcb/<BOARD>/bom.csv from the schematic fields (kicad-cli) and print the cost total
+	$(KICAD_RUN) python3 $(PCB_LIBS)/bom_total.py --export
+
 # ---- ROS tools (need: make car-up) ----------------------------------------------------------
 teleop: _need-stack  ## SSH keyboard driving via the supervisor (arrows, space=brake, d=disarm, a=arm, q/x=quit)
 	$(COMPOSE) run --rm tools ros2 run rccar_teleop keyboard
@@ -128,6 +253,21 @@ test: _need-stack  ## steering sweep + failsafe check (motor stays off, never ar
 
 rangefinder: _need-stack  ## live rangefinder feed: MCU timestamp, Pi time, range (Ctrl+C to exit)
 	$(COMPOSE) run --rm tools ros2 run rccar_calibration rangefinder_monitor
+
+viz: _need-stack  ## live websocket feed for Foxglove/Lichtblick on localhost:8765 (VS Code forwards it; Ctrl+C to exit)
+	@echo "viz: open ws://localhost:8765 in Foxglove or Lichtblick (VS Code Remote-SSH forwards port 8765)"
+	$(COMPOSE) run --rm tools ros2 launch rccar_bringup viz.launch.py
+
+lidar-imu: _need-stack  ## live Mapper IMU feed (heading, yaw rate, horizontal accel, speed) + logs/lidar_imu_*.jsonl (Ctrl+C to exit)
+	$(COMPOSE) run --rm tools ros2 run rccar_calibration lidar_imu_monitor
+
+lidar-snapshot: _need-stack  ## one lidar capture -> logs/lidar_snapshot_<UTC>/ (map.png + scan, pose, summary; read-only)
+	$(COMPOSE) run --rm tools ros2 run rccar_calibration lidar_snapshot
+
+SECS ?= 30
+lidar-record: _need-stack  ## record the lidar topics for SECS (default 30) -> logs/lidar_bag_<UTC>/ (mcap; read-only)
+	@case '$(SECS)' in ''|*[!0-9]*) echo "SECS must be a whole number of seconds (1..600), got '$(SECS)'"; exit 1;; esac
+	$(COMPOSE) run --rm tools ros2 run rccar_calibration lidar_record --secs $(SECS)
 
 mcu: _need-stack  ## one McuCommand to the ESP32, e.g. make mcu CMD="GET" (stack up; CMD: GET INFO PING SET ...; ARM refused)
 	@test -n "$(CMD)" || { echo 'usage: make mcu CMD="GET"'; exit 1; }

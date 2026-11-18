@@ -1,0 +1,64 @@
+---
+paths:
+  - "pcb/**"
+  - "docs/pcb/**"
+  - "docs/techctcarvera/**"
+---
+
+# Schematics (power distribution board)
+
+## Layout
+- `pcb/<board>/`: one KiCad project for each board (schematic, board, rules, `bom.csv`). A released board is in `pcb/releases/<rev>/`; rev A is `pcb/releases/rev_A/`. Make targets use `BOARD=<path below pcb/>`; the default is `DEFAULT_BOARD` in `pcb/libraries/paths.py` and `BOARD` in the Makefile.
+- Fab outputs are not committed. `make pcb-fab` writes them to `build/fab/<BOARD>/`.
+- `pcb/lib/`: symbol and footprint libraries, shared by all boards. `pcb/libraries/`: board tools, their Python libraries and tests (`paths.py` holds the layout).
+- `docs/pcb/`: context of the board and the schematic (plan, overview, BOM notes, review record, analysis). Read it. The tools write only `review/` and `analysis/` there.
+- The lab directory (`lab:` in `.claude/CLAUDE.md`): lab facts, `milling_waivers.toml` and the mill tools (`tools/milling_check.py`, `tools/fab_export.py`).
+- `pcb/COLCON_IGNORE` keeps the directory out of the ROS 2 build.
+
+## Sources of truth
+- Spec / build guide: `docs/pcb/power_board_plan.md` (exported from the live Claude Doc linked at its top). Schematic changes that contradict it => update the plan in the same change, or ask.
+- Parts: symbol fields in the schematic (MPN, Manufacturer, Status, Unit cost USD, Supplier link, BOM Comments), exported by `make bom` to `bom.csv` of the board directory (commit it); off-board items in `bom_offboard.csv`; notes in `docs/pcb/bom.md`. CNC-milling (rev A) and later fab checklist: `docs/pcb/fab_handoff.md`.
+- Meeting summary: `docs/pcb/design_overview.md` (concise, < 2 pages). Keep it in step with the schematic.
+- Inventory and part facts: `docs/datasheets/` (components_list.xlsx, ESC manual, servo datasheet, Pololu D36V50F5 (U1 and U2, `regulator_pololu_d36v50f5.md`; the D24V90F5 note is superseded)). Never invent a part value: unknown => `TBD` (repo rule: no unconfirmed parameters).
+- Project KiCad version: 10.0. Do not save the project with an older KiCad; do not downgrade the file format (the schematic is KiCad 10 format since the U2 footprint change; see docs/pcb/README.md).
+
+## Invariants
+- Rails: `VBAT`, `+5V_CPU` (Pi 5 + ESP32 only), `+5V_SENS`, `+3V3_SENS` (LDO from `+5V_SENS`), `+6V_BEC` (ESC BEC, servo only, never joined to a 5 V rail). One common `GND`; never `GNDA`/`GNDD`/`GNDPWR`.
+- Rails are project power symbols from `rc_power.kicad_sym` (pin name == Value == net name). Never rename a stock `power:` symbol's Value to make a rail.
+- ESP32 powers nothing; sensors never take power from ESP32 pins; signals <= 3.3 V.
+- Every net feeding a power_in pin through a fuse or ferrite has a PWR_FLAG.
+- U1 (Pololu D36V50F5) EN is left unconnected (no-connect; ESP32 control archived). It never connects directly to an ESP32 GPIO: EN has a 100k pull-up to VIN (up to 8.4 V), and U1 powers the ESP32, so U1 must start on its own. Any future control goes through a transistor.
+- ESC battery power is off-board (battery -> ESC on its own 12 AWG leads, up to 20 A). The board carries only the ESC's 3-wire lead (THROTTLE_PWM + `+6V_BEC`); size the fuse for board loads (~8.4 A at 6.4 V, ~9.0 A at the 6.0 V cutoff, ~9.3 A briefly at Mapper startup; F1 = 15 A, decided), but size VBAT_RAW/VBAT/GND copper for F1's rating (~16.5 A), not the load.
+- Wiring style: each region's local nets are wired as one bus/trunk source-to-load with one net label, avoiding crossings; GND stays as symbols.
+- U1 VRP is unused; the sensor buck is fed from VBAT (VRP would overload U1's 6 A VIN pin pair).
+- Slamtec Mapper M2M1 is on J11 (+5V_SENS; harness XH -> 22 AWG 3 A USB-A pigtail, never Pi USB or straight from the pack): 0.75 A typ / 1.3 A max, 1.4-1.6 A startup, ripple <= 50 mV. +5V_SENS is 4.6 A running / 4.9 A startup, so U2 must be >= 6 A (Pololu D36V50F5, owner 2026-11-12: about 7.4 A at 6.6 V in, where the graph curve starts (no data below 6.6 V), and about 7.7 A at 8.4 V in per the Pololu graph, so the rule is met from 6.6 to 8.4 V in; dropout about 1.0 V at 5 A (U1 too: brown-out risk for the Pi), bench check near the 6.0 V cutoff; facts in `docs/datasheets/regulator_pololu_d36v50f5.md`) and C9 (>= 100 uF low-ESR, TBD) sits at J11.
+- One replaceable main fuse F1 (standard ATO/ATC blade in a Littelfuse FLR 178.6165 PCB holder) protects all board loads; no branch fuses (fuse inventory is high-current).
+- Connectors: JST-XH (2.5 mm) for sensors and low-power parts (single Dupont jumper sockets push onto XH pins for breadboard debug; 2.54 mm multi-pin housings don't fit; lab stock); exceptions: J1 battery T-plug pads, J6/J7 USB-C pigtail screw terminals (>3 A).
+- XH pin order (crimp table in `fab_handoff.md`; keep it in step with the schematic): Rule A, device with its own pinout, header follows the device (J3/J4: 1 GND, 2 +6V_BEC, 3 signal; J8: 1 +5V_SENS, 2 GND, 3 SDA, 4 SCL). Rule B, generic power header: 1 V+, 2 GND (J9, J11 +5V_SENS; J12-J14 +3V3_SENS). Rule C, signal harness: signals in order, GND last (J5: 1 U1_PG, 2 THROTTLE_PWM, 3 STEER_PWM, 4 I2C_SDA, 5 I2C_SCL, 6 GND). Layout: XH headers on the board edge, entry outward, pin 1 at the same end. Rev A exception (pending owner approval): J4, J8, J6 and J7 have pin 1 at the top and J1 is turned 180 degrees, for B.Cu routing without rivets; pin numbers per connector are unchanged (see `fab_handoff.md`).
+- J3/J4 XH current: 3 A/pin with 22 AWG only; BEC pin up to 3 A = 100 % of rating. Never claim it "fits" or is "within" rating.
+- Garmin LIDAR-Lite v4 on J8 (4-pin XH, pin order = Garmin 1–4); I2C_SDA GPIO8, I2C_SCL GPIO9 via J5; no external pull-ups (13 kΩ internal to 3.3 V).
+- Power to the Pi 5 and ESP32 leaves through 2-wire USB-C pigtails (J6/J7) so their own USB-C input protection stays in the path.
+- Rev A prototype is milled in-house. The machine, the copper stock and the rivet kit are in the lab file (`milling.toml` in the lab directory (`lab:` in `.claude/CLAUDE.md`)): no plated holes; vias are rivets (drill and pad from the lab file, `via_drill`, `via_pad`; see `fab_handoff.md`); DRC clearance ≥0.4 mm; route THT connector pins on the bottom; board outline fits the lab stock.
+- Net classes live in `rc_power_board.kicad_pro`; clearance 0.4 mm all classes; HighCurrent 6.0, Power5A (`+5V_CPU`, `+5V_SENS`) 1.6, Power3A (`*+6V_BEC`) 1.0, Default 0.5 mm; DRC rules min clearance 0.4, track 0.5, via 2.0, annular 0.45, min hole 0.8; via 2.1/1.1 mm (rivet: `via_drill`, `via_pad` in the lab file). `fab_handoff.md` matches the plan's net-class table for rev A; fab-house revisions restore the plan values.
+
+## Agents and skills (PCB work)
+- New board or a large change => start the main session as `claude --agent pcb-designer` (`.claude/agents/pcb-designer.md`): start questions, plan, owner approval of the plan, schematic loop, owner approval of the schematic, board loop, report. It dispatches `pcb-worker` (one task, iterate) and `pcb-reviewer` (read-only, independent). A session without `--agent` follows the same file.
+- Skills: `pcb-lab-config` (lab file `milling.toml` in the lab directory (`lab:` in `.claude/CLAUDE.md`): machine, bits, stock, rivets, limits), `pcb-parts` (part choice, datasheet notes, BOM fields, compatibility), `pcb-design-check` (check matrix, lessons in `lessons.md`), `pcb-milling-check` (board against the mill limits). A skill for fab-house rule compliance does not exist: use the kicad-happy skills `jlcpcb` and `pcbway`.
+- Environment: docker, make, the KiCad 10.0.8 image (`make kicad-image`), the Freerouting image, plugin kicad-happy. Optional: `ngspice`, `zstd`, distributor API keys. The list is in `pcb-designer.md`.
+- Review record: `docs/pcb/review/README.md`. Dated review records (Opus, Fable): `docs/archive/pcb/review/`.
+
+## Tooling (kicad-happy@kicad-happy)
+- Review/analysis => `kicad` skill; subcircuit checks => `spice` skill (needs ngspice); EMC once a PCB exists => `emc`.
+- Analyzer output goes to `docs/pcb/analysis/` (config `.kicad-happy.json`; per-run JSON gitignored, manifest tracked).
+- Treat analyzer findings as claims to verify against the raw `.kicad_sch` and datasheets; known false positives on this board: "U3 missing input capacitor" (C7 is its input cap), "U3 EN missing pull-up" (EN tied to VIN per AP2112 datasheet), "U1 PG missing pull-up" (ESP32 input pull-up), "VBAT plane split" (overlapping bus zones merge into one piece). More in `docs/pcb/review/README.md`.
+- ERC/DRC results count only when run in KiCad 10 (user-run, or kicad-cli 10 if installed); never claim ERC passed without its output.
+
+## Rev A PCB (review only; Gerber and CAM wait for the lab tech)
+- Board: `rc_power_board.kicad_pcb` of the board directory, built by `pcb/libraries/build_pcb.py` and routed by `pcb/libraries/route_pcb.py` in the pinned KiCad 10.0.8 image (`docker/kicad.Dockerfile`) and Freerouting 2.5.0 (digest in the Makefile). Make targets: `kicad-image erc pcb-build pcb-route pcb-check pcb-mill-check pcb-review pcb-fab pcb-test bom`. No host Python for the tools. After the first build the `.kicad_pcb` is the owner's file: `pcb-build` refuses to overwrite it without `--force`.
+- Rivet via: drill and pad from the lab file (`via_drill`, `via_pad`), in every net class. A hole larger than the largest drill (`drill_set`) is bored with the end mill and must be at least `milled_hole_min`; the list is `MILLED_HOLES` in `pcb/libraries/placement.py`. Never make a hole between the largest drill and `milled_hole_min`. Limits, their status and the lab facts: the lab directory (`lab:` in `.claude/CLAUDE.md`).
+- Fab outputs: `make pcb-fab` writes `build/fab/<BOARD>/` (DXF F.Cu, B.Cu, Edge.Cuts; Excellon; drill-map DXF) in the lab frame: origin = dowel 1, board turned 90 degrees counter-clockwise on the lab stock, B.Cu not mirrored. Do not commit them: the KiCad project is the source. Never use KiCad's native DXF for the mill. `build_pcb.py --sync-drills` (`make pcb-build PCB_BUILD_ARGS=--sync-drills`) applies the drill set, bored holes and via drill to an existing board.
+- `make pcb-check` also runs the opening test of `check_board.py` (`PATH_ROWS`): copper width along the GND, `VBAT` and 5 V paths on B.Cu. Power zones and the `U1_PG` jumper are planned in `pcb/libraries/placement.py` (`BUS_ZONES`, `GND_KEEPOUTS`, `JUMPERS`); the router (no vias) handles signals only. `build_pcb.py --sync-fields` copies the symbol fields onto an existing board without other changes. `build_pcb.py --sync-zones` (`make pcb-build PCB_BUILD_ARGS=--sync-zones`) rebuilds and refills the zones of an existing board from `placement.py`; parts and tracks stay.
+- After every board change run `make pcb-check pcb-mill-check` (skill `pcb-milling-check`). DRC clean does not mean millable. MILL-DEPTH uses the lab depth (`cut_depth_*` and `copper_thickness` in the lab file); a failure means a limit changed, not the board.
+- Never put F.Cu copper on a THT pad. Never put a via inside a part courtyard. No F-side courtyard overlaps another one or crosses the board edge (DRC `courtyards_overlap` and `check_board.py`). Module footprints (`Pololu_D36V50Fx`) carry the real body: a header-only footprint hides collisions. VBAT, VBAT_RAW and GND are B.Cu zones, not tracks.
+- Connector pin order decides if a net can be routed on one layer: do not change a J3/J4/J5/J8 orientation without a new `make pcb-route`. Rule `U3_fine` is in `rc_power_board.kicad_dru`.
+
