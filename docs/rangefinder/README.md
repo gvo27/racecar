@@ -55,3 +55,10 @@ These are the decisions and lessons from the rangefinder work. Each one has a re
 - Test on the full vehicle (wheels on the ground). The owner did not test this yet.
 - The frame `rangefinder_link` is not in the URDF yet (`docs/sensor_contract.md`, TF row `gap`).
 - The forward e-brake is not in the firmware. Its thresholds need confirmed bench readings first. They go in the firmware, then in `tuning.toml`, `FIRMWARE_KEYS` and `setKey`.
+
+## Swap to another rangefinder
+1. Add `firmware/esp32/src/rangefinder_<model>.cpp` that implements `include/rangefinder.h`.
+2. Register it in the driver table entry (`driver` id).
+3. Add new `[rangefinder]` values from its datasheet (confirmed values only).
+4. Add `docs/datasheets/rangefinder_<model>.md` (summary) + the archived PDF. Update the Docs line of `.claude/rules/rangefinder.md`, the README wiring and the mapping table.
+5. Update the `paths:` of `.claude/rules/rangefinder.md`. If the wiring changes, pins.h must equal the README.

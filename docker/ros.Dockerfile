@@ -1,4 +1,4 @@
-# ros runtime: ROS 2 Jazzy + the rccar_* workspace. Notes: .claude/rules/dependencies.md
+# ros runtime: ROS 2 Jazzy + the rccar_* workspace. Notes: docs/dependencies.md
 # Build: make ros-image    Test: make ros-test (builds target `test`, runs colcon test)
 # Context = repo root, filtered by docker/ros.Dockerfile.dockerignore. Stages:
 #   builder  rosdep (apt deps from package.xml) + colcon build --merge-install -> /ws/install

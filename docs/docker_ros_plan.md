@@ -160,7 +160,7 @@ rccar/                            ← repo root; colcon finds packages directly
 - `${VAR:?msg}` for required variables
 - `cap_drop: [ALL]`, `security_opt: [no-new-privileges:true]`, a size-capped `tmpfs: /tmp`, and `read_only: true` where possible. Add `SYS_NICE` back only for real-time nodes.
 - a heartbeat-file healthcheck (`find /run/hb -mmin -0.1`)
-- a header comment: `# <svc> — <role>` + `# Notes: .claude/rules/deploy.md`
+- a header comment: `# <svc> — <role>` + `# Notes: docs/deploy.md`
 
 A systemd unit runs `compose up -d` at boot. Deploys are explicit: run `make car-pull && make car-up` at known SHAs. There are no auto-updaters and no autoheal.
 

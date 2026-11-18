@@ -5,7 +5,7 @@ Stdlib only (tomllib => python>=3.11). `make config` runs it inside the ROS imag
 --user <host uid:gid>, --repo-dir and --dialout-gid passed by make (the container's group db differs).
 Output keys (compose reads them with --env-file, `${VAR:?msg}` for required ones):
   PLATFORM ESP32_DEVICE ROS_DOMAIN_ID TZ RCCAR_ROS_IMAGE REPO_DIR HOST_UID HOST_GID DIALOUT_GID
-Notes: .claude/rules/deploy.md
+Notes: docs/deploy.md
 """
 import argparse
 import os

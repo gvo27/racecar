@@ -1,5 +1,5 @@
 # car stack: micro-ROS agent + ROS 2 core (supervisor + mcu_bridge) + drivers (Mapper lidar) + on-demand tools.
-# Notes: .claude/rules/deploy.md
+# Notes: docs/deploy.md
 # Env: deploy/car/.env.generated (make config; compose --env-file). Run: make car-up
 # Images: base by digest, ours as rccar-ros:local (make ros-image) or ${RCCAR_ROS_IMAGE} (git SHA from GHCR). Never :latest.
 name: rccar
@@ -26,7 +26,7 @@ x-ros-mounts: &ros-mounts
 
 services:
   # mcu-agent — micro-ROS agent: XRCE serial bridge ESP32 <-> ROS 2 graph
-  # Notes: .claude/rules/deploy.md
+  # Notes: docs/deploy.md
   mcu-agent:
     image: microros/micro-ros-agent:jazzy@sha256:76b7a4382ea1d34f65027449c518335dea5641154bcaa62bfe84b1691eb33c53
     command: ["serial", "--dev", "${ESP32_DEVICE:?run make config}", "-b", "115200"]
@@ -55,7 +55,7 @@ services:
     logging: *logging
 
   # core — ROS 2 bringup: supervisor (sole /rccar/mcu/drive publisher) + lifecycle mcu_bridge
-  # Notes: .claude/rules/deploy.md
+  # Notes: docs/deploy.md
   core:
     image: ${RCCAR_ROS_IMAGE:-rccar-ros:local}
     command: ["ros2", "launch", "rccar_bringup", "car.launch.py",
@@ -90,7 +90,7 @@ services:
     logging: *logging
 
   # drivers — sensor drivers (Slamtec Mapper lidar over Wi-Fi/TCP; robot_state_publisher)
-  # Notes: .claude/rules/deploy.md
+  # Notes: docs/deploy.md
   drivers:
     image: ${RCCAR_ROS_IMAGE:-rccar-ros:local}
     command: ["ros2", "launch", "rccar_bringup", "drivers.launch.py",
@@ -120,7 +120,7 @@ services:
     logging: *logging
 
   # tools — on-demand ROS shell: teleop, calibrate, tune, bench_test, viz, lidar-imu/-snapshot/-record (docker compose run --rm tools ...)
-  # Notes: .claude/rules/deploy.md
+  # Notes: docs/deploy.md
   tools:
     profiles: [tools]
     image: ${RCCAR_ROS_IMAGE:-rccar-ros:local}

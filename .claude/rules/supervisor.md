@@ -13,5 +13,5 @@ paths:
 - state: `/rccar/supervisor/state` reliable + transient_local; reason strings <= 64 chars.
 - logic in `arbiter.py` (pure, table tests: priority, timeout, latch, reset needs neutral, single output). Node = wiring. Any behavior change needs an arbiter test first.
 - software stop is not safety-rated; ESC power switch is the independent hardware stop (state it in user docs).
-- QoS rows: see ros2.md. Never add a second publisher on /rccar/mcu/drive (fake MCU in tests only subscribes).
+- QoS: `docs/sensor_contract.md` (boundary) and `docs/ros2.md` (other topics). Never add a second publisher on /rccar/mcu/drive (fake MCU in tests only subscribes).
 - stop-path checklist: kill teleop, kill core, unplug usb, agent loss, stale reset, reset with throttle != 0, double brake, brake during reset. Hardware runs of these are user bench only.

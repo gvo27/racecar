@@ -269,7 +269,7 @@ Troubleshooting: the bridge (foxglove_bridge 3.6.0, SDK based) accepts the webso
 
 The Foxglove warning "Infinity invalid values" on `/rccar/lidar/scan` is expected (+inf = no return per REP-117). Set the Color mode of the scan to Flat and the Point size to about 4.
 
-**Topics.** See `.claude/rules/ros2.md`. Scan, IMU and pose are best effort (~10/50/10 Hz). The map is reliable + transient_local (~0.5 Hz). These parameters of `mapper_driver` are bench-TBD: `scan_angle_sign` and `map_transpose`. (`map_free_is_high` is bench-confirmed `false`: cells 0 unknown, 1..127 free, 128..255 occupied, 2026-11-02.) The IMU `linear_acceleration` is raw and flagged not provided (covariance[0] = -1) unless `imu_trust_acc:=true`. The URDF mount offsets in `rccar_description` are unmeasured until you measure them on the car.
+**Topics.** See `docs/sensor_contract.md`. Scan, IMU and pose are best effort (~10/50/10 Hz). The map is reliable + transient_local (~0.5 Hz). These parameters of `mapper_driver` are bench-TBD: `scan_angle_sign` and `map_transpose`. (`map_free_is_high` is bench-confirmed `false`: cells 0 unknown, 1..127 free, 128..255 occupied, 2026-11-02.) The IMU `linear_acceleration` is raw and flagged not provided (covariance[0] = -1) unless `imu_trust_acc:=true`. The URDF mount offsets in `rccar_description` are unmeasured until you measure them on the car.
 
 **IMU feed: `make lidar-imu`.** This command is read-only. It needs the stack up. The Mapper (fw 2.6.0_dev) exports only an orientation and no rates, so most columns come from the SLAM pose. The command prints one line per sample (at most ~10/s) with these columns:
 - Pi time.
