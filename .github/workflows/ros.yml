@@ -43,12 +43,12 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
-      - uses: docker/setup-buildx-action@v3
+      - uses: actions/checkout@v5
+      - uses: docker/setup-buildx-action@v4
 
       # test stage = builder (rosdep + colcon build) + colcon test entrypoint (docker/ros-test.sh)
       - name: Build test image (amd64, gha cache)
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: docker/ros.Dockerfile
@@ -60,7 +60,7 @@ jobs:
 
       # runtime stage must build too (exec deps resolve, install tree copies). Shares builder layers.
       - name: Build runtime image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: docker/ros.Dockerfile
@@ -81,7 +81,7 @@ jobs:
 
       - name: Upload log/ and test results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ros-test-results
           path: build/ros-test
@@ -99,13 +99,13 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
+      - uses: actions/checkout@v5
         with:
           repository: dbwls99706/ros2-engineering-skills
           ref: v1.7.2
           path: .ros2skill
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
@@ -155,7 +155,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: rccar_msgs == firmware extra_packages copy
         run: |
           diff -r rccar_msgs firmware/esp32/extra_packages/rccar_msgs \
