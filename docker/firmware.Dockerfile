@@ -1,4 +1,4 @@
-# firmware toolchain: PlatformIO + esptool for firmware/esp32. Notes: .claude/rules/dependencies.md
+# firmware toolchain: PlatformIO + esptool for firmware/esp32. Notes: docs/dependencies.md
 # Build: make fw-image    Run: make build | flash | monitor
 # The default env (esp32s3) pulls micro_ros_platformio, which colcon-builds the micro-ROS
 # library during the first `pio run` (git clone of ROS repos + pip into the PlatformIO penv:

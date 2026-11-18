@@ -29,7 +29,7 @@ The sim repo (racecar-sim) replaces the ESP32 and the Mapper with virtual device
 | `rccar_bringup/launch/car.launch.py`, `drivers.launch.py` arguments | none | `rccar_sim_bringup` launch files |
 
 ## Rules
-- `docs/sensor_contract.md` is the source of truth for the boundary. The `ros2.md` topic table must agree with it.
+- `docs/sensor_contract.md` is the source of truth for the boundary. `docs/ros2.md` lists only the topics above the boundary and the subscribers. It does not repeat a boundary type or QoS.
 - Never add an unconfirmed value to `tuning.toml` for the sim. Sim-only values stay in racecar-sim.
 - Do not rename a `/rccar/...` topic without user approval.
 - Only the supervisor publishes `/rccar/mcu/drive`.

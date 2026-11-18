@@ -19,7 +19,7 @@
 
 **Rules for every phase (one PR each):**
 - The root `README.md` gets brief quick setup → deploy commands. Put long guides in `docs/`.
-- Update `.claude/CLAUDE.md` and `.claude/layout.yaml` in the same concise, machine-readable style.
+- Update `.claude/CLAUDE.md` only when a pointer changes. Keep it concise and machine-readable.
 - Give every new feature folder a `.claude/rules/<feature>.md` with a `paths:` block.
 
 ---
@@ -45,7 +45,7 @@ rccar/                            ← repo root; colcon finds packages directly
 ├── deploy/car/                   compose.yaml, systemd unit, udev rules                [COLCON_IGNORE]
 ├── tuning.toml                   SSOT: [link] [steering(.calibration)] [throttle(.calibration)] [warmup] … + [platform.*] [models] [supervisor]
 ├── .env.example                  committed template; .env gitignored
-├── .claude/                      CLAUDE.md, layout.yaml, rules/<feature>.md
+├── .claude/                      CLAUDE.md, rules/<feature>.md
 ├── docs/  logs/  Makefile  README.md
 └── .github/workflows/            firmware build, colcon test, multi-arch images → GHCR
 ```
@@ -160,7 +160,7 @@ rccar/                            ← repo root; colcon finds packages directly
 - `${VAR:?msg}` for required variables
 - `cap_drop: [ALL]`, `security_opt: [no-new-privileges:true]`, a size-capped `tmpfs: /tmp`, and `read_only: true` where possible. Add `SYS_NICE` back only for real-time nodes.
 - a heartbeat-file healthcheck (`find /run/hb -mmin -0.1`)
-- a header comment: `# <svc> — <role>` + `# Notes: .claude/rules/deploy.md`
+- a header comment: `# <svc> — <role>` + `# Notes: docs/deploy.md`
 
 A systemd unit runs `compose up -d` at boot. Deploys are explicit: run `make car-pull && make car-up` at known SHAs. There are no auto-updaters and no autoheal.
 
@@ -176,7 +176,7 @@ A systemd unit runs `compose up -d` at boot. Deploys are explicit: run `make car
 
 ## `.claude/` context files
 
-- **`.claude/layout.yaml`**: machine-readable map of path → role, owner package, rules file and invariants. `CLAUDE.md` replaces its `layout:` block with `layout: .claude/layout.yaml`.
+- **`.claude/layout.yaml`** (archived 2026-11-18, `docs/archive/layout.yaml`): it was a map of path to role, owner package, rules file and invariants. Nothing read it for navigation, and it repeated `ls`, the rule `paths:` and the README.
 - **Rules files**, each created with its feature:
 
 | Rules file | `paths:` |
