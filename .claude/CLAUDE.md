@@ -4,7 +4,7 @@ chassis: tamiya_tt02_1:10
 goals: [sensor_fusion, object_detection, semantic_slam, racing_trajectory_optimization]
 compute: {high_level: raspberry_pi_5 (ros2 jazzy in docker, deploy/car), real_time: esp32-s3-n16r8 (micro-ros client)}
 plan: docs/docker_ros_plan.md
-status: docs/{rangefinder,lidar,sim}/README.md, docs/pcb/review/README.md (rev1), docs/techctcarvera/review/README.md (mill board)  # each file owns its status; do not copy status here
+status: docs/{rangefinder,lidar,sim}/README.md, docs/pcb/releases/rev1/review/README.md (rev1), docs/pcb/releases/rev3/review/README.md (mill board)  # each file owns its status; do not copy status here
 sim: {repo: gvo27/racecar-sim (pins this repo), contract: docs/sensor_contract.md, findings: docs/sim/README.md}
 lab: docs/techctcarvera/  # the lab directory; pcb/libraries/lab.py and the Makefile read this line. Another lab => change this line only
 convention: .claude/ = general rules, skills, agents (no site values); docs/ = facts that change; this file = pointers, no values. Path-specific rules load by their paths: frontmatter

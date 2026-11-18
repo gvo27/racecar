@@ -6,7 +6,7 @@ Reference for the power distribution board in `pcb/`. The rules for changes are 
 - `pcb/<board>/`: one KiCad project for each board (schematic, board, rules, `bom.csv`). A released board is in `pcb/releases/<rev>/`; rev1 is `pcb/releases/rev1/`. Make targets use `BOARD=<path below pcb/>`; the default is `DEFAULT_BOARD` in `pcb/libraries/paths.py` and `BOARD` in the Makefile.
 - Fab outputs are not committed. `make pcb-fab` writes them to `build/fab/<BOARD>/`.
 - `pcb/lib/`: symbol and footprint libraries, shared by all boards. `pcb/libraries/`: board tools, their Python libraries and tests (`paths.py` holds the layout).
-- `docs/pcb/`: context of the board and the schematic (plan, overview, BOM notes, review record, analysis). Read it. The tools write only `review/` and `analysis/` there.
+- `docs/pcb/`: context of the board and the schematic (plan, overview, BOM notes). Read it. The tools write only `releases/<rev>/review/` there (`paths.review_dir()`).
 - The lab directory (`lab:` in `.claude/CLAUDE.md`): lab facts, `milling_waivers.toml` and the mill tools (`tools/milling_check.py`, `tools/fab_export.py`).
 - `pcb/COLCON_IGNORE` keeps the directory out of the ROS 2 build.
 
@@ -14,15 +14,15 @@ Reference for the power distribution board in `pcb/`. The rules for changes are 
 - Each board has design rules: `design_rules.toml` in the board directory. A board without that file uses `design_rules.toml` of the lab directory (the mill tuning file). Loader: `pcb/libraries/rules.py`. The tools and the milling check read all limits from it. Do not add a limit as a constant to a tool.
 - `make pcb-rules BOARD=<board>` compares the `.kicad_pro` and the `.kicad_dru` with the design rules. `PCB_RULES_ARGS=--write` changes them. Do not edit the net class widths, the clearances or the `.kicad_dru` by hand.
 - `pcb/releases/rev1/` is the rev1 board for a fab house and the base board (`DEFAULT_BOARD` in `pcb/libraries/paths.py`). Its design rules are the rev1 values. Do not change this board for the mill.
-- `pcb/mill/` is the mill prototype: the same circuit, without the parts in `[parts] exclude`, with the footprints of `[parts.footprint]`, and with wider tracks and gaps. Its schematic is made by `make pcb-sch BOARD=mill` from the rev1 schematic (`on_board no`, `dnp yes` for the excluded parts). Do not edit it by hand.
-- `pcb/<board>/placement.py` holds the part positions, the planned zones and the path rows of one board. `pcb/mill/placement.py` loads the rev1 file and changes it. The design rules do not move parts: when a check fails after a rule change, change the placement file.
-- After a change of the mill tuning file run `make pcb-all BOARD=mill` (schematic variant, rules, build, route, fab outputs, review files, checks), then `make pcb-mill-check BOARD=mill`. `pcb-all` builds the board again from `placement.py` with `--force`: manual edits of `pcb/mill/rc_power_board.kicad_pcb` are lost.
+- `pcb/src/` is the mill prototype: the same circuit, without the parts in `[parts] exclude`, with the footprints of `[parts.footprint]`, and with wider tracks and gaps. Its schematic is made by `make pcb-sch BOARD=src` from the rev1 schematic (`on_board no`, `dnp yes` for the excluded parts). Do not edit it by hand.
+- `pcb/<board>/placement.py` holds the part positions, the planned zones and the path rows of one board. `pcb/src/placement.py` loads the rev1 file and changes it. The design rules do not move parts: when a check fails after a rule change, change the placement file.
+- After a change of the mill tuning file run `make pcb-all BOARD=src` (schematic variant, rules, build, route, fab outputs, review files, checks), then `make pcb-mill-check BOARD=src`. `pcb-all` builds the board again from `placement.py` with `--force`: manual edits of `pcb/src/rc_power_board.kicad_pcb` are lost.
 - A zone at a part with an `[[exception]]` (`zones = true`) can be as near to a pad of that part as the exception clearance. Two zones of different nets keep the larger of their two clearances, and never less than the board clearance. Lesson from U3 on the mill board. `zones = true` applies to all pours at all pads of the part, not only to the planned zones. Use it only when no other form is possible (lesson from U1 and U2: use `own_pads = true` and `_NEAR` necks).
-- On the mill board the pours keep `zone_clearance` (2 mm) from other copper. Where that leaves no copper (pin headers, module pins, the GND trunk), `pcb/mill/placement.py` has zones with their own clearance (`_NEAR`, `_NEAR_GND`, `_FINE`). Add such a zone only where a check fails with 2 mm, and list it in the review record of the lab directory.
+- On the mill board the pours keep `zone_clearance` (2 mm) from other copper. Where that leaves no copper (pin headers, module pins, the GND trunk), `pcb/src/placement.py` has zones with their own clearance (`_NEAR`, `_NEAR_GND`, `_FINE`). Add such a zone only where a check fails with 2 mm, and list it in the review record of the lab directory.
 - `[parts.footprint]` of the design rules gives a part a different footprint on a board variant (mill board: through-hole capacitors). `make pcb-sch` then sets the part fields of that part to TBD (the base part number is for the base footprint). Do not edit the footprint in the mill schematic by hand.
 - `[parts.wire]` (`refs`, `reason`) gives a JST XH header of a variant the solder-wire footprint with the same pads (`rc_power:SolderWire_1xNN_P2.50mm`) and no part. Use it only for a temporary exception, and write the end condition in `reason`. A ref in `[parts.wire]` must not be in `[parts.footprint]` or `exclude`.
 - `pcb/releases/<rev>/` holds a frozen release with its own `design_rules.toml`. Do not tune a release. Do not run `make pcb-all` or `make pcb-sch` on it.
-- Review files of the mill board: `review/` in the lab directory.
+- Review files: `docs/pcb/releases/<rev>/review/`. The active board `pcb/src` reviews into `rev3`. Only the active board is reviewed. Releases are frozen.
 
 ## Sources of truth
 - Spec / build guide: `docs/pcb/power_board_plan.md` (exported from the live Claude Doc linked at its top). Schematic changes that contradict it => update the plan in the same change, or ask.
@@ -53,7 +53,7 @@ Reference for the power distribution board in `pcb/`. The rules for changes are 
 ## Tooling (kicad-happy@kicad-happy)
 - Review/analysis => `kicad` skill; subcircuit checks => `spice` skill (needs ngspice); EMC once a PCB exists => `emc`.
 - Analyzer output goes to `docs/pcb/analysis/` (config `.kicad-happy.json`; per-run JSON gitignored, manifest tracked).
-- Treat analyzer findings as claims to verify against the raw `.kicad_sch` and datasheets; known false positives on this board: "U3 missing input capacitor" (C7 is its input cap), "U3 EN missing pull-up" (EN tied to VIN per AP2112 datasheet), "U1 PG missing pull-up" (ESP32 input pull-up), "VBAT plane split" (overlapping bus zones merge into one piece). More in `docs/pcb/review/README.md`.
+- Treat analyzer findings as claims to verify against the raw `.kicad_sch` and datasheets; known false positives on this board: "U3 missing input capacitor" (C7 is its input cap), "U3 EN missing pull-up" (EN tied to VIN per AP2112 datasheet), "U1 PG missing pull-up" (ESP32 input pull-up), "VBAT plane split" (overlapping bus zones merge into one piece). More in `docs/pcb/releases/rev1/review/README.md`.
 - ERC/DRC results count only when run in KiCad 10 (user-run, or kicad-cli 10 if installed); never claim ERC passed without its output.
 
 ## Rev1 PCB (review only; Gerber and CAM wait for the lab tech)

@@ -13,7 +13,7 @@ A move to a different machine or a change of inventory is then one change of thi
 - The `lab:` line of `.claude/CLAUDE.md` is the only place that names the lab directory. Documents, rules, skills and agents write "the lab directory" and point to that line. They do not write the path.
 - Code reads the line through `pcb/libraries/lab.py`. The environment variable `LAB_DIR` overrides it.
 - Contents: `milling.toml` (the lab file), `README.md` (index), `example/` (the lab CAM file and its `README.md`), `example/fusion_export/` (setup sheet, tool library, sketch DXFs and screenshots that the owner exports from the CAM tool).
-- `design_rules.toml` in the lab directory is the mill tuning file: the limits that a board for this mill must keep (horizontal error, cut spacing, clearance, track widths, component gap, exceptions, parts that are not on the board). `milling.toml` holds facts of the machine. `design_rules.toml` holds design choices that follow from the accuracy of the machine. It uses the same `status` and `source` fields. After a change run `make pcb-all BOARD=mill`.
+- `design_rules.toml` in the lab directory is the mill tuning file: the limits that a board for this mill must keep (horizontal error, cut spacing, clearance, track widths, component gap, exceptions, parts that are not on the board). `milling.toml` holds facts of the machine. `design_rules.toml` holds design choices that follow from the accuracy of the machine. It uses the same `status` and `source` fields. After a change run `make pcb-all BOARD=src`.
 - The lab directory holds lab facts and lab files only. Board files stay in the board directory.
 - To use the lab in a different project or repo, copy the lab directory and set the `lab:` line there.
 

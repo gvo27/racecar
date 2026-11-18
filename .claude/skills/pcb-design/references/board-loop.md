@@ -29,4 +29,4 @@
 4. When all rows pass, dispatch `pcb-reviewer`. Fix and repeat as in the schematic loop.
 
 ## Mill board
-The tuning loop of the mill board (`pcb/mill`, the mill tuning file, `make pcb-all BOARD=mill`) is in `docs/techctcarvera/README.md` "Tune a prototype". `pcb-all` rebuilds the board with `--force`: put each change into `placement.py` or the design rules, never into the GUI.
+The tuning loop of the mill board (`pcb/src`, the mill tuning file, `make pcb-all BOARD=src`) is in `docs/techctcarvera/README.md` "Tune a prototype". `pcb-all` rebuilds the board with `--force`: put each change into `placement.py` or the design rules, never into the GUI.

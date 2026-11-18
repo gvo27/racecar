@@ -24,7 +24,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        board: [releases/rev1, releases/rev2, mill]
+        board: [src]   # only the active board (pcb/src). Releases are frozen and are not reviewed again
     steps:
       - uses: actions/checkout@v5
         with:
