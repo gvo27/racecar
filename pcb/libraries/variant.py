@@ -4,7 +4,7 @@ A variant has the same circuit as the base board (paths.base_board_dir()) withou
 rules, and with the footprints of `[parts.footprint]` (same part value, a package that the variant can make). For each excluded part the copy has `(on_board no)`, `(in_bom no)` and `(dnp yes)`: the part stays in the
 drawing, is crossed out, and has no footprint and no BOM row. A part with a variant footprint gets TBD in its part
 fields (MPN, Manufacturer, Supplier link, Status) and an empty unit cost: the base part number is for the base
-footprint. Nothing else changes, so the variant cannot drift from the base schematic. Do not edit the variant schematic by hand: edit the base schematic, then run `make pcb-sch`.
+footprint. The variant keeps its own title-block revision (`(rev "...")`): the first run copies the base revision. Nothing else changes, so the variant cannot drift from the base schematic. Do not edit the variant schematic by hand: edit the base schematic, then run `make pcb-sch`.
 
 The first run also copies the project file and the lib tables of the base board. Stdlib only.
 """
@@ -25,6 +25,7 @@ COPY_ONCE = (paths.STEM + ".kicad_pro", "sym-lib-table", "fp-lib-table", ".gitig
 
 
 PROP = r'\(property "%s" "((?:[^"\\]|\\.)*)"'
+REV = re.compile(r'\(rev "((?:[^"\\]|\\.)*)"\)')
 # fields of the base part that are wrong for a part with another footprint: the variant sets them to TBD (no
 # unconfirmed part numbers). The unit cost is empty: the cost total counts the part as 0.
 PART_FIELDS = (("MPN", "TBD"), ("Manufacturer", "TBD"), ("Supplier link", "TBD"), ("Status", "TBD"), ("Unit cost USD", ""))
@@ -71,6 +72,12 @@ def set_wire_fields(block, ref):
     if n != 1:
         raise RuntimeError("symbol %s has no BOM Comments property" % ref)
     return block
+
+
+def keep_revision(text, old):
+    """Return `text` with the title-block revision of `old` (the variant schematic before this run). `old` None: no change."""
+    m = REV.search(old) if old else None
+    return REV.sub(lambda _: m.group(0), text, count=1) if m else text
 
 
 def make_variant(text, exclude, footprints=None, wires=None):
@@ -121,8 +128,10 @@ def run(base_dir, board_dir):
     if missing:
         print("pcb-sch: [parts] names parts that are not in the base schematic: %s" % ", ".join(missing), file=sys.stderr)
         return 1
-    with open(os.path.join(board_dir, name), "w", encoding="utf-8") as fh:
-        fh.write(text)
+    target = os.path.join(board_dir, name)
+    old = open(target, encoding="utf-8").read() if os.path.exists(target) else None
+    with open(target, "w", encoding="utf-8") as fh:
+        fh.write(keep_revision(text, old))
     for f in COPY_ONCE:
         if not os.path.exists(os.path.join(board_dir, f)):
             shutil.copyfile(os.path.join(base_dir, f), os.path.join(board_dir, f))

@@ -157,18 +157,25 @@ class TestVariant(unittest.TestCase):
         notes = [v for n, v in new if n == "BOM Comments"]
         self.assertTrue(all(v.startswith("Temporary (first mill print round)") and ("B2B-XH-A" in v or "B6B-XH-A" in v) for v in notes))
 
+    def test_variant_keeps_its_own_title_block_revision(self):
+        old = self.base.replace('(rev "1")', '(rev "3 (draft)")', 1)
+        self.assertEqual(variant.keep_revision(self.base, old).count('(rev "3 (draft)")'), 1)
+        self.assertEqual(variant.keep_revision(self.base, None), self.base)   # first run: the base revision
+
     def test_no_exclude_list_gives_the_base_schematic(self):
         self.assertEqual(variant.make_variant(self.base, set())[0], self.base)
 
     def test_committed_mill_schematic_is_current(self):
         r = rules.load(MILL_RULES)
-        want = variant.make_variant(self.base, set(r.exclude), r.footprint, set(r.wire))[0]
-        self.assertEqual(open(os.path.join(MILL, paths.STEM + ".kicad_sch"), encoding="utf-8").read(), want, "run make pcb-sch BOARD=mill")
+        have = open(os.path.join(MILL, paths.STEM + ".kicad_sch"), encoding="utf-8").read()
+        want = variant.keep_revision(variant.make_variant(self.base, set(r.exclude), r.footprint, set(r.wire))[0], have)
+        self.assertEqual(have, want, "run make pcb-sch BOARD=mill")
 
     def test_committed_rev_b_schematic_is_current(self):
         r = rules.load(rules.rules_file(REV_B))
-        want = variant.make_variant(self.base, set(r.exclude), r.footprint, set(r.wire))[0]
-        self.assertEqual(open(os.path.join(REV_B, paths.STEM + ".kicad_sch"), encoding="utf-8").read(), want)
+        have = open(os.path.join(REV_B, paths.STEM + ".kicad_sch"), encoding="utf-8").read()
+        want = variant.keep_revision(variant.make_variant(self.base, set(r.exclude), r.footprint, set(r.wire))[0], have)
+        self.assertEqual(have, want)
 
 
 class TestRingAndWidth(unittest.TestCase):

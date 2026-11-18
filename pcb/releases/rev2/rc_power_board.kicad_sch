@@ -7,7 +7,7 @@
 	(title_block
 		(title "RC Car Power Distribution Board")
 		(date "2026-10-30")
-		(rev "A (draft)")
+		(rev "2 (draft)")
 		(company "gvo27/racecar")
 		(comment 1 "Draft for review, values marked TBD are unconfirmed")
 		(comment 2 "Spec: docs/pcb/power_board_plan.md")
