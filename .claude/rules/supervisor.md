@@ -3,15 +3,16 @@ paths:
   - "rccar_supervisor/**"
 ---
 
-# rccar_supervisor (safety authority; refs: safety-estop §3 §5 §6)
+# Supervisor (safety authority)
 
-- sole publisher of `/rccar/mcu/drive`. Inputs `/rccar/cmd/<source>` with (priority, timeout) from config keyed on topic (admin 100/0.3 s, captain 10/0.5 s). Highest-priority fresh input wins; stale input never forwarded.
-- boot: disarmed, not latched, incident 0, explicit Reset required.
-- `brake` / `disarm` / MCU FAILSAFE event latch a new incident (idempotent while latched) and stop forwarding immediately (services bypass arbitration, send MCU DISARM, retried until confirmed).
-- `arm` = `Reset(incident)`: only for the current incident (stale refused), only while top-priority input is neutral/stale; result = armed but stationary. Generation fence: commands received before the reset are discarded; neutral is streamed until a fresh command arrives. Deadman: after a reset each input's throttle is forwarded as 0 until that input has sent a neutral command (|throttle| < neutral_threshold) since the reset.
-- fail-safe by silence: while disarmed publish nothing; esp32 `cmd_timeout_ms` disarm is the backstop. Keep `cmd_timeout_ms >= 3 x 1000/send_hz`.
-- state: `/rccar/supervisor/state` reliable + transient_local; reason strings <= 64 chars.
-- logic in `arbiter.py` (pure, table tests: priority, timeout, latch, reset needs neutral, single output). Node = wiring. Any behavior change needs an arbiter test first.
-- software stop is not safety-rated; ESC power switch is the independent hardware stop (state it in user docs).
-- QoS: `docs/sensor_contract.md` (boundary) and `docs/ros2.md` (other topics). Never add a second publisher on /rccar/mcu/drive (fake MCU in tests only subscribes).
-- stop-path checklist: kill teleop, kill core, unplug usb, agent loss, stale reset, reset with throttle != 0, double brake, brake during reset. Hardware runs of these are user bench only.
+Reference (input priorities and timeouts, state limits, stop-path checklist): `docs/ros2.md`. ros2-engineering reference: safety-estop sections 3, 5 and 6.
+
+- The supervisor is the only publisher of `/rccar/mcu/drive`. Never add a second publisher (the fake MCU in tests only subscribes). This rule owns that invariant.
+- The highest-priority fresh input wins. Never forward a stale input.
+- Boot state: disarmed, not latched, incident 0. Arming needs an explicit Reset.
+- `brake`, `disarm` and an MCU FAILSAFE event latch a new incident and stop forwarding at once. Services bypass arbitration and send MCU DISARM until confirmed.
+- `arm` is `Reset(incident)`: only for the current incident, only while the top-priority input is neutral or stale. The result is armed but stationary. Discard commands from before the reset. Forward throttle 0 from each input until that input has sent a neutral command since the reset.
+- Fail-safe by silence: while disarmed, publish nothing. Keep `cmd_timeout_ms >= 3 x 1000/send_hz` (the ESP32 disarm is the backstop).
+- Logic stays in `arbiter.py` (pure, table tests). A behavior change needs an arbiter test first.
+- The software stop is not safety-rated. The ESC power switch is the hardware stop. Say so in the user docs.
+- Hardware runs of the stop-path checklist are user bench only.

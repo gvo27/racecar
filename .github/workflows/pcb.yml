@@ -1,0 +1,66 @@
+name: pcb
+
+# kicad-happy analyzers (schematic, PCB, EMC, thermal, SPICE) on each PCB change, with a diff against the base branch.
+# Analyzers only: no AI review step. The fab release gate runs locally (make pcb-gate, skill pcb-fab).
+# The action ref is the same release as the plugin ref in .claude/settings.json. Bump both together.
+on:
+  pull_request:
+    paths:
+      - "pcb/**/*.kicad_sch"
+      - "pcb/**/*.kicad_pcb"
+      - ".github/workflows/pcb.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  review:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      pull-requests: write
+      statuses: write
+    strategy:
+      fail-fast: false
+      matrix:
+        board: [src]   # only the active board (pcb/src). Releases are frozen and are not reviewed again
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Install ngspice (SPICE)
+        run: sudo apt-get update && sudo apt-get install -y ngspice poppler-utils
+      - uses: aklofas/kicad-happy@v2.3.2
+        id: analysis
+        with:
+          schematic: pcb/${{ matrix.board }}/rc_power_board.kicad_sch
+          pcb: pcb/${{ matrix.board }}/rc_power_board.kicad_pcb
+          diff-base: true
+      - name: Name the board in the report
+        env:
+          REPORT: ${{ steps.analysis.outputs.report-path }}
+          BOARD: ${{ matrix.board }}
+        run: |
+          { printf '# Board: `pcb/%s`\n\n' "$BOARD"; cat "$REPORT"; } > "$REPORT.named"
+          mv "$REPORT.named" "$REPORT"
+      - name: Board slug for the artifact name
+        id: slug
+        env:
+          BOARD: ${{ matrix.board }}
+        run: echo "name=kicad-happy-$(echo "$BOARD" | tr / -)" >> "$GITHUB_OUTPUT"
+      - name: Upload the full reports (markdown report and analyzer JSON)
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ steps.slug.outputs.name }}
+          path: |
+            ${{ steps.analysis.outputs.report-path }}
+            ${{ steps.analysis.outputs.schematic-json }}
+            ${{ steps.analysis.outputs.pcb-json }}
+          if-no-files-found: warn
+          retention-days: 30
+      - uses: thollander/actions-comment-pull-request@v3
+        with:
+          file-path: ${{ steps.analysis.outputs.report-path }}
+          comment-tag: kicad-happy-${{ strategy.job-index }}
+          mode: upsert

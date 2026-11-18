@@ -15,7 +15,7 @@ import gen_rules  # noqa: E402
 import variant  # noqa: E402
 
 BASE = paths.base_board_dir()
-MILL = os.path.join(paths.PCB_DIR, "mill")
+MILL = os.path.join(paths.PCB_DIR, "src")
 MILL_RULES = os.path.join(lab.lab_dir(), rules.FILE_NAME)
 REV_B = os.path.join(paths.PCB_DIR, "releases", "rev2")
 XH = {"J3", "J4", "J5", "J8", "J9", "J11", "J12", "J13", "J14"}
@@ -97,6 +97,28 @@ class TestBaseBoard(unittest.TestCase):
         self.assertEqual(line.split(":=", 1)[1].strip(), paths.DEFAULT_BOARD.replace(os.sep, "/"))
 
 
+class TestReviewDir(unittest.TestCase):
+    def test_each_board_reviews_into_its_release_folder(self):
+        want = {os.path.join("releases", "rev1"): "rev1", os.path.join("releases", "rev2"): "rev2", "src": "rev3"}
+        for board, rev in want.items():
+            self.assertEqual(paths.release_of(os.path.join(paths.PCB_DIR, board)), rev, board)
+        old = os.environ.get("BOARD_DIR")
+        try:
+            os.environ["BOARD_DIR"] = os.path.join(paths.PCB_DIR, "src")
+            self.assertEqual(paths.review_dir(), os.path.join(paths.DOCS_DIR, "releases", "rev3", "review"))
+        finally:
+            if old is None:
+                os.environ.pop("BOARD_DIR", None)
+            else:
+                os.environ["BOARD_DIR"] = old
+
+    def test_makefile_working_release_is_the_paths_value(self):
+        # one owner for the next release of the working board: paths.WORKING_RELEASE; the Makefile keeps a copy
+        with open(os.path.join(paths.REPO_ROOT, "Makefile"), encoding="utf-8") as f:
+            line = next(ln for ln in f if ln.startswith("SRC_RELEASE"))
+        self.assertEqual(line.split(":=", 1)[1].split("#")[0].strip(), paths.WORKING_RELEASE["src"])
+
+
 class TestGenRules(unittest.TestCase):
     def test_project_files_of_both_boards_agree_with_their_rules(self):
         for board in (BASE, MILL, REV_B):
@@ -169,7 +191,7 @@ class TestVariant(unittest.TestCase):
         r = rules.load(MILL_RULES)
         have = open(os.path.join(MILL, paths.STEM + ".kicad_sch"), encoding="utf-8").read()
         want = variant.keep_revision(variant.make_variant(self.base, set(r.exclude), r.footprint, set(r.wire))[0], have)
-        self.assertEqual(have, want, "run make pcb-sch BOARD=mill")
+        self.assertEqual(have, want, "run make pcb-sch BOARD=src")
 
     def test_committed_rev_b_schematic_is_current(self):
         r = rules.load(rules.rules_file(REV_B))

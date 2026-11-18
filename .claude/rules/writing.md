@@ -35,5 +35,5 @@ Strict applies every rule in the plugin. STE-flavored applies the structural rul
 8. Use simple tenses. Keep a compound tense only when it carries information, for example "may have failed".
 
 ## Check
-- Optional lint for prose: `python3 <plugin dir>/scripts/ste-lint.py <file.md>`. The script uses only the Python standard library. The lint is advisory and not in CI. Text in code blocks gives false findings, so read each finding before you act on it.
+- Optional lint for prose: `uv run --no-project python <plugin dir>/scripts/ste-lint.py <file.md>`. The script uses only the Python standard library. The lint is advisory and not in CI. Text in code blocks gives false findings, so read each finding before you act on it.
 - The lint does not check rules 1 to 4. Compare the diff against the original text for those rules.

@@ -20,13 +20,13 @@ Layout since 2026-11-16: the KiCad projects, the libraries and the tools are in 
 | `pcb/lib/rc_power.pretty/` + `pcb/releases/rev1/fp-lib-table` | Project footprint library: `Pololu_D36V50Fx` (U1 and U2: 12 pads and the full 25.4 x 25.4 mm body, from Pololu's drawing; facts in `docs/datasheets/regulator_pololu_d36v50f5.md`). |
 | `milling_waivers.toml` (lab directory) | The waiver list for the milling check. The milling limits (`milling.toml`), the mill tools (`tools/milling_check.py`, `tools/fab_export.py`) and the lab CAM example are also in the lab directory ([`lab:` in `.claude/CLAUDE.md`](../../.claude/CLAUDE.md)). |
 | `pcb/libraries/` | Python tools and tests that run in the KiCad image: `paths.py` (repo layout), `lab.py` (path of the lab directory), `build_pcb.py`, `placement.py`, `route_pcb.py`, `check_board.py`, `review_plots.py`. |
-| `review/` | Review package: DRC report, milling check, layer PDF, 1:1 PDF, `README.md`. |
+| `releases/<rev>/review/` | Review package of each release: DRC report, milling check, layer PDF, 1:1 PDF, `README.md` (the latest state only; older records are in `docs/archive/pcb/review/`). The active board `pcb/src` reviews into `releases/rev3/review/`. |
 | `pcb/releases/rev1/rc_power_board.pdf` | Plot of the sheet, for review without KiCad. |
 | `pcb/releases/rev1/.kicad-happy.json` | Config for the kicad-happy Claude plugin (analysis output in `analysis/`, gitignored except the manifest). |
 
 ## Mill prototype
 
-A second board, `pcb/mill/`, is the coarse copy of this board for the lab mill: no LEDs (D2 to D4) and no LED resistors (R1 to R3), through-hole capacitors for C2 to C8, wider tracks and gaps. This is a deviation from `power_board_plan.md` for the prototype only. Its rules, its review record and the tuning steps are in the lab directory (`design_rules.toml`, `review/README.md`, `README.md`).
+A second board, `pcb/src/`, is the coarse copy of this board for the lab mill: no LEDs (D2 to D4) and no LED resistors (R1 to R3), through-hole capacitors for C2 to C8, wider tracks and gaps. This is a deviation from `power_board_plan.md` for the prototype only. Its rules, its review record and the tuning steps are in the lab directory (`design_rules.toml`, `review/README.md`, `README.md`).
 
 ## KiCad version
 
@@ -142,4 +142,4 @@ The previous revision was checked with KiCad 7.0.11 `kicad-cli`, the kicad-happy
 
 ## Working on this folder with Claude Code
 
-The repo enables the kicad-happy plugin (`.claude/settings.json`). Rules for this folder are in `.claude/rules/schematics.md`. Typical asks are "review pcb/releases/rev1", "check the power budget against the schematic" and "simulate the subcircuits". SPICE needs `ngspice` installed on the host.
+The kicad-happy plugin is off by default: enable it for a session (`.claude/rules/plugins.md`). Rules: `.claude/rules/schematics.md`. Facts and conventions: [conventions.md](conventions.md). Workflow: skill `pcb-design`. Fab release gate and order files: skill `pcb-fab` and `make pcb-gate`. Each PR that changes a schematic or a board gets a kicad-happy report (`.github/workflows/pcb.yml`). SPICE needs `ngspice` installed on the host.

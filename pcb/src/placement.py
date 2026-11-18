@@ -1,4 +1,4 @@
-"""Placement of the mill prototype (pcb/mill). It starts from the rev1 placement (placement.py of the base board, paths.base_board_dir()) and changes it.
+"""Placement of the mill prototype (pcb/src). It starts from the rev1 placement (placement.py of the base board, paths.base_board_dir()) and changes it.
 
 Differences from rev1: no LEDs and LED resistors (`[parts] exclude` of the design rules). C2 to C8 are through-hole
 capacitors with 5.0 mm lead pitch on the top side (`[parts.footprint]`). The 3.3 V nets are planned zones. Pads of

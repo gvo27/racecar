@@ -9,7 +9,7 @@ KiCad DRC checks the numbers in `rc_power_board.kicad_pro` and `.kicad_dru`. It 
 
 ## Run
 - `make pcb-mill-check`. The check runs `tools/milling_check.py` in the lab directory in the pinned KiCad 10 image.
-- Output: `docs/pcb/review/milling_check.json` and a text summary. Exit code 0 = no errors, 1 = errors, 2 = the check could not run.
+- Output: `docs/pcb/releases/rev1/review/milling_check.json` and a text summary. Exit code 0 = no errors, 1 = errors, 2 = the check could not run.
 - Limits: `milling.toml` in the lab directory (`lab:` in `.claude/CLAUDE.md`). Every value there is `confirmed` or `assumed`. Assumed values stay assumed until the lab tech confirms them. Do not change a limit to make a board pass. To add or change a lab fact (machine, bits, stock, depth), use the skill `pcb-lab-config`.
 
 ## What it checks (rule ids)

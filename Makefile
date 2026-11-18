@@ -31,8 +31,9 @@ PCB_LIBS         := $(CURDIR)/pcb/libraries
 PCB_DOCS         := docs/pcb
 LAB_DIR          := $(patsubst %/,%,$(shell sed -n "s/^lab:[[:space:]]*\\([^[:space:]]*\\).*/\\1/p" .claude/CLAUDE.md))
 LAB_TOOLS        := $(CURDIR)/$(LAB_DIR)/tools
-# review files: docs/pcb/review for the base board, review/ of the lab directory for a mill board (paths.review_dir)
-REVIEW_DIR       := $(if $(filter $(BASE_BOARD),$(BOARD)),$(PCB_DOCS)/review,$(LAB_DIR)/review)
+# review files: docs/pcb/releases/<rev>/review (paths.review_dir). The active board pcb/src reviews into its next release.
+SRC_RELEASE      := rev3   # copy of paths.WORKING_RELEASE["src"] (test_rules checks it)
+REVIEW_DIR       := $(PCB_DOCS)/releases/$(if $(filter src,$(BOARD)),$(strip $(SRC_RELEASE)),$(notdir $(BOARD)))/review
 # global lib tables: kicad-cli in a bare container finds no stock libraries (false ERC warnings), so copy the templates
 KICAD_CFG        := $(CURDIR)/build/kicad-cfg
 KICAD_RUN        = docker run --rm --user $(shell id -u):$(shell id -g) -e HOME=/tmp -e XDG_CONFIG_HOME=$(KICAD_CFG) \
@@ -46,10 +47,10 @@ EXTRA_REPOS :=
 COMPOSE  := docker compose -f deploy/car/compose.yaml --env-file deploy/car/.env.generated
 
 .DEFAULT_GOAL := help
-.PHONY: help open close check-host setup clean build pcb-rules pcb-sch pcb-all flash monitor fw-image config models compiledb unit check-dev dev-setup \
+.PHONY: help open close plugins-reset check-host setup clean build pcb-rules pcb-sch pcb-all flash monitor fw-image config models compiledb unit check-dev dev-setup \
         ros-image ros-test ros-test-image ros-test-run ros-shell car-up car-down car-ps car-logs car-pull \
         car-shutdown install-host teleop calibrate tune test rangefinder viz lidar-imu lidar-snapshot lidar-record mcu unit-run \
-        drivers-stop drivers-start lidar-hw-test kicad-image erc pcb-build pcb-route pcb-check pcb-mill-check pcb-review pcb-fab pcb-test bom \
+        drivers-stop drivers-start lidar-hw-test kicad-image erc pcb-build pcb-route pcb-check pcb-mill-check pcb-review pcb-fab pcb-test pcb-gate bom \
         _kicad-cfg _clean-build _need-config _need-stack _need-stack-down _need-drivers-down
 
 help:            ## list targets (grouped in README.md)
@@ -59,8 +60,11 @@ help:            ## list targets (grouped in README.md)
 open: check-host  ## start a Claude Code session: git fast-forward, uv sync + direnv allow, missing plugins, checklist; safe to rerun
 	uv run --no-project python scripts/open.py . $(EXTRA_REPOS)
 
-close:           ## end a Claude Code session: clean caches, report uncommitted/unpushed work and done plans; safe to rerun
+close: plugins-reset  ## end a Claude Code session: clean caches, report uncommitted/unpushed work and done plans; safe to rerun
 	uv run --no-project python scripts/close.py . $(EXTRA_REPOS)
+
+plugins-reset:   ## remove the session-only plugin enables (local scope) from .claude/settings.local.json; safe to rerun
+	@uv run --no-project python scripts/plugins_reset.py
 
 check-host:      ## check the host tools outside .venv (git, make, uv, direnv, docker); fails if a required one is missing
 	@fail=0; \
@@ -200,11 +204,11 @@ _kicad-cfg:
 pcb-rules: _kicad-cfg  ## check the KiCad project files of BOARD against its design rules (design_rules.toml); PCB_RULES_ARGS=--write changes them
 	$(KICAD_RUN) python3 $(PCB_LIBS)/gen_rules.py $(PCB_RULES_ARGS)
 
-pcb-sch: _kicad-cfg  ## make the schematic of a board variant (BOARD=mill) from the base schematic (BASE_BOARD) and its [parts] exclude list
+pcb-sch: _kicad-cfg  ## make the schematic of a board variant (BOARD=src) from the base schematic (BASE_BOARD) and its [parts] exclude list
 	$(KICAD_RUN) python3 $(PCB_LIBS)/variant.py
 
 # One command after a change of the design rules. The part positions stay (placement.py of the board is the source).
-pcb-all:         ## BOARD=mill: schematic variant, rules into the project, build from placement.py, route, checks, fab outputs, review files
+pcb-all:         ## BOARD=src: schematic variant, rules into the project, build from placement.py, route, checks, fab outputs, review files
 	$(MAKE) pcb-sch BOARD=$(BOARD)
 	$(MAKE) pcb-rules BOARD=$(BOARD) PCB_RULES_ARGS=--write
 	$(MAKE) pcb-build BOARD=$(BOARD) PCB_BUILD_ARGS=--force
@@ -239,7 +243,7 @@ pcb-check: _kicad-cfg  ## DRC (with schematic parity) + board checks + milling c
 	$(KICAD_RUN) python3 $(PCB_LIBS)/drc_summary.py "$(CURDIR)/build/drc/drc.json"
 	$(KICAD_RUN) python3 $(PCB_LIBS)/check_board.py rc_power_board.kicad_pcb
 
-pcb-review: _kicad-cfg  ## write the review directory of BOARD (docs/pcb/review, or review/ of the lab directory for BOARD=mill): drc.json, milling_check.json, layer PDF, 1:1 PDF
+pcb-review: _kicad-cfg  ## write the review directory of BOARD (docs/pcb/releases/<rev>/review; BOARD=src: rev3): drc.json, milling_check.json, layer PDF, 1:1 PDF
 	$(KICAD_RUN) python3 $(PCB_LIBS)/review_plots.py
 
 pcb-mill-check: _kicad-cfg  ## milling check of the board vs the lab limits (milling.toml in the lab directory, waivers); exit 1 = unwaived errors
@@ -250,6 +254,16 @@ pcb-mill-check: _kicad-cfg  ## milling check of the board vs the lab limits (mil
 pcb-fab: _kicad-cfg  ## DXF (F.Cu, B.Cu, Edge.Cuts), Excellon and drill-map DXF for the lab's Fusion 360 template -> build/fab/<BOARD>/ (not committed), then test_fab
 	$(KICAD_RUN) python3 $(LAB_TOOLS)/fab_export.py rc_power_board.kicad_pcb --out "$(CURDIR)/build/fab/$(BOARD)"
 	$(KICAD_RUN) python3 -m unittest discover -s $(LAB_TOOLS) -p 'test_fab.py' -v
+
+# kicad-happy plugin directory (the installed version, ref in .claude/settings.json); override with KICAD_HAPPY=<dir>
+KICAD_HAPPY      ?= $(lastword $(sort $(wildcard $(HOME)/.claude/plugins/cache/kicad-happy/kicad-happy/*)))
+# fab = fab house (Gerbers checked), mill = the lab mill (no Gerbers). The active board pcb/src is made on the mill.
+METHOD           ?= $(if $(filter src,$(BOARD)),mill,fab)
+pcb-gate: _kicad-cfg  ## kicad-happy analyzers + fab release gate of BOARD -> build/gate/<BOARD>/ (METHOD=fab|mill; needs the kicad-happy plugin)
+	@test -n "$(KICAD_HAPPY)" -a -d "$(KICAD_HAPPY)/skills/kicad/scripts" || { echo "pcb-gate: kicad-happy plugin not found. Run: claude plugin install kicad-happy@kicad-happy --scope project, or set KICAD_HAPPY=<dir>"; exit 1; }
+	docker run --rm --user $(shell id -u):$(shell id -g) -e HOME=/tmp -e XDG_CONFIG_HOME=$(KICAD_CFG) \
+	  -v "$(CURDIR)":"$(CURDIR)" -v "$(KICAD_HAPPY)":"$(KICAD_HAPPY)":ro -w "$(CURDIR)/$(BOARD_DIR)" $(KICAD_IMAGE) \
+	  sh $(PCB_LIBS)/pcb_gate.sh "$(KICAD_HAPPY)" "$(CURDIR)/build/gate/$(BOARD)" "$(METHOD)"
 
 pcb-test: _kicad-cfg  ## unit tests for the PCB libraries and the mill tools (stdlib unittest, image python3)
 	$(KICAD_RUN) python3 -m unittest discover -s $(PCB_LIBS) -p 'test_*.py' -v
