@@ -180,7 +180,7 @@ tuning.toml        all runtime tuning + [platform.*]; pushed to the ESP32 by mcu
 .env.example       template for the gitignored .env
 logs/              session history (*.jsonl, gitignored)
 docs/              setup.md, docker_ros_plan.md, proposal, datasheets/
-.claude/           CLAUDE.md, layout.yaml, rules/, agents/
+.claude/           CLAUDE.md, rules/, agents/, skills/
 .github/           workflows/{firmware,ros}.yml
 Makefile           every command (make help)
 ```

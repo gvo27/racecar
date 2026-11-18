@@ -61,7 +61,7 @@ The software name is always "rangefinder". The model name appears only in docs/d
 2. Register it in the driver table entry (`driver` id).
 3. Add new `[rangefinder]` values from its datasheet (confirmed values only).
 4. Add `docs/datasheets/rangefinder_<model>.md` (summary) + the archived PDF. Update the Docs and Wiring sections of this file, the README wiring and the mapping table.
-5. Update the paths above and layout.yaml. If the wiring changes, pins.h must equal the README.
+5. Update the paths above. If the wiring changes, pins.h must equal the README.
 
 ## Deploy
 - Flash the firmware BEFORE `make car-up` with the new Pi image. Old firmware answers `ERR unknown key rf_driver`, and the tuning push stops before SAVE.
