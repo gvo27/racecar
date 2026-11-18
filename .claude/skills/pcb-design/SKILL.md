@@ -28,15 +28,16 @@ Project rules: `.claude/rules/schematics.md`. Board context: `docs/pcb/`. Lab fa
 | `pcb-lab-config` | read or change a lab fact (machine, bits, stock, rivets, limits) |
 | `pcb-milling-check` | a board for the lab mill |
 | `pcb-fab` | "Is this board ready to order or to mill?", fab outputs, supplier files |
+| kicad-happy `jlcpcb`, `pcbway` | method "fab house": the fab rules and limits of that house. No project skill covers fab-house rule compliance: tell the owner about the gap |
 
 ## Step 0
-1. Check that the kicad-happy skills are in your skill list. If not, follow `.claude/rules/plugins.md` (the owner enables the plugin for the session).
+1. Check that the kicad-happy skills are in your skill list. If not, follow `.claude/rules/plugins.md` (the owner enables the plugin for the session). If they are still missing, stop and tell the owner. Do not replace the analyzers with your own reading of the files.
 2. Run the environment check of `references/intake.md`.
 
 ## Workflow
 1. **Intake and plan** (`references/intake.md`). Owner gate 1: the plan.
 2. **Schematic loop** (`references/board-loop.md`). Run the schematic rows of the check matrix after each task.
-3. **Review the schematic.** Dispatch `pcb-reviewer` with the scope "schematic", the plan path and the commit range. Fix each blocker and major finding, run the checks again, and dispatch the reviewer again. Owner gate 2: the schematic.
+3. **Review the schematic.** Dispatch `pcb-reviewer` with the scope "schematic", the plan path and the commit range. Fix each blocker and major finding in this session, run the checks again, and dispatch the reviewer again. Owner gate 2: the schematic.
 4. **Board loop** (`references/board-loop.md`). Run the board rows after each change. Method "mill" adds `pcb-milling-check`.
 5. **Review the board.** Run `make pcb-gate` first. Dispatch `pcb-reviewer` with the scope "board" and the gate output directory. Repeat until no blocker and no major finding is open.
 6. **Fab outputs** (skill `pcb-fab`).
@@ -49,6 +50,8 @@ Project rules: `.claude/rules/schematics.md`. Board context: `docs/pcb/`. Lab fa
 - An analyzer finding is a claim. Give it a verdict (`references/check-matrix.md`, Triage).
 - Never run hardware tests. Bench checks are owner steps.
 - Do not review your own work as the only review. Dispatch `pcb-reviewer`.
+- Stay in the task scope. Write other problems in the report. Do not fix them without the owner.
+- Do not push and do not open a PR unless the owner asks.
 - Text for docs, commits and PRs follows `.claude/rules/writing.md`.
 
 ## Report

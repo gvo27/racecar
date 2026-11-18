@@ -15,5 +15,5 @@ kicad-happy (aklofas/kicad-happy, README "Workflow") describes 7 steps. The plug
 ## Notes
 - The GitHub Action `aklofas/kicad-happy` runs steps 3 and 4 on each PR (`.github/workflows/pcb.yml`). It does not run `fab_release_gate.py`. `make pcb-gate` does.
 - The mill path skips the Gerber analysis, JLCPCB tiers and assembly. `make pcb-mill-check` and `make pcb-fab` (DXF, Excellon) replace them.
-- `fab_release_gate.py` exits 0 also for FAIL. Read the verdict line (`Gate: PASS|WARN|FAIL`), not the exit code.
+- `fab_release_gate.py` exits 0 also for FAIL and INCOMPLETE. Read the header `FABRICATION RELEASE GATE — <status>` or `overall_status` in `gate.json`, not the exit code.
 - The scripts need only the Python standard library. Run them in the KiCad image, not with the host python3.

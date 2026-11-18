@@ -21,6 +21,7 @@
 
 Add each new false positive here, with the evidence.
 
-## Results (2026-11-18, kicad-happy 2.3.2)
-- `BOARD=releases/rev1` (fab): `Gate: WARN`. All nets routed (24/24), all 33 parts with MPN, DFM standard tier, schematic and PCB match (40/40, 24 nets), Gerber layers present, EMC 88.0/100 with no critical finding. Warnings: no revision and no board name on the silkscreen.
-- `BOARD=mill` (mill): `Gate: FAIL` from the false positive above. The other lines are as for rev1, without Gerbers.
+## Snapshot (2026-11-18, kicad-happy 2.3.2)
+A dated example of the output, to calibrate a reading. It goes stale: run `make pcb-gate` for the current state. The review records own the board status (`docs/pcb/review/README.md`, `docs/techctcarvera/review/README.md`).
+- `BOARD=releases/rev1` (fab): `WARN`. All nets routed (24/24), all 33 parts with MPN, DFM standard tier, schematic and PCB match (40/40, 24 nets), Gerber layers present, EMC 88.0/100 with no critical finding. Warnings: no revision and no board name on the silkscreen.
+- `BOARD=mill` (mill): `FAIL` from the false positive above. The other lines are as for rev1, without Gerbers.

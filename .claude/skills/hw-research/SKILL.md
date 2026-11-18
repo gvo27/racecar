@@ -1,12 +1,11 @@
 ---
 name: hw-research
-description: Use when you research a hardware part, sensor, module, connector or regulator, its datasheet, pinout, ratings or errata. Use when you research a firmware or ROS 2 API at the pinned stack version (arduino-esp32 2.0.17, ESP-IDF 4.4.7, ROS 2 Jazzy). It adds hardware and firmware steps to the user skill upstream-research.
-disable-model-invocation: true
+description: Use when you research an electronic part for this car - a sensor, module, connector, regulator, fuse or other component, its datasheet, pinout, ratings, errata or a replacement - or an ESP32 firmware, micro-ROS or ROS 2 API at the pinned stack version (arduino-esp32 2.0.17, ESP-IDF 4.4.7, PlatformIO espressif32 6.9.0, ROS 2 Jazzy, micro-ROS jazzy). In this repo it replaces upstream-research for these topics and applies the source rules of upstream-research. For general software tools, libraries, repos or agent tooling, use upstream-research.
 ---
 
 # Hardware and firmware research
 
-This skill adds hardware and firmware steps to the user skill `upstream-research`. Read `~/.claude/skills/upstream-research/SKILL.md` first. Its rules apply here without change. Examples: public names only in queries, primary sources, a link with a version and a date for each fact, and "not found" instead of a guess.
+This skill adds hardware and firmware steps to the user skill `upstream-research`. Scope split: this skill owns electronic parts, datasheets and the pinned firmware and ROS stack of this repo. `upstream-research` owns general software tools, libraries, repos and agent tooling. Do not run both for one question. Read `~/.claude/skills/upstream-research/SKILL.md` first. Its rules apply here without change. Examples: public names only in queries, primary sources, a link with a version and a date for each fact, and "not found" instead of a guess.
 
 ## Sources, in this order
 1. **The manufacturer datasheet** of the exact part number, and its revision. A distributor page is a lead, not the source. For a module (for example a Pololu regulator), the module vendor page and its schematic are primary for the module, and the IC datasheet is primary for the IC.
@@ -20,8 +19,14 @@ The plugin `kicad-happy@kicad-happy` is off by default. Enable it for the sessio
 1. Download the PDFs with the kicad-happy distributor skills. `lcsc` needs no API key. `digikey`, `mouser` and `element14` need keys in user scope. Never put a key in the repo.
    - From a schematic: `sync_datasheets_lcsc.py <file.kicad_sch>`.
    - From a list of part numbers: `sync_datasheets_lcsc.py --mpn-list <file> --output <dir>`.
-   - Run the scripts in the KiCad image (`rccar-kicad:local`, stdlib python3), not with the host python3. Put the downloads under `build/` (not committed). Archive only the PDF that the project uses, in `docs/datasheets/`.
-2. Extract the structured specs with the kicad-happy `datasheets` skill (per-MPN cache, quality score). Use its own plan and merge steps.
+   - Run the scripts in the KiCad image (`rccar-kicad:local`), not with the host python3. They use the Python standard library and call the network. Example:
+     ```
+     KH=$(ls -d ~/.claude/plugins/cache/kicad-happy/kicad-happy/* | sort | tail -1)
+     docker run --rm --user $(id -u):$(id -g) -e HOME=/tmp -v "$PWD":"$PWD" -v "$KH":"$KH":ro -w "$PWD" rccar-kicad:local \
+       python3 "$KH/skills/lcsc/scripts/sync_datasheets_lcsc.py" --mpn-list build/mpns.txt --output build/datasheets
+     ```
+   - Put the downloads under `build/` (not committed). Archive only the PDF that the project uses, in `docs/datasheets/`.
+2. Extract the structured specs with the kicad-happy `datasheets` skill (per-MPN cache, quality score). Follow the extraction procedure in that skill (`plan_extraction.py`, then `merge_results.py`).
 3. Read the extraction as a lead. Check each value that the project uses against the PDF page, and write the page number.
 
 ## Output into the repo
