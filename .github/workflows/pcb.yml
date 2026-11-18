@@ -37,6 +37,13 @@ jobs:
           schematic: pcb/${{ matrix.board }}/rc_power_board.kicad_sch
           pcb: pcb/${{ matrix.board }}/rc_power_board.kicad_pcb
           diff-base: true
+      - name: Name the board in the report
+        env:
+          REPORT: ${{ steps.analysis.outputs.report-path }}
+          BOARD: ${{ matrix.board }}
+        run: |
+          { printf '# Board: `pcb/%s`\n\n' "$BOARD"; cat "$REPORT"; } > "$REPORT.named"
+          mv "$REPORT.named" "$REPORT"
       - uses: thollander/actions-comment-pull-request@v3
         with:
           file-path: ${{ steps.analysis.outputs.report-path }}
