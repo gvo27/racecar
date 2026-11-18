@@ -50,6 +50,7 @@ Project rules: `.claude/rules/schematics.md`. Board context: `docs/pcb/`. Lab fa
 - An analyzer finding is a claim. Give it a verdict (`references/check-matrix.md`, Triage).
 - Never run hardware tests. Bench checks are owner steps.
 - Do not review your own work as the only review. Dispatch `pcb-reviewer`.
+- The active board is `pcb/src` (the next release, rev3). Work on it and review only it, unless the owner names another board. Releases in `pcb/releases/` are frozen: never change or review them again. Review records: `docs/pcb/releases/<rev>/review/README.md`, latest state only.
 - Stay in the task scope. Write other problems in the report. Do not fix them without the owner.
 - Do not push and do not open a PR unless the owner asks.
 - Text for docs, commits and PRs follows `.claude/rules/writing.md`.

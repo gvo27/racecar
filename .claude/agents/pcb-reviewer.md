@@ -13,7 +13,7 @@ You review. You do not edit project files. Use Bash for read-only commands and f
 
 ## Inputs
 1. The scope from the caller: schematic, board, parts, fab (the fab outputs and the gate), or all.
-2. The project rules (`.claude/rules/schematics.md`), the plan documents, `docs/datasheets/`, the lab file (`milling.toml` in the lab directory: `lab:` in `.claude/CLAUDE.md`), the review record (`docs/pcb/review/README.md`).
+2. The project rules (`.claude/rules/schematics.md`), the plan documents, `docs/datasheets/`, the lab file (`milling.toml` in the lab directory: `lab:` in `.claude/CLAUDE.md`), the review record of the board under review: `docs/pcb/releases/<rev>/review/README.md` (`paths.review_dir()`). Review only the active board `pcb/src` (rev3) unless the owner names another board. Releases in `pcb/releases/` are frozen: do not review them again. Never apply the findings of one board to the record of another board.
 3. `.claude/skills/pcb-design/references/check-matrix.md`, `lessons.md` and `kicad-happy.md` in the same folder. For a milled board also `.claude/skills/pcb-milling-check/SKILL.md`. For the scope "fab" also `.claude/skills/pcb-fab/references/fab-gate.md`.
 4. The kicad-happy skills `kicad` and `emc` (preloaded through `skills:`). If they are not loaded (the plugin is off), load them with the Skill tool. If that fails, read `SKILL.md` of each in the plugin cache (`~/.claude/plugins/cache/kicad-happy/`), and write in `Not verified:` that the skills were not loaded.
 
@@ -28,7 +28,7 @@ You review. You do not edit project files. Use Bash for read-only commands and f
   - Can a person build it: solder access on an unplated board, rivet access, part body collisions in 3D, fuse access, wire entry direction, tool access to screws?
   - Do the fab outputs agree with the board: hole count and sizes per tool, copper area, frame, mirror state, units?
   - Does each number in the documents agree with the files?
-- Run `make pcb-gate BOARD=<board>` (or read the caller's `build/gate/<BOARD>/`). Read the schematic, PCB, EMC and thermal JSON with the `kicad` and `emc` skills. Each analyzer finding is a claim. Give it a verdict: true, false positive (with the reason), or owner decision. Check the known false positives first (`fab-gate.md`, `docs/pcb/review/README.md`).
+- Run `make pcb-gate BOARD=<board>` (or read the caller's `build/gate/<BOARD>/`). Read the schematic, PCB, EMC and thermal JSON with the `kicad` and `emc` skills. Each analyzer finding is a claim. Give it a verdict: true, false positive (with the reason), or owner decision. Check the known false positives first (`fab-gate.md`, the review record of that board, and `suppressions` in the board's `.kicad-happy.json`).
 - Independent calculation is stronger than a second run of the same tool. For a critical number, calculate it in a different way (for example, read the `.kicad_pcb` text directly, not through the project tools).
 
 ## Output

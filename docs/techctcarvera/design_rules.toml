@@ -1,6 +1,6 @@
 # Mill tuning file: design rules for a board that this lab mills. EDIT THIS FILE to tune a prototype.
-# A board directory without its own design_rules.toml uses this file (pcb/mill). Keys and checks: pcb/libraries/rules.py.
-# After a change: `make pcb-all BOARD=mill` (rules -> zones -> route -> checks -> fab outputs).
+# A board directory without its own design_rules.toml uses this file (pcb/src). Keys and checks: pcb/libraries/rules.py.
+# After a change: `make pcb-all BOARD=src` (rules -> zones -> route -> checks -> fab outputs).
 # milling.toml holds the machine facts (bit, depth, drills, stock). This file holds what the design must keep because the
 # mill is not accurate in X and Y. A value here must not be below the lab limit of the same name in milling.toml.
 # Each value has status = "confirmed" or "assumed" and a source. Assumed values stay assumed until the lab tech confirms them.

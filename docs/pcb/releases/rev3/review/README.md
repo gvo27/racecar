@@ -1,8 +1,8 @@
-# Mill prototype board (`pcb/mill`): review record
+# Rev3 (draft): review record of the active board `pcb/src`
 
-Date: 2026-11-17. Board: `pcb/mill/rc_power_board.kicad_pcb`, made by `make pcb-all BOARD=mill` from `pcb/mill/placement.py` and the mill tuning file (`design_rules.toml` in this lab directory). The rev1 board (`pcb/releases/rev1`) is not changed.
+Latest state, 2026-11-18. Board: `pcb/src/rc_power_board.kicad_pcb` (title-block revision `3 (draft)`), made by `make pcb-all BOARD=src` from `pcb/src/placement.py` and the mill tuning file (`design_rules.toml` in the lab directory). Only the latest review is kept here. The earlier layout reviews (2026-11-16 and 2026-11-17, all findings fixed or moved to the open items below) are in `docs/archive/pcb/review/2026-11-18-mill-review-record.md`. The rev1 board (`pcb/releases/rev1`) is not changed.
 
-Release: rev2 (`pcb/releases/rev2`) is a frozen copy of this board with the JST XH headers and its own copy of the design rules (2026-11-17). After that copy, `pcb/mill` got the temporary solder-wire pads (next section). The checks of rev2 give the results of the second layout: 96 milling warnings, BOM 91.83 USD.
+Release: rev2 (`pcb/releases/rev2`) is a frozen copy of this board with the JST XH headers and its own copy of the design rules (2026-11-17). After that copy, `pcb/src` got the temporary solder-wire pads (next section). The checks of rev2 give the results of the second layout: 96 milling warnings, BOM 91.83 USD.
 
 ## Temporary exception: wires soldered to the board (first print round only)
 
@@ -21,7 +21,7 @@ This list ranks the risks of the mill board. The details are in the sections tha
 
 1. **Wires on the board, first round only.** No headers and no strain relief on the board. See "Temporary exception".
 2. **U3 (SOT-23-5) is the weakest point.** Its gaps are 0.34 to 0.35 mm. With an error of 0.25 mm for each side, a cut can remove most of a 0.6 mm wide pad, prong or strip. Owner decision: U3 stays. If the first prototype fails at U3, U3 needs a different package or a module. See "Warnings to read".
-3. **All 16 tuning values are `assumed`.** No value comes from a measurement of this mill (`make pcb-rules BOARD=mill`).
+3. **All 16 tuning values are `assumed`.** No value comes from a measurement of this mill (`make pcb-rules BOARD=src`).
 4. **The 2 mm copper gap is not everywhere.** See "Areas without the 2 mm copper gap".
 5. **Loose copper strips between two cuts**, and the meaning of "2 mm between cuts". See "Not verified" and "Questions for the lab tech".
 6. **Margins without spare** (clearance, load paths). See that section.
@@ -48,7 +48,7 @@ This list ranks the risks of the mill board. The details are in the sections tha
 
 ## Areas without the 2 mm copper gap
 
-In these areas a zone has the board clearance (0.8 mm) or the footprint fixes a smaller gap. They are in `pcb/mill/placement.py` (`_NEAR`, `_NEAR_GND`, `_FINE`) and in the `[[exception]]` entries of the tuning file.
+In these areas a zone has the board clearance (0.8 mm) or the footprint fixes a smaller gap. They are in `pcb/src/placement.py` (`_NEAR`, `_NEAR_GND`, `_FINE`) and in the `[[exception]]` entries of the tuning file.
 
 | Area | Gap | Cause |
 | --- | --- | --- |
@@ -80,15 +80,14 @@ All other copper has a 2.0 mm gap: the pours to the VBAT, 5 V, `/LDO_IN` and `+3
 
 | Check | Result |
 | --- | --- |
-| `make erc BOARD=mill` | 0 errors, 3 warnings (`lib_symbol_mismatch`, as rev1) |
-| `make pcb-rules BOARD=mill` | The project files agree with the design rules. 16 values assumed |
-| `make pcb-check BOARD=mill` | DRC: 0 errors, 0 unconnected, parity clean. 117 warnings: 26 `lib_footprint_mismatch` (pads changed by the build), 91 `silk_over_copper` (silkscreen of the library footprints; the milled board has no silkscreen). `check_board`: 0 problems |
-| `make pcb-mill-check BOARD=mill` | 0 errors, 0 waived, 103 warnings: 85 `MILL-GAP-FIXED`, 9 `MILL-CUT-SPACING`, 9 `MILL-CONN-EDGE`. No `MILL-SLIVER`, no `MILL-ISLAND` |
-| `make pcb-fab BOARD=mill` | Outputs in `build/fab/mill/` (not committed). The target then runs `test_fab.py` on the mill board: 20 tests, OK |
-| `make bom BOARD=mill` | `pcb/mill/bom.csv`. C2 to C8: part number TBD, no cost. Wire pads: no part. Total 90.73 USD |
-| `make pcb-test` | 103 + 61 = 164 tests, OK |
-| Rev2 (`BOARD=releases/rev2`) | `pcb-rules` agree, ERC 0 errors, DRC 0 errors, 0 unconnected, parity clean, `check_board` 0 problems, milling check 0 errors and 96 warnings, BOM 91.83 USD |
-| Rev1 (`make pcb-check pcb-mill-check pcb-fab`, base board) | Same as before: DRC 0 errors, `check_board` 0 problems, milling check 0 errors and 2 `MILL-SLIVER` warnings. No change in `pcb/releases/rev1` |
+| `make erc BOARD=src` | 0 errors, 3 warnings (`lib_symbol_mismatch`, as rev1) |
+| `make pcb-rules BOARD=src` | The project files agree with the design rules. 16 values assumed |
+| `make pcb-check BOARD=src` | DRC: 0 errors, 0 unconnected, parity clean. 117 warnings: 26 `lib_footprint_mismatch` (pads changed by the build), 91 `silk_over_copper` (silkscreen of the library footprints; the milled board has no silkscreen). `check_board`: 0 problems |
+| `make pcb-mill-check BOARD=src` | 0 errors, 0 waived, 103 warnings: 85 `MILL-GAP-FIXED`, 9 `MILL-CUT-SPACING`, 9 `MILL-CONN-EDGE`. No `MILL-SLIVER`, no `MILL-ISLAND` |
+| `make pcb-fab BOARD=src` | Outputs in `build/fab/src/` (not committed). The target then runs `test_fab.py` on the mill board: 20 tests, OK |
+| `make bom BOARD=src` | `pcb/src/bom.csv`. C2 to C8: part number TBD, no cost. Wire pads: no part. Total 90.73 USD |
+| `make pcb-test` | 108 + 61 = 169 tests, OK (2026-11-18) |
+| `make pcb-gate BOARD=src` | FAIL from the count false positive, 2 WARN (no silkscreen by design). EMC 71.5/100. Verdicts: section "kicad-happy analysis" |
 
 Copper width along the current paths (opening test, B.Cu):
 
@@ -125,7 +124,7 @@ The milling check prints positions as (x, -y) in mm from the lower-left corner o
 
 ## Not verified
 
-- No review of this layout by a person. No KiCad GUI check. No kicad-happy analysis. No second `pcb-reviewer` run after the fixes of 2026-11-17.
+- No review of this layout by a person. No KiCad GUI check. No second `pcb-reviewer` run after the fixes of 2026-11-17 (the kicad-happy review of 2026-11-18 changed no board file).
 - The capacitor type: the footprint is a 5.0 mm pitch disc. The capacitor values of the schematic are TBD (C7, C8: 1 uF). A part with 2.5 mm lead pitch needs formed leads or a different footprint.
 - The effect of the new positions of C2 and C4 (about 6 mm from the VIN pads) was not analyzed. The modules have their own input capacitors.
 - The body height and the body size of the capacitors next to the modules and connectors (courtyards do not overlap in DRC).
@@ -136,36 +135,28 @@ The milling check prints positions as (x, -y) in mm from the lower-left corner o
 - A 2 mm copper gap with a single-pass contour toolpath leaves a loose copper strip of about 1.4 mm between the two cuts. A 0.8 mm gap leaves a strip of 0.8 - 2 x 0.292 = 0.22 mm. The lab CAM must remove the strips or leave them. Not checked with the lab.
 - The meaning of "2 mm between cuts". This record uses track + gap = 2.1 mm (gap center to gap center). Between the two toolpaths beside a 1.3 mm track the distance is 1.59 mm. Not confirmed by the lab tech.
 
-## Review findings on the first layout (`pcb-reviewer`, 2026-11-16)
+## kicad-happy analysis (`make pcb-gate BOARD=src`, kicad-happy 2.3.2, 2026-11-18)
 
-No blocker, 2 major, 7 minor. All fixed in commit `adef37b`: the component gap check includes parts with an exception; a track or a pad of another part near a pad of an exception part is a `MILL-GAP` error; U3 zone clearance 0.34 mm; no island fragments on `+5V_SENS`; no sliver at the U3 GND strip. The reviewer compared all pad nets with rev1 (0 differences).
+Gate: FAIL from the count false positive and WARN for the silkscreen (`.claude/skills/pcb-fab/references/fab-gate.md`). EMC score 71.5/100 with `analyze_pcb --full`. Verdicts from `pcb-reviewer` (2026-11-18), checked in the raw board file. Suppressed findings are in `pcb/src/.kicad-happy.json`, each with its reason.
 
-## Review findings on the second layout (`pcb-reviewer`, 2026-11-17)
+| Finding | Verdict | Evidence | Action |
+| --- | --- | --- | --- |
+| GP-001 (error) `/THROTTLE_PWM`, `/I2C_SCL`, `/I2C_SDA`, `/STEER_PWM` | True geometry, the mechanism does not apply | The tracks are on B.Cu. The F.Cu pour `GND_F` has `connect_pads no` and joins GND at one rivet (68.1, 42.1), about 80 mm away, so it is not a return conductor. The return is the B.Cu GND beside the tracks (STEER 90 %, SDA 79 %, SCL 74 %, THROTTLE 0 % within 2.5 mm) and the harness GND. Servo PWM and I2C at 400 kHz or less, tracks 12 to 41 mm. The J5 pin order (rule C: 1 PG, 2 THROTTLE, 3 STEER) forces the crossing of the F.Cu `U1_PG` jumper | Owner decision: accept, or change the J5 pin order (schematic, harness, crimp table) |
+| GP-001 (warning) `/U1_PG`, RP-001 `/U1_PG` | True, no EMC effect | PG is a static open-drain status line. The nearest GND via is about 85 mm from the PG rivets. Next to the west rivet there is no legal site for a GND rivet (J3.3 is 2.3 mm away) | Owner decision: accept |
+| VS-001 | True | The board has one GND rivet | Owner decision: one GND rivet north of each module GND pad pair (open question 3) |
+| DC-001 C4/U2, C2/U1 | True | 6.38 mm centre to centre, 4.23 mm pad edge to pad edge. 3 mm is not possible within `component_gap` 2.0 mm. The smallest legal distance is 3.32 mm (C4 pad 1 at placement (19.43, 49.75), C2 at (47.43, 49.75)), but the `U1_PG` jumper at y 130.2 must move north first. The gain is small: the modules are not bare ICs | Owner decision: one jumper re-route, or accept. A lab-confirmed lower `component_gap` changes the result |
+| PM-002 J1 | False positive | Pad copper 1.0 mm from the edge (edge_clearance 0.5 mm). The courtyard at 0.8 mm meets connector_edge_distance (1.0 mm or less). The 3.4 mm bored hole leaves a 1.8 mm FR-4 web to the edge: the strain relief must be on the harness | Suppressed |
+| TE-001 | False positive in practice | TP1 to TP3 are on the rails. Each signal ends on a bare B.Cu wire pad (J3, J4, J5, J8), which is a probe point | Suppressed |
+| PU-001 U1 PG, U3 EN | False positive | `power_board_plan.md`, AP2112 datasheet | Suppressed. Open item: `firmware/esp32/include/pins.h` has no PG input with a pull-up yet, so J5.1 floats until the firmware has one (a GPIO that is not a strapping pin) |
+| GP-004 GND fill | Owner decision | The 2.0 mm copper gap (`zone_clearance`, owner 2026-11-17) | Suppressed |
 
-Model: Claude Opus 5.5. No blocker, 4 major, 5 minor, 3 nits. The reviewer reproduced all check counts of the second layout.
+The analyzer also reports 9 GND islands in its connectivity graph. This is an analyzer artifact (overlapping zones of one net, and the F.Cu pour with `connect_pads no`). DRC reports 0 unconnected items.
 
-| Id | Finding | Fix |
-| --- | --- | --- |
-| M1 | The U1/U2 exception (`zones = true`, 0.64 mm) let both GND pours come to 0.64 mm of every module pad, VOUT, VIN and VRP included. The milling check listed it as `MILL-GAP-FIXED` | The exception is `own_pads = true`. The VIN and VOUT necks are `_NEAR` zones (0.8 mm). The pours keep 2.0 mm from all module pads. `MILL-GAP-FIXED` 112 -> 85. A test checks that no zone fill at U1/U2 is a fixed gap |
-| M2 | The mill BOM had the 0805 part numbers on the through-hole footprint | `variant.py` sets the part fields of a `[parts.footprint]` part to TBD (test). Part choice: owner |
-| M3 | C1.1, C2.2, C4.2 and C9.1 were 0.8 to 1.22 mm from zones, but the record said 2 mm | VIN necks: 1.3 mm wide north of y 50.5. Left GND area: x 10.1 at C9. C1.1 (0.8 mm) is in the areas table |
-| M4 | `grow_rings` counted pads of one net, so F1 kept 0.45 mm | Pads of one net do not limit the ring (`ring_for`). A pad keeps its gap to an unplated hole of its part (`npth_cap`): the four F1 pads at the holder hole would touch it with a larger ring. Tests |
-| m1 | "2 mm between cuts" can mean toolpath distance | Lab question 6. Not verified section |
-| m2 | All B.Cu pours connect to THT pads with no thermal relief: hard to hand solder | Not changed: owner decision (see below) |
-| m3 | `widen_tracks` set the floor width without a collision test. `own_pads` and `zones` together were accepted | `fit_width` tests the floor and prints a track that does not fit. `rules.py` rejects both forms together. Tests |
-| m4 | `keepout: False` on the bottom GND trunk and the module GND areas let the router narrow them | Only the two edge GND areas are `keepout: False` |
-| m5 | Wrong numbers in this record (J7.2 gap, J9/J11 courtyard, zone widths) | Corrected |
-| n1 | `milling_check.py` did not change in d81e790 | Noted |
-| n2 | The C4 comment in `placement.py` did not give the 0.95 mm gap to the U1_PG jumper | Comment changed |
-| n3 | F1 listed with the parts that keep 0.45 mm | Corrected |
+## Open owner decisions
 
-Found during the fixes:
-- With 2 mm the VOUT trunks did not reach the VOUT pads (4 unconnected items). Fix: `_NEAR` VOUT necks over the pin rows.
-- Freerouting gave a different route in each run. One run narrowed `+6V_BEC` to 1.1 mm, another run cut the left-edge GND into two pieces. Fix: `-mt 1` in `make pcb-route`.
-
-For the owner:
 1. C2 to C8: radial capacitor part numbers and ratings. The rev1 values: 10 uF >= 16 V (C2, C4, C6), 22 uF >= 10 V (C3, C5), 1 uF (C7, C8), all with 5.0 mm lead pitch.
 2. Thermal reliefs (spokes of 1.2 mm or more, relief gap of 0.8 mm or more) on the GND and VBAT pads of C2 to C9. They make hand soldering easier and add cuts near these pads. Keep the full connection on J1, F1, J6, J7 and the modules.
+
 
 ## Questions for the lab tech
 

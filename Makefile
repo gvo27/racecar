@@ -31,8 +31,9 @@ PCB_LIBS         := $(CURDIR)/pcb/libraries
 PCB_DOCS         := docs/pcb
 LAB_DIR          := $(patsubst %/,%,$(shell sed -n "s/^lab:[[:space:]]*\\([^[:space:]]*\\).*/\\1/p" .claude/CLAUDE.md))
 LAB_TOOLS        := $(CURDIR)/$(LAB_DIR)/tools
-# review files: docs/pcb/review for the base board, review/ of the lab directory for a mill board (paths.review_dir)
-REVIEW_DIR       := $(if $(filter $(BASE_BOARD),$(BOARD)),$(PCB_DOCS)/review,$(LAB_DIR)/review)
+# review files: docs/pcb/releases/<rev>/review (paths.review_dir). The active board pcb/src reviews into its next release.
+SRC_RELEASE      := rev3   # copy of paths.WORKING_RELEASE["src"] (test_rules checks it)
+REVIEW_DIR       := $(PCB_DOCS)/releases/$(if $(filter src,$(BOARD)),$(strip $(SRC_RELEASE)),$(notdir $(BOARD)))/review
 # global lib tables: kicad-cli in a bare container finds no stock libraries (false ERC warnings), so copy the templates
 KICAD_CFG        := $(CURDIR)/build/kicad-cfg
 KICAD_RUN        = docker run --rm --user $(shell id -u):$(shell id -g) -e HOME=/tmp -e XDG_CONFIG_HOME=$(KICAD_CFG) \
@@ -203,11 +204,11 @@ _kicad-cfg:
 pcb-rules: _kicad-cfg  ## check the KiCad project files of BOARD against its design rules (design_rules.toml); PCB_RULES_ARGS=--write changes them
 	$(KICAD_RUN) python3 $(PCB_LIBS)/gen_rules.py $(PCB_RULES_ARGS)
 
-pcb-sch: _kicad-cfg  ## make the schematic of a board variant (BOARD=mill) from the base schematic (BASE_BOARD) and its [parts] exclude list
+pcb-sch: _kicad-cfg  ## make the schematic of a board variant (BOARD=src) from the base schematic (BASE_BOARD) and its [parts] exclude list
 	$(KICAD_RUN) python3 $(PCB_LIBS)/variant.py
 
 # One command after a change of the design rules. The part positions stay (placement.py of the board is the source).
-pcb-all:         ## BOARD=mill: schematic variant, rules into the project, build from placement.py, route, checks, fab outputs, review files
+pcb-all:         ## BOARD=src: schematic variant, rules into the project, build from placement.py, route, checks, fab outputs, review files
 	$(MAKE) pcb-sch BOARD=$(BOARD)
 	$(MAKE) pcb-rules BOARD=$(BOARD) PCB_RULES_ARGS=--write
 	$(MAKE) pcb-build BOARD=$(BOARD) PCB_BUILD_ARGS=--force
@@ -242,7 +243,7 @@ pcb-check: _kicad-cfg  ## DRC (with schematic parity) + board checks + milling c
 	$(KICAD_RUN) python3 $(PCB_LIBS)/drc_summary.py "$(CURDIR)/build/drc/drc.json"
 	$(KICAD_RUN) python3 $(PCB_LIBS)/check_board.py rc_power_board.kicad_pcb
 
-pcb-review: _kicad-cfg  ## write the review directory of BOARD (docs/pcb/review, or review/ of the lab directory for BOARD=mill): drc.json, milling_check.json, layer PDF, 1:1 PDF
+pcb-review: _kicad-cfg  ## write the review directory of BOARD (docs/pcb/releases/<rev>/review; BOARD=src: rev3): drc.json, milling_check.json, layer PDF, 1:1 PDF
 	$(KICAD_RUN) python3 $(PCB_LIBS)/review_plots.py
 
 pcb-mill-check: _kicad-cfg  ## milling check of the board vs the lab limits (milling.toml in the lab directory, waivers); exit 1 = unwaived errors
@@ -256,8 +257,8 @@ pcb-fab: _kicad-cfg  ## DXF (F.Cu, B.Cu, Edge.Cuts), Excellon and drill-map DXF 
 
 # kicad-happy plugin directory (the installed version, ref in .claude/settings.json); override with KICAD_HAPPY=<dir>
 KICAD_HAPPY      ?= $(lastword $(sort $(wildcard $(HOME)/.claude/plugins/cache/kicad-happy/kicad-happy/*)))
-# fab = fab house (Gerbers checked), mill = the lab mill (no Gerbers). The working mill board is mill.
-METHOD           ?= $(if $(filter mill,$(BOARD)),mill,fab)
+# fab = fab house (Gerbers checked), mill = the lab mill (no Gerbers). The active board pcb/src is made on the mill.
+METHOD           ?= $(if $(filter src,$(BOARD)),mill,fab)
 pcb-gate: _kicad-cfg  ## kicad-happy analyzers + fab release gate of BOARD -> build/gate/<BOARD>/ (METHOD=fab|mill; needs the kicad-happy plugin)
 	@test -n "$(KICAD_HAPPY)" -a -d "$(KICAD_HAPPY)/skills/kicad/scripts" || { echo "pcb-gate: kicad-happy plugin not found. Run: claude plugin install kicad-happy@kicad-happy --scope project, or set KICAD_HAPPY=<dir>"; exit 1; }
 	docker run --rm --user $(shell id -u):$(shell id -g) -e HOME=/tmp -e XDG_CONFIG_HOME=$(KICAD_CFG) \

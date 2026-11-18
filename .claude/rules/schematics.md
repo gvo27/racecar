@@ -14,7 +14,7 @@ Workflow: skill `pcb-design`. Fab outputs and releases: skill `pcb-fab`. Review:
 - Never invent a part value. Unknown is `TBD`.
 - Do not edit generated files by hand: variant schematics (`make pcb-sch`), `.kicad_pro` net classes and `.kicad_dru` (`make pcb-rules`), `bom.csv` (`make bom`), fab outputs (`make pcb-fab`, not committed).
 - Limits come from `design_rules.toml` and the lab file. Do not add a limit as a constant to a tool. Never change a limit, a waiver or a check to make a board pass.
-- Never tune or rebuild a release in `pcb/releases/`. The working mill board is `pcb/mill` (rebuilt with `--force` by `make pcb-all`: put changes into `placement.py` or the design rules).
+- Never tune or rebuild a release in `pcb/releases/`. The working mill board is `pcb/src` (rebuilt with `--force` by `make pcb-all`: put changes into `placement.py` or the design rules).
 - A spec change that contradicts `docs/pcb/power_board_plan.md` updates the plan in the same change, or ask.
 - Save the projects only with KiCad 10. Do not downgrade the file format.
 
@@ -36,5 +36,5 @@ Workflow: skill `pcb-design`. Fab outputs and releases: skill `pcb-fab`. Review:
 - Never use the KiCad native DXF for the mill. `make pcb-fab` writes the lab frame.
 
 ## Analyzers
-- kicad-happy findings are claims. Check each one against the raw files and the datasheets. Known false positives: `docs/pcb/review/README.md` and `.claude/skills/pcb-fab/references/fab-gate.md`.
+- kicad-happy findings are claims. Check each one against the raw files and the datasheets. Known false positives: `docs/pcb/releases/rev1/review/README.md` and `.claude/skills/pcb-fab/references/fab-gate.md`.
 - ERC and DRC results count only with their KiCad 10 output from this session.
