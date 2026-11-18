@@ -142,4 +142,4 @@ The previous revision was checked with KiCad 7.0.11 `kicad-cli`, the kicad-happy
 
 ## Working on this folder with Claude Code
 
-The repo enables the kicad-happy plugin (`.claude/settings.json`). Rules for this folder are in `.claude/rules/schematics.md`. Typical asks are "review pcb/releases/rev1", "check the power budget against the schematic" and "simulate the subcircuits". SPICE needs `ngspice` installed on the host.
+The kicad-happy plugin is off by default: enable it for a session (`.claude/rules/plugins.md`). Rules: `.claude/rules/schematics.md`. Facts and conventions: [conventions.md](conventions.md). Workflow: skill `pcb-design`. Fab release gate and order files: skill `pcb-fab` and `make pcb-gate`. Each PR that changes a schematic or a board gets a kicad-happy report (`.github/workflows/pcb.yml`). SPICE needs `ngspice` installed on the host.
