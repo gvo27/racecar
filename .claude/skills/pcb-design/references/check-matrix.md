@@ -18,7 +18,7 @@ A clean ERC and a clean DRC show that the files agree with their own rules. They
 ## Triage
 1. Give each finding one verdict: **true** (fix it), **false positive** (write the reason and the evidence), **owner decision** (put it in the report).
 2. Check a finding in the raw file before you act. An analyzer reads patterns. It does not know this board's decisions.
-3. Add a new false positive to the table in `docs/pcb/review/README.md`, so the next review does not spend time on it.
+3. Add a new false positive, so the next review does not spend time on it: an analyzer finding of the board goes to the table in `docs/pcb/review/README.md`, a fab release gate line goes to `.claude/skills/pcb-fab/references/fab-gate.md`.
 4. A true finding that a check could find again becomes a check with a test (`pcb/libraries/`, or `tools/` in the lab directory for a mill check).
 
 ## Design principles (review each one, write a line for each in the report)
