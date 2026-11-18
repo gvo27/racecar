@@ -5,6 +5,9 @@ Launch arguments:
   use_sim_time    pass-through to every node (default false)
   heartbeat_dir   directory for docker healthcheck files (default '' = disabled)
   mapper_host     Slamtec Mapper IP (default 192.168.11.1, the Mapper's own AP)
+  urdf_file       xacro for robot_state_publisher (default '' = rccar_description
+                  rccar.urdf.xacro). The sim repo gives its wrapper xacro, so one
+                  robot_state_publisher serves the car frames and the sim model.
 """
 import os
 
@@ -31,7 +34,7 @@ def _setup(context):
     hb_dir = LaunchConfiguration('heartbeat_dir').perform(context)
     host = LaunchConfiguration('mapper_host').perform(context)
 
-    xacro_file = os.path.join(
+    xacro_file = LaunchConfiguration('urdf_file').perform(context) or os.path.join(
         get_package_share_directory('rccar_description'), 'urdf', 'rccar.urdf.xacro')
     rsp = Node(package='robot_state_publisher', executable='robot_state_publisher',
                name='robot_state_publisher', output='screen',
@@ -71,5 +74,8 @@ def generate_launch_description():
                                           'files (empty = disabled)'),
         DeclareLaunchArgument('mapper_host', default_value='192.168.11.1',
                               description='Slamtec Mapper IP address'),
+        DeclareLaunchArgument('urdf_file', default_value='',
+                              description='xacro file for robot_state_publisher '
+                                          '(empty = rccar_description rccar.urdf.xacro)'),
         OpaqueFunction(function=_setup),
     ])

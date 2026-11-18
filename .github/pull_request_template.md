@@ -6,6 +6,12 @@
 ## Changes
 <!-- Bullet list by area (firmware, ROS packages, tuning, docs). Show protocol and tuning key changes. -->
 
+## Sim impact
+<!-- Fill in when the diff touches the hardware boundary (firmware control or grammar, rccar_msgs, sensor topics/types/frames/QoS, rccar_description, tuning keys). Procedure: .claude/skills/sim-parity/SKILL.md. Else write "None". -->
+- Changed contract rows (`docs/sensor_contract.md`):
+- racecar-sim artifacts to change:
+- racecar-sim `.repos` pin bump: needed / not needed
+
 ## CI
 <!-- Which checks cover this change: firmware build, ros-test, unit. Link the runs or paste the results. -->
 

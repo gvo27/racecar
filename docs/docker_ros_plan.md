@@ -252,7 +252,7 @@ captain / perception / planning / supervisor      ← identical in sim and on th
 
    See docs/setup.md "Lidar". The rangefinder (Garmin LIDAR-Lite v4 LED) on ESP32 I2C also started: driver + `/rccar/rangefinder/range` + `make rangefinder` (PR `rangefinder`, compile-only, bench pending). The e-brake follows after bench data exists. The phase also covers `rccar_drivers`, `rccar_description` TF, sensor calibration, time sync (chrony). `rccar_description` is the single URDF for car and sim. Sensor topics and frames are defined one time, so that the sim adapter can publish the same ones.
 5. **Captain, perception, inference, admin-link failsafe.** Per the notes above.
-6. **Sim adapter (sim repo).** Gazebo world + `ros_gz_bridge` below the supervisor, and a `sim:=true` arg in `rccar_bringup`. Verify that the captain/perception stack runs unchanged in sim and on the car.
+6. **Sim adapter (sim repo [racecar-sim](https://github.com/gvo27/racecar-sim)).** The boundary is in `docs/sensor_contract.md`. With `sim:=true`, `mcu_bridge` stays up and pushes the tuning to the virtual ESP32. Gazebo world + `ros_gz_bridge` below the supervisor, and a `sim:=true` arg in `rccar_bringup`. Verify that the captain/perception stack runs unchanged in sim and on the car.
 
 ---
 

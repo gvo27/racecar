@@ -3,7 +3,9 @@ Car bringup: supervisor + lifecycle mcu_bridge (auto configure/activate).
 
 Launch arguments:
   use_sim_time    pass-through to every node (default false)
-  sim             true = skip MCU-facing nodes; the sim adapter lives in the sim repo
+  sim             true = the ESP32 is the virtual ESP32 of the sim repo (racecar-sim).
+                  The node set does not change: mcu_bridge still pushes tuning.toml to
+                  /rccar/mcu/command, so the virtual ESP32 runs with the car tuning.
   tuning_file     tuning.toml (default: $RCCAR_TUNING or /ws/src/racecar/tuning.toml)
   heartbeat_dir   directory for docker healthcheck files (default '' = disabled)
 """
@@ -54,9 +56,8 @@ def _setup(context):
                         parameters=[common('supervisor')]))
 
     if sim:
-        actions.append(LogInfo(msg='sim:=true: sim adapter lives in the sim repo; '
-                                   'skipping mcu_bridge'))
-        return actions
+        actions.append(LogInfo(msg='sim:=true: the virtual ESP32 of the sim repo serves '
+                                   '/rccar/mcu/*; mcu_bridge pushes the tuning to it'))
 
     bridge_params = common('mcu_bridge')
     bridge_params['tuning_file'] = tuning_file
@@ -83,8 +84,8 @@ def generate_launch_description():
         DeclareLaunchArgument('use_sim_time', default_value='false',
                               description='use /clock (simulation) for every node'),
         DeclareLaunchArgument('sim', default_value='false',
-                              description='true: skip MCU-facing nodes (sim adapter replaces '
-                                          'them, lives in the sim repo)'),
+                              description='true: the virtual ESP32 of the sim repo replaces '
+                                          'the ESP32 (same nodes, log line only)'),
         DeclareLaunchArgument(
             'tuning_file',
             default_value=EnvironmentVariable(

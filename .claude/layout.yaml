@@ -27,17 +27,30 @@ paths:
   repos/: {role: rccar.repos vcstool manifest (third-party only) + README, rules: .claude/rules/repos.md, colcon_ignore: true, phase: 1}
   logs/: {role: runtime data (jsonl logs, snapshots, bags), fully gitignored except .gitkeep + COLCON_IGNORE (maps = private floor plans; public repo), mounted rw into core/tools, colcon_ignore: true}
   build/: {role: make ros-test output (log + xml), gitignored}
-  docs/: {role: setup.md, docker_ros_plan.md, esp32-firmware-proposal.md, tuning-notes.txt, colcon_ignore: true}
+  docs/: {role: setup.md, docker_ros_plan.md, tuning-notes.txt; stale docs and done plans in docs/archive/, colcon_ignore: true}
+  docs/sensor_contract.md: {role: "hardware-boundary ssot: topics, types, frames, qos, tf, device facts; racecar-sim copies it", rules: .claude/skills/sim-parity/SKILL.md, invariants: ["active rows == code (deploy/tests/test_contract.py)", "boundary change => contract + Sim impact PR section"]}
+  .claude/skills/sim-parity/: {role: project skill; boundary change -> contract rows + racecar-sim artifacts + Sim impact}
+  pcb/: {role: "power distribution board: kicad project per board, released boards in pcb/releases/<rev> (pcb/releases/rev_A), shared kicad lib (pcb/lib), board tools and python libraries (pcb/libraries); COLCON_IGNORE", rules: .claude/rules/schematics.md, phase: 1}
+  docs/pcb/: {role: power board context (power_board_plan.md = spec, overview, bom notes, review, analysis), rules: .claude/rules/schematics.md, phase: 1}
   docs/datasheets/: {role: "archived datasheets + summaries (ds3225_servo.md, thw-1060-brushed-esc.md, rangefinder_lidar_lite_v4.md) + components_list.xlsx (ground truth inventory)", rules: .claude/rules/rangefinder.md}
   .github/pull_request_template.md: {role: PR body template incl. user-run bench checklist (deploy + feature checks), rules: .claude/rules/claude-tooling.md, phase: 4}
   .github/workflows/firmware.yml: {role: ci firmware build env esp32s3 in container, libdeps cache, firmware.bin artifact, phase: 1}
   .claude/: {role: CLAUDE.md, layout.yaml, rules/*.md, agents/*.md, settings.json}
   .claude/rules/rangefinder.md: {role: rangefinder wiring, names, invariants, sensor-swap recipe; links all rangefinder docs, rules: .claude/rules/claude-tooling.md, phase: 4}
   .claude/agents/ros2-reviewer.md: {role: project subagent; reviews diffs vs rules + ros2-engineering refs + stop-path checklist, phase: 2}
+  .claude/agents/pcb-designer.md: {role: "main-session agent for kicad schematic + board work (claude --agent pcb-designer): intake questions, plan, owner gates (plan, schematic), worker + review loop, report", rules: .claude/rules/schematics.md, phase: 1}
+  .claude/agents/pcb-worker.md: {role: project subagent; one bounded kicad task for the pcb-designer loop; reports diff + check output, rules: .claude/rules/schematics.md, phase: 1}
+  .claude/agents/pcb-reviewer.md: {role: project subagent; read-only review of schematic, board, bom, fab outputs; punch list with evidence, rules: .claude/rules/schematics.md, phase: 1}
+  .claude/skills/pcb-lab-config/: {role: project skill; keeps the lab file milling.toml in the lab directory (lab: in .claude/CLAUDE.md; machine, bits, stock, rivets, limits; status + source per value), phase: 1}
+  .claude/skills/pcb-parts/: {role: project skill; part choice, datasheet notes (docs/datasheets), bom in symbol fields (make bom), compatibility checks, phase: 1}
+  .claude/skills/pcb-design-check/: {role: project skill; check matrix (schematic, board, parts, fab outputs, principles) + lessons.md (lessons of the rev A board), phase: 1}
+  .claude/skills/pcb-milling-check/: {role: project skill; board vs the mill limits (make pcb-mill-check), phase: 1}
+  "lab directory (lab: in .claude/CLAUDE.md)": {role: "mill lab config: milling.toml (milling limits + machine + lab inventory; one source for lab facts), example/ (lab CAM file + Fusion exports); copy it to seed another project", rules: .claude/skills/pcb-lab-config/SKILL.md, phase: 1}
+  pcb/libraries/lab.py: {role: "reads the lab: line of .claude/CLAUDE.md (LAB_DIR env overrides); the only code path to the lab directory", phase: 1}
   .claude/settings.json: {role: project claude plugins + mcp enablement, rules: [.claude/rules/dependencies.md, .claude/rules/claude-tooling.md], phase: 1}
   pyrightconfig.json: {role: pyright-lsp config (include rccar_* + deploy; missing imports = warning since rclpy/rccar_msgs only exist in the ROS image), location: repo root (required), rules: .claude/rules/claude-tooling.md, phase: 1}
   firmware/esp32/.clangd: {role: clangd flags for xtensa; db from make compiledb (gitignored compile_commands.json, .pio-core/), rules: .claude/rules/claude-tooling.md, phase: 1}
-  deploy/tests/: {role: pytest for deploy/render_env.py (make unit: ros test image; ci ros.yml), rules: .claude/rules/claude-tooling.md, phase: 2}
+  deploy/tests/: {role: "pytest for deploy/render_env.py, hw_guard, test_contract (sensor_contract.md vs code), test_rules_paths (every rule has paths: and each glob matches) (make unit: ros test image; ci ros.yml)", rules: .claude/rules/claude-tooling.md, phase: 2}
   .github/workflows/ros.yml: {role: ci ros image build + colcon test + deploy/tests (build-test), advisory ros2-engineering validators (ros2-static), rccar_msgs sync check (interfaces-sync), rules: .claude/rules/ros2.md, phase: 2}
   docs/plans/: {role: superpowers writing-plans output, rules: .claude/rules/claude-tooling.md}
   deploy/: {role: deploy files + render_env.py (make config, runs in ros image) + tests/, colcon_ignore: true, rules: .claude/rules/deploy.md, phase: 2}
@@ -54,7 +67,7 @@ paths:
   rccar_calibration/: {role: calibrate, bench_test, tune, rangefinder_monitor + lidar_imu_monitor + lidar_snapshot + lidar_record clis (ros2 run; make rangefinder, make lidar-imu, make lidar-snapshot, make lidar-record), rules: [.claude/rules/calibration.md, .claude/rules/ros2.md], phase: 2}
   rccar_description/: {role: "urdf/xacro base_link, lidar_link, lidar_imu_link for rsp; mount offsets UNMEASURED until user measures", rules: [.claude/rules/drivers.md, .claude/rules/ros2.md], phase: 4}
   rccar_drivers/: {role: "lifecycle node mapper_driver (Slamtec Mapper M2M1 over TCP 1445) + slamtec/* protocol/convert library; exists now (branch lidar, bench pending)", rules: [.claude/rules/drivers.md, .claude/rules/ros2.md], phase: 4}
-  rccar_bringup/launch/drivers.launch.py: {role: robot_state_publisher + mapper_driver (auto configure/activate), used by compose service drivers, rules: .claude/rules/drivers.md, phase: 4}
+  rccar_bringup/launch/drivers.launch.py: {role: "robot_state_publisher + mapper_driver (auto configure/activate), used by compose service drivers; urdf_file:= (sim wrapper xacro)", rules: .claude/rules/drivers.md, phase: 4}
   rccar_bringup/launch/viz.launch.py: {role: foxglove_bridge websocket, 127.0.0.1:8765 default, topic whitelist; make viz, rules: .claude/rules/drivers.md, phase: 4}
   rccar_drivers/test_hw/: {role: "hardware acceptance launch_testing vs the PHYSICAL lidar (make lidar-hw-test); NOT collected by colcon test (conftest needs RCCAR_HW_TEST=1); installed to share/rccar_drivers/test_hw", rules: .claude/rules/hw-testing.md, phase: 4}
   rccar_drivers/rccar_drivers/hw_criteria.py: {role: pass/fail thresholds + eval functions for the hw test (pure, pytest test/test_hw_criteria.py), rules: .claude/rules/hw-testing.md, phase: 4}

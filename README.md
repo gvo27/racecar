@@ -2,6 +2,27 @@
 
 This project turns a 1:10 Tamiya TT-02 into a self-driving research platform. It has a two-layer compute stack. A Raspberry Pi 5 does perception, sensor fusion, semantic SLAM and racing-line optimization. An ESP32-S3 does hard-real-time control. This repo holds everything that runs on the car: PWM actuation, failsafes, the host-to-ESP32 protocol, runtime tuning, logging and the Docker/ROS 2 deployment. Setup: [docs/setup.md](docs/setup.md).
 
+## Quick reference
+
+| Task | Commands |
+| --- | --- |
+| One-time setup (Pi) | `cp .env.example .env`, `make setup`, `make install-host`, `make flash` (ESC off) |
+| Start / check / stop | `make car-up`, `make car-ps`, `make car-down` (or `make car-shutdown`) |
+| Drive | `make teleop` |
+| Sensors | `make viz`, `make rangefinder`, `make lidar-snapshot`, `make lidar-record SECS=30` |
+| Tests (no hardware) | `make ros-test`, `make unit`, `make build` |
+| Simulation and training | separate repo [racecar-sim](https://github.com/gvo27/racecar-sim). The sim uses the topics in [docs/sensor_contract.md](docs/sensor_contract.md) |
+| All targets | `make help` |
+
+**Claude Code session.** Start a session: `make open`. End a session: `make close`. These targets are for the Claude Code session only. `make setup` prepares the car host. `make open` needs `direnv` and `docker` on the host (`make check-host`). Install a missing host tool with your package manager, for example `sudo apt install direnv`.
+
+**Claude Code plugins.** `.claude/settings.json` (`enabledPlugins`) sets the plugins of a new session. Some domain plugins are off by default. `.claude/rules/plugins.md` tells which folder needs which plugin. To enable a plugin for one session, run `claude plugin enable <plugin> --scope local`, then `/reload-plugins`. `make open` installs the enabled plugins that are missing. To install one by hand, accept the trust prompt or run:
+
+```bash
+claude plugin marketplace add JuliusBrussee/caveman@v4.1.0
+claude plugin install <plugin>@<marketplace> --scope project
+```
+
 ## Compute stack
 
 | Layer | Hardware | Role | Status |
@@ -164,4 +185,4 @@ docs/              setup.md, docker_ros_plan.md, proposal, datasheets/
 Makefile           every command (make help)
 ```
 
-Bench checklist (the procedure that verified phase 2): [docs/setup.md](docs/setup.md#phase-2-bench-checklist-user-run). Roadmap: [docs/docker_ros_plan.md](docs/docker_ros_plan.md). Firmware design: [docs/esp32-firmware-proposal.md](docs/esp32-firmware-proposal.md).
+Bench checklist (the procedure that verified phase 2): [docs/setup.md](docs/setup.md#phase-2-bench-checklist-user-run). Roadmap: [docs/docker_ros_plan.md](docs/docker_ros_plan.md). Firmware design (historical, phase 1): [docs/archive/esp32-firmware-proposal.md](docs/archive/esp32-firmware-proposal.md).
