@@ -3,7 +3,7 @@ scope: infrastructure + comms layer (actuation, safety, host link, logging); ML 
 chassis: tamiya_tt02_1:10
 goals: [sensor_fusion, object_detection, semantic_slam, racing_trajectory_optimization]
 compute: {high_level: raspberry_pi_5 (ros2 jazzy in docker, deploy/car), real_time: esp32-s3-n16r8 (micro-ros client)}
-phase: 2 complete (ros2 actuator path, bench-verified); phase 4 lidar in progress (branch lidar: rccar_drivers mapper_driver + drivers container, compile/CI only, bench pending); phase 4 started: rangefinder driver (compile-only, awaiting bench)  # pi: mcu-agent+core(supervisor,mcu_bridge) -usb/micro-ros-> esp32 -pwm-> servo+esc; legacy ascii path removed
+phase: 2 complete (ros2 actuator path, bench-verified); phase 4 lidar in progress (rccar_drivers mapper_driver + drivers container; runs on the real Mapper, mapping not accepted; status: docs/lidar/README.md); phase 4 rangefinder: sensor bench pass, full vehicle not tested (status: docs/rangefinder/README.md)  # pi: mcu-agent+core(supervisor,mcu_bridge) -usb/micro-ros-> esp32 -pwm-> servo+esc; legacy ascii path removed
 next: power board rev A PCB: owner review and open items (docs/pcb/review/README.md), lab tech limits; phase 4 lidar bench (power from +5V_SENS, wlan0 on SLAMWARE AP, make viz checks), then phase 3 recorder/backup, phase 4 sensors (imu/encoder/battery, camera)
 plan: docs/docker_ros_plan.md
 sim: {repo: gvo27/racecar-sim (pins this repo via .repos), contract: docs/sensor_contract.md, skill: sim-parity, car.launch sim:=true = same nodes (mcu_bridge pushes tuning to the virtual esp32)}

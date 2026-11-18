@@ -6,11 +6,12 @@ paths:
   - "rccar_bringup/launch/viz.launch.py"
   - "rccar_calibration/**/lidar_imu*"
   - "docs/datasheets/slamtec*"
+  - "docs/lidar/**"
 ---
 
 # Drivers: lidar (Slamtec Mapper M2M1) -> rccar_drivers, rccar_description
 
-The software name is "lidar" or "mapper". The model name appears only in the datasheet docs. Docs: `docs/datasheets/slamtec_mapper_M2M1_datasheet.md` (protocol section 11), `docs/setup.md` "Lidar" (power, networking, viewing). Topics and QoS table: `.claude/rules/ros2.md`. Service: `.claude/rules/deploy.md`.
+The software name is "lidar" or "mapper". The model name appears only in the datasheet docs. Bench status, findings and open items (status owner): `docs/lidar/README.md`. Roadmap: `docs/lidar/roadmap.md`. Docs: `docs/datasheets/slamtec_mapper_M2M1_datasheet.md` (protocol section 11), `docs/setup.md` "Lidar" (power, networking, viewing). Topics and QoS table: `.claude/rules/ros2.md`. Service: `.claude/rules/deploy.md`.
 
 ## Protocol facts
 - The protocol is JSON over TCP 1445 on the Mapper's Wi-Fi (192.168.11.1, bench-confirmed) or on Ethernet. `mapper_host` may move to tuning.toml [platform.pi5] in a later change. Messages end with `\n\r\n\r\n` and are matched by request_id. There is no USB or serial data.

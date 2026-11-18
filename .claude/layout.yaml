@@ -33,6 +33,8 @@ paths:
   pcb/: {role: "power distribution board: kicad project per board, released boards in pcb/releases/<rev> (pcb/releases/rev_A), shared kicad lib (pcb/lib), board tools and python libraries (pcb/libraries); COLCON_IGNORE", rules: .claude/rules/schematics.md, phase: 1}
   docs/pcb/: {role: power board context (power_board_plan.md = spec, overview, bom notes, review, analysis), rules: .claude/rules/schematics.md, phase: 1}
   docs/datasheets/: {role: "archived datasheets + summaries (ds3225_servo.md, thw-1060-brushed-esc.md, rangefinder_lidar_lite_v4.md) + components_list.xlsx (ground truth inventory)", rules: .claude/rules/rangefinder.md}
+  docs/rangefinder/: {role: "rangefinder bench status (owner), findings, open items", rules: .claude/rules/rangefinder.md, phase: 4}
+  docs/lidar/: {role: "lidar bench status (owner), findings, open items; roadmap.md (walled track, 3d lidar, odometry, sim)", rules: .claude/rules/drivers.md, phase: 4}
   .github/pull_request_template.md: {role: PR body template incl. user-run bench checklist (deploy + feature checks), rules: .claude/rules/claude-tooling.md, phase: 4}
   .github/workflows/firmware.yml: {role: ci firmware build env esp32s3 in container, libdeps cache, firmware.bin artifact, phase: 1}
   .claude/: {role: CLAUDE.md, layout.yaml, rules/*.md, agents/*.md, settings.json}
