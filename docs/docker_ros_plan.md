@@ -241,7 +241,7 @@ captain / perception / planning / supervisor      ← identical in sim and on th
    - **New invariant:** "protocol/interface change => rccar_msgs + firmware/esp32/extra_packages + main.cpp + rccar_mcu_bridge + docs". The supervisor is the sole publisher of `/rccar/mcu/drive`. Agents never run hardware fault-injection tests.
    - **Conventions:** add `.claude/rules/ros2.md`. Make the supervisor output the hardware boundary, and have every launch file accept `use_sim_time` (see "Sim/real parity").
 3. **Recorder + backup.** Write MCAP bags to `/data`. Upload only when the car is disarmed and idle, to the destination set in `.env`.
-4. **Sensors.** **Status: the lidar started early, before phase 3** (branch `lidar`, compile/CI only, bench pending). It is a Slamtec Mapper M2M1 that connects over Wi-Fi/TCP. The work so far:
+4. **Sensors.** **Status: the lidar started early, before phase 3** (branch `lidar`, driver runs on the real Mapper, mapping not accepted: status in docs/lidar/README.md). It is a Slamtec Mapper M2M1 that connects over Wi-Fi/TCP. The work so far:
    - Own driver `rccar_drivers` (`mapper_driver`).
    - `rccar_description` URDF/TF.
    - `drivers.launch.py`.

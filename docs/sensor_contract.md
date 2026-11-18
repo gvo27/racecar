@@ -45,6 +45,6 @@ The sim never publishes `odom -> base_link` or any `/rccar/*` topic from Gazebo 
 | Mapper health flags | camelCase (`hasError`, `hasLidarDisconnected`, ...) | PR #6, `slamtec/protocol.py` |
 | Raw points per scan | about 920 over 360 degrees; the driver bins them to `n_bins` 1080 | datasheet section 11, `mapper_node.py` |
 | Scan range | `range_min` 0.15 m, `range_max` 40 m | `mapper_node.py` PARAMS |
-| Mapper IMU (fw 2.6.0_dev) | orientation only, availability bitmap 131, rate and acceleration covariance[0] = -1 | PR #6 bench |
+| Mapper IMU (fw 2.6.0_dev) | orientation only, availability bitmap 131, rate and acceleration covariance[0] = -1 | PR #6 bench, docs/lidar/README.md |
 | Mapper pose | 10 Hz, about 100 ms late, can jump on relocalization | PR #6 roadmap note (not verified as a model) |
-| Track | 2D lidar needs walls of 30 cm or more | PR #6 roadmap note |
+| Track | 2D lidar needs walls of 30 cm or more | docs/lidar/roadmap.md |
