@@ -44,6 +44,21 @@ jobs:
         run: |
           { printf '# Board: `pcb/%s`\n\n' "$BOARD"; cat "$REPORT"; } > "$REPORT.named"
           mv "$REPORT.named" "$REPORT"
+      - name: Board slug for the artifact name
+        id: slug
+        env:
+          BOARD: ${{ matrix.board }}
+        run: echo "name=kicad-happy-$(echo "$BOARD" | tr / -)" >> "$GITHUB_OUTPUT"
+      - name: Upload the full reports (markdown report and analyzer JSON)
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ steps.slug.outputs.name }}
+          path: |
+            ${{ steps.analysis.outputs.report-path }}
+            ${{ steps.analysis.outputs.schematic-json }}
+            ${{ steps.analysis.outputs.pcb-json }}
+          if-no-files-found: warn
+          retention-days: 30
       - uses: thollander/actions-comment-pull-request@v3
         with:
           file-path: ${{ steps.analysis.outputs.report-path }}

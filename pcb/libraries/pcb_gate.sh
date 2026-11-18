@@ -4,14 +4,22 @@
 # Method fab: Gerber and drill export (kicad-cli), analyze_gerbers.py, gate with --gerbers.
 # Method mill: no Gerbers (the lab mills from DXF and Excellon: make pcb-fab, make pcb-mill-check).
 set -eu
+# shellcheck disable=SC2086 # $CFG and $GERBERS are option lists
 KH="$1"; OUT="$2"; METHOD="$3"
 S="$KH/skills/kicad/scripts"
 STEM=rc_power_board
 mkdir -p "$OUT"
-python3 "$S/analyze_schematic.py" "$STEM.kicad_sch" --no-hierarchy -o "$OUT/schematic.json"
-python3 "$S/analyze_pcb.py" "$STEM.kicad_pcb" --schematic "$STEM.kicad_sch" -o "$OUT/pcb.json"
-python3 "$KH/skills/emc/scripts/analyze_emc.py" -s "$OUT/schematic.json" -p "$OUT/pcb.json" -o "$OUT/emc.json"
-python3 "$S/analyze_thermal.py" -s "$OUT/schematic.json" -p "$OUT/pcb.json" -o "$OUT/thermal.json"
+# The analyzers look for .kicad-happy.json next to their input file. The EMC and thermal inputs are JSON files in $OUT,
+# so pass the board config (suppressions, design intent) to each analyzer.
+CFG=""
+if [ -f .kicad-happy.json ]; then CFG="--config $(pwd)/.kicad-happy.json"; fi
+python3 "$S/analyze_schematic.py" "$STEM.kicad_sch" --no-hierarchy $CFG -o "$OUT/schematic.json"
+python3 "$S/analyze_pcb.py" "$STEM.kicad_pcb" --schematic "$STEM.kicad_sch" --full $CFG -o "$OUT/pcb.json"   # --full: per-track data for the EMC checks
+if [ -n "$CFG" ]; then   # analyze_schematic and analyze_pcb do not apply suppressions (kicad-happy 2.3.2)
+  python3 "$(dirname "$0")/gate_suppress.py" "$S" "$(pwd)/.kicad-happy.json" "$OUT/schematic.json" "$OUT/pcb.json"
+fi
+python3 "$KH/skills/emc/scripts/analyze_emc.py" -s "$OUT/schematic.json" -p "$OUT/pcb.json" $CFG -o "$OUT/emc.json"
+python3 "$S/analyze_thermal.py" -s "$OUT/schematic.json" -p "$OUT/pcb.json" $CFG -o "$OUT/thermal.json"
 GERBERS=""
 if [ "$METHOD" = fab ]; then
   rm -rf "$OUT/gerbers"; mkdir -p "$OUT/gerbers"
