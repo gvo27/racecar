@@ -19,7 +19,7 @@ Facts about the Claude Code setup of this repo. The rules for work with it are i
 There are no project MCP servers (context7 was removed: the free tier was too restrictive). `pyrightconfig.json` and a future `.mcp.json` stay at the repo root: Claude Code reads project MCP only from the root, and pyright finds its config only at the workspace root.
 
 ## Session and dev tools
-- `make open` at the start of a session: git fast-forward, `uv sync --frozen`, `direnv allow`, install of the enabled plugins that are missing. `make close` before exit: cache cleanup, a report of work that is not committed or not pushed. Scripts: `scripts/open.py`, `scripts/close.py` (template: user skill setup-shop).
+- `make open` at the start of a session: git fast-forward, `uv sync --frozen`, `direnv allow`, install of the enabled plugins that are missing. `make close` before exit: removes the session-only plugin enables (`make plugins-reset`, `scripts/plugins_reset.py`), cache cleanup, a report of work that is not committed or not pushed. Scripts: `scripts/open.py`, `scripts/close.py` (template: user skill setup-shop).
 - `make setup` is different: it prepares a car host and builds the images.
 - `make check-dev` reports missing dev tools (uv, direnv, LSP binaries). `make dev-setup` installs ruff, pyright and pytest into `.venv` from `uv.lock`.
 

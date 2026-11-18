@@ -46,7 +46,7 @@ EXTRA_REPOS :=
 COMPOSE  := docker compose -f deploy/car/compose.yaml --env-file deploy/car/.env.generated
 
 .DEFAULT_GOAL := help
-.PHONY: help open close check-host setup clean build pcb-rules pcb-sch pcb-all flash monitor fw-image config models compiledb unit check-dev dev-setup \
+.PHONY: help open close plugins-reset check-host setup clean build pcb-rules pcb-sch pcb-all flash monitor fw-image config models compiledb unit check-dev dev-setup \
         ros-image ros-test ros-test-image ros-test-run ros-shell car-up car-down car-ps car-logs car-pull \
         car-shutdown install-host teleop calibrate tune test rangefinder viz lidar-imu lidar-snapshot lidar-record mcu unit-run \
         drivers-stop drivers-start lidar-hw-test kicad-image erc pcb-build pcb-route pcb-check pcb-mill-check pcb-review pcb-fab pcb-test pcb-gate bom \
@@ -59,8 +59,11 @@ help:            ## list targets (grouped in README.md)
 open: check-host  ## start a Claude Code session: git fast-forward, uv sync + direnv allow, missing plugins, checklist; safe to rerun
 	uv run --no-project python scripts/open.py . $(EXTRA_REPOS)
 
-close:           ## end a Claude Code session: clean caches, report uncommitted/unpushed work and done plans; safe to rerun
+close: plugins-reset  ## end a Claude Code session: clean caches, report uncommitted/unpushed work and done plans; safe to rerun
 	uv run --no-project python scripts/close.py . $(EXTRA_REPOS)
+
+plugins-reset:   ## remove the session-only plugin enables (local scope) from .claude/settings.local.json; safe to rerun
+	@uv run --no-project python scripts/plugins_reset.py
 
 check-host:      ## check the host tools outside .venv (git, make, uv, direnv, docker); fails if a required one is missing
 	@fail=0; \

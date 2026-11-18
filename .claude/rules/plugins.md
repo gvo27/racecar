@@ -23,8 +23,8 @@ When you work on a file in a folder of the table:
 3. If the user agrees, run `claude plugin enable <plugin> --scope local`.
 4. Tell the user to type `/reload-plugins`. You cannot type it.
 
-Local scope writes `.claude/settings.local.json`. Git ignores that file. Do not change `enabledPlugins` in `.claude/settings.json` for one session.
+Local scope writes `.claude/settings.local.json`. Git ignores that file, but it lasts across sessions. A local enable is for this session only: `make close` (target `plugins-reset`) removes all local enables, so the next session starts with the project default set. Do not change `enabledPlugins` in `.claude/settings.json` for one session.
 
 To disable the plugin again, run `claude plugin disable <plugin> --scope local`, then `/reload-plugins`.
 
-`claude-md-management@claude-plugins-official` is also off by default. It is not necessary to edit `CLAUDE.md`. Enable it the same way when the user asks for its commands.
+`claude-md-management@claude-plugins-official` is also off by default. It is not necessary to edit `CLAUDE.md`. Enable it the same way when the user asks for its commands. `plugin-dev@claude-plugins-official` (skill and agent review) is not in the project set: enable it the same way when the user asks for a skill or agent review.
