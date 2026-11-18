@@ -7,9 +7,9 @@ import pytest
 ROOT = Path(__file__).resolve().parents[2]
 AGENTS = sorted((ROOT / '.claude' / 'agents').glob('*.md'))
 SKILLS = sorted((ROOT / '.claude' / 'skills').glob('*/SKILL.md'))
-SKILL_FILES = sorted((ROOT / '.claude' / 'skills').glob('*/*.md'))
+SKILL_FILES = sorted((ROOT / '.claude' / 'skills').glob('*/**/*.md'))
 PATH_RE = re.compile(r'`((?:\.claude|docs|docker|deploy)/[A-Za-z0-9_./-]+)`')
-MAKE_TARGETS = {'pcb-build', 'pcb-route', 'pcb-check', 'pcb-mill-check', 'pcb-review', 'pcb-fab', 'pcb-test'}
+MAKE_TARGETS = {'pcb-build', 'pcb-route', 'pcb-check', 'pcb-mill-check', 'pcb-review', 'pcb-fab', 'pcb-test', 'pcb-gate', 'pcb-all', 'pcb-sch', 'pcb-rules'}
 
 
 def frontmatter(path) -> dict[str, str]:
