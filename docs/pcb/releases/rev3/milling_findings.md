@@ -34,3 +34,10 @@ Status of an entry: `verified` (measured or seen on the real board or the machin
 - Agent analysis (not measured): a single-flute engraving bit has one flat ground face, so a cone that is not symmetric is the usual shape. For a cone from a 0.2 mm tip to a 3.175 mm shank, the slant length is about 3.0 mm at 30 deg per side (T2) and about 5.7 mm at 30 deg included. A slant length a little more than 3 mm agrees with T2. A slant length near 5.7 mm means 30 deg included.
 - Viable for B.Cu with either reading: the cut width at 0.08 mm depth is 0.292 mm (per side) or 0.243 mm (included). Both are less than the smallest B.Cu gap (U3, 0.34 mm). The 0.6 mm corn bit is not (F-002).
 - Open: the slant length in mm on the cutting side, or the width of a test groove at 0.08 mm depth (0.29 mm or 0.24 mm).
+
+## F-004: Fusion 360 limits the engraving bit on B.Cu (2026-11-20, open)
+
+- Found (lab): Fusion 360 does not let the engraving bit (T2, a chamfer mill in the tool library) do all B.Cu milling. It seems to allow the bit only for some operations.
+- Leads (not confirmed, Autodesk forum and help, read 2026-11-20): users report "invalid tool" errors for a chamfer mill in some milling operations (for example adaptive clearing). The 2D Adaptive help says rest machining needs the geometry of the previous tool (diameter, corner radius, taper angle, shoulder length). The lab template already uses T2 in 2D Contour.
+- Possible workaround (not tested): T2 in 2D Contour (or Trace) for the isolation. A flat end mill (0.6 mm corn bit, or the 0.2 mm micro end mill, `[inventory.bits_on_hand]`) for pocket or rest operations.
+- Open: the Fusion version, the operation and the exact error text.
