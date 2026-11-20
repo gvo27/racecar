@@ -16,7 +16,9 @@ Status of an entry: `verified` (measured or seen on the real board or the machin
 ## F-002: B.Cu isolation with a 0.6 mm corn bit, about 40 min (2026-11-20, reported)
 
 - Found: during the rev3 milling (owner). The B.Cu isolation uses a 0.6 mm corn bit, not the T2 V-bit of the lab CAM template. The B.Cu run takes about 40 min.
-- The lab file is not changed. `[[isolation_bit]]` in `milling.toml` is still the 60deg/0.2 V-bit (cut width 0.292 mm at 0.08 mm depth). The milling check and the mill tuning file (`clearance` 0.8 mm = 0.292 mm + 2 x 0.25 mm) use that bit.
+- Expected bit: T2 of the lab CAM template, chamfer mill "0.1mm Tip Engraving Metal", 0.2 mm tip, 30 deg per side (60 deg included), cut width 0.292 mm at 0.08 mm depth (`[inventory.cam_tools]` in `milling.toml`).
+- Stock on hand (owner 2026-11-20): no corn bit below 0.6 mm. One V-bit, 1/8 in shank, 30 deg, 0.2 mm tip (`[inventory.bits_on_hand]`). Its angle reading (included or per side) is not confirmed.
+- The isolation limits are not changed. `[[isolation_bit]]` in `milling.toml` is still the 60deg/0.2 V-bit (cut width 0.292 mm at 0.08 mm depth). The milling check and the mill tuning file (`clearance` 0.8 mm = 0.292 mm + 2 x 0.25 mm) use that bit.
 - Risk (agent analysis from the review record, not measured): a 0.6 mm flat bit cuts a groove of about 0.6 mm. It cannot cut a gap narrower than 0.6 mm. On B.Cu, these gaps are smaller than 0.6 mm or almost equal to it:
   - U3 (SOT-23-5): 0.34 to 0.35 mm, pad to pad and zone to pad. The CAM can leave copper there (a bridge), or the cut can remove pad copper.
   - Wire pads J3, J4, J5, J8, J9, J11 to J14: 0.6 mm, pad to pad. The cut fits only with no X/Y error.

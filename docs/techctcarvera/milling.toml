@@ -147,6 +147,13 @@ size_in = [4, 6]
 status = "confirmed"
 source = "owner photo, PR #3 2026-11-02; owner 2026-11-12"
 
+# Physical bit stock on hand (owner count). [inventory.cam_tools] lists the tools of the lab CAM template.
+[inventory.bits_on_hand]
+corn_min_mm = 0.6
+corn_note = "corn bits: none below 0.6 mm (2026-11-20)"
+vbit = "V-bit, 1/8 in (3.175 mm) shank, 30 deg, 0.2 mm tip. Not confirmed: 30 deg included (cut 0.243 mm at 0.08 mm depth) or 30 deg per side like T2 (cut 0.292 mm)"
+status = "confirmed"
+source = "owner 2026-11-20 (rev3 milling)"
 [inventory.cam_tools]
 isolation = "T2 chamfer mill '0.1mm Tip Engraving Metal': tip 0.2 mm, taper 30 deg per side (60 deg included), shank 3.175 mm, 1 flute, carbide, 12000 rpm, feed 500, plunge 200, ramp 300 mm/min"
 drills_in_cam = [0.9, 1.0, 1.1]
