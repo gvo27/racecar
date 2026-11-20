@@ -12,7 +12,7 @@
 
 ## Checks after each edit
 - Schematic change: `make erc bom`.
-- Board, footprint or placement change: `make pcb-check pcb-mill-check pcb-test`, and `make pcb-fab` when copper or holes changed.
+- Board, footprint or placement change: `make pcb-check pcb-mill-check pcb-test`. Run `make pcb-fab` only when the owner asks for export files.
 - Tool change: `make pcb-test`.
 - Before a review: `make pcb-gate` (and `METHOD=mill` for the mill board).
 
@@ -23,9 +23,9 @@
 4. Give the owner the schematic PDF, the ERC output, the BOM, the power budget and the open questions. Do not start the board before the owner approves the schematic.
 
 ## Board loop
-1. Order of work: outline and mounting, connectors on the edge, power-path placement, power copper as planned zones, signal routing, checks, fab outputs.
+1. Order of work: outline and mounting, connectors on the edge, power-path placement, power copper as planned zones, signal routing, checks. The deliverable is the `.kicad_pcb` file.
 2. After each change, run the board rows of `check-matrix.md`. Method "mill" adds skill `pcb-milling-check`.
-3. Make the fab outputs again when the copper or the holes change.
+3. If the owner asked for export files, make them again when the copper or the holes change.
 4. When all rows pass, dispatch `pcb-reviewer`. Fix and repeat as in the schematic loop.
 
 ## Mill board

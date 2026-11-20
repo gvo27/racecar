@@ -24,6 +24,8 @@ A board is ready only when the gate, the project checks and an independent revie
 4. Dispatch `pcb-reviewer` with the scope "fab" and `build/gate/<BOARD>/`.
 
 ## Deliverables
+The only project deliverable is the `.kicad_pcb` file of the board (scope: `docs/pcb/conventions.md`). Make the files below only when the owner asks for them.
+
 **Method fab (fab house):**
 - Gerbers and the drill file: `make pcb-gate METHOD=fab` writes them to `build/gate/<BOARD>/gerbers/`. Load the skill `jlcpcb` or `pcbway` for its layer names and limits.
 - BOM and order files (kicad-happy `bom`, scripts in `$KH/skills/bom/scripts/`, run in the KiCad image as in `.claude/skills/pcb-design/references/kicad-happy.md`, working directory: the board directory `pcb/<BOARD>/`. Write the output to `$ROOT/build/order/<BOARD>/`, where `$ROOT` is the repo root, never below `pcb/`):
@@ -43,6 +45,6 @@ A release freezes a board in `pcb/releases/rev<N>/` with its own `design_rules.t
 ## Report
 1. The gate verdict and each line with its verdict.
 2. The project checks with their result lines from this run.
-3. The deliverables with their paths.
+3. The path of the `.kicad_pcb` file. If the owner asked for export files, also their paths.
 4. Owner decisions (TBD parts, silkscreen, method limits that are `assumed`).
 5. What was not checked (for example, no SPICE without `ngspice`, no supplier stock without API keys).

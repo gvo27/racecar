@@ -19,7 +19,7 @@ This directory holds the facts and files of one lab: the mill, its tools, the co
 
 The mill is not accurate in X and Y. The board `pcb/src` is a coarse copy of the rev1 board for this mill. `design_rules.toml` holds all values that make it coarse. To change the board for the next prototype:
 
-1. Run `make pcb-fab BOARD=src` and mill the board from `build/fab/src/` (DXF for F.Cu, B.Cu and Edge.Cuts, Excellon drill file, in the frame of the lab CAM template). The parts list is `pcb/src/bom.csv`.
+1. Give the lab `pcb/src/rc_power_board.kicad_pcb`. This file is the only deliverable (scope: `docs/pcb/conventions.md`). If the lab asks for export files, run `make pcb-fab BOARD=src`. It writes DXF for F.Cu, B.Cu and Edge.Cuts and an Excellon drill file to `build/fab/src/`, in the frame of the lab CAM template. The parts list is `pcb/src/bom.csv`.
 2. Examine the board: bridges between nets, copper that lifted, pads that the cut damaged, holes that are off center, joints that were hard to solder. Use the symptom table below.
 3. Edit `design_rules.toml`. Set `status` and `source` of each value that you change (for example `status = "confirmed"`, `source = "lab tech 2026-11-20, prototype 1"`).
 4. Run `make pcb-all BOARD=src`. It makes the schematic variant, writes the rules into the KiCad project, builds the board from `pcb/src/placement.py`, routes it, writes the fab outputs and the review files, and runs the checks.
