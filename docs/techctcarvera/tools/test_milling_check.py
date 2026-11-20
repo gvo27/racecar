@@ -113,7 +113,7 @@ class TestLimits(unittest.TestCase):
         lim = limits()
         self.assertEqual((lim.stock_w, lim.stock_h), (152.4, 101.6))
         self.assertAlmostEqual(lim.stock_t, 1.57)
-        self.assertAlmostEqual(lim.dowel_dia, 4.191)
+        self.assertAlmostEqual(lim.dowel_dia, 4.2672)
         self.assertAlmostEqual(lim.dowel_pin, 4.0)
         self.assertEqual(lim.dowels, [(3.2766, 3.81), (149.1234, 3.81)])
 

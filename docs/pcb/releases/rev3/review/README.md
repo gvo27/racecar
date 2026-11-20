@@ -4,6 +4,8 @@ Latest state, 2026-11-18. Board: `pcb/src/rc_power_board.kicad_pcb` (title-block
 
 Release: rev2 (`pcb/releases/rev2`) is a frozen copy of this board with the JST XH headers and its own copy of the design rules (2026-11-17). After that copy, `pcb/src` got the temporary solder-wire pads (next section). The checks of rev2 give the results of the second layout: 96 milling warnings, BOM 91.83 USD.
 
+Findings of the rev3 milling: [`../milling_findings.md`](../milling_findings.md).
+
 ## Temporary exception: wires soldered to the board (first print round only)
 
 The owner (2026-11-17): for the first print round, solder the wires to the board directly. Do not fit the JST XH headers. The exception and its status are in `[parts.wire]` of the mill tuning file. Remove that table for the next round.
