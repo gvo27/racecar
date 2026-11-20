@@ -51,7 +51,7 @@ The project DRC rules in `rc_power_board.kicad_pro` are set to match: `min_clear
 
 - **Via (confirmed):** the EasyContac 0.8 rivet (1.0 mm OD, owner caliper 2026-11-13, measured on the shaft: 0.8 bag 1.0 mm, 1.0 bag 1.45 mm, 1.2 bag 1.6 mm OD (old caliper, small error possible)) needs a 1.1 mm hole (lab tech rule: OD + 0.1 mm). Rivet stock is the LPKF EasyContac kit (owner photo 2026-11-13). The owner's bit set has a 1.1 mm bit, so the via is **1.1 mm drill / 2.1 mm pad** (annular ring 0.5 mm) in every net class. If a rivet does not fit, the lab widens the hole in a second pass.
 - **Bit set (owner photo, 2026-11-12):** drill 0.1 to 2.0 mm in 0.1 mm steps. A footprint hole is snapped up to the smallest size in the set in the board copies (XH 0.95 to 1.0, MKDS 1.3 stays 1.3, F1 pins 1.4 stays 1.4); pads grow to keep the 0.45 mm annular ring. A hole larger than 2.0 mm is bored with the 3.175 mm end mill and must be 3.3 mm or more (`milled_hole_min`, assumed: tool + 0.125 mm).
-- **Hole list from the board (lab fit, Task 9):** 0.8 mm x 2 (C9); 1.0 mm x 52 (U1, U2 (12 each), C1, J3, J4, J5, J8, J9, J11 to J14); 1.1 mm x 3 (rivet vias); 1.3 mm x 4 (J6, J7); 1.4 mm x 8 (F1 pins); bored: 3.4 mm x 7 (H1 to H4 M3 clearance, J1 wire pads, F1 locating peg), plus 2 dowel holes of 4.191 mm outside the board. Before Task 9 the board had 2.4 mm (F1 peg), 3.0 mm (J1) and 3.2 mm (H1 to H4) holes, which the lab tools cannot make.
+- **Hole list from the board (lab fit, Task 9):** 0.8 mm x 2 (C9); 1.0 mm x 52 (U1, U2 (12 each), C1, J3, J4, J5, J8, J9, J11 to J14); 1.1 mm x 3 (rivet vias); 1.3 mm x 4 (J6, J7); 1.4 mm x 8 (F1 pins); bored: 3.4 mm x 7 (H1 to H4 M3 clearance, J1 wire pads, F1 locating peg), plus 2 dowel holes outside the board (size: `[dowel]` in `milling.toml`, lab directory). Before Task 9 the board had 2.4 mm (F1 peg), 3.0 mm (J1) and 3.2 mm (H1 to H4) holes, which the lab tools cannot make.
 - **F1 peg:** the KiCad library footprint of the Littelfuse FLR 178.6165 has a 2.4 mm NPTH for the central locating peg. The Littelfuse drawing was not reachable from the build host (HTTP 403), so the peg diameter is **not confirmed**. It is larger than 2.0 mm in any case (the library hole is 2.4 mm), so it is a loose 3.4 mm locator hole. If the real peg is 2.0 mm or less, a drill from the set can replace it. Check the peg against the holder before milling.
 - **J1 wire pads:** hole 3.4 mm (was 3.0 mm), pad 4.4 mm, annular ring 0.5 mm. The 12 AWG conductor (about 2.05 mm) is loose in the hole.
 - **Frame:** the board is turned 90 degrees and centered on the stock; the two dowel holes are outside the board. Details and file list: the docstring of `tools/fab_export.py` in the lab directory.
@@ -92,7 +92,7 @@ Rule (lab tech 2026-11-13): drill = rivet outer diameter + 0.1 mm. If a rivet do
 | J6 VH option | 1.7 mm (only if chosen) | drill or helical mill, TBD |
 | J1 SolderWire | 3.4 mm | bore with the 3.175 mm end mill |
 | M3 mounting (H1-H4) | 3.4 mm | bore with the 3.175 mm end mill |
-| Dowel pins | 4.191 mm for 4.0 mm pins (lab template), 2 holes | bore in Setup A, outside the board outline |
+| Dowel pins | `[dowel]` in `milling.toml` (lab directory), for 4.0 mm pins, 2 holes | bore in Setup A, outside the board outline |
 
 ## Unplated THT soldering
 
@@ -100,7 +100,7 @@ Solder each THT pin on every layer where it has copper. JST XH shrouds and screw
 
 ## Registration and outline
 
-- 2 dowel holes (4.191 mm for 4.0 mm pins) on one line along the stock long side, bored in Setup A of the lab template. B.Cu is not mirrored in the files: Setup C flips the stock.
+- 2 dowel holes (size: `[dowel]` in `milling.toml`, for 4.0 mm pins) on one line along the stock long side, bored in Setup A of the lab template. B.Cu is not mirrored in the files: Setup C flips the stock.
 - The board (66 x 140 mm) is turned 90 degrees and centered on the 152.4 x 101.6 mm stock: 6.2 mm at each end, 17.8 mm at each long side. The dowel holes are about 14 mm from the outline. Outputs: `make pcb-fab`.
 
 ## Export and CAM

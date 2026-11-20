@@ -26,6 +26,8 @@ import placement  # noqa: E402
 SCH_DIR = paths.board_dir()
 
 BOARD = os.path.join(SCH_DIR, "rc_power_board.kicad_pcb")
+# Dowel hole as the Excellon file writes it (3 decimals). The value comes from the lab file.
+DOWEL = round(mc.load_limits(lab.limits_file()).dowel_dia, 3)
 
 
 # ---- stdlib DXF reader --------------------------------------------------------------------------------------------
@@ -319,13 +321,13 @@ class TestOutputs(unittest.TestCase):
         self.assertTrue(text.rstrip().endswith("M30"))
         tools, _ = self.read_drl()
         self.assertEqual(len(set(tools.values())), len(tools), "one tool per diameter")
-        self.assertIn(4.191, tools.values())
+        self.assertIn(DOWEL, tools.values())
         self.assertIn("; T", text)
 
     def test_dowels_in_excellon(self):
         _, holes = self.read_drl()
-        self.assertIn((4.191, 0.0, 0.0), holes)
-        xs = sorted(x for d, x, y in holes if d == 4.191)
+        self.assertIn((DOWEL, 0.0, 0.0), holes)
+        xs = sorted(x for d, x, y in holes if d == DOWEL)
         self.assertEqual(len(xs), 2)
         self.assertAlmostEqual(xs[0], 0.0, places=3)
         self.assertAlmostEqual(xs[1], 145.8468, places=3)
@@ -360,7 +362,7 @@ class TestOutputs(unittest.TestCase):
         want = sorted((round(d, 3), round(a, 3), round(b, 3)) for d, a, b in
                       ((d, *placement.board_to_lab(x, sign * y)) for d, x, y in ref))
         _, mine = self.read_drl()
-        mine = sorted((round(d, 3), round(x, 3), round(y, 3)) for d, x, y in mine if d != 4.191)
+        mine = sorted((round(d, 3), round(x, 3), round(y, 3)) for d, x, y in mine if d != DOWEL)
         self.assertEqual(len(mine), len(want))
         self.assertEqual([m[0] for m in mine].count(1.0), [w[0] for w in want].count(1.0))
         for a, b in zip(mine, want):
@@ -377,8 +379,8 @@ class TestOutputs(unittest.TestCase):
         for e in es:
             use, d = e["layer"].split("_")
             self.assertAlmostEqual(2 * e["r"], float(d), places=3)
-            self.assertEqual(use, "DOWEL" if abs(float(d) - 4.191) < 1e-6 else ("DRILL" if float(d) <= 2.0 + 1e-6 else "BORE"))
-        self.assertIn("DOWEL_4.191", {e["layer"] for e in es})
+            self.assertEqual(use, "DOWEL" if abs(float(d) - DOWEL) < 1e-6 else ("DRILL" if float(d) <= 2.0 + 1e-6 else "BORE"))
+        self.assertIn(fab_export.tool_name("DOWEL", DOWEL), {e["layer"] for e in es})
         self.assertIn("BORE_3.4", {e["layer"] for e in es})
 
     def test_every_board_hole_is_makeable(self):

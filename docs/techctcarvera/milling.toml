@@ -21,13 +21,14 @@ status = "confirmed"
 source = "lab .f3z (Fusion stock 152.4 x 101.6 mm; Fusion Sketch1 6 x 4 in, example/fusion_export/, 2026-11-15); owner 2026-11-12 (4x6 in blank, P22-465G); example/README.md"
 
 # Dowel holes: bored in Setup A with the 3.175 mm end mill, for 4.0 mm pins. Centers from the stock lower-left corner.
+# 2026-11-19: hole = lab template 4.191 mm (0.165 in) + 0.003 in (0.0762 mm) = 4.2672 mm (0.168 in). The lab CAM template (Bore1) still has 4.191 mm.
 [dowel]
-diameter = 4.191
+diameter = 4.2672
 pin = 4.0
 centers = [[3.2766, 3.81], [149.1234, 3.81]]
 unit = "mm"
 status = "confirmed"
-source = "lab .f3z (Bore1 toolpath; hole 0.165 in; centers +-72.9234 / -46.99 from the stock center); Fusion Measure and Sketch10 (owner 2026-11-15, example/fusion_export/): diameter 0.165 in, centers (0.129, 0.15) and (5.871, 0.15) in, distance 5.742 in; owner 2026-11-12 (4.0 mm pins)"
+source = "owner 2026-11-19, verified physical finding during the rev3 milling: pins measured 4.0 mm with a caliper; the hole gets 0.003 in more clearance (old value 4.191 mm). Old source: lab .f3z (Bore1 toolpath; hole 0.165 in; centers +-72.9234 / -46.99 from the stock center); Fusion Measure and Sketch10 (owner 2026-11-15, example/fusion_export/): diameter 0.165 in, centers (0.129, 0.15) and (5.871, 0.15) in, distance 5.742 in; owner 2026-11-12 (4.0 mm pins)"
 
 # Isolation bits: cut width at depth d = tip + 2 * d * tan(angle / 2)
 # The lab bit is tool T2 "0.1mm Tip Engraving Metal": tip 0.2 mm, Fusion taper 30. Fusion "taper" is the angle per side
