@@ -25,3 +25,12 @@ Status of an entry: `verified` (measured or seen on the real board or the machin
   - U1 and U2 VOUT to GND: 0.64 mm. Margin 0.02 mm for each side. The tuning file assumes 0.25 mm.
 - Check after the B.Cu run: examine these gaps for bridges and for damaged pads. Measure the real groove width.
 - Open (owner): record the corn bit in `milling.toml` (name, tip, flutes) if it stays the B.Cu tool. A 0.6 mm cut width then needs a clearance of about 1.1 mm (0.6 mm + 2 x 0.25 mm) in the mill tuning file for the next board.
+
+## F-003: the V-bit on hand can mill B.Cu (2026-11-20, reported)
+
+- Bit: Makera "Single Flute Engraving Bit for Metal", QR code `C1-BIT-ENGRAVE-M-30-0.2`, 1/8 in shank, 30 deg, 0.2 mm tip (`[inventory.bits_on_hand]` in `milling.toml`).
+- Owner: the bit measures the same as T2. The lab tech: T2 in the lab CAM template comes from Makera and is correct.
+- Owner observation: the cone is not symmetric (one side is higher). Both slant lengths are longer than the shank diameter (more than 3 mm).
+- Agent analysis (not measured): a single-flute engraving bit has one flat ground face, so a cone that is not symmetric is the usual shape. For a cone from a 0.2 mm tip to a 3.175 mm shank, the slant length is about 3.0 mm at 30 deg per side (T2) and about 5.7 mm at 30 deg included. A slant length a little more than 3 mm agrees with T2. A slant length near 5.7 mm means 30 deg included.
+- Viable for B.Cu with either reading: the cut width at 0.08 mm depth is 0.292 mm (per side) or 0.243 mm (included). Both are less than the smallest B.Cu gap (U3, 0.34 mm). The 0.6 mm corn bit is not (F-002).
+- Open: the slant length in mm on the cutting side, or the width of a test groove at 0.08 mm depth (0.29 mm or 0.24 mm).

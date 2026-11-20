@@ -151,7 +151,7 @@ source = "owner photo, PR #3 2026-11-02; owner 2026-11-12"
 [inventory.bits_on_hand]
 corn_min_mm = 0.6
 corn_note = "corn bits: none below 0.6 mm (2026-11-20)"
-vbit = "V-bit, 1/8 in (3.175 mm) shank, 30 deg, 0.2 mm tip. Not confirmed: 30 deg included (cut 0.243 mm at 0.08 mm depth) or 30 deg per side like T2 (cut 0.292 mm)"
+vbit = "Makera Single Flute Engraving Bit for Metal, QR code C1-BIT-ENGRAVE-M-30-0.2, 1/8 in (3.175 mm) shank, 30 deg, 0.2 mm tip. Owner: same as T2 by measurement; both slant lengths of the cone are longer than the shank diameter. Not confirmed: 30 deg included (cut 0.243 mm at 0.08 mm depth) or 30 deg per side like T2 (cut 0.292 mm)"
 status = "confirmed"
 source = "owner 2026-11-20 (rev3 milling)"
 [inventory.cam_tools]
