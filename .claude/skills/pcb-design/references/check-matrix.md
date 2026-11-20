@@ -11,7 +11,7 @@ A clean ERC and a clean DRC show that the files agree with their own rules. They
 | Board | `make pcb-mill-check` (method "mill") | 0 errors that are not waived | Skill `pcb-milling-check`. Solder access and rivet access |
 | Board | `make pcb-gate` (kicad-happy analyzers: schematic, PCB, EMC, thermal, and Gerbers for a fab house) | Each finding has a verdict. Gate result read with `fab-gate.md` of skill `pcb-fab` | Return path of each signal that changes layer. Parts under module bodies |
 | Tools | `make pcb-test` | All tests pass | A new check has a test that fails on a bad board |
-| Fab outputs | `make pcb-fab` (writes `build/fab/<BOARD>/`, not committed) | `test_fab` passes. Same files after a second run on the same board | Frame, units, mirror state, hole count for each tool against the board |
+| Fab outputs (only when the owner asks for them) | `make pcb-fab` (writes `build/fab/<BOARD>/`, not committed) | `test_fab` passes. Same files after a second run on the same board | Frame, units, mirror state, hole count for each tool against the board |
 | Documents | `grep` each number of the review record in the check output | Each number agrees | Statements with no check behind them |
 | Subcircuits | kicad-happy `spice` (needs `ngspice`) | Only if `ngspice` is installed | Without `ngspice`: write "SPICE not run" in the report |
 

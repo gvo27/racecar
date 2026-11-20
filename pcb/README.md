@@ -9,7 +9,7 @@
 | `libraries/` | Board tools, their Python libraries and tests. They run in the KiCad image through `make`. `paths.py` holds this layout |
 | `COLCON_IGNORE` | Keeps this directory out of the ROS 2 build |
 
-- Fab outputs are not committed. `make pcb-fab` writes them to `build/fab/<BOARD>/`.
+- The only deliverable of each board is its `.kicad_pcb` file (scope: `docs/pcb/conventions.md`). Fab outputs are optional and not committed. `make pcb-fab` writes them to `build/fab/<BOARD>/`.
 - Context of the board and the schematic (plan, overview, BOM notes, review record): [`docs/pcb/`](../docs/pcb/README.md). Stale docs: `docs/archive/pcb/`.
 - Releases are numbered `rev1`, `rev2`, `rev3` and so on (rev1 and rev2 were `rev_A` and `rev_B` until 2026-11-18). A release is frozen: copy the working board to `releases/rev<N>/` with its own `design_rules.toml`.
 - Risks of the mill board, most important first: [review record](../docs/pcb/releases/rev3/review/README.md#risks-most-important-first).

@@ -4,7 +4,8 @@ Reference for the power distribution board in `pcb/`. The rules for changes are 
 
 ## Layout
 - `pcb/<board>/`: one KiCad project for each board (schematic, board, rules, `bom.csv`). A released board is in `pcb/releases/<rev>/`; rev1 is `pcb/releases/rev1/`. Make targets use `BOARD=<path below pcb/>`; the default is `DEFAULT_BOARD` in `pcb/libraries/paths.py` and `BOARD` in the Makefile.
-- Fab outputs are not committed. `make pcb-fab` writes them to `build/fab/<BOARD>/`.
+- Scope (owner, 2026-11-19): the only deliverable of each board and each release is its `.kicad_pcb` file. DXF, Excellon, Gerber and other export files are not deliverables. Make them only when the owner asks for them.
+- Fab outputs are optional and not committed. `make pcb-fab` writes them to `build/fab/<BOARD>/`.
 - `pcb/lib/`: symbol and footprint libraries, shared by all boards. `pcb/libraries/`: board tools, their Python libraries and tests (`paths.py` holds the layout).
 - `docs/pcb/`: context of the board and the schematic (plan, overview, BOM notes). Read it. The tools write only `releases/<rev>/review/` there (`paths.review_dir()`).
 - The lab directory (`lab:` in `.claude/CLAUDE.md`): lab facts, `milling_waivers.toml` and the mill tools (`tools/milling_check.py`, `tools/fab_export.py`).

@@ -11,6 +11,7 @@ Workflow: skill `pcb-design`. Fab outputs and releases: skill `pcb-fab`. Review:
 
 ## Sources and generated files
 - The schematic is the source for the board. Change parts and nets in the schematic first.
+- The only deliverable of a board is its `.kicad_pcb` file. Do not make export files (`make pcb-fab`, Gerbers) as a deliverable. Make them only when the owner asks. Scope: `docs/pcb/conventions.md`.
 - Never invent a part value. Unknown is `TBD`.
 - Do not edit generated files by hand: variant schematics (`make pcb-sch`), `.kicad_pro` net classes and `.kicad_dru` (`make pcb-rules`), `bom.csv` (`make bom`), fab outputs (`make pcb-fab`, not committed).
 - Limits come from `design_rules.toml` and the lab file. Do not add a limit as a constant to a tool. Never change a limit, a waiver or a check to make a board pass.
