@@ -21,13 +21,14 @@ status = "confirmed"
 source = "lab .f3z (Fusion stock 152.4 x 101.6 mm; Fusion Sketch1 6 x 4 in, example/fusion_export/, 2026-11-15); owner 2026-11-12 (4x6 in blank, P22-465G); example/README.md"
 
 # Dowel holes: bored in Setup A with the 3.175 mm end mill, for 4.0 mm pins. Centers from the stock lower-left corner.
+# 2026-11-19: hole = lab template 4.191 mm (0.165 in) + 0.003 in (0.0762 mm) = 4.2672 mm (0.168 in). The lab CAM template (Bore1) still has 4.191 mm.
 [dowel]
-diameter = 4.191
+diameter = 4.2672
 pin = 4.0
 centers = [[3.2766, 3.81], [149.1234, 3.81]]
 unit = "mm"
 status = "confirmed"
-source = "lab .f3z (Bore1 toolpath; hole 0.165 in; centers +-72.9234 / -46.99 from the stock center); Fusion Measure and Sketch10 (owner 2026-11-15, example/fusion_export/): diameter 0.165 in, centers (0.129, 0.15) and (5.871, 0.15) in, distance 5.742 in; owner 2026-11-12 (4.0 mm pins)"
+source = "owner 2026-11-19, verified physical finding during the rev3 milling: pins measured 4.0 mm with a caliper; the hole gets 0.003 in more clearance (old value 4.191 mm). Old source: lab .f3z (Bore1 toolpath; hole 0.165 in; centers +-72.9234 / -46.99 from the stock center); Fusion Measure and Sketch10 (owner 2026-11-15, example/fusion_export/): diameter 0.165 in, centers (0.129, 0.15) and (5.871, 0.15) in, distance 5.742 in; owner 2026-11-12 (4.0 mm pins)"
 
 # Isolation bits: cut width at depth d = tip + 2 * d * tan(angle / 2)
 # The lab bit is tool T2 "0.1mm Tip Engraving Metal": tip 0.2 mm, Fusion taper 30. Fusion "taper" is the angle per side
@@ -146,6 +147,14 @@ size_in = [4, 6]
 status = "confirmed"
 source = "owner photo, PR #3 2026-11-02; owner 2026-11-12"
 
+# Physical bit stock on hand (owner count). [inventory.cam_tools] lists the tools of the lab CAM template.
+[inventory.bits_on_hand]
+corn_min_mm = 0.6
+corn_note = "corn bits: none below 0.6 mm (2026-11-20)"
+vbit = "Makera Single Flute Engraving Bit for Metal, QR code C1-BIT-ENGRAVE-M-30-0.2, 1/8 in (3.175 mm) shank, 30 deg, 0.2 mm tip. Owner: same as T2 by measurement; both slant lengths of the cone are longer than the shank diameter. Not confirmed: 30 deg included (cut 0.243 mm at 0.08 mm depth) or 30 deg per side like T2 (cut 0.292 mm)"
+micro_end_mill = "10 pcs, Unique Bargains model S25092400UX5341 (item 7897065): carbide end mill engraving bit, cutting edge diameter 0.2 mm, cutting edge length 2.5 mm, shank 3.175 mm, overall length 38 mm, titanium coated. End shape (flat or not) and flute count not stated. Not in the lab CAM tool library. No cutting data from the seller"
+status = "confirmed"
+source = "owner 2026-11-20 (rev3 milling); micro_end_mill: owner 2026-11-20, seller product page"
 [inventory.cam_tools]
 isolation = "T2 chamfer mill '0.1mm Tip Engraving Metal': tip 0.2 mm, taper 30 deg per side (60 deg included), shank 3.175 mm, 1 flute, carbide, 12000 rpm, feed 500, plunge 200, ramp 300 mm/min"
 drills_in_cam = [0.9, 1.0, 1.1]
