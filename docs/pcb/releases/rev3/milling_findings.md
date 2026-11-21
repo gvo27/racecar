@@ -1,6 +1,6 @@
 # Rev3 milling findings
 
-This log records the findings of the rev3 milling, one entry for each finding. The board is `pcb/src/rc_power_board.kicad_pcb`. A finding that changes a lab value also changes `milling.toml` in the lab directory (`lab:` in `.claude/CLAUDE.md`). That file holds the current value. This log holds the history.
+This log records the findings of the rev3 milling, one entry for each finding. The CAM brief for the lab tech: `docs/plans/2026-11-20-rev3-milling-brief.md`. The board is `pcb/src/rc_power_board.kicad_pcb`. A finding that changes a lab value also changes `milling.toml` in the lab directory (`lab:` in `.claude/CLAUDE.md`). That file holds the current value. This log holds the history.
 
 Status of an entry: `verified` (measured or seen on the real board or the machine), `reported` (a statement that nobody checked yet).
 
