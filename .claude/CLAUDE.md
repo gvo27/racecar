@@ -14,9 +14,10 @@ cmd: make help  # session: make open (start), make close (end); car host setup: 
 @../docs/invariants.md
 workflow:  # always-on owner; extra items: .claude/rules/claude-tooling.md
   - library/framework API => check upstream docs/source at the pinned version before writing code; pins: docs/dependencies.md (stack pins)
-  - non-trivial change => superpowers brainstorming -> writing-plans (docs/plans/) -> test-driven-development -> requesting-code-review
+  - non-trivial change => skill engineering-workflow (plan in docs/plans/, failing test first, independent review agent: ros2-reviewer, pcb-reviewer or code-review)
+  - design choice => ask one question at a time; give 2-3 options with a recommendation
   - change to an invariant, the repo layout or an interface => ADR in docs/adr/ first (docs/adr/0000-template.md)
-  - bug => superpowers systematic-debugging first
+  - bug or flaky test => root cause before a fix: reproduce, read the full error, one hypothesis and one change at a time; no rerun until green; 3 failed fixes => stop and ask
   - tests: no system python (host dev tools via uv only); .claude/, docs/, deploy/, scripts/ => make checks (fast, no docker), make unit (ROS image); hardware checks are user-run (never claim without output)
   - every PR body = .github/pull_request_template.md with user-run bench checklist (deploy + deps + feature checks)
   - all project text (docs, .claude/*, PR/commit/review text, user-facing strings) => asd-ste100 STE: strict for .claude/**, procedures and error strings; ste-flavored for prose; keep facts+hedges; .claude/rules/writing.md

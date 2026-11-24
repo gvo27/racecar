@@ -24,7 +24,7 @@ Read the docs or the tagged source of these versions before you write code again
 - Keep the `rccar-fw` pins (platformio, esptool, pyserial) consistent with the `platformio.ini` platform pin.
 
 ## Claude plugin sources (.claude/settings.json)
-- claude-plugins-official (anthropics/claude-plugins-official): superpowers, pyright-lsp, clangd-lsp, claude-md-management (commands + claude-md-improver skill, no hooks), code-simplifier (agent only, no hooks). The LSP binaries are optional host dev tools (not runtime deps). `pyright-langserver` comes from the uv dev group (`make dev-setup`). `clangd` comes from apt. See `make check-dev`.
+- claude-plugins-official (anthropics/claude-plugins-official): pyright-lsp, clangd-lsp, claude-md-management (commands + claude-md-improver skill, no hooks), code-simplifier (agent only, no hooks). The LSP binaries are optional host dev tools (not runtime deps). `pyright-langserver` comes from the uv dev group (`make dev-setup`). `clangd` comes from apt. See `make check-dev`.
 - embedded-skills@embedded-skills: github rovinax/embedded-skills, ref master (no tags upstream). Topics: firmware arch, driver layering, rtos, isr.
 - ros2-engineering@ros2-engineering-skills: github dbwls99706/ros2-engineering-skills, ref v1.7.2. Topics: micro-ros, ros2_control, nav2, perception.
 - asd-ste100@asd-ste100-skill: github danyuchn/asd-ste100-skill, ref master (the default branch; upstream has no `main` branch and no tags; marketplace sources take ref only, no sha; reviewed at a4905d922500dd7530ca8a0eb9e4940494255709). Skill + lint script only, no hooks.

@@ -7,7 +7,6 @@ Facts about the Claude Code setup of this repo. The rules for work with it are i
 
 | Plugin | Gives | Needs |
 | --- | --- | --- |
-| superpowers (claude-plugins-official) | workflow skills: brainstorming, writing-plans, executing-plans, test-driven-development, systematic-debugging, requesting-code-review, verification-before-completion | the official marketplace pins obra/superpowers by sha |
 | pyright-lsp | Python LSP | `pyright-langserver` on PATH (uv dev group). Config `pyrightconfig.json`: `ros2_ws/src` and `deploy`, py3.12, basic. `reportMissingImports` = warning (rclpy and rccar_msgs exist only in the ROS image) |
 | clangd-lsp | C++ LSP | `clangd` on PATH (apt) and `firmware/esp32/compile_commands.json` (`make compiledb`). `firmware/esp32/.clangd` removes xtensa-only flags. No `--query-driver`, so xtensa libstdc++ headers can show false errors |
 | embedded-skills, ros2-engineering, kicad-happy | domain skills | kicad-happy: stdlib scripts; SPICE needs `ngspice`; distributor skills need API keys in user scope |

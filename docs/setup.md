@@ -32,7 +32,6 @@ make setup                              # check prerequisites, dev tools into .v
 
 | Plugin / server | Use |
 | --- | --- |
-| `superpowers` | brainstorm → plan → TDD → review workflow |
 | `pyright-lsp` | Python diagnostics, needs `pyright-langserver` on PATH |
 | `clangd-lsp` | firmware C/C++ diagnostics, needs `clangd` on PATH + `make compiledb` |
 | `embedded-skills` | firmware architecture, RTOS, ISR design |
