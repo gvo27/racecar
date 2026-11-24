@@ -17,6 +17,7 @@ CLAUDE_MDS = sorted(p for p in ROOT.glob('**/CLAUDE.md') if not SKIP & set(p.rel
 PATH_RE = re.compile(r'`((?:\.claude|docs|docker|deploy|ros2_ws|firmware|pcb|models|simulation|mechanical|scripts)/[A-Za-z0-9_./-]+)`')
 GENERATED = ('models/cache', 'deploy/car/.env.generated', 'firmware/esp32/.pio',
              '.claude/settings.local.json')  # gitignored, made at run time
+VERSION_RE = re.compile(r'\b\d+\.\d+\.\d+\b')  # same as the project-context check script
 MAKE_TARGETS = {'pcb-build', 'pcb-route', 'pcb-check', 'pcb-mill-check', 'pcb-review', 'pcb-fab', 'pcb-test', 'pcb-gate', 'pcb-all', 'pcb-sch', 'pcb-rules'}
 
 
@@ -67,3 +68,16 @@ def test_pcb_files_name_existing_skills_and_agents():
             continue
         unknown = set(re.findall(r'`(pcb-[a-z-]+)`', path.read_text())) - known
         assert not unknown, f'{rel(path)}: names {sorted(unknown)}, which is not a project skill, agent or make target'
+
+
+@pytest.mark.parametrize('path', SKILLS, ids=rel)
+def test_skill_has_verify_section(path):
+    """Each project skill tells how to verify its result."""
+    assert re.search(r'^## Verify\s*$', path.read_text(), re.MULTILINE), f'{rel(path)}: no "## Verify" section'
+
+
+@pytest.mark.parametrize('path', SKILL_FILES, ids=rel)
+def test_skill_files_hold_no_versions(path):
+    """A skill holds no repo facts: versions live in their owner file (docs/dependencies.md, settings.json)."""
+    hits = [(n, line.strip()) for n, line in enumerate(path.read_text().splitlines(), 1) if VERSION_RE.search(line)]
+    assert not hits, f'{rel(path)}: x.y.z versions {hits}'

@@ -10,19 +10,29 @@ import lab  # noqa: E402
 
 
 class TestLab(unittest.TestCase):
-    def test_pointer_is_read_from_claude_md(self):
+    def _config(self, root, text):
+        os.makedirs(os.path.join(root, "pcb", "config"))
+        with open(os.path.join(root, "pcb", "config", "lab.toml"), "w") as fh:
+            fh.write(text)
+
+    def test_pointer_is_read_from_lab_toml(self):
         with tempfile.TemporaryDirectory() as root:
-            os.makedirs(os.path.join(root, ".claude"))
-            with open(os.path.join(root, ".claude", "CLAUDE.md"), "w") as fh:
-                fh.write("project: x\nlab: docs/somelab/  # lab config\nnext: y\n")
+            self._config(root, 'dir = "docs/somelab"  # lab directory\n')
             self.assertEqual(lab.read_pointer(root), os.path.join(root, "docs", "somelab"))
 
     def test_missing_pointer_fails(self):
         with tempfile.TemporaryDirectory() as root:
+            self._config(root, 'other = "x"\n')
+            with self.assertRaises(RuntimeError):
+                lab.read_pointer(root)
+
+    def test_claude_md_is_not_read(self):
+        """A script must not parse CLAUDE.md (skill project-context): only pcb/config/lab.toml counts."""
+        with tempfile.TemporaryDirectory() as root:
             os.makedirs(os.path.join(root, ".claude"))
             with open(os.path.join(root, ".claude", "CLAUDE.md"), "w") as fh:
-                fh.write("project: x\n")
-            with self.assertRaises(RuntimeError):
+                fh.write("lab: docs/somelab/\n")
+            with self.assertRaises((RuntimeError, OSError)):
                 lab.read_pointer(root)
 
     def test_env_overrides_pointer(self):
