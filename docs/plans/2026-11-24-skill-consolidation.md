@@ -5,7 +5,7 @@ Status: active (follow-up of the monorepo layout PR, ADR 0001)
 ## Context
 The monorepo layout PR took the hard-coded paths out of `sim-parity` (the "Sources" table of `docs/interfaces/sensor_contract.md` is now the owner, and `test_contract.py` checks it) and the stack pins out of `hw-research` (owner: `docs/dependencies.md`, "Stack pins"). A review with the user skill `project-context` and issue #20 found these open items:
 
-- 7 project skills: 5 for the PCB, `hw-research` and `sim-parity`. ROS 2, firmware and deploy have no task skills. Their procedures are in 18 rules that load by path.
+- 7 project skills: 5 for the PCB (now in `pcb/.claude/skills/`), `hw-research` (root) and `sim-parity` (now in `ros2_ws/.claude/skills/`). Nested skills load only when Claude reads a file in their folder. ROS 2, firmware and deploy have no task skills. Their procedures are in 18 rules that load by path.
 - `pcb-lab-config` and `pcb-milling-check` overlap: both read the lab limits of the mill.
 - `pcb-lab-config` copies mill values that `docs/techctcarvera/milling.toml` owns (issue #20, item 6).
 - `pcb-design/references/kicad-happy.md:3` and `pcb-fab/references/fab-gate.md:18` contain versions (issue #20, item 5).
@@ -21,8 +21,8 @@ The monorepo layout PR took the hard-coded paths out of `sim-parity` (the "Sourc
 1. Merge `pcb-lab-config` and `pcb-milling-check` into one skill `pcb-mill` (lab limits, inventory, milling check). The skill points to `milling.toml` for the values.
 2. Move the versions in the pcb skill references to `docs/dependencies.md` and point to it.
 3. Rename `sim-parity` to `interface-change`. It covers a message change (copy to the firmware), the contract, and the sim. When the sim moves into `simulation/`, the steps edit the sim in the same PR.
-4. Add `firmware-change`: pins, `setKey`, tuning keys, message copy, `make build`, `make compiledb`, the bench checklist for the PR. Move the procedures out of `.claude/rules/firmware.md`, `tuning.md` and `msgs.md`. The rules keep the constraints.
-5. Add `car-deploy`: image, compose, render_env and udev changes, `make unit`, `docker compose config`, the Pi bench checklist. Move the procedures out of `.claude/rules/deploy.md` and `hw-testing.md`.
+4. Add `firmware-change` in `firmware/.claude/skills/`: pins, `setKey`, tuning keys, message copy, `make build`, `make compiledb`, the bench checklist for the PR. Move the procedures out of `.claude/rules/firmware.md`, `tuning.md` and `msgs.md`. The rules keep the constraints.
+5. Add `car-deploy` (root `.claude/skills/`, because deploy is shared infrastructure): image, compose, render_env and udev changes, `make unit`, `docker compose config`, the Pi bench checklist. Move the procedures out of `.claude/rules/deploy.md` and `hw-testing.md`.
 6. Move the `lab:` value to a TOML file (for example `pcb/config/lab.toml`). `lab.py` and the Makefile read the TOML file. `.claude/CLAUDE.md` points to it.
 7. Run the agent `plugin-dev:skill-reviewer` on each new or changed skill (the user chose to run it in this follow-up, not in the layout PR).
 

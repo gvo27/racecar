@@ -18,6 +18,7 @@ The recommended clone path on the Pi changes from `~/ros2_ws/src/racecar` to `~/
 
 ## Consequences
 - The make targets, the container paths and the runtime behavior do not change.
+- A skill for one subproject goes in `<subproject>/.claude/skills/` (now `pcb/` and `ros2_ws/`). Claude Code loads it only after it reads a file in that folder, so other sessions do not carry its description. A rule with `paths:` points to the `SKILL.md` from folders outside the subproject (for example `docs/pcb/`).
 - Path globs in `.claude/rules/*.md`, the hook `.claude/hooks/hw_guard.py`, the CI path filters and `docker/ros.Dockerfile` name `ros2_ws/src/`. Tests check them: `deploy/tests/test_rules_paths.py`, `test_hw_guard.py`, `test_layout.py`, `test_claude_agents.py`.
 - The existing Pi clone must move once to `~/racecar`. Then `make install-host` writes the new `WorkingDirectory` into `rccar.service` (procedure: `docs/setup.md`).
 - The `COLCON_IGNORE` files stay. The compose mount and a sim workspace that imports this repo still see the whole tree, and `firmware/` holds a copy of `rccar_msgs`.

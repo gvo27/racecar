@@ -27,7 +27,7 @@ Read each script's `--help` first: the options change between plugin versions.
 
 ## Findings are claims
 - `make pcb-gate` runs `analyze_pcb.py --full` (per-track data). The EMC grounding checks (GP-001, RP-001, VS-001) need it. Without it the EMC score is too high.
-- A verified false positive or owner decision goes into `suppressions` of the board's `.kicad-happy.json` (`.claude/skills/pcb-fab/references/fab-gate.md`).
+- A verified false positive or owner decision goes into `suppressions` of the board's `.kicad-happy.json` (`pcb/.claude/skills/pcb-fab/references/fab-gate.md`).
 - The full CI reports are artifacts of the `pcb` workflow run: `gh run download <run-id> --dir build/ci-report`.
 - Give each finding a verdict: true, false positive (with the reason), or owner decision. Check it in the raw file first.
 - Known false positives of this board: `docs/pcb/releases/rev1/review/README.md` (rev1) and `fab-gate.md` of skill `pcb-fab` (the gate).

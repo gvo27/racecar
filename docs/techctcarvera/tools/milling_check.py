@@ -1,6 +1,6 @@
 """Milling check for the power board (Makera Carvera isolation milling).
 
-DRC-clean does not mean CNC-millable. Rule ids and groups: .claude/skills/pcb-milling-check/SKILL.md
+DRC-clean does not mean CNC-millable. Rule ids and groups: pcb/.claude/skills/pcb-milling-check/SKILL.md
 Limits: milling.toml in the lab directory (lab.py; pointer `lab:` in .claude/CLAUDE.md). Waivers: milling_waivers.toml in the lab directory.
 
 CLI: milling_check.py <board> [--limits <toml>] [--waivers <toml>] --json <out>

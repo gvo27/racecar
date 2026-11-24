@@ -7,8 +7,10 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
 AGENTS = sorted((ROOT / '.claude' / 'agents').glob('*.md'))
-SKILLS = sorted((ROOT / '.claude' / 'skills').glob('*/SKILL.md'))
-SKILL_FILES = sorted((ROOT / '.claude' / 'skills').glob('*/**/*.md'))
+# root skills, and nested skills that load when Claude works in their subproject (ADR 0001)
+SKILL_DIRS = [ROOT / '.claude' / 'skills'] + sorted(ROOT.glob('*/.claude/skills'))
+SKILLS = sorted(p for d in SKILL_DIRS for p in d.glob('*/SKILL.md'))
+SKILL_FILES = sorted(p for d in SKILL_DIRS for p in d.glob('*/**/*.md'))
 RULES = sorted((ROOT / '.claude' / 'rules').glob('*.md'))
 CLAUDE_MDS = sorted(p for p in ROOT.glob('**/CLAUDE.md') if '.venv' not in p.parts and 'build' not in p.parts)
 PATH_RE = re.compile(r'`((?:\.claude|docs|docker|deploy|ros2_ws|firmware|pcb|models|simulation|mechanical|scripts)/[A-Za-z0-9_./-]+)`')
@@ -59,7 +61,7 @@ def test_named_paths_exist(path):
 def test_pcb_files_name_existing_skills_and_agents():
     known = {p.parent.name for p in SKILLS} | {p.stem for p in AGENTS} | MAKE_TARGETS
     for path in AGENTS + SKILL_FILES:
-        if not (path.stem.startswith('pcb-') or path.parent.name.startswith('pcb-')):
+        if not (path.stem.startswith('pcb-') or 'pcb' in path.relative_to(ROOT).parts[:1]):
             continue
         unknown = set(re.findall(r'`(pcb-[a-z-]+)`', path.read_text())) - known
         assert not unknown, f'{rel(path)}: names {sorted(unknown)}, which is not a project skill, agent or make target'

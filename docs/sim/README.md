@@ -6,7 +6,7 @@ The sim lives in the separate repo [racecar-sim](https://github.com/gvo27/raceca
 | --- | --- |
 | Sim plan and status | racecar-sim `docs/plans/2026-11-10-sim-scaffold.md` (PR gvo27/racecar-sim#1) |
 | Hardware boundary: topics, types, frames, QoS, TF, device facts | [docs/interfaces/sensor_contract.md](../interfaces/sensor_contract.md) |
-| What to update when the boundary changes | [.claude/skills/sim-parity/SKILL.md](../../.claude/skills/sim-parity/SKILL.md) |
+| What to update when the boundary changes | [ros2_ws/.claude/skills/sim-parity/SKILL.md](../../ros2_ws/.claude/skills/sim-parity/SKILL.md) |
 | Sim/real parity design | [docs/docker_ros_plan.md](../docker_ros_plan.md) "Sim/real parity + ROS 2 conventions" |
 | Car pin in the sim repo | racecar-sim `repos/racecar.repos` (procedure: racecar-sim `repos/README.md`) |
 | Lidar facts that the sim must copy | [docs/lidar/README.md](../lidar/README.md), [docs/lidar/roadmap.md](../lidar/roadmap.md) "Simulation" |

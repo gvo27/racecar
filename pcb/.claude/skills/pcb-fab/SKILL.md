@@ -28,7 +28,7 @@ The only project deliverable is the `.kicad_pcb` file of the board (scope: `docs
 
 **Method fab (fab house):**
 - Gerbers and the drill file: `make pcb-gate METHOD=fab` writes them to `build/gate/<BOARD>/gerbers/`. Load the skill `jlcpcb` or `pcbway` for its layer names and limits.
-- BOM and order files (kicad-happy `bom`, scripts in `$KH/skills/bom/scripts/`, run in the KiCad image as in `.claude/skills/pcb-design/references/kicad-happy.md`, working directory: the board directory `pcb/<BOARD>/`. Write the output to `$ROOT/build/order/<BOARD>/`, where `$ROOT` is the repo root, never below `pcb/`):
+- BOM and order files (kicad-happy `bom`, scripts in `$KH/skills/bom/scripts/`, run in the KiCad image as in `pcb/.claude/skills/pcb-design/references/kicad-happy.md`, working directory: the board directory `pcb/<BOARD>/`. Write the output to `$ROOT/build/order/<BOARD>/`, where `$ROOT` is the repo root, never below `pcb/`):
   - `bom_manager.py export rc_power_board.kicad_sch -o $ROOT/build/order/<BOARD>/bom.csv`
   - `bom_manager.py order $ROOT/build/order/<BOARD>/bom.csv -o $ROOT/build/order/<BOARD>/ --boards <N> --spares <S>`: DigiKey, Mouser and LCSC files with the quantities for N boards plus spares.
   - JLCPCB assembly. The CPL source is the KiCad placement file: `kicad-cli pcb export pos --format csv --units mm --exclude-dnp -o $ROOT/build/order/<BOARD>/cpl.csv rc_power_board.kicad_pcb`. Then `translate_bom_pnp.py bom $ROOT/build/order/<BOARD>/bom.csv -o $ROOT/build/order/<BOARD>/jlc_bom.csv` and `translate_bom_pnp.py pnp $ROOT/build/order/<BOARD>/cpl.csv -o $ROOT/build/order/<BOARD>/jlc_cpl.csv --bom $ROOT/build/order/<BOARD>/jlc_bom.csv`.

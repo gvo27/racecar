@@ -33,7 +33,7 @@ Reference facts (build, tasks, pins, limits, command grammar): `docs/firmware/RE
 - Use left header P1 only. Never use the strapping, PSRAM, native USB or COM UART pins (list in `docs/firmware/README.md`). COM (UART0) is the only host link.
 
 ## Protocol and config
-- A new or renamed command or interface follows `.claude/rules/msgs.md`. A `SET` key change follows `.claude/rules/tuning.md`.
+- A new or renamed command or interface follows `.claude/rules/msgs.md`. A `SET` key change follows `.claude/rules/tuning.md`. A boundary change follows `ros2_ws/.claude/skills/sim-parity/SKILL.md`.
 - Keep every reply within `REPLY_CAP` (384). `test_tuning.py` checks the worst case.
 - `D` (drive) goes only through the `/rccar/mcu/drive` subscription, never through the service.
 - A change to the `Config` layout must bump `CFG_MAGIC`.

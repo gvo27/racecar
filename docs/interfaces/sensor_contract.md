@@ -4,7 +4,7 @@ This file is the single list of the topics at the hardware boundary. The car dri
 
 - `deploy/tests/test_contract.py` compares the "active" rows with the source code (`make unit`). If a row and the code are different, the test fails.
 - "planned" rows are not tested. They show the names that new drivers must use.
-- A change to a row needs a "Sim impact" section in the PR (`.claude/skills/sim-parity/SKILL.md`).
+- A change to a row needs a "Sim impact" section in the PR (`ros2_ws/.claude/skills/sim-parity/SKILL.md`).
 - QoS: `sensor_data` = best effort, keep last 5 (`qos_profile_sensor_data`). `reliable+tl` = reliable + transient local, depth 1.
 
 ## Topics
