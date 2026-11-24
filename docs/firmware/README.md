@@ -1,6 +1,6 @@
 # ESP32 firmware: reference
 
-Facts about the ESP32-S3-N16R8 firmware in `firmware/esp32/`. The rules for changes are in [.claude/rules/firmware.md](../../.claude/rules/firmware.md). The pin map is `firmware/esp32/include/pins.h` (the README table is a copy).
+Facts about the ESP32-S3-N16R8 firmware in `firmware/esp32/`. The rules for changes are in [.claude/rules/firmware.md](../../.claude/rules/firmware.md). The pin map is `firmware/esp32/include/pins.h` (the table in the root [README.md](../../README.md#microcontroller-pinout) is a copy).
 
 ## Build
 - One PlatformIO env, `esp32s3` (default for `FW_ENV=`). `platform = espressif32@6.9.0`: Arduino-ESP32 2.0.17, ESP-IDF 4.4.7, `board = esp32-s3-devkitc-1`.
@@ -38,3 +38,9 @@ Facts about the ESP32-S3-N16R8 firmware in `firmware/esp32/`. The rules for chan
 ## Config persistence
 - `Config` is one NVS blob (`Preferences`, namespace `rccar`, key `cfg`). The firmware ignores a blob with a different `CFG_MAGIC` and loads the defaults.
 - `tuning.toml` layout for each device: `[<dev>]` hand-tuned knobs, `[<dev>.calibration]` measured values (written by `make calibrate`), `[warmup.<dev>]` routine settings.
+
+## New sensor
+- Use the rangefinder as the template (`.claude/rules/rangefinder.md`).
+- Add its pins to `pins.h`. Fill its `tuning.toml` section only with values confirmed against `docs/datasheets/`.
+- Read it in its own task. Read it in `controlTask()` only when safety needs it.
+- Emergency braking lives in the firmware, so that it works without the host.
