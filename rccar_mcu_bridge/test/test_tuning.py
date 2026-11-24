@@ -6,24 +6,26 @@ import pytest
 
 from rccar_mcu_bridge import tuning as t
 
-REPO = Path(__file__).resolve().parents[2]
-TUNING = REPO / 'tuning.toml'
-MAIN_CPP = REPO / 'firmware' / 'esp32' / 'src' / 'main.cpp'
+# repo root = the first parent that holds tuning.toml (ros.Dockerfile copies it next to the packages)
+REPO = next((d for d in Path(__file__).resolve().parents if (d / 'tuning.toml').is_file()), None)
+TUNING = REPO / 'tuning.toml' if REPO else None
+MAIN_CPP = REPO / 'firmware' / 'esp32' / 'src' / 'main.cpp' if REPO else None
+
+
+def test_repo_files_found():
+    assert REPO, 'tuning.toml not found in a parent of %s (ros.Dockerfile COPY?)' % __file__
 
 
 def test_every_key_resolves_in_repo_tuning():
-    if not TUNING.exists():
-        pytest.skip('repo tuning.toml not found')
+    assert TUNING, 'tuning.toml not found'
     tun = t.load_tuning(TUNING)
     for (table, key), _cmd in t.FIRMWARE_KEYS:
         t.tuning_value(tun, table, key)
 
 
 def _firmware_source():
-    if not MAIN_CPP.exists():
-        if not TUNING.exists():
-            pytest.skip('repo tree not found (installed-only tree)')
-        pytest.fail('repo tree present but firmware/esp32/src/main.cpp missing '
+    if not MAIN_CPP or not MAIN_CPP.exists():
+        pytest.fail('firmware/esp32/src/main.cpp not found next to tuning.toml '
                     '(ros.Dockerfile COPY / dockerignore?)')
     return MAIN_CPP.read_text()
 
@@ -65,8 +67,7 @@ def test_firmware_commands_skips_missing_tables_and_keys():
 
 
 def test_firmware_commands_repo_file_all_present():
-    if not TUNING.exists():
-        pytest.skip('repo tuning.toml not found')
+    assert TUNING, 'tuning.toml not found'
     cmds = t.firmware_commands(t.load_tuning(TUNING))
     assert len(cmds) == len(t.FIRMWARE_KEYS)
     assert cmds[0] == 'CAL CENTER 1500'

@@ -5,6 +5,7 @@ The fake MCU stands in for the virtual ESP32 of the sim repo. Skipped automatica
 where ROS 2 / launch_testing is not installed.
 """
 import os
+from pathlib import Path
 import sys
 import time
 import unittest
@@ -28,7 +29,9 @@ from std_msgs.msg import String  # noqa: E402,I100,I201,I202
 HERE = os.path.dirname(os.path.abspath(__file__))
 FAKE_MCU = os.path.join(HERE, 'fake_mcu.py')
 LAUNCH = os.path.join(HERE, '..', 'launch', 'car.launch.py')
-TUNING = os.path.abspath(os.path.join(HERE, '..', '..', 'tuning.toml'))
+# repo root = the first parent that holds tuning.toml (ros.Dockerfile copies it next to the packages)
+TUNING = next((os.path.join(d, 'tuning.toml') for d in Path(HERE).parents
+               if os.path.isfile(os.path.join(d, 'tuning.toml'))), '')
 
 
 @pytest.mark.launch_test
@@ -57,8 +60,7 @@ class TestSimBringup(unittest.TestCase):
         rclpy.shutdown()
 
     def test_bridge_exists_and_pushes_tuning(self):
-        if not os.path.isfile(TUNING):
-            self.skipTest(f'{TUNING} not present')
+        self.assertTrue(TUNING, 'tuning.toml not found in a parent of %s' % HERE)
         expected = firmware_commands(load_tuning(TUNING))
         self.assertTrue(expected, 'tuning file has no firmware keys')
         log = []

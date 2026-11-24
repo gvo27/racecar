@@ -54,14 +54,15 @@ def test_build_detection():
 
 
 @pytest.mark.parametrize('path,expected', [
-    ('rccar_drivers/rccar_drivers/mapper_node.py', True),
-    ('rccar_description/urdf/rccar.urdf.xacro', True),
+    ('ros2_ws/src/rccar_drivers/rccar_drivers/mapper_node.py', True),
+    ('ros2_ws/src/rccar_description/urdf/rccar.urdf.xacro', True),
     ('docker/ros.Dockerfile', True),
-    ('./rccar_drivers/setup.py', True),
-    ('rccar_bringup/launch/drivers.launch.py', False),
+    ('./ros2_ws/src/rccar_drivers/setup.py', True),
+    ('ros2_ws/src/rccar_bringup/launch/drivers.launch.py', False),
+    ('rccar_drivers/old_root_layout.py', False),
     ('docs/setup.md', False),
     ('docker/firmware.Dockerfile', False),
-    ('rccar_drivers_extra/x.py', False),
+    ('ros2_ws/src/rccar_drivers_extra/x.py', False),
     ('', False),
 ])
 def test_is_driver_path(path, expected):
@@ -70,7 +71,7 @@ def test_is_driver_path(path, expected):
 
 def test_is_driver_path_absolute(tmp_path):
     root = str(tmp_path)
-    assert g.is_driver_path(root + '/rccar_drivers/a.py', root)
+    assert g.is_driver_path(root + '/ros2_ws/src/rccar_drivers/a.py', root)
     assert not g.is_driver_path(root + '/docs/a.md', root)
     assert not g.is_driver_path('/etc/passwd', root)
 
@@ -84,9 +85,9 @@ def test_decide():
     assert g.decide(bash('make car-down'), lambda: True) is None
     assert g.decide(bash('make ros-image'), lambda: True)[0] == 'deny'
     assert g.decide(bash('make ros-image'), lambda: False) is None
-    res = g.decide(edit('rccar_drivers/x.py'), lambda: True)
+    res = g.decide(edit('ros2_ws/src/rccar_drivers/x.py'), lambda: True)
     assert res[0] == 'deny' and 'make drivers-stop' in res[1]
-    assert g.decide(edit('rccar_drivers/x.py'), lambda: False) is None
+    assert g.decide(edit('ros2_ws/src/rccar_drivers/x.py'), lambda: False) is None
     assert g.decide(edit('docs/x.md'), lambda: True) is None
     assert g.decide({'tool_name': 'Read', 'tool_input': {}}, lambda: True) is None
 
