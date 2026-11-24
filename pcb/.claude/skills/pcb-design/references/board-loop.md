@@ -24,7 +24,7 @@
 
 ## Board loop
 1. Order of work: outline and mounting, connectors on the edge, power-path placement, power copper as planned zones, signal routing, checks. The deliverable is the `.kicad_pcb` file.
-2. After each change, run the board rows of `check-matrix.md`. Method "mill" adds skill `pcb-milling-check`.
+2. After each change, run the board rows of `check-matrix.md`. Method "mill" adds skill `pcb-mill`.
 3. If the owner asked for export files, make them again when the copper or the holes change.
 4. When all rows pass, dispatch `pcb-reviewer`. Fix and repeat as in the schematic loop.
 

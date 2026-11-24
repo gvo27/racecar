@@ -1,6 +1,6 @@
 # kicad-happy in this project
 
-Plugin `kicad-happy@kicad-happy` (aklofas/kicad-happy, ref in `.claude/settings.json`, 2.3.2 when this file was written). It is off by default: enable it for the session with `.claude/rules/plugins.md`.
+Plugin `kicad-happy@kicad-happy` (aklofas/kicad-happy, ref in `.claude/settings.json`; version and review notes: `docs/dependencies.md`). It is off by default: enable it for the session with `.claude/rules/plugins.md`.
 
 ## What it gives
 - No hooks and no orchestrator. It is a set of skills and stdlib Python scripts that write JSON. This project chains them with `make pcb-gate` (`pcb/libraries/pcb_gate.sh`).

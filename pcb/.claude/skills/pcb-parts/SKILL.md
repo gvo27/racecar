@@ -12,7 +12,7 @@ description: Use when a part for a KiCad board must be chosen, replaced or check
 | Parts with no symbol | `docs/pcb/bom_offboard.csv` | Housings, crimps, wire, stock, rivets. Kept by hand |
 | Part facts | `docs/datasheets/<kind>_<model>.md`, with the archived PDF, drawing or page beside it | One note for each part model. Each number has its source (page, figure, graph) |
 | Inventory | `docs/datasheets/components_list.xlsx` (owner file) and `Status = in hand` in the symbol field | Ask the owner before you write "in hand" |
-| Lab stock (bits, blanks, rivets) | The lab file (skill `pcb-lab-config`) | Not part data |
+| Lab stock (bits, blanks, rivets) | The lab file (skill `pcb-mill`) | Not part data |
 
 `Status` values: `in hand`, `proposed`, `assumed`, `TBD`. An unknown value is `TBD`. Never write a typical value as a fact.
 
@@ -50,7 +50,7 @@ For each item, find the two values in the notes and write the result with the nu
 6. **Mating parts:** board header against housing, contact and wire gauge. Pin order against the device pinout, the crimp table and the harness colors.
 7. **Signals:** logic levels of the two ends, pull-ups present one time and to the correct rail, bus address conflicts.
 8. **Footprint against package:** the footprint in the schematic against the package of the chosen MPN. Pad numbers of a module footprint against the manufacturer drawing, in the correct view.
-9. **Mechanical:** body size and height against neighbors, parts on the underside of a module against copper below it, hole sizes against the lab drill set (skill `pcb-lab-config`).
+9. **Mechanical:** body size and height against neighbors, parts on the underside of a module against copper below it, hole sizes against the lab drill set (skill `pcb-mill`).
 10. **Fuse:** continuous load at 75 % or less of the rating, the I2t of the inrush against the fuse, the holder rating, copper sized for the fuse rating.
 11. **Lifecycle and stock:** each MPN active. Write the date of the stock check.
 
@@ -62,3 +62,8 @@ For each item, find the two values in the notes and write the result with the nu
 
 ## Report
 List: parts changed (old, new, reason), each `TBD` that stops the build, each compatibility item that failed or has less than 20 % margin, and the facts that need an owner measurement or a bench check.
+
+## Verify
+- `make bom BOARD=<board>` and `make erc BOARD=<board>` after a part change. `make pcb-check BOARD=<board>` after a footprint change.
+- Each part fact has its datasheet page in the note (`docs/datasheets/`).
+- Claim a result only with the command output from this session. A check that you did not run is "not run".

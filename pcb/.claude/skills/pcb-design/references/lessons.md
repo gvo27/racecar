@@ -47,7 +47,7 @@ Each lesson has the event that caused it. Sources: PR #3, `docs/pcb/README.md`, 
 ## Process
 33. **An analyzer finding is a claim.** Check it in the raw file. Record each false positive with its reason.
 34. **The main session implements. `pcb-reviewer` reviews with a fresh context.** An agent's "passes" is not evidence: the main session runs each check again before the report.
-35. **Lab limits live in one file with `status` and `source`** (skill `pcb-lab-config`). Never change a limit to make a board pass.
+35. **Lab limits live in one file with `status` and `source`** (skill `pcb-mill`). Never change a limit to make a board pass.
 36. **Two owner gates:** the plan before the schematic, the schematic before the board.
 ## Fable review (2026-11-15)
 37. **An exemption in a check hides findings.** The path-width test counted all copper within 2.5 mm of a narrow pad. It hid two necks of 1.9 mm by 6.9 mm, and the record said 6.39 mm. A check prints the value with the exemption and without it, or has no exemption.
