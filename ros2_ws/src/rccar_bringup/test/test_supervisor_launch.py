@@ -62,7 +62,11 @@ class TestSupervisorWiring(unittest.TestCase):
         n.create_subscription(
             DriveCmd, '/rccar/mcu/drive', self.drive.append,
             QoSProfile(depth=10, reliability=ReliabilityPolicy.BEST_EFFORT))
-        n.create_subscription(String, '/fake_mcu/log', lambda m: self.log.append(m.data), 50)
+        # same QoS as the fake ESP32 log publisher: a late DDS match still gets every command
+        n.create_subscription(
+            String, '/fake_mcu/log', lambda m: self.log.append(m.data),
+            QoSProfile(depth=200, reliability=ReliabilityPolicy.RELIABLE,
+                       durability=DurabilityPolicy.TRANSIENT_LOCAL))
         n.create_subscription(
             SupervisorState, '/rccar/supervisor/state', self._on_state,
             QoSProfile(depth=1, reliability=ReliabilityPolicy.RELIABLE,
@@ -121,7 +125,8 @@ class TestSupervisorWiring(unittest.TestCase):
         self.spin(0.5, throttle=0.0)
         res = self.call(self.arm_cli, req)
         self.assertTrue(res.ok, res.message)
-        self.assertIn('ARM', self.log)
+        # the fake ESP32 log arrives on a topic after the service reply: wait for it
+        self.assertTrue(self.wait_for(lambda: 'ARM' in self.log), self.log)
         self.assertTrue(self.wait_for(lambda: self.state.armed))
 
         # deadman: motion only after the admin input re-asserts neutral post-reset
