@@ -29,7 +29,7 @@ from std_msgs.msg import String  # noqa: E402,I100,I201,I202
 HERE = os.path.dirname(os.path.abspath(__file__))
 FAKE_MCU = os.path.join(HERE, 'fake_mcu.py')
 LAUNCH = os.path.join(HERE, '..', 'launch', 'car.launch.py')
-# repo root = the first parent that holds tuning.toml (ros.Dockerfile copies it next to the packages)
+# repo root: the first parent that holds tuning.toml (ros.Dockerfile copies it)
 TUNING = next((os.path.join(d, 'tuning.toml') for d in Path(HERE).parents
                if os.path.isfile(os.path.join(d, 'tuning.toml'))), '')
 

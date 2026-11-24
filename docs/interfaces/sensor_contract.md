@@ -37,6 +37,22 @@ This file is the single list of the topics at the hardware boundary. The car dri
 
 The sim never publishes `odom -> base_link` or any `/rccar/*` topic from Gazebo directly. The Gazebo ground-truth pose goes on an internal topic outside `/rccar/`.
 
+## Sources
+
+This table lists the code that defines the boundary. Skill `sim-parity` reads it. `deploy/tests/test_contract.py` checks that each path in the source column exists.
+
+| source | contract action | sim artifact |
+|---|---|---|
+| `firmware/esp32/src/main.cpp` controlTask, slew, clamps, failsafe | none | `rccar_sim_mcu` model + golden vectors |
+| `firmware/esp32/src/main.cpp` handleLine, setKey; a `tuning.toml` key | none (`test_tuning.py` checks FIRMWARE_KEYS) | `rccar_sim_mcu` grammar and key limits |
+| `firmware/esp32/src/main.cpp` comms header (pub/sub/srv lines) | update the ESP32 rows | `rccar_sim_mcu` node entities |
+| `ros2_ws/src/rccar_msgs/**` | update the type column | `rccar_sim_mcu` node; bridge config |
+| `ros2_ws/src/rccar_drivers/**` topic, type, frame, QoS, PARAMS defaults | update the mapper_driver rows | `rccar_sim_mapper`; gz bridge config |
+| `ros2_ws/src/rccar_drivers/rccar_drivers/slamtec/protocol.py` | update "Device facts" | `rccar_sim_mapper` protocol server |
+| `ros2_ws/src/rccar_description/urdf/**` | update the TF table | sim wrapper xacro; gz sensor xacros |
+| `ros2_ws/src/rccar_supervisor/**` arbitration, Reset, inputs | update the `/rccar/cmd/*` rows | sim-safety-check in racecar-sim |
+| `ros2_ws/src/rccar_bringup/launch/car.launch.py`, `ros2_ws/src/rccar_bringup/launch/drivers.launch.py` arguments | none | `rccar_sim_bringup` launch files |
+
 ## Device facts that the sim must copy
 
 | fact | value | source |

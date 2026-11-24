@@ -6,7 +6,7 @@ import pytest
 
 from rccar_mcu_bridge import tuning as t
 
-# repo root = the first parent that holds tuning.toml (ros.Dockerfile copies it next to the packages)
+# repo root: the first parent that holds tuning.toml (ros.Dockerfile copies it)
 REPO = next((d for d in Path(__file__).resolve().parents if (d / 'tuning.toml').is_file()), None)
 TUNING = REPO / 'tuning.toml' if REPO else None
 MAIN_CPP = REPO / 'firmware' / 'esp32' / 'src' / 'main.cpp' if REPO else None

@@ -52,7 +52,7 @@ def mapper_defaults():
 
 
 def test_contract_parses():
-    assert ROWS, 'no topic table in docs/sensor_contract.md'
+    assert ROWS, 'no topic table in docs/interfaces/sensor_contract.md'
     assert {r['status'] for r in ROWS} <= {'active', 'planned'}
     assert len({r['topic'] for r in ROWS}) == len(ROWS), 'duplicate topic rows'
 

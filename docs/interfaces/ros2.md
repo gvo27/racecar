@@ -1,6 +1,6 @@
 # ROS 2 interfaces: reference
 
-The hardware-boundary topics (type, frame, QoS, rate, TF) are owned by [docs/sensor_contract.md](sensor_contract.md). This file lists the rest: topics above the boundary, the subscribers and the services. The rules are in [.claude/rules/ros2.md](../.claude/rules/ros2.md).
+The hardware-boundary topics (type, frame, QoS, rate, TF) are owned by [docs/interfaces/sensor_contract.md](sensor_contract.md). This file lists the rest: topics above the boundary, the subscribers and the services. The rules are in [.claude/rules/ros2.md](../.claude/rules/ros2.md).
 
 ## Topics above the boundary
 | topic | type | publisher | QoS | subscriber |
@@ -43,4 +43,4 @@ VDA 5050, Nav2 BT plugin scaffolding, gz-sim ECS and plugin tooling, a 4-layer c
 
 ## Launch and tuning parameters
 - Launch arguments: `use_sim_time`, `sim`, `tuning_file` (default `$RCCAR_TUNING`, else `/ws/src/racecar/tuning.toml`), `heartbeat_dir`.
-- `rccar_bringup/tuning_params.py` `PARAM_MAP` maps `tuning.toml` tables to node parameters. Only keys that are in the file are passed. Otherwise the nodes keep their code defaults.
+- `ros2_ws/src/rccar_bringup/rccar_bringup/tuning_params.py` `PARAM_MAP` maps `tuning.toml` tables to node parameters. Only keys that are in the file are passed. Otherwise the nodes keep their code defaults.

@@ -8,7 +8,7 @@
 
 ## Sim impact
 <!-- Fill in when the diff touches the hardware boundary (firmware control or grammar, rccar_msgs, sensor topics/types/frames/QoS, rccar_description, tuning keys). Procedure: .claude/skills/sim-parity/SKILL.md. Else write "None". -->
-- Changed contract rows (`docs/sensor_contract.md`):
+- Changed contract rows (`docs/interfaces/sensor_contract.md`):
 - racecar-sim artifacts to change:
 - racecar-sim `.repos` pin bump: needed / not needed
 

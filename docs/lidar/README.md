@@ -9,8 +9,8 @@ Other facts have their own owners:
 | Driver parameters, protocol facts, bench-confirmed values | [.claude/rules/drivers.md](../../.claude/rules/drivers.md) |
 | Device facts, protocol notes, power specs | [docs/datasheets/slamtec_mapper_M2M1_datasheet.md](../datasheets/slamtec_mapper_M2M1_datasheet.md) |
 | Power harness, networking, viewing, debug tools | [docs/setup.md](../setup.md) "Lidar" |
-| Topics, frames, QoS, device facts for the sim | [docs/sensor_contract.md](../sensor_contract.md) |
-| Hardware test criteria | `rccar_drivers/hw_criteria.py` |
+| Topics, frames, QoS, device facts for the sim | [docs/interfaces/sensor_contract.md](../interfaces/sensor_contract.md) |
+| Hardware test criteria | `ros2_ws/src/rccar_drivers/rccar_drivers/hw_criteria.py` |
 | Agent rules on the Pi | [.claude/rules/hw-testing.md](../../.claude/rules/hw-testing.md) |
 | Design plan | [docs/plans/2026-11-01-slamtec-mapper.md](../plans/2026-11-01-slamtec-mapper.md) |
 | Roadmap: track, 3D lidar, odometry, sim | [roadmap.md](roadmap.md) |
@@ -67,7 +67,7 @@ These are the lessons from the lidar work. Each one has a reason that is not cle
 ## Open items
 
 - Troubleshoot the mapping (owner report). Then do the scan direction, map mirror and loop checks (`scan_angle_sign`, `map_transpose`).
-- Measure the mount offsets (`lidar_x`, `lidar_y`, `lidar_z`, `lidar_yaw`) and put them in `rccar_description/urdf/rccar.urdf.xacro`. The PR says: measure them before the merge.
+- Measure the mount offsets (`lidar_x`, `lidar_y`, `lidar_z`, `lidar_yaw`) and put them in `ros2_ws/src/rccar_description/urdf/rccar.urdf.xacro`. The PR says: measure them before the merge.
 - Get one `make lidar-hw-test` run with `OVERALL: PASS`, or change the criteria for the IMU units and the pose drift (owner decision). Record the report name here.
 - Find the cause of exit code 137 of `rccar-drivers-1` on `make drivers-stop` (not investigated).
 - Do the power checks and move the Mapper to the `+5V_SENS` header. The Mapper is not in the 3.3 A rail budget of the power board. With the Mapper, the 4 A buck goes to about 4.6 A (notes on gvo27/racecar#3).

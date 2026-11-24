@@ -4,7 +4,7 @@ from pathlib import Path
 from rccar_bringup.tuning_params import node_params
 import tomllib
 
-# repo root = the first parent that holds tuning.toml (ros.Dockerfile copies it next to the packages)
+# repo root: the first parent that holds tuning.toml (ros.Dockerfile copies it)
 REPO = next((d for d in Path(__file__).resolve().parents if (d / 'tuning.toml').is_file()), None)
 
 
