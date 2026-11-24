@@ -1,6 +1,6 @@
 ---
 name: hw-research
-description: Use when you research the facts of an electronic part for this car - a sensor, module, connector, regulator, fuse or other component, its datasheet, pinout, ratings or errata - or an ESP32 firmware, micro-ROS or ROS 2 API at the pinned stack version (arduino-esp32 2.0.17, ESP-IDF 4.4.7, PlatformIO espressif32 6.9.0, ROS 2 Jazzy, micro-ROS jazzy). In this repo it replaces upstream-research for these topics and applies its source rules. To choose, replace or check a part for a KiCad board or the BOM, use pcb-parts. For general software tools, libraries, repos or agent tooling, use upstream-research.
+description: Use when you research the facts of an electronic part for this car (datasheet, pinout, ratings, errata) or an ESP32 firmware, micro-ROS or ROS 2 API at the pinned stack version. For part choice on a board use pcb-parts. For general software tools, libraries or agent tooling use upstream-research.
 ---
 
 # Hardware and firmware research
@@ -10,7 +10,7 @@ This skill adds hardware and firmware steps to the user skill `upstream-research
 ## Sources, in this order
 1. **The manufacturer datasheet** of the exact part number, and its revision. A distributor page is a lead, not the source. For a module (for example a Pololu regulator), the module vendor page and its schematic are primary for the module, and the IC datasheet is primary for the IC.
 2. **Errata and application notes** of the manufacturer for the same part and revision.
-3. **The pinned firmware and ROS versions.** Read the docs or the tagged source of: arduino-esp32 2.0.17 (core 2.x, not 3.x), ESP-IDF 4.4.7, PlatformIO espressif32 6.9.0, ROS 2 Jazzy, micro-ROS jazzy. The pins are in `docs/dependencies.md` and `firmware/esp32/platformio.ini`. If a page is for a different major version, say so.
+3. **The pinned firmware and ROS versions.** Read the docs or the tagged source of the versions in `docs/dependencies.md` (section "Stack pins"). If a page is for a different major version, say so.
 4. **Distributor parametric search** (LCSC, DigiKey, Mouser) to find candidates, stock and price. Then go back to step 1 for each candidate.
 
 ## Datasheets through kicad-happy

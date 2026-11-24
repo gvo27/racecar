@@ -7,6 +7,12 @@ Facts about the host prerequisites, the toolchain images and the Claude plugin s
 - No system Python, no `pip install`, no `requirements.txt`. Host Python comes only through uv. `pyproject.toml` (dev group, exact `==` pins, `package = false`) + `uv.lock` + `.python-version` (3.13, the system interpreter) are committed. `make dev-setup` runs `uv sync --frozen` + `direnv allow` (both are safe to run again, and `make setup` runs it). It fills the gitignored `.venv`. `.envrc` puts `.venv/bin` on PATH. If direnv is missing or `direnv allow` fails, dev-setup prints a warning and continues. Dev tools today: ruff, pyright (gives `pyright-langserver`), pytest. Runtime, ROS tests, firmware and KiCad tools stay in docker. To add a dev tool, run `uv add --dev <tool>==<ver>` and commit `pyproject.toml` + `uv.lock`. In the Claude Code sandbox, `~/.cache/uv` is read-only: set `UV_CACHE_DIR=$PWD/.cache/uv` (gitignored).
 - `make config` runs `deploy/render_env.py` in the ROS image (python 3.12, noble). `make unit` runs `deploy/tests` in the ROS test image (`rccar-ros-test:local`). `make setup` checks git/make/docker/uv (+ compose/buildx warnings), runs `make dev-setup` and builds both images.
 
+## Stack pins
+Read the docs or the tagged source of these versions before you write code against an API.
+- Firmware: PlatformIO platform `espressif32@6.9.0` (`firmware/esp32/platformio.ini`, the owner). It gives arduino-esp32 2.0.17 (core 2.x, not 3.x) and ESP-IDF 4.4.7.
+- micro-ROS: jazzy, through micro_ros_platformio pinned by commit (`firmware/esp32/platformio.ini`).
+- ROS 2: Jazzy (`docker/ros.Dockerfile` base image, pinned by digest).
+
 ## Toolchain images
 - `docker/firmware.Dockerfile` -> image `rccar-fw`: python:3.12-slim-bookworm, platformio==6.1.16, esptool==4.8.1, pyserial==3.5. The project packages (espressif32@6.9.0, board toolchain, framework, scons) are preinstalled with a project-context `pio pkg install` into `/opt/platformio` (`PLATFORMIO_CORE_DIR`, a+rwX for `--user <host uid>`). `docker/firmware.Dockerfile.dockerignore` filters the context.
 - Named volume `rccar-platformio-v2` on `/opt/platformio` is seeded from the image on first use. A bind mount through `FW_VOL=<abs dir>` is NOT seeded: packages download on the first build. If the image toolchain changes, run `docker volume rm rccar-platformio-v2`. CI uses the named volume.

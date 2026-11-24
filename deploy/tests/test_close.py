@@ -1,6 +1,6 @@
 """scripts/close.py: the done-plan check reads docs/plans/ (template: skill setup-shop)."""
-from pathlib import Path
 import importlib.util
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 spec = importlib.util.spec_from_file_location('close', ROOT / 'scripts' / 'close.py')
@@ -11,7 +11,7 @@ spec.loader.exec_module(close)
 def _plan(repo, name, status):
     plans = repo / 'docs' / 'plans'
     plans.mkdir(parents=True, exist_ok=True)
-    (plans / name).write_text('# Plan\n\nStatus: %s\n' % status)
+    (plans / name).write_text(f'# Plan\n\nStatus: {status}\n')
 
 
 def test_done_plan_in_docs_plans_is_reported(tmp_path):

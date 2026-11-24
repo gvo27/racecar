@@ -47,7 +47,7 @@ EXTRA_REPOS :=
 COMPOSE  := docker compose -f deploy/car/compose.yaml --env-file deploy/car/.env.generated
 
 .DEFAULT_GOAL := help
-.PHONY: help open close plugins-reset check-host setup clean build pcb-rules pcb-sch pcb-all flash monitor fw-image config models compiledb unit check-dev dev-setup \
+.PHONY: help open close context plugins-reset check-host setup clean build pcb-rules pcb-sch pcb-all flash monitor fw-image config models compiledb unit check-dev dev-setup \
         ros-image ros-test ros-test-image ros-test-run ros-shell car-up car-down car-ps car-logs car-pull \
         car-shutdown install-host teleop calibrate tune test rangefinder viz lidar-imu lidar-snapshot lidar-record mcu unit-run \
         drivers-stop drivers-start lidar-hw-test kicad-image erc pcb-build pcb-route pcb-check pcb-mill-check pcb-review pcb-fab pcb-test pcb-gate bom \
@@ -62,6 +62,12 @@ open: check-host  ## start a Claude Code session: git fast-forward, uv sync + di
 
 close: plugins-reset  ## end a Claude Code session: clean caches, report uncommitted/unpushed work and done plans; safe to rerun
 	uv run --no-project python scripts/close.py . $(EXTRA_REPOS)
+
+# check script of the user skill project-context (not in the repo; WARN when missing)
+CONTEXT_CHECK ?= $(HOME)/.claude/skills/project-context/scripts/context_check.py
+context:         ## report context drift: dead pointers, orphan docs, size budgets (user skill project-context); changes nothing
+	@if [ -f "$(CONTEXT_CHECK)" ]; then uv run --no-project python "$(CONTEXT_CHECK)" --exclude docs/archive .; \
+	else echo "WARN    $(CONTEXT_CHECK) not found: install the user skill project-context"; fi
 
 plugins-reset:   ## remove the session-only plugin enables (local scope) from .claude/settings.local.json; safe to rerun
 	@uv run --no-project python scripts/plugins_reset.py
@@ -184,7 +190,7 @@ _need-drivers-down:
 	@if [ -f deploy/car/.env.generated ] && [ -n "$$($(COMPOSE) ps --status running -q drivers 2>/dev/null)" ]; then \
 	  echo "lidar driver container is running: make drivers-stop first (before editing/rebuilding rccar_drivers)"; exit 1; fi
 
-# Physical-Mapper acceptance (launch_testing, rccar_drivers/test_hw; criteria rccar_drivers/hw_criteria.py).
+# Physical-Mapper acceptance (launch_testing, ros2_ws/src/rccar_drivers/test_hw; criteria ros2_ws/src/rccar_drivers/rccar_drivers/hw_criteria.py).
 # Runs its own driver instance, so the compose service must be stopped. Never starts anything afterwards.
 lidar-hw-test: _need-config _need-drivers-down  ## automated launch_testing against the PHYSICAL Mapper (read-only; car stationary); JSON report in logs/
 	@echo "lidar-hw-test: car stationary, ESC power OFF. Read-only (getters only). Report: logs/hw_test_lidar_<UTC>.json"

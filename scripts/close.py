@@ -9,7 +9,7 @@ Steps, safe to run again:
   2. Report uncommitted paths, stashes, commits that are not pushed, and gone branches.
      Ignore a change to settings.json that changes only builtin plugins (<name>@builtin)
      or the key order. Claude Code writes these entries.
-  3. Report plans in docs/plan/ with "Status: done" or "Status: cancelled".
+  3. Report plans in docs/plans/ with "Status: done" or "Status: cancelled".
   4. Delete the make open stamp, so the next session asks for make open.
 Each line is: STATUS message. Exit 1 if a line needs action. Standard library only.
 The script never pushes, resets, or deletes a tracked file or a branch.
@@ -81,9 +81,9 @@ def clean_caches(repo, lines):
 
 
 def done_plans(repo, lines):
-    """Return 1 for each plan in docs/plan/ that is done and not archived."""
+    """Return 1 for each plan in docs/plans/ that is done and not archived."""
     code = 0
-    for plan in sorted((repo / "docs/plan").glob("*.md")):
+    for plan in sorted((repo / "docs/plans").glob("*.md")):
         head = "\n".join(plan.read_text(errors="replace").splitlines()[:10])
         if m := DONE.search(head):
             rel = plan.relative_to(repo)

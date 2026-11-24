@@ -1,5 +1,7 @@
 # Plan: Slamtec Mapper M2M1 → ROS 2 (phase 4 starts with the lidar)
 
+Status: active (mapping not accepted, `docs/lidar/README.md`)
+
 ## Context
 The car needs a lidar for semantic SLAM (geometric SLAM + camera detections fused onto the map) on the Pi 5 (Ubuntu 24.04, ROS 2 Jazzy in Docker). The Mapper M2M1 is a lidar with its own SLAM computer. It sends JSON over TCP port 1445 on Wi‑Fi or Ethernet. It never uses USB or serial.
 
