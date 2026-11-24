@@ -7,7 +7,7 @@ description: Use when you design or change a KiCad schematic or board in pcb/ - 
 
 The main session implements. The agent `pcb-reviewer` reviews with a fresh context after each phase. The owner approves the plan and the schematic. This follows the user-scope engineering workflow: implement, verify, independent review, fix, report.
 
-Project rules: `.claude/rules/schematics.md`. Board context: `docs/pcb/`. Lab facts: the lab directory (`lab:` in `.claude/CLAUDE.md`).
+Project rules: `.claude/rules/schematics.md`. Board context: `docs/pcb/`. Lab facts: the lab directory (`dir` in `pcb/config/lab.toml`).
 
 ## References (read when the step starts)
 | File | Use |

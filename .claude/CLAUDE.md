@@ -8,7 +8,7 @@ roadmap: docs/docker_ros_plan.md
 status: docs/{rangefinder,lidar,sim}/README.md, docs/pcb/releases/rev1/review/README.md (rev1), docs/pcb/releases/rev3/review/README.md (mill board)  # each file owns its status; do not copy status here
 sim: {repo: gvo27/racecar-sim (pins this repo; moves to simulation/ later), contract: docs/interfaces/sensor_contract.md, findings: docs/sim/README.md}
 skills: pcb/.claude/skills/ (pcb-*), ros2_ws/.claude/skills/ (sim-parity)  # load on the first read of a file in that folder; elsewhere read their SKILL.md
-lab: docs/techctcarvera/  # the lab directory; pcb/libraries/lab.py and the Makefile read this line. Another lab => change this line only
+lab: pcb/config/lab.toml  # key dir = the lab directory; pcb/libraries/lab.py and the Makefile read it
 convention: .claude/ = general rules, skills, agents (no site values); docs/ = facts that change; this file = pointers, no values. Path-specific rules load by their paths: frontmatter
 cmd: make help  # session: make open (start), make close (end); car host setup: make setup
 @../docs/invariants.md

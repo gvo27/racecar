@@ -22,22 +22,24 @@ ROS_BUILD_ARGS ?=
 # KiCad 10 + Freerouting for the power board (pcb/); images pinned by digest
 KICAD_IMAGE      ?= rccar-kicad:local
 FREEROUTING_IMAGE := ghcr.io/freerouting/freerouting:2.5.0@sha256:6c195891c9b1d62620c140784ab91285b9350d12d905693defe0162eb128cf8e
-# pcb/<BOARD>/ = one KiCad project (default: the rev1 release). Shared Python libraries: pcb/libraries. Mill tools: tools/ of the lab directory (lab: in .claude/CLAUDE.md)
+# pcb/<BOARD>/ = one KiCad project (default: the rev1 release). Shared Python libraries: pcb/libraries. Mill tools: tools/ of the lab directory (key dir of pcb/config/lab.toml)
 # base board = DEFAULT_BOARD in pcb/libraries/paths.py (test_rules checks that they agree)
 BASE_BOARD       := releases/rev1
 BOARD            ?= $(BASE_BOARD)
 BOARD_DIR        := pcb/$(BOARD)
 PCB_LIBS         := $(CURDIR)/pcb/libraries
 PCB_DOCS         := docs/pcb
-LAB_DIR          := $(patsubst %/,%,$(shell sed -n "s/^lab:[[:space:]]*\\([^[:space:]]*\\).*/\\1/p" .claude/CLAUDE.md))
-LAB_TOOLS        := $(CURDIR)/$(LAB_DIR)/tools
+# lab directory: key dir of pcb/config/lab.toml (lab.py reads the same key). LAB_DIR=<dir> overrides it, also in the container
+LAB_DIR          ?= $(patsubst %/,%,$(shell sed -n 's/^dir[[:space:]]*=[[:space:]]*"\([^"]*\)".*/\1/p' pcb/config/lab.toml))
+LAB_ABS          := $(abspath $(LAB_DIR))
+LAB_TOOLS        := $(LAB_ABS)/tools
 # review files: docs/pcb/releases/<rev>/review (paths.review_dir). The active board pcb/src reviews into its next release.
 SRC_RELEASE      := rev3   # copy of paths.WORKING_RELEASE["src"] (test_rules checks it)
 REVIEW_DIR       := $(PCB_DOCS)/releases/$(if $(filter src,$(BOARD)),$(strip $(SRC_RELEASE)),$(notdir $(BOARD)))/review
 # global lib tables: kicad-cli in a bare container finds no stock libraries (false ERC warnings), so copy the templates
 KICAD_CFG        := $(CURDIR)/build/kicad-cfg
 KICAD_RUN        = docker run --rm --user $(shell id -u):$(shell id -g) -e HOME=/tmp -e XDG_CONFIG_HOME=$(KICAD_CFG) \
-                   -e BOARD_DIR="$(CURDIR)/$(BOARD_DIR)" -v "$(CURDIR)":"$(CURDIR)" -w "$(CURDIR)/$(BOARD_DIR)" $(KICAD_IMAGE)
+                   -e BOARD_DIR="$(CURDIR)/$(BOARD_DIR)" -e LAB_DIR="$(LAB_ABS)" -v "$(CURDIR)":"$(CURDIR)" -w "$(CURDIR)/$(BOARD_DIR)" $(KICAD_IMAGE)
 # Session targets (make open / make close, template: skill setup-shop). Host tools outside the uv .venv.
 REQUIRED    := git make uv direnv docker
 RECOMMENDED := gh
@@ -255,7 +257,7 @@ pcb-review: _kicad-cfg  ## write the review directory of BOARD (docs/pcb/release
 pcb-mill-check: _kicad-cfg  ## milling check of the board vs the lab limits (milling.toml in the lab directory, waivers); exit 1 = unwaived errors
 	@mkdir -p "$(CURDIR)/$(REVIEW_DIR)"
 	$(KICAD_RUN) python3 $(LAB_TOOLS)/milling_check.py rc_power_board.kicad_pcb \
-	  --waivers "$(CURDIR)/$(LAB_DIR)/milling_waivers.toml" --json "$(CURDIR)/$(REVIEW_DIR)/milling_check.json"
+	  --waivers "$(LAB_ABS)/milling_waivers.toml" --json "$(CURDIR)/$(REVIEW_DIR)/milling_check.json"
 
 pcb-fab: _kicad-cfg  ## DXF (F.Cu, B.Cu, Edge.Cuts), Excellon and drill-map DXF for the lab's Fusion 360 template -> build/fab/<BOARD>/ (not committed), then test_fab
 	$(KICAD_RUN) python3 $(LAB_TOOLS)/fab_export.py rc_power_board.kicad_pcb --out "$(CURDIR)/build/fab/$(BOARD)"

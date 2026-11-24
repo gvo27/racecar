@@ -4,7 +4,7 @@ Date: 2026-11-16. Board: `rc_power_board.kicad_pcb` on branch `schematic` at `91
 
 Sources:
 
-- The lab limits come from `milling.toml` in the lab directory (`lab:` line in `.claude/CLAUDE.md`).
+- The lab limits come from `milling.toml` in the lab directory (`dir` in `pcb/config/lab.toml`).
 - The check results come from the committed `milling_check.json` in this directory. The checks did not run again for this report.
 - The copper width of the power paths comes from the table in `README.md` in this directory.
 - The capacitor gaps and the track widths are measured on the board file with `pcbnew` (one-time script, not a repo check).

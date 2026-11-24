@@ -1,6 +1,6 @@
 # Lab directory: in-house isolation milling (Makera Carvera)
 
-This directory holds the facts and files of one lab: the mill, its tools, the copper stock, the rivet kit and the lab CAM template. It also holds the mill tools and the waiver list of the milling check. It holds no board files. A board project reads it through one pointer: the `lab:` line of `.claude/CLAUDE.md`. In this repo, the board tools read that line through `pcb/libraries/lab.py`. The environment variable `LAB_DIR` overrides it.
+This directory holds the facts and files of one lab: the mill, its tools, the copper stock, the rivet kit and the lab CAM template. It also holds the mill tools and the waiver list of the milling check. It holds no board files. A board project reads it through one pointer: key `dir` of `pcb/config/lab.toml`. In this repo, the board tools read that key through `pcb/libraries/lab.py`. The environment variable `LAB_DIR` overrides it.
 
 ## Contents
 
@@ -76,8 +76,8 @@ The values are start values with `status = "assumed"`. `make pcb-rules BOARD=src
 ## Use this lab in another project
 
 1. Copy this directory into the other repo.
-2. Add a `lab:` line with the new path to the `.claude/CLAUDE.md` of that repo.
+2. Set key `dir` of `pcb/config/lab.toml` in that repo to the new path.
 3. Copy the skills `pcb-lab-config` and `pcb-milling-check`, and `lab.py` from `pcb/libraries/`. The mill tools come with this directory. They find `lab.py` at `pcb/libraries/` of the repo root.
 4. Run the milling check on the board of that project.
 
-For a different lab or mill, make a new lab directory with the skill `pcb-lab-config`, then change the `lab:` line.
+For a different lab or mill, make a new lab directory with the skill `pcb-mill`, then change key `dir` of `pcb/config/lab.toml`.
