@@ -1,6 +1,6 @@
 # Plan: monorepo layout (branch `restructure`, new PR)
 
-Status: active
+Status: done (2026-11-24; the Pi bench checklist of the PR is user-run)
 
 ## Context
 The 8 ROS packages `rccar_*` sit at the repo root next to `pcb/`, `firmware/`, `docs/`, `deploy/`, `docker/`. The user wants a monorepo layout with dedicated root folders: `ros2_ws/`, `firmware/`, `pcb/`, `models/`, plus scaffolds for `simulation/gazebo/` (racecar-sim moves in later) and `mechanical/` (3D-printed case later). Each subproject gets a short README and, where useful, a nested CLAUDE.md. The workflow gets an invariants file and `docs/adr/`. The root README gets shorter. The car (Pi 5 + ESP32-S3) must build, deploy and behave exactly as it does now.

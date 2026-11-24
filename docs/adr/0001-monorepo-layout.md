@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-11-24
-- Plan: `docs/plans/2026-11-24-monorepo-layout.md`
+- Plan: `docs/archive/plans/2026-11-24-monorepo-layout.md`
 
 ## Context
 - The 8 ROS packages (`rccar_*`) were at the repo root, next to `pcb/`, `firmware/`, `docs/`, `deploy/` and `docker/`. Every folder that was not a ROS package needed a `COLCON_IGNORE` file, and the root README had to explain the mix.
