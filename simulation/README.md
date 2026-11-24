@@ -1,6 +1,6 @@
 # simulation/: Gazebo simulation (scaffold)
 
-The simulation of the car. Today it is in the separate repo [racecar-sim](https://github.com/gvo27/racecar-sim). The plan is to move it into this folder and to stop the separate repo. The sim replaces the ESP32 and the lidar with virtual devices. The real car nodes run unchanged.
+The simulation of the car. Today it is in the separate repo [racecar-sim](https://github.com/gvo27/racecar-sim) (move: ADR 0001). The sim replaces the ESP32 and the lidar with virtual devices. The real car nodes run unchanged.
 
 ```mermaid
 flowchart LR

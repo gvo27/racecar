@@ -30,7 +30,7 @@ The software name is *rangefinder*. Datasheet: [archived PDF](datasheets/LIDAR-L
 
 ## Power rules
 
-1. **The ESP32 powers nothing.** It outputs only actuator signals and communications. A separate regulated power rail powers the sensors. This rail shares ground with the ESP32. All signals stay at ≤ 3.3 V.
+1. Invariants 1 and 2 apply: the ESP32 powers nothing, and the sensors use their own rail ([invariants.md](invariants.md)).
 2. Servo power comes from the built-in 6 V / 3 A BEC of the ESC (red wire of the throttle lead). Connect it with a Y-harness.
 3. Connect the grounds of the ESP32, ESC and servo (P1-22).
 

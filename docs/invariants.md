@@ -1,6 +1,6 @@
 # Invariants
 
-These rules are true for every change in this repo. `.claude/CLAUDE.md` loads this file in each agent session. To change an invariant, write an ADR in `docs/adr/` first and get the owner's approval.
+These rules are true for every change in this repo. To change an invariant, write an ADR in `docs/adr/` first and get the owner's approval.
 
 1. The ESP32 sends only actuator PWM and host communication. It supplies power to nothing.
 2. The sensors use a separate power rail with a common ground. All signals stay at 3.3 V or less.

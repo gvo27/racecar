@@ -4,7 +4,8 @@ One line for each entry. Folders have their own README.
 
 | Path | Purpose |
 |---|---|
-| [setup.md](setup.md) | Zero to driving: host, wiring, flash, stack, drive, sensors, command reference, bench checklist |
+| [setup.md](setup.md) | Zero to driving: host, wiring, flash, stack, drive, sensors, bench checklist |
+| [commands.md](commands.md) | Make commands: once per Pi, sensors, when needed |
 | [hardware.md](hardware.md) | Inventory, rangefinder wiring, power rules, power-up sequence |
 | [invariants.md](invariants.md) | Rules that are true for every change (loaded in each agent session) |
 | [adr/](adr/README.md) | Architecture decision records |

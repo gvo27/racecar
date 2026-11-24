@@ -5,9 +5,9 @@ The real-time layer of the car. The ESP32-S3-N16R8 makes the servo and ESC PWM, 
 ```mermaid
 flowchart LR
   pi[Pi: micro-ROS agent] <-- UART0, COM port --> loop["loop(): micro-ROS spin"]
-  loop -- DriveCmd, commands --> control["controlTask(): 100 Hz, core 1"]
-  control -- LEDC PWM --> servo[servo GPIO4] & esc[ESC GPIO5]
-  rf["rangefinderTask(): core 0"] -- I2C GPIO8/9 --> lidarlite[rangefinder]
+  loop -- DriveCmd, commands --> control["controlTask()"]
+  control -- LEDC PWM --> servo[steering servo] & esc[ESC]
+  rf["rangefinderTask()"] -- I2C --> lidarlite[rangefinder]
   rf -- range --> loop
 ```
 

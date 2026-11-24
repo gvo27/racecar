@@ -17,7 +17,7 @@ A 1:10 Tamiya TT-02 made into a self-driving research platform. A Raspberry Pi 5
 
 ## Daily commands
 
-`make help` lists all targets. One-time setup, sensors and repairs: [docs/setup.md](docs/setup.md#10-command-reference).
+`make help` lists all targets. One-time setup, sensors and repairs: [docs/commands.md](docs/commands.md).
 
 | Command | Task |
 | --- | --- |

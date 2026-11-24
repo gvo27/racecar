@@ -1,6 +1,6 @@
 # pcb/: agent notes
 
-Rules: `.claude/rules/schematics.md` (loads for `pcb/**`). Workflow: skill `pcb-design`. Release and fab: skill `pcb-fab`. Review: agent `pcb-reviewer`.
+Facts and conventions: `docs/pcb/conventions.md`.
 
 ## Verify
 - `make pcb-test`: unit tests of `pcb/libraries/` and of the lab tools.

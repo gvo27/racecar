@@ -27,6 +27,8 @@ There are no project MCP servers (context7 was removed: the free tier was too re
   claude plugin marketplace add JuliusBrussee/caveman@v4.1.0
   claude plugin install <plugin>@<marketplace> --scope project
   ```
+- `make checks` runs `deploy/tests` with the uv dev tools, without docker. CI runs the same in `.github/workflows/checks.yml` for each change. `make unit` runs the same tests in the ROS test image.
+- Project skills for one subproject are in `<subproject>/.claude/skills/` (`pcb/`, `ros2_ws/`). Claude Code loads them the first time it reads a file in that folder, so their descriptions cost no context in other sessions. A rule with `paths:` outside the folder points to their `SKILL.md`. Skills for all of the repo stay in `.claude/skills/`.
 - `make context` runs the check script of the user skill `project-context` (dead pointers, orphan docs, size budgets). It prints WARN and exits 0 when the skill is not installed.
 - `make check-dev` reports missing dev tools (uv, direnv, LSP binaries). `make dev-setup` installs ruff, pyright and pytest into `.venv` from `uv.lock`.
 
