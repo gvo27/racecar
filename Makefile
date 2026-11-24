@@ -47,7 +47,7 @@ EXTRA_REPOS :=
 COMPOSE  := docker compose -f deploy/car/compose.yaml --env-file deploy/car/.env.generated
 
 .DEFAULT_GOAL := help
-.PHONY: help open close context plugins-reset check-host setup clean build pcb-rules pcb-sch pcb-all flash monitor fw-image config models compiledb unit check-dev dev-setup \
+.PHONY: help open close context checks plugins-reset check-host setup clean build pcb-rules pcb-sch pcb-all flash monitor fw-image config models compiledb unit check-dev dev-setup \
         ros-image ros-test ros-test-image ros-test-run ros-shell car-up car-down car-ps car-logs car-pull \
         car-shutdown install-host teleop calibrate tune test rangefinder viz lidar-imu lidar-snapshot lidar-record mcu unit-run \
         drivers-stop drivers-start lidar-hw-test kicad-image erc pcb-build pcb-route pcb-check pcb-mill-check pcb-review pcb-fab pcb-test pcb-gate bom \
@@ -346,6 +346,9 @@ compiledb:       ## firmware compile_commands.json for clangd, env FW_ENV (docke
 unit-run:        ## run deploy/tests (pytest) in an already built ROS test image, repo mounted read-only
 	docker run --rm --user $(shell id -u):$(shell id -g) -e PYTHONDONTWRITEBYTECODE=1 \
 	  -v "$(CURDIR)":/repo:ro -w /repo $(ROS_TEST_IMAGE) python3 -m pytest -q -p no:cacheprovider deploy/tests
+
+checks:          ## deploy/tests with the uv dev tools, no docker (same as CI checks.yml; about 1 s)
+	uv run pytest -q -p no:cacheprovider deploy/tests
 
 unit: ros-test-image unit-run  ## deploy/tests (pytest) in the ROS test image, no hardware
 

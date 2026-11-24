@@ -1,6 +1,7 @@
 name: ros
 
-# ROS 2 packages (ros2_ws/src/rccar_*) + deploy/: image build + colcon test + deploy unit tests, advisory static checks, msg sync check.
+# ROS 2 packages (ros2_ws/src/rccar_*) + deploy/: image build + colcon test + deploy unit tests, advisory static checks.
+# Docs, .claude/ and the msg sync check: checks.yml (every change).
 on:
   push:
     paths:
@@ -11,15 +12,10 @@ on:
       - "docker/ros-test.sh"
       - "tuning.toml"
       - "deploy/**"
-      - "scripts/**"
       - "firmware/esp32/src/main.cpp"
       - "Makefile"
       - ".github/workflows/ros.yml"
-      - ".claude/**"
-      - "docs/**"
-      - "**/README.md"
-      - "**/CLAUDE.md"
-      - "firmware/esp32/extra_packages/**"
+      - "docs/interfaces/**"
   pull_request:
     paths:
       - "ros2_ws/**"
@@ -29,15 +25,10 @@ on:
       - "docker/ros-test.sh"
       - "tuning.toml"
       - "deploy/**"
-      - "scripts/**"
       - "firmware/esp32/src/main.cpp"
       - "Makefile"
       - ".github/workflows/ros.yml"
-      - ".claude/**"
-      - "docs/**"
-      - "**/README.md"
-      - "**/CLAUDE.md"
-      - "firmware/esp32/extra_packages/**"
+      - "docs/interfaces/**"
 
 permissions:
   contents: read
@@ -153,14 +144,3 @@ jobs:
 
           cat "$RUNNER_TEMP/summary.md" >> "$GITHUB_STEP_SUMMARY"
           exit "$internal_error"
-
-  # firmware/esp32/extra_packages/rccar_msgs is a synced copy of ros2_ws/src/rccar_msgs (micro-ROS builds it).
-  interfaces-sync:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v5
-      - name: rccar_msgs == firmware extra_packages copy
-        run: |
-          diff -r ros2_ws/src/rccar_msgs firmware/esp32/extra_packages/rccar_msgs \
-            || { echo "::error::out of sync: cp -r ros2_ws/src/rccar_msgs/. firmware/esp32/extra_packages/rccar_msgs/"; exit 1; }
