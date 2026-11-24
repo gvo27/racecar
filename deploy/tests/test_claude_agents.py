@@ -12,9 +12,11 @@ SKILL_DIRS = [ROOT / '.claude' / 'skills'] + sorted(ROOT.glob('*/.claude/skills'
 SKILLS = sorted(p for d in SKILL_DIRS for p in d.glob('*/SKILL.md'))
 SKILL_FILES = sorted(p for d in SKILL_DIRS for p in d.glob('*/**/*.md'))
 RULES = sorted((ROOT / '.claude' / 'rules').glob('*.md'))
-CLAUDE_MDS = sorted(p for p in ROOT.glob('**/CLAUDE.md') if '.venv' not in p.parts and 'build' not in p.parts)
+SKIP = {'.git', '.venv', '.cache', '.pio', '.pio-core', 'build', 'install', 'log', 'logs', 'node_modules', 'cache'}
+CLAUDE_MDS = sorted(p for p in ROOT.glob('**/CLAUDE.md') if not SKIP & set(p.relative_to(ROOT).parts))
 PATH_RE = re.compile(r'`((?:\.claude|docs|docker|deploy|ros2_ws|firmware|pcb|models|simulation|mechanical|scripts)/[A-Za-z0-9_./-]+)`')
-GENERATED = ('models/cache', 'deploy/car/.env.generated', 'firmware/esp32/.pio')  # gitignored, made at run time
+GENERATED = ('models/cache', 'deploy/car/.env.generated', 'firmware/esp32/.pio',
+             '.claude/settings.local.json')  # gitignored, made at run time
 MAKE_TARGETS = {'pcb-build', 'pcb-route', 'pcb-check', 'pcb-mill-check', 'pcb-review', 'pcb-fab', 'pcb-test', 'pcb-gate', 'pcb-all', 'pcb-sch', 'pcb-rules'}
 
 

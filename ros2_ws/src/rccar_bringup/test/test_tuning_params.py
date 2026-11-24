@@ -4,8 +4,9 @@ from pathlib import Path
 from rccar_bringup.tuning_params import node_params
 import tomllib
 
-# repo root: the first parent that holds tuning.toml (ros.Dockerfile copies it)
-REPO = next((d for d in Path(__file__).resolve().parents if (d / 'tuning.toml').is_file()), None)
+# repo root: the first parent with tuning.toml and ros2_ws/ (ros.Dockerfile copies both)
+REPO = next((d for d in Path(__file__).resolve().parents
+             if (d / 'tuning.toml').is_file() and (d / 'ros2_ws').is_dir()), None)
 
 
 def test_send_hz_mapped_from_link():

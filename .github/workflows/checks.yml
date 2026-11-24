@@ -6,6 +6,7 @@ name: checks
 # for every change, also for docs and .claude/ changes that do not start ros.yml.
 on:
   push:
+    branches: [main]
   pull_request:
 
 permissions:

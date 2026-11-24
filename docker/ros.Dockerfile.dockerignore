@@ -22,3 +22,8 @@ ros2_ws/install
 ros2_ws/log
 simulation
 mechanical
+.venv
+.claude
+pcb
+scripts
+models
