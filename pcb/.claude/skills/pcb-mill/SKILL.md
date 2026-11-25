@@ -32,11 +32,11 @@ KiCad DRC checks the numbers in the KiCad project. It does not know the cutter. 
   4. Run again until there are 0 unwaived errors. Report the open errors, not a percentage.
 
 ## Rules
-- Never change a limit, a design rule or a waiver to make a board pass. A change needs a statement of the owner or the lab tech.
+- Never change a limit or a design rule to make a board pass. Add a waiver only for a false positive (Loop, step 2). A limit change needs a statement of the owner or the lab tech.
 - When a hole size is not sure, choose the smaller hole. The lab can make it wider. A hole that is too large cannot be repaired.
 - A hole between the largest drill (`drill_set`) and `milled_hole_min` cannot be made. Change the footprint drill, not the limit.
 - Never write "millable" or "ready to mill". Write "passes the milling check with the assumed limits" until the lab tech confirms the limits and the owner signs off.
-- The instructions of the lab tech and the lab CAM file override the generic values and this skill. When they arrive, change the lab file and this skill in the same change.
+- The instructions of the lab tech and the lab CAM file override the generic values. When they arrive, change the lab file. Change this skill only when the procedure changes.
 - Part facts go to `docs/datasheets/` (skill `pcb-parts`). Fab-house limits come from the fab house (skill `pcb-fab`).
 
 ## Report

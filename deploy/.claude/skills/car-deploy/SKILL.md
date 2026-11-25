@@ -17,22 +17,20 @@ The constraints are in `.claude/rules/deploy.md`, `dependencies.md` and `hw-test
 2. Run `make config-check`. It renders the env file and validates the compose file.
 
 ## Image change
-1. Before a build on the Pi: `make drivers-stop` (the hook denies `make ros-image` while the drivers container runs).
+1. Before a build on the Pi: `make drivers-stop` (the hook denies `make ros-image` and `make setup` while the drivers container runs).
 2. A base image digest change: `docker pull <image>:<tag>`, then `docker inspect --format '{{index .RepoDigests 0}}' <image>:<tag>`. Put the digest in the Dockerfile or the compose file. Write the old and the new digest in the PR.
 3. `make ros-test` (image `test` stage) and `make ros-image` (runtime stage).
 
 ## Pi deploy steps (user-run)
-The agent does not start, restart or flash hardware. Write these steps in the "Deploy" part of the PR bench checklist (`.github/pull_request_template.md`), in this order, and only the ones that the change needs:
-1. `make car-down`
-2. `git fetch && git switch <branch>`, then `make dev-setup` if `uv.lock` or `.envrc` changed.
-3. `make ros-image` (and `make fw-image` for a toolchain change).
-4. `make install-host` if `deploy/car/99-rccar.rules` or `deploy/car/rccar.service` changed.
-5. `make flash` if `firmware/` changed (ESC off).
-6. `make car-up && make car-ps`: all services healthy.
+The agent does not start, restart or flash hardware. The owner of the deploy checklist is the "Deploy" part of `.github/pull_request_template.md`. Copy its steps into the PR. Add only the steps that the change needs:
+- `make dev-setup`, if `uv.lock` or `.envrc` changed.
+- `make fw-image`, if the firmware toolchain changed.
+- `make install-host`, if `deploy/car/99-rccar.rules` or `deploy/car/rccar.service` changed.
+- `make clean && make flash` instead of `make flash`, if `rccar.meta`, `extra_packages` or `platformio.ini` changed.
 Operations (replug, shutdown, pull): `docs/deploy.md` ("Operations").
 
 ## Verify
-- `make checks` and `make unit` (`deploy/tests`).
+- `make checks` (`deploy/tests`, fast, no docker). `make unit` runs the same tests in the ROS image: run it when the image changed.
 - `make config-check` for a compose, env or platform change. It needs `.env` and the image `rccar-ros:local`. Without them the check is "not run".
 - `make ros-test` for an image change.
 - Claim a result only with the command output from this session. A check that you did not run is "not run". Hardware steps are "user-run".

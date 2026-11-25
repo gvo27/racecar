@@ -1,6 +1,6 @@
 # Milling check: rule ids
 
-The rules of `tools/milling_check.py` in the lab directory. Limits come from `milling.toml` and `design_rules.toml` (keys in backticks). The last four rows read the design rules of the board (`design_rules.toml`: board directory, else lab directory; `pcb/libraries/rules.py`).
+The rules of `tools/milling_check.py` in the lab directory. Limits come from `milling.toml` and `design_rules.toml` (keys in backticks). The rows MILL-GAP (design rules), MILL-GAP-FIXED, MILL-CUT-SPACING and MILL-COMP-GAP read the design rules of the board (`design_rules.toml`: board directory, else lab directory; `pcb/libraries/rules.py`).
 
 | Id | Check | Severity |
 | --- | --- | --- |
@@ -16,7 +16,7 @@ The rules of `tools/milling_check.py` in the lab directory. Limits come from `mi
 | MILL-EDGE | Copper-to-board-edge distance >= the configured edge clearance | error |
 | MILL-RIVET-ACCESS | A rivet via must be solderable on both sides: no via inside the courtyard of an F-side part (its body covers the top joint) or of a B-side part | error |
 | MILL-CONN-EDGE | Each connector (J*) courtyard is within the configured distance of the board edge (wire entry outward) | warning |
-| MILL-GAP (design rules) | With design rules that have a `horizontal_error`: each gap >= cut width + 2 x `horizontal_error` | error |
+| MILL-GAP (design rules; same id, stricter limit) | With design rules that have a `horizontal_error`: each gap >= cut width + 2 x `horizontal_error` | error |
 | MILL-GAP-FIXED | A gap below that value that the footprint fixes: two pads of one part, or zone fill at a pad of a part with an `[[exception]]` that has `zones = true`. Listed for the lab tech. A track or a pad of another part near such a pad is a `MILL-GAP` error | warning |
 | MILL-CUT-SPACING | Tracks and zone copper narrower than the copper target (`cut_spacing_min` - `clearance`). Shows the thin areas | warning |
 | MILL-COMP-GAP | Pads of two different parts on different nets are at least `component_gap` apart. Parts with an `[[exception]]` are included | error |

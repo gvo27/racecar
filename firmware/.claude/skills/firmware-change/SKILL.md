@@ -18,10 +18,10 @@ A key that the firmware reads (`SET <key>`) lives in three places. Change them i
 A change to the `Config` struct (fields, order, types) must change `CFG_MAGIC`. Otherwise the ESP32 loads an old NVS blob into the new layout.
 
 ## Pins
-`firmware/esp32/include/pins.h` is the source. Change the diagram and the table of the root `README.md` ("Microcontroller pinout") in the same commit. `deploy/tests/test_pinout.py` checks the diagram.
+`firmware/esp32/include/pins.h` is the source. Change the diagram and the table of the root `README.md` ("Microcontroller pinout") in the same commit. `deploy/tests/test_pinout.py` checks the diagram. Check the table by hand.
 
 ## Build configuration
-- After a change to `rccar.meta` or `extra_packages`: `make clean && make build`. A plain `make build` keeps the old micro-ROS library.
+- After a change to `rccar.meta` or `extra_packages`: `make clean && make build`. A plain `make build` can keep the old micro-ROS library (`docs/firmware/README.md`, "Build").
 - After a change to the toolchain image (`docker/firmware.Dockerfile`): `make fw-image`, then remove the PlatformIO volume (`FW_VOL` in the Makefile) with `docker volume rm`, so the next build seeds it again.
 
 ## New sensor
