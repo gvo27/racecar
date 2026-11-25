@@ -31,8 +31,14 @@ class TestLab(unittest.TestCase):
         with tempfile.TemporaryDirectory() as root:
             os.makedirs(os.path.join(root, ".claude"))
             with open(os.path.join(root, ".claude", "CLAUDE.md"), "w") as fh:
-                fh.write("lab: docs/somelab/\n")
-            with self.assertRaises((RuntimeError, OSError)):
+                fh.write("lab: docs/claudelab/\n")
+            self._config(root, 'dir = "docs/tomllab"\n')
+            self.assertEqual(lab.read_pointer(root), os.path.join(root, "docs", "tomllab"))
+
+    def test_dir_must_be_a_string(self):
+        with tempfile.TemporaryDirectory() as root:
+            self._config(root, "dir = 5\n")
+            with self.assertRaises(RuntimeError):
                 lab.read_pointer(root)
 
     def test_env_overrides_pointer(self):

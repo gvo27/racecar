@@ -30,8 +30,13 @@ BOARD_DIR        := pcb/$(BOARD)
 PCB_LIBS         := $(CURDIR)/pcb/libraries
 PCB_DOCS         := docs/pcb
 # lab directory: key dir of pcb/config/lab.toml (lab.py reads the same key). LAB_DIR=<dir> overrides it, also in the container
-LAB_DIR          ?= $(patsubst %/,%,$(shell sed -n 's/^dir[[:space:]]*=[[:space:]]*"\([^"]*\)".*/\1/p' pcb/config/lab.toml))
+LAB_DIR          ?= $(patsubst %/,%,$(shell sed -n "s/^[[:space:]]*dir[[:space:]]*=[[:space:]]*[\"']\([^\"']*\)[\"'].*/\1/p" pcb/config/lab.toml))
+ifeq ($(strip $(LAB_DIR)),)
+$(error LAB_DIR is empty: set key dir in pcb/config/lab.toml, or pass LAB_DIR=<dir>)
+endif
 LAB_ABS          := $(abspath $(LAB_DIR))
+# a lab outside the repo needs its own mount in the KiCad container
+LAB_MOUNT        := $(if $(filter $(CURDIR)/%,$(LAB_ABS)),,-v "$(LAB_ABS)":"$(LAB_ABS)")
 LAB_TOOLS        := $(LAB_ABS)/tools
 # review files: docs/pcb/releases/<rev>/review (paths.review_dir). The active board pcb/src reviews into its next release.
 SRC_RELEASE      := rev3   # copy of paths.WORKING_RELEASE["src"] (test_rules checks it)
@@ -39,7 +44,7 @@ REVIEW_DIR       := $(PCB_DOCS)/releases/$(if $(filter src,$(BOARD)),$(strip $(S
 # global lib tables: kicad-cli in a bare container finds no stock libraries (false ERC warnings), so copy the templates
 KICAD_CFG        := $(CURDIR)/build/kicad-cfg
 KICAD_RUN        = docker run --rm --user $(shell id -u):$(shell id -g) -e HOME=/tmp -e XDG_CONFIG_HOME=$(KICAD_CFG) \
-                   -e BOARD_DIR="$(CURDIR)/$(BOARD_DIR)" -e LAB_DIR="$(LAB_ABS)" -v "$(CURDIR)":"$(CURDIR)" -w "$(CURDIR)/$(BOARD_DIR)" $(KICAD_IMAGE)
+                   -e BOARD_DIR="$(CURDIR)/$(BOARD_DIR)" -e LAB_DIR="$(LAB_ABS)" -v "$(CURDIR)":"$(CURDIR)" $(LAB_MOUNT) -w "$(CURDIR)/$(BOARD_DIR)" $(KICAD_IMAGE)
 # Session targets (make open / make close, template: skill setup-shop). Host tools outside the uv .venv.
 REQUIRED    := git make uv direnv docker
 RECOMMENDED := gh
@@ -112,7 +117,7 @@ config:          ## render deploy/car/.env.generated from .env + tuning.toml [pl
 	docker run --rm --user $(shell id -u):$(shell id -g) -v "$(CURDIR)":/work -w /work $(ROS_IMAGE) \
 	  python3 deploy/render_env.py --repo-dir "$(CURDIR)" --dialout-gid $(DIALOUT_GID)
 
-config-check: config  ## render the env file, then validate deploy/car/compose.yaml (docker compose config -q); starts nothing
+config-check: config  ## render the env file, then validate deploy/car/compose.yaml (docker compose config -q); starts no car service
 	$(COMPOSE) config -q && echo "config-check: compose file OK"
 
 models:          ## print models/manifest.yaml (download + sha256 verify not implemented; needs tailnet)
@@ -322,6 +327,7 @@ mcu: _need-stack  ## one McuCommand to the ESP32, e.g. make mcu CMD="GET" (stack
 
 # ---- firmware (docker) ----------------------------------------------------------------------
 msgs-sync:       ## copy ros2_ws/src/rccar_msgs to firmware/esp32/extra_packages/rccar_msgs (the micro-ROS build reads the copy)
+	@test -n "$(FW_DIR)" -a -d "$(FW_DIR)/extra_packages" || { echo "msgs-sync: $(FW_DIR)/extra_packages not found"; exit 1; }
 	rm -rf $(FW_DIR)/extra_packages/rccar_msgs
 	cp -r ros2_ws/src/rccar_msgs $(FW_DIR)/extra_packages/rccar_msgs
 

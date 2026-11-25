@@ -13,7 +13,7 @@ The boundary has three parts that must agree: the code, `docs/interfaces/sensor_
    1. Run `make msgs-sync`. It copies the package to `firmware/esp32/extra_packages/rccar_msgs/`. Never edit the copy.
    2. Change the users of the message. The Sources table and the build show them.
    3. If the count of entities changes, change the counts in `firmware/esp32/rccar.meta`.
-   4. Build the firmware again from zero: `make clean && make build`.
+   4. Build the firmware again from zero (`firmware/.claude/skills/firmware-change/SKILL.md`, "Build configuration").
 3. A tuning key change: follow `firmware/.claude/skills/firmware-change/SKILL.md` ("Tuning key"). The contract has no row change. Write the sim key limits (`rccar_sim_mcu`) in the PR.
 4. Change the contract rows that step 1 found. Keep one row for each topic. Copy the type, frame, QoS and rate from the code, not from memory.
 5. Fill in the "Sim impact" section of the PR body: each racecar-sim artifact to change, and "racecar-sim `.repos` pin bump: needed".

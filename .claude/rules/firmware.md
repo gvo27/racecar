@@ -28,11 +28,11 @@ Reference facts (build, tasks, pins, limits, command grammar): `docs/firmware/RE
 - `SAVE` refuses unless center lies between left and right.
 
 ## Pins
-- `firmware/esp32/include/pins.h` is the source. Keep the pin table of the root `README.md` ("Microcontroller pinout") identical (`test_pinout.py`).
+- `firmware/esp32/include/pins.h` is the source. Keep the pinout of the root `README.md` identical (the diagram: `test_pinout.py`; the table: by hand).
 - Use left header P1 only. Never use the strapping, PSRAM, native USB or COM UART pins (list in `docs/firmware/README.md`). COM (UART0) is the only host link.
 
 ## Protocol and config
 - A new or renamed command, a message or a boundary change follows `.claude/skills/interface-change/SKILL.md`. A `SET` key change follows `firmware-change` ("Tuning key").
-- Keep every reply within `REPLY_CAP` (384). `test_tuning.py` checks the worst case.
+- Keep every reply within `REPLY_CAP`. `test_tuning.py` checks the worst case.
 - `D` (drive) goes only through the `/rccar/mcu/drive` subscription, never through the service.
 - A change to the `Config` layout must bump `CFG_MAGIC`.

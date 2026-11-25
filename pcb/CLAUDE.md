@@ -1,9 +1,5 @@
 # pcb/: agent notes
 
-Facts and conventions: `docs/pcb/conventions.md`.
+Facts and conventions: `docs/pcb/conventions.md`. Lab directory: key `dir` of `pcb/config/lab.toml`. Checks: the `## Verify` section of the pcb skills (`pcb/.claude/skills/`).
 
-## Verify
-- `make pcb-test`: unit tests of `pcb/libraries/` and of the lab tools.
-- `make pcb-check BOARD=src` and `make pcb-mill-check BOARD=src`: DRC, board checks and milling check of the active board.
-- `make erc BOARD=<board>` after a schematic change.
 - The tools run only in the KiCad image (`make kicad-image`). Do not run them with the host python.

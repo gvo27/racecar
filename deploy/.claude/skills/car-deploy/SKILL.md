@@ -8,9 +8,8 @@ description: Use when you change the car stack deployment - deploy/ (compose, re
 The constraints are in `.claude/rules/deploy.md`, `dependencies.md` and `hw-testing.md`. Facts (config split, compose settings, host files, image stages, operations): `docs/deploy.md`. Commands: `docs/commands.md`.
 
 ## Platform key or render_env change
-1. A new `[platform.*]` key that compose uses: change `tuning.toml`, `deploy/render_env.py`, `deploy/tests` and `docs/deploy.md` in one commit.
-2. A new `.env` variable: add it to `.env.example` with a placeholder value. Never commit `.env`.
-3. `render_env.py` uses the standard library only. Write the test first in `deploy/tests/test_render_env.py`.
+1. Follow the constraints of `.claude/rules/tuning.md` (platform key) and `.claude/rules/deploy.md` ("Config").
+2. Write the test first in `deploy/tests/test_render_env.py`, then change `deploy/render_env.py`, then `docs/deploy.md`.
 
 ## Compose change
 1. Keep the hardening of each service (`.claude/rules/deploy.md`, "Compose").

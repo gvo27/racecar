@@ -10,7 +10,7 @@ paths:
 Reference (config split, compose settings, drivers service, host files, image stages, operations): `docs/deploy.md`. Procedures and checks: `deploy/.claude/skills/car-deploy/SKILL.md`.
 
 ## Config
-- `tuning.toml` is the single source of truth for tuning and platform settings. Add a platform value only when it is confirmed. A new platform is a new `[platform.<name>]` table, not a new compose file.
+- Add a platform value only when it is confirmed (`.claude/rules/tuning.md`). A new platform is a new `[platform.<name>]` table, not a new compose file.
 - `.env` (gitignored) holds only secrets and private names. Keep `.env.example` in sync with it.
 - `deploy/render_env.py` uses the standard library only, runs in the ROS image, and must not depend on the firmware image (it runs at boot).
 

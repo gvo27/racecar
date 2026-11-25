@@ -21,14 +21,14 @@ A change to the `Config` struct (fields, order, types) must change `CFG_MAGIC`. 
 `firmware/esp32/include/pins.h` is the source. Change the diagram and the table of the root `README.md` ("Microcontroller pinout") in the same commit. `deploy/tests/test_pinout.py` checks the diagram. Check the table by hand.
 
 ## Build configuration
-- After a change to `rccar.meta` or `extra_packages`: `make clean && make build`. A plain `make build` can keep the old micro-ROS library (`docs/firmware/README.md`, "Build").
+- After a change to `rccar.meta`, `extra_packages` or `platformio.ini`: `make clean && make build`. A plain `make build` can keep the old micro-ROS library (`docs/firmware/README.md`, "Build").
 - After a change to the toolchain image (`docker/firmware.Dockerfile`): `make fw-image`, then remove the PlatformIO volume (`FW_VOL` in the Makefile) with `docker volume rm`, so the next build seeds it again.
 
 ## New sensor
 Follow `docs/firmware/README.md` ("New sensor"). The sensor also gets `.claude/rules/<sensor>.md` (software name) and a datasheet note `docs/datasheets/<kind>_<model>.md` (form: skill `pcb-parts`).
 
 ## Verify
-- `make build` (env `esp32s3`). After a `rccar.meta` or `extra_packages` change: `make clean && make build`.
+- `make build` (env `esp32s3`), or `make clean && make build` ("Build configuration").
 - `make compiledb`, then the clangd diagnostics of the changed files.
 - `make ros-test` for a key or a reply change (`test_tuning.py`). `make checks` for a pin or a comms header change (`test_pinout.py`, `test_contract.py`).
 - User-run only: `make flash`, `make monitor`, the bench `make test` and the bench checklist of the PR. Add the flash step to the PR checklist.

@@ -16,8 +16,8 @@ def read_pointer(root=REPO_ROOT):
     path = os.path.join(root, CONFIG)
     with open(path, "rb") as fh:
         rel = tomllib.load(fh).get("dir")
-    if not rel:
-        raise RuntimeError("%s: no key 'dir'. Add the path of the lab directory" % path)
+    if not isinstance(rel, str) or not rel:
+        raise RuntimeError("%s: key 'dir' must be the path of the lab directory (a string)" % path)
     return os.path.normpath(os.path.join(root, rel))
 
 

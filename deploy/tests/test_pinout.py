@@ -1,4 +1,4 @@
-"""The pin table of the root README equals firmware/esp32/include/pins.h (rule: .claude/rules/firmware.md)."""
+"""The pin diagram of the root README equals firmware/esp32/include/pins.h (rule: .claude/rules/firmware.md)."""
 from pathlib import Path
 import re
 
@@ -20,7 +20,9 @@ def readme_diagram():
 
 
 def test_pins_h_parses():
+    """Each pin constant has its '// P1-<n>' comment, so the test sees every pin."""
     assert len(pins_h()) >= 8
+    assert len(re.findall(r'constexpr int PIN_', PINS_H.read_text())) == len(pins_h()), 'a PIN_ constant without // P1-<n>'
 
 
 def test_readme_diagram_matches_pins_h():
