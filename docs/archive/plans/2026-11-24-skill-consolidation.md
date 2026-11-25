@@ -1,6 +1,6 @@
 # Plan: skill consolidation (branch `consolidate`, stacked PR on `restructure`)
 
-Status: active
+Status: done (2026-11-24; stacked PR on restructure)
 
 ## Context
 Follow-up of PR #23 (monorepo layout). Source plan: `docs/plans/2026-11-24-skill-consolidation.md`, issue #20 items 2, 5, 6. Problems:
