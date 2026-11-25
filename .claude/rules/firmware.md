@@ -4,7 +4,7 @@ paths:
 ---
 
 # Firmware rules (ESP32-S3)
-Reference facts (build, tasks, pins, limits, command grammar): `docs/firmware/README.md`. Procedures (tuning key, Config layout, pins, build configuration, new sensor) and checks: `firmware/.claude/skills/firmware-change/SKILL.md`.
+Reference facts (build, tasks, pins, limits, command grammar): `docs/firmware/README.md`. Procedures (tuning key, Config layout, pins, build configuration, new sensor) and checks: `firmware/.claude/skills/firmware-change/SKILL.md`. Tasks, shared state, watchdog and ISRs: `firmware/.claude/skills/firmware-rtos/SKILL.md`.
 
 ## Build
 - Build, flash and monitor only with `make build`, `make flash` and `make monitor`. No host `pio`.

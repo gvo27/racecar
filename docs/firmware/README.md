@@ -17,6 +17,7 @@ Facts about the ESP32-S3-N16R8 firmware in `firmware/esp32/`. The rules for chan
 
 ## Tasks and peripherals
 - `controlTask()`: 100 Hz default, core 1, high priority. It is registered with the task watchdog.
+- `loop()`: the Arduino loop task, core 1 (Arduino default), priority 1. It owns UART0 (micro-ROS) and the NVS writes.
 - `rangefinderTask()`: core 0, priority 1. It owns the I2C bus and `g_rangefinder` (see [docs/rangefinder/README.md](../rangefinder/README.md)).
 - PWM: ESP-IDF LEDC driver. Servo = LEDC timer 0 / channel 0. ESC = timer 1 / channel 1. Both 14-bit, low-speed mode.
 - Shared state under `g_mux`: `g_cfg`, `g_cmd`, `g_out`, `g_armed`, `g_rawSteerUs`, `g_rangefinder`.

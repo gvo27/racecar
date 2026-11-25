@@ -9,11 +9,10 @@ Facts about the Claude Code setup of this repo. The rules for work with it are i
 | --- | --- | --- |
 | pyright-lsp | Python LSP | `pyright-langserver` on PATH (uv dev group). Config `pyrightconfig.json`: `ros2_ws/src` and `deploy`, py3.12, basic. `reportMissingImports` = warning (rclpy and rccar_msgs exist only in the ROS image) |
 | clangd-lsp | C++ LSP | `clangd` on PATH (apt) and `firmware/esp32/compile_commands.json` (`make compiledb`). `firmware/esp32/.clangd` removes xtensa-only flags. No `--query-driver`, so xtensa libstdc++ headers can show false errors |
-| embedded-skills, ros2-engineering, kicad-happy | domain skills | kicad-happy: stdlib scripts; SPICE needs `ngspice`; distributor skills need API keys in user scope |
+| ros2-engineering, kicad-happy | domain skills | kicad-happy: stdlib scripts; SPICE needs `ngspice`; distributor skills need API keys in user scope |
 | asd-ste100 | STE rewrite skill and `scripts/ste-lint.py` (stdlib, advisory) | |
 | code-simplifier | the `code-simplifier` agent | its prompt lists JS/React standards that do not apply here |
 | claude-md-management | CLAUDE.md commands and the claude-md-improver skill | off by default |
-| caveman | terse chat replies | hooks need node. Without node, start the mode with `/caveman` |
 
 There are no project MCP servers (context7 was removed: the free tier was too restrictive). `pyrightconfig.json` and a future `.mcp.json` stay at the repo root: Claude Code reads project MCP only from the root, and pyright finds its config only at the workspace root.
 
@@ -23,7 +22,7 @@ There are no project MCP servers (context7 was removed: the free tier was too re
 - `make open` needs `direnv` and `docker` on the host (`make check-host`). Install a missing host tool with the package manager, for example `sudo apt install direnv`.
 - To enable a plugin for one session: `claude plugin enable <plugin> --scope local`, then `/reload-plugins`. `make open` installs the enabled plugins that are missing. To install one by hand, accept the trust prompt or run:
   ```bash
-  claude plugin marketplace add JuliusBrussee/caveman@v4.1.0
+  claude plugin marketplace add <owner>/<repo>@<ref>
   claude plugin install <plugin>@<marketplace> --scope project
   ```
 - `make checks` runs `deploy/tests` with the uv dev tools, without docker. CI runs the same in `.github/workflows/checks.yml` for each change. `make unit` runs the same tests in the ROS test image.

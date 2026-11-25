@@ -7,7 +7,7 @@ layout: README.md (subproject table); decisions: docs/adr/ (0001 = layout)
 roadmap: docs/docker_ros_plan.md
 status: docs/{rangefinder,lidar,sim}/README.md, docs/pcb/releases/rev1/review/README.md (rev1), docs/pcb/releases/rev3/review/README.md (mill board)  # each file owns its status; do not copy status here
 sim: {repo: gvo27/racecar-sim (pins this repo; moves to simulation/ later), contract: docs/interfaces/sensor_contract.md, findings: docs/sim/README.md}
-skills: pcb/.claude/skills/ (pcb-*), firmware/.claude/skills/ (firmware-change), deploy/.claude/skills/ (car-deploy)  # load on the first read of a file in that folder; elsewhere read their SKILL.md
+skills: pcb/.claude/skills/ (pcb-*), firmware/.claude/skills/ (firmware-*), deploy/.claude/skills/ (car-deploy)  # load on the first read of a file in that folder; elsewhere read their SKILL.md
 convention: .claude/ = general rules, skills, agents (no site values); docs/ = facts that change; this file = pointers, no values. Path-specific rules load by their paths: frontmatter
 cmd: make help  # session: make open (start), make close (end); car host setup: make setup
 @../docs/invariants.md
