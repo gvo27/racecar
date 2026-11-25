@@ -28,7 +28,7 @@ The rule gives the critical-section pattern. This section adds the ESP32 details
 
 ## Blocking and timing
 - The only wait in `controlTask` is `vTaskDelayUntil`. It never waits on I2C, NVS, `Serial`, a mutex or a queue.
-- An NVS write (`SAVE`, `Preferences`) turns off the flash cache on both cores. Each task and each ISR that runs from flash stops for that time. This includes `controlTask`. Write NVS only from `loop()`, and only on a command.
+- An NVS write (`SAVE`, `Preferences`) turns off the flash cache on both cores. Each task and each ISR that runs from flash stops for that time. This includes `controlTask`. Write NVS only from `loop()`, only on a command, and only while disarmed (`SAVE` refuses while armed).
 - A sensor driver waits with a timeout (example: `POLL_TIMEOUT_MS` in `src/rangefinder_lidar_lite_v4.cpp`). It never waits without a limit.
 
 ## Watchdog and stack

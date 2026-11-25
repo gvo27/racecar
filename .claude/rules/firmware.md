@@ -25,7 +25,7 @@ Reference facts (build, tasks, pins, limits, command grammar): `docs/firmware/RE
 - Throttle requires `ARM`. The boot state is disarmed.
 - No drive command for `timeoutMs`: disarm, neutral, `FAILSAFE` event. Keep emergency braking in the firmware.
 - Keep the steering and ESC clamps (limits in `docs/firmware/README.md`). Use an ESC frame rate above 50 Hz only after you confirm that the ESC accepts it.
-- `SAVE` refuses unless center lies between left and right.
+- `SAVE` refuses while armed (an NVS write stalls `controlTask`) and unless center lies between left and right.
 
 ## Pins
 - `firmware/esp32/include/pins.h` is the source. Keep the pinout of the root `README.md` identical (the diagram: `test_pinout.py`; the table: by hand).
