@@ -49,7 +49,7 @@ EXTRA_REPOS :=
 COMPOSE  := docker compose -f deploy/car/compose.yaml --env-file deploy/car/.env.generated
 
 .DEFAULT_GOAL := help
-.PHONY: help open close context checks msgs-sync plugins-reset check-host setup clean build pcb-rules pcb-sch pcb-all flash monitor fw-image config models compiledb unit check-dev dev-setup \
+.PHONY: help open close context checks msgs-sync config-check plugins-reset check-host setup clean build pcb-rules pcb-sch pcb-all flash monitor fw-image config models compiledb unit check-dev dev-setup \
         ros-image ros-test ros-test-image ros-test-run ros-shell car-up car-down car-ps car-logs car-pull \
         car-shutdown install-host teleop calibrate tune test rangefinder viz lidar-imu lidar-snapshot lidar-record mcu unit-run \
         drivers-stop drivers-start lidar-hw-test kicad-image erc pcb-build pcb-route pcb-check pcb-mill-check pcb-review pcb-fab pcb-test pcb-gate bom \
@@ -111,6 +111,9 @@ config:          ## render deploy/car/.env.generated from .env + tuning.toml [pl
 	@docker image inspect $(ROS_IMAGE) >/dev/null 2>&1 || { echo "image $(ROS_IMAGE) missing: run make ros-image"; exit 1; }
 	docker run --rm --user $(shell id -u):$(shell id -g) -v "$(CURDIR)":/work -w /work $(ROS_IMAGE) \
 	  python3 deploy/render_env.py --repo-dir "$(CURDIR)" --dialout-gid $(DIALOUT_GID)
+
+config-check: config  ## render the env file, then validate deploy/car/compose.yaml (docker compose config -q); starts nothing
+	$(COMPOSE) config -q && echo "config-check: compose file OK"
 
 models:          ## print models/manifest.yaml (download + sha256 verify not implemented; needs tailnet)
 	@cat models/manifest.yaml
