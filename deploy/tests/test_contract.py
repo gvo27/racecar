@@ -122,7 +122,7 @@ def test_source_table_parses():
 
 @pytest.mark.parametrize('row', SOURCES, ids=lambda r: r['source'])
 def test_source_paths_exist(row):
-    """Each backticked path in the source column matches a file (skill sim-parity reads this table)."""
+    """Each backticked path in the source column matches a file (skill interface-change reads this table)."""
     paths = re.findall(r'`([^`]+)`', row['source'])
     assert paths, 'source cell without a backticked path: %s' % row['source']
     for path in paths:

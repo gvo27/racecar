@@ -49,7 +49,7 @@ EXTRA_REPOS :=
 COMPOSE  := docker compose -f deploy/car/compose.yaml --env-file deploy/car/.env.generated
 
 .DEFAULT_GOAL := help
-.PHONY: help open close context checks plugins-reset check-host setup clean build pcb-rules pcb-sch pcb-all flash monitor fw-image config models compiledb unit check-dev dev-setup \
+.PHONY: help open close context checks msgs-sync plugins-reset check-host setup clean build pcb-rules pcb-sch pcb-all flash monitor fw-image config models compiledb unit check-dev dev-setup \
         ros-image ros-test ros-test-image ros-test-run ros-shell car-up car-down car-ps car-logs car-pull \
         car-shutdown install-host teleop calibrate tune test rangefinder viz lidar-imu lidar-snapshot lidar-record mcu unit-run \
         drivers-stop drivers-start lidar-hw-test kicad-image erc pcb-build pcb-route pcb-check pcb-mill-check pcb-review pcb-fab pcb-test pcb-gate bom \
@@ -318,6 +318,10 @@ mcu: _need-stack  ## one McuCommand to the ESP32, e.g. make mcu CMD="GET" (stack
 	$(COMPOSE) run --rm tools timeout 10 ros2 service call /rccar/mcu/command rccar_msgs/srv/McuCommand "{command: '$(CMD)'}"
 
 # ---- firmware (docker) ----------------------------------------------------------------------
+msgs-sync:       ## copy ros2_ws/src/rccar_msgs to firmware/esp32/extra_packages/rccar_msgs (the micro-ROS build reads the copy)
+	rm -rf $(FW_DIR)/extra_packages/rccar_msgs
+	cp -r ros2_ws/src/rccar_msgs $(FW_DIR)/extra_packages/rccar_msgs
+
 fw-image:        ## build the firmware toolchain docker image (rccar-fw)
 	docker build -f docker/firmware.Dockerfile -t $(FW_IMAGE) .
 

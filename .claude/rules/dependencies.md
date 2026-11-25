@@ -19,7 +19,7 @@ Reference (host prerequisites, toolchain images, digests, plugin sources): `docs
 - Pin versions everywhere: exact pip pins, base images by tag (by digest for ros, micro-ros-agent, KiCad and Freerouting), GitHub Actions by major tag. Never use `:latest`.
 - Change a digest on purpose: `docker pull`, `docker inspect --format '{{index .RepoDigests 0}}'`, and note it in the PR.
 - Keep the `rccar-fw` pins (platformio, esptool, pyserial) consistent with the platform pin in `platformio.ini`.
-- After a change to the firmware image toolchain, run `docker volume rm rccar-platformio-v2`.
+- After a change to the firmware image toolchain, reset the PlatformIO volume (`firmware-change`, "Build configuration").
 - `package.xml`: never use `<buildtool_depend>ament_python</buildtool_depend>` (it is not a rosdep key). ament_python packages declare only `<export><build_type>ament_python</build_type>`.
 - Third-party ROS sources without an apt binary go in `ros2_ws/repos/rccar.repos` (`.claude/rules/repos.md`).
 - Claude plugins: bump the ref to a tag. Never track a moving branch when a tag exists. Read the hooks of a plugin before you enable it.

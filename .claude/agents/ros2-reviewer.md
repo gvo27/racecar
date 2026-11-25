@@ -35,7 +35,7 @@ Deploy
 - Makefile: every target has `## help`; ROS targets guard with _need-stack; flash/monitor guard with _need-stack-down; build/flash keep .pio/libdeps.
 - CI: pinned actions, `permissions: contents: read`, timeout-minutes, paths filters cover new files.
 - docs, README and the matching rule updated for every new path or command. CLAUDE.md changes only if a pointer changes.
-Sim parity (`docs/interfaces/sensor_contract.md`, skill `sim-parity`)
+Sim parity (`docs/interfaces/sensor_contract.md`, skill `interface-change`)
 - A hardware-boundary change without a "Sim impact" section in the PR body = major. Boundary: firmware controlTask/handleLine/setKey, rccar_msgs, a topic/type/frame/QoS in a driver or main.cpp, rccar_description, a tuning key.
 - `docs/interfaces/sensor_contract.md` changes in the same diff, and `make unit` (test_contract.py) passes.
 

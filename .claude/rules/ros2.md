@@ -8,7 +8,7 @@ paths:
 Boundary topics, frames, QoS and TF: `docs/interfaces/sensor_contract.md` (tested by `deploy/tests/test_contract.py`). Other topics, subscribers and services: `docs/interfaces/ros2.md`. ros2-engineering references: communication, lifecycle-components, testing, launch-system.
 
 ## Interfaces
-- A topic, type, frame or QoS change at the boundary changes the code, `docs/interfaces/sensor_contract.md` and the sim (skill `sim-parity`) together. A message change follows `.claude/rules/msgs.md`.
+- A topic, type, frame or QoS change at the boundary changes the code, `docs/interfaces/sensor_contract.md` and the sim (skill `interface-change`) together. A message change follows `.claude/rules/msgs.md`.
 - The supervisor is the only publisher of `/rccar/mcu/drive`.
 - Names are `/rccar/<area>/<stream>`, snake_case. Do not hardcode absolute names inside libraries. Use standard messages before custom ones. Units are SI and REP-103 (rad, + = left).
 - Commands: freshness before delivery (best effort, timeout at the consumer). Events and state must not be lost (reliable).

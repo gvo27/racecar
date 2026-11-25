@@ -4,13 +4,12 @@ paths:
 ---
 
 # Firmware rules (ESP32-S3)
-Reference facts (build, tasks, pins, limits, command grammar): `docs/firmware/README.md`.
+Reference facts (build, tasks, pins, limits, command grammar): `docs/firmware/README.md`. Procedures (tuning key, Config layout, pins, build configuration, new sensor) and checks: `firmware/.claude/skills/firmware-change/SKILL.md`.
 
 ## Build
 - Build, flash and monitor only with `make build`, `make flash` and `make monitor`. No host `pio`.
 - Keep one env (`esp32s3`) and one comms layer (micro-ROS). No comms macros, no `#ifdef` variants.
 - Compiler is `-std=gnu++11`. Do not use `std::clamp`, C++14 aggregate init with default member initializers, or `if constexpr`.
-- After a change to `rccar.meta` or `extra_packages`, run `make clean && make build`.
 
 ## Architecture
 - `controlTask()` is the only writer of PWM outputs. Keep it on the task watchdog.
@@ -29,12 +28,11 @@ Reference facts (build, tasks, pins, limits, command grammar): `docs/firmware/RE
 - `SAVE` refuses unless center lies between left and right.
 
 ## Pins
-- `firmware/esp32/include/pins.h` is the source. Keep the pin table of the root `README.md` ("Microcontroller pinout") identical.
+- `firmware/esp32/include/pins.h` is the source. Keep the pin table of the root `README.md` ("Microcontroller pinout") identical (`test_pinout.py`).
 - Use left header P1 only. Never use the strapping, PSRAM, native USB or COM UART pins (list in `docs/firmware/README.md`). COM (UART0) is the only host link.
 
 ## Protocol and config
-- A new or renamed command or interface follows `.claude/rules/msgs.md`. A `SET` key change follows `.claude/rules/tuning.md`. A boundary change follows `ros2_ws/.claude/skills/sim-parity/SKILL.md`.
+- A new or renamed command, a message or a boundary change follows `.claude/skills/interface-change/SKILL.md`. A `SET` key change follows `firmware-change` ("Tuning key").
 - Keep every reply within `REPLY_CAP` (384). `test_tuning.py` checks the worst case.
 - `D` (drive) goes only through the `/rccar/mcu/drive` subscription, never through the service.
 - A change to the `Config` layout must bump `CFG_MAGIC`.
-- A new sensor: follow `docs/firmware/README.md` ("New sensor"). Each sensor gets its own `.claude/rules/<sensor>.md`.
