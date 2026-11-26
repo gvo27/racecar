@@ -11,7 +11,7 @@ No output = no opinion (normal permission flow).
   systemctl start/restart/enable ...rccar, reboot, poweroff ...) => ask. Never deny these.
   Stops (drivers-stop, car-down, compose stop) => no opinion.
 - Bash `make ros-image|setup`, `docker build` while the drivers container runs => deny.
-- Edit/Write under rccar_drivers/, rccar_description/, docker/ros.Dockerfile while the
+- Edit/Write under ros2_ws/src/rccar_drivers/, ros2_ws/src/rccar_description/, docker/ros.Dockerfile while the
   drivers container runs => deny ("make drivers-stop" first).
 - docker missing or erroring => allow (dev laptops, cloud sessions).
 Known gap: edits made through shell redirection/sed in Bash are not path-checked.
@@ -30,7 +30,7 @@ DOCKER_ASK = {'restart', 'start'}
 SYSTEMCTL_ASK = {'start', 'restart', 'enable', 'reload-or-restart', 'try-restart'}
 SYSTEMCTL_ALWAYS = {'reboot', 'poweroff', 'halt', 'kexec'}
 POWER_CMDS = {'reboot', 'poweroff', 'shutdown', 'halt'}
-DRIVER_PATHS = ('rccar_drivers/', 'rccar_description/')
+DRIVER_PATHS = ('ros2_ws/src/rccar_drivers/', 'ros2_ws/src/rccar_description/')
 DRIVER_FILES = ('docker/ros.Dockerfile',)
 PREFIX_CMDS = {'sudo', 'env', 'command', 'nohup', 'time', 'exec', 'nice', 'stdbuf'}
 SEPARATORS = {';', '&&', '||', '|', '&', '|&'}
@@ -169,7 +169,7 @@ def is_build(command):
 
 
 def is_driver_path(path, root=None):
-    """True if path is under rccar_drivers/, rccar_description/ or is docker/ros.Dockerfile."""
+    """True if path is under ros2_ws/src/rccar_drivers/, ros2_ws/src/rccar_description/ or is docker/ros.Dockerfile."""
     if not path:
         return False
     if os.path.isabs(path):

@@ -1,7 +1,7 @@
 ---
 paths:
-  - "rccar_calibration/**"
-  - "rccar_teleop/**"
+  - "ros2_ws/src/rccar_calibration/**"
+  - "ros2_ws/src/rccar_teleop/**"
 ---
 
 # Car tools (rccar_calibration, rccar_teleop)

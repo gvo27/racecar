@@ -1,13 +1,13 @@
 ---
 paths:
-  - "rccar_supervisor/**"
+  - "ros2_ws/src/rccar_supervisor/**"
 ---
 
 # Supervisor (safety authority)
 
-Reference (input priorities and timeouts, state limits, stop-path checklist): `docs/ros2.md`. ros2-engineering reference: safety-estop sections 3, 5 and 6.
+Reference (input priorities and timeouts, state limits, stop-path checklist): `docs/interfaces/ros2.md`. ros2-engineering reference: safety-estop sections 3, 5 and 6.
 
-- The supervisor is the only publisher of `/rccar/mcu/drive`. Never add a second publisher (the fake MCU in tests only subscribes). This rule owns that invariant.
+- The supervisor is the only publisher of `/rccar/mcu/drive` (invariant 3, `docs/invariants.md`). Never add a second publisher (the fake MCU in tests only subscribes).
 - The highest-priority fresh input wins. Never forward a stale input.
 - Boot state: disarmed, not latched, incident 0. Arming needs an explicit Reset.
 - `brake`, `disarm` and an MCU FAILSAFE event latch a new incident and stop forwarding at once. Services bypass arbitration and send MCU DISARM until confirmed.

@@ -1,6 +1,6 @@
 # PCB conventions and facts
 
-Reference for the power distribution board in `pcb/`. The rules for changes are in [.claude/rules/schematics.md](../../.claude/rules/schematics.md). The workflow is skill `pcb-design` (`.claude/skills/pcb-design/`).
+Reference for the power distribution board in `pcb/`. The rules for changes are in [.claude/rules/schematics.md](../../.claude/rules/schematics.md). The workflow is skill `pcb-design` (`pcb/.claude/skills/pcb-design/`).
 
 ## Layout
 - `pcb/<board>/`: one KiCad project for each board (schematic, board, rules, `bom.csv`). A released board is in `pcb/releases/<rev>/`; rev1 is `pcb/releases/rev1/`. Make targets use `BOARD=<path below pcb/>`; the default is `DEFAULT_BOARD` in `pcb/libraries/paths.py` and `BOARD` in the Makefile.

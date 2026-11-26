@@ -1,6 +1,6 @@
 ---
 name: ros2-reviewer
-description: Reviews a diff in this repo (rccar_* packages, firmware/esp32 comms, deploy/, docker/) against .claude/rules/*, the ros2-engineering references and the stop-path checklist. Use after non-trivial ROS/micro-ROS/deploy changes, before requesting code review. Read-only; outputs a file:line punch list.
+description: Reviews a diff in this repo (ros2_ws/src/rccar_* packages, firmware/esp32 comms, deploy/, docker/) against .claude/rules/*, the ros2-engineering references and the stop-path checklist. Use after non-trivial ROS/micro-ROS/deploy changes, before requesting code review. Read-only; outputs a file:line punch list.
 tools: Read, Grep, Glob, Bash, Skill
 skills:
   - ros2-engineering:ros2-engineering-skills
@@ -23,8 +23,8 @@ Stop path (blocker if violated)
 - bench_test never arms; teleop restores the terminal on every exit path; calibrate writes only existing calibration keys.
 - no new path where a stale/late command can move the car (best effort + consumer timeout).
 Interfaces
-- QoS matches `docs/sensor_contract.md` (boundary) and `docs/ros2.md` (other topics); reliable/transient_local only for state/events; no QoS mismatch (run qos_audit.py if available).
-- rccar_msgs: bounded strings, REP-103 units, no priority in messages; `diff -r rccar_msgs firmware/esp32/extra_packages/rccar_msgs` clean; main.cpp + rccar_mcu_bridge + docs updated together.
+- QoS matches `docs/interfaces/sensor_contract.md` (boundary) and `docs/interfaces/ros2.md` (other topics); reliable/transient_local only for state/events; no QoS mismatch (run qos_audit.py if available).
+- rccar_msgs: bounded strings, REP-103 units, no priority in messages; `diff -r ros2_ws/src/rccar_msgs firmware/esp32/extra_packages/rccar_msgs` clean; main.cpp + rccar_mcu_bridge + docs updated together.
 - tuning: key change touches tuning.toml + FIRMWARE_KEYS + main.cpp setKey (test_tuning.py enforces); no unconfirmed parameter.
 Code
 - thin node / fat pure module with pytest; declare_parameter for every parameter; use_sim_time honored; lifecycle for resource owners.
@@ -35,9 +35,9 @@ Deploy
 - Makefile: every target has `## help`; ROS targets guard with _need-stack; flash/monitor guard with _need-stack-down; build/flash keep .pio/libdeps.
 - CI: pinned actions, `permissions: contents: read`, timeout-minutes, paths filters cover new files.
 - docs, README and the matching rule updated for every new path or command. CLAUDE.md changes only if a pointer changes.
-Sim parity (`docs/sensor_contract.md`, skill `sim-parity`)
+Sim parity (`docs/interfaces/sensor_contract.md`, skill `sim-parity`)
 - A hardware-boundary change without a "Sim impact" section in the PR body = major. Boundary: firmware controlTask/handleLine/setKey, rccar_msgs, a topic/type/frame/QoS in a driver or main.cpp, rccar_description, a tuning key.
-- `docs/sensor_contract.md` changes in the same diff, and `make unit` (test_contract.py) passes.
+- `docs/interfaces/sensor_contract.md` changes in the same diff, and `make unit` (test_contract.py) passes.
 
 ## Run
 - `make unit` (contract, rule paths, hw_guard, deploy tests) and `make ros-test` (colcon test). Copy the result lines.

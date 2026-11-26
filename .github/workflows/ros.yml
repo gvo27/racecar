@@ -1,39 +1,34 @@
 name: ros
 
-# ROS 2 packages (rccar_*) + deploy/: image build + colcon test + deploy unit tests, advisory static checks, msg sync check.
+# ROS 2 packages (ros2_ws/src/rccar_*) + deploy/: image build + colcon test + deploy unit tests, advisory static checks.
+# Docs, .claude/ and the msg sync check: checks.yml (every change).
 on:
   push:
     paths:
-      - "rccar_*/**"
+      - "ros2_ws/**"
       - "docker/ros.Dockerfile"
       - "docker/ros.Dockerfile.dockerignore"
       - "docker/entrypoint.sh"
       - "docker/ros-test.sh"
-      - "repos/**"
       - "tuning.toml"
       - "deploy/**"
       - "firmware/esp32/src/main.cpp"
       - "Makefile"
       - ".github/workflows/ros.yml"
-      - ".claude/rules/**"
-      - "docs/sensor_contract.md"
-      - "firmware/esp32/extra_packages/**"
+      - "docs/interfaces/**"
   pull_request:
     paths:
-      - "rccar_*/**"
+      - "ros2_ws/**"
       - "docker/ros.Dockerfile"
       - "docker/ros.Dockerfile.dockerignore"
       - "docker/entrypoint.sh"
       - "docker/ros-test.sh"
-      - "repos/**"
       - "tuning.toml"
       - "deploy/**"
       - "firmware/esp32/src/main.cpp"
       - "Makefile"
       - ".github/workflows/ros.yml"
-      - ".claude/rules/**"
-      - "docs/sensor_contract.md"
-      - "firmware/esp32/extra_packages/**"
+      - "docs/interfaces/**"
 
 permissions:
   contents: read
@@ -136,27 +131,16 @@ jobs:
             fi
           }
 
-          for pkg in rccar_*/; do
+          for pkg in ros2_ws/src/rccar_*/; do
             pkg="${pkg%/}"
             run_tool "qos_audit $pkg" python "$S/qos_audit.py" "$pkg"
           done
-          run_tool "launch_validator rccar_bringup" python "$S/launch_validator.py" rccar_bringup
+          run_tool "launch_validator rccar_bringup" python "$S/launch_validator.py" ros2_ws/src/rccar_bringup
 
-          mapfile -t pyfiles < <(find rccar_* -name '*.py' -not -path '*/build/*' | sort)
+          mapfile -t pyfiles < <(find ros2_ws/src/rccar_* -name '*.py' -not -path '*/build/*' | sort)
           if [ "${#pyfiles[@]}" -gt 0 ]; then
             run_tool "skill_validate_hook (${#pyfiles[@]} files)" python "$S/skill_validate_hook.py" --file "${pyfiles[@]}"
           fi
 
           cat "$RUNNER_TEMP/summary.md" >> "$GITHUB_STEP_SUMMARY"
           exit "$internal_error"
-
-  # firmware/esp32/extra_packages/rccar_msgs is a synced copy of rccar_msgs (micro-ROS builds it).
-  interfaces-sync:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v5
-      - name: rccar_msgs == firmware extra_packages copy
-        run: |
-          diff -r rccar_msgs firmware/esp32/extra_packages/rccar_msgs \
-            || { echo "::error::out of sync: cp -r rccar_msgs/. firmware/esp32/extra_packages/rccar_msgs/"; exit 1; }

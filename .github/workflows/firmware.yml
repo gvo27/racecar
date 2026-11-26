@@ -4,7 +4,7 @@ on:
   push:
     paths:
       - "firmware/**"
-      - "rccar_msgs/**"
+      - "ros2_ws/src/rccar_msgs/**"
       - "docker/firmware.Dockerfile"
       - "docker/firmware.Dockerfile.dockerignore"
       - "Makefile"
@@ -12,7 +12,7 @@ on:
   pull_request:
     paths:
       - "firmware/**"
-      - "rccar_msgs/**"
+      - "ros2_ws/src/rccar_msgs/**"
       - "docker/firmware.Dockerfile"
       - "docker/firmware.Dockerfile.dockerignore"
       - "Makefile"

@@ -7,7 +7,7 @@ paths:
 
 # PCB (power distribution board)
 
-Workflow: skill `pcb-design`. Fab outputs and releases: skill `pcb-fab`. Review: agent `pcb-reviewer`. Facts and conventions (layout, design rules, sources of truth, rails, connectors, pin order, board tools): `docs/pcb/conventions.md`. Mill tuning loop: `docs/techctcarvera/README.md`.
+Workflow: skill `pcb-design`. Fab outputs and releases: skill `pcb-fab`. Review: agent `pcb-reviewer`. The pcb skills are in `pcb/.claude/skills/` and load when you read a file in `pcb/`. Outside `pcb/`, read their `SKILL.md` first. Facts and conventions (layout, design rules, sources of truth, rails, connectors, pin order, board tools): `docs/pcb/conventions.md`. Mill tuning loop: `docs/techctcarvera/README.md`.
 
 ## Sources and generated files
 - The schematic is the source for the board. Change parts and nets in the schematic first.
@@ -21,7 +21,7 @@ Workflow: skill `pcb-design`. Fab outputs and releases: skill `pcb-fab`. Review:
 
 ## Design invariants
 - Rails: `VBAT`, `+5V_CPU` (Pi 5 and ESP32 only), `+5V_SENS`, `+3V3_SENS`, `+6V_BEC` (servo only, never joined to a 5 V rail). One common `GND`. Rails are project power symbols from `rc_power.kicad_sym`.
-- The ESP32 powers nothing. Sensors never take power from ESP32 pins. Signals are 3.3 V or less.
+- The ESP32 powers nothing. Sensors never take power from ESP32 pins. Signals are 3.3 V or less (invariants 1 and 2, `docs/invariants.md`).
 - Every net that feeds a power_in pin through a fuse or a ferrite has a PWR_FLAG.
 - U1 EN never connects directly to an ESP32 GPIO. Future control goes through a transistor.
 - One replaceable main fuse F1. Size VBAT_RAW, VBAT and GND copper for the fuse rating, not the load.
@@ -37,5 +37,5 @@ Workflow: skill `pcb-design`. Fab outputs and releases: skill `pcb-fab`. Review:
 - Never use the KiCad native DXF for the mill. `make pcb-fab` writes the lab frame.
 
 ## Analyzers
-- kicad-happy findings are claims. Check each one against the raw files and the datasheets. Known false positives: `docs/pcb/releases/rev1/review/README.md` and `.claude/skills/pcb-fab/references/fab-gate.md`.
+- kicad-happy findings are claims. Check each one against the raw files and the datasheets. Known false positives: `docs/pcb/releases/rev1/review/README.md` and `pcb/.claude/skills/pcb-fab/references/fab-gate.md`.
 - ERC and DRC results count only with their KiCad 10 output from this session.
