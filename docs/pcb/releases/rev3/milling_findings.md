@@ -41,3 +41,17 @@ Status of an entry: `verified` (measured or seen on the real board or the machin
 - Leads (not confirmed, Autodesk forum and help, read 2026-11-20): users report "invalid tool" errors for a chamfer mill in some milling operations (for example adaptive clearing). The 2D Adaptive help says rest machining needs the geometry of the previous tool (diameter, corner radius, taper angle, shoulder length). The lab template already uses T2 in 2D Contour.
 - Possible workaround (not tested): T2 in 2D Contour (or Trace) for the isolation. A flat end mill (0.6 mm corn bit, or the 0.2 mm micro end mill, `[inventory.bits_on_hand]`) for pocket or rest operations.
 - Open: the Fusion version, the operation and the exact error text.
+
+## F-005: the lab CAM file of the failed rev3 run (2026-11-25, reported)
+
+- Source: the Fusion file of the lab tech, read by the agent. Facts and status of each value: [`cam/README.md`](cam/README.md). The run failed (owner). The next run waits for the 0.2 mm end mills.
+- Dowels (lab standard): the two setup origins are sketch points 145.82 mm +-0.03 apart, on a line along the board long side. This agrees with `[dowel] centers` in `milling.toml` (145.8468 mm). The file does not bore the dowels, so the hole diameter (F-001) is not in the toolpaths.
+- Board placement: the board sits against the far long edge of the blank, turned 180 degrees from the frame of the fab export (`placement.board_to_lab`). The fab export frame is not what the lab uses.
+- Possible causes of the failure (agent analysis of the file, not measured):
+  - Z0 is a sketch point, not the stock top: Setup5 Z0 is 0.065 mm above the top, Setup3 Z0 is 0.075 mm below the top. A Z0 probed on the copper gives 0.14 mm cuts on F.Cu and no cut on B.Cu.
+  - Isolation is a pocket with the 0.6 mm corn bit (F-002). The 0.2 mm rest pass is only on B.Cu. No V-bit pass.
+  - The 0.2 mm end mill runs at 0.1 mm/tooth (1000 mm/min, 5000 rpm, 2 flutes): half the tool diameter for each tooth. Expect a broken bit.
+  - T4 is the number of the 0.8 mm drill, the 1.0 mm drill and the 3.175 mm end mill, with no manual tool change. The machine can keep the wrong tool between Drill1, Drill2 and Bore1.
+  - Drill3 makes the 1.3 mm J6/J7 holes with a 1.1 mm drill and adds 2 holes that are not on the rev3 board.
+  - Flood coolant on T1, T5 and T6. The machine has air only.
+- Open: the questions to the lab tech in PR #22 (2026-11-25 comment).
