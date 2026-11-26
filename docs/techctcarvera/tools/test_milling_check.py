@@ -97,12 +97,18 @@ class TestCutWidth(unittest.TestCase):
         # lab tool T2: tip 0.2 mm, Fusion taper 30 = angle per side = 60 deg included (Fusion tool export 2026-11-15)
         self.assertAlmostEqual(mc.cut_width(0.2, 60, 0.08), 0.292, places=3)
 
+    def test_flat_end_mill_cuts_its_diameter(self):
+        # lab CAM isolation tools (rev3 lab CAM file, 2026-11-25): flat end mills, angle 0
+        self.assertAlmostEqual(mc.cut_width(0.6, 0, 0.08), 0.6)
+        self.assertAlmostEqual(mc.cut_width(0.2, 0, 0.5), 0.2)
+
 
 class TestLimits(unittest.TestCase):
     def test_loads_and_derives(self):
         lim = limits()
         self.assertAlmostEqual(lim.depth_worst, 0.08)
-        self.assertEqual([b.name for b in lim.bits], ["60deg/0.2"])
+        self.assertEqual([b.name for b in lim.bits], ["corn/0.6", "endmill/0.2"])
+        self.assertEqual(lim.tool_slots, 6)
         self.assertEqual(lim.drills, [round(0.1 * i, 1) for i in range(1, 21)])
         self.assertAlmostEqual(lim.endmill_min, 3.175)
         self.assertAlmostEqual(lim.milled_hole_min, 3.3)
@@ -140,15 +146,29 @@ class TestGap(unittest.TestCase):
         f = self.gap(0.15)
         self.assertEqual(rules(f, "error"), ["MILL-GAP"])
 
-    def test_025_error_with_the_lab_bit(self):
-        # 0.25 mm is narrower than the 0.292 mm cut of the only lab isolation bit
-        self.assertEqual(rules(self.gap(0.25), "error"), ["MILL-GAP"])
+    def test_025_only_the_02_end_mill_fits(self):
+        # lab CAM isolation: 0.6 mm corn bit, rest pass with the 0.2 mm end mill
+        self.assertEqual(rules(self.gap(0.25)), ["MILL-GAP-BIT"])
 
-    def test_030_none(self):
-        self.assertEqual(rules(self.gap(0.30)), [])
+    def test_045_only_the_02_end_mill_fits(self):
+        self.assertEqual(rules(self.gap(0.45)), ["MILL-GAP-BIT"])
 
-    def test_045_none(self):
-        self.assertEqual(rules(self.gap(0.45)), [])
+    def test_065_none(self):
+        self.assertEqual(rules(self.gap(0.65)), [])
+
+    def test_corn_bit_needs_the_horizontal_error_too(self):
+        # with design rules (horizontal error 0.25 mm): the 0.6 mm corn bit needs 1.1 mm, the 0.2 mm end mill 0.7 mm
+        import rules as design_rules  # pcb/libraries
+        r = design_rules.load(os.path.join(lab.lab_dir(), design_rules.FILE_NAME))  # the mill tuning file
+        for g, want in ((0.9, ["MILL-GAP-BIT"]), (1.2, [])):
+            s = Synth()
+            s.track(0, 0, 10, 0, "A")
+            s.track(0, 0.5 + g, 10, 0.5 + g, "B")
+            with self.subTest(gap=g):
+                f = mc.check(s.b, limits(), r)
+                self.assertEqual([x for x in rules(f) if x.startswith("MILL-GAP")], want)
+                if want:
+                    self.assertIn("only endmill/0.2 fit", [x for x in f if x[0] == "MILL-GAP-BIT"][0][5])
 
     def test_same_net_ignored(self):
         s = Synth()
@@ -208,6 +228,27 @@ class TestHoles(unittest.TestCase):
 
     def test_annular(self):
         self.assertEqual(rules(self.hole(1.0, 1.5), "error"), ["MILL-ANNULAR"])
+
+
+class TestTools(unittest.TestCase):
+    """tool_list: the tools to stage before a run, with exact specs."""
+
+    def tools(self, drills):
+        s = Synth()
+        fp = s.fp("J1", 20, 20)
+        for i, d in enumerate(drills):
+            s.pad(fp, 20 + 5 * i, 20, d, d + 1.2, "N%d" % i)
+        return mc.tool_list(s.b, limits())
+
+    def test_drills_end_mill_and_bits(self):
+        t = self.tools([1.0, 1.0, 1.3, 3.4])
+        self.assertEqual(t[:2], ["drill 1.00 mm: 2 holes", "drill 1.30 mm: 1 holes"])
+        self.assertTrue(t[2].startswith("end mill 3.175 mm: 2 dowels 4.2672 mm, 1 bored 3.40 mm."))
+        self.assertEqual([x.split(":")[0] for x in t[3:]], ["isolation corn/0.6", "isolation endmill/0.2"])
+
+    def test_more_tools_than_slots_need_more_rounds(self):
+        t = self.tools([0.8, 1.0, 1.1, 1.3, 1.4])
+        self.assertEqual(t[-1], "8 tools for 6 slots: stage them in more than one round")
 
 
 class TestFcuTht(unittest.TestCase):

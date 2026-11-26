@@ -1,6 +1,6 @@
 ---
 name: pcb-milling-check
-description: Use when a .kicad_pcb in pcb/ is created, changed, re-routed or reviewed, or before any claim that the power board is millable. Checks the board against the isolation-milling limits of the lab mill (V-bit cut width at depth, copper gaps, drill set, annular ring, unplated-hole rules, slivers, islands). DRC-clean does not mean CNC-millable.
+description: Use when a .kicad_pcb in pcb/ is created, changed, re-routed or reviewed, or before any claim that the power board is millable. Checks the board against the isolation-milling limits of the lab mill (isolation bit cut width at depth, copper gaps, drill set, annular ring, unplated-hole rules, slivers, islands). DRC-clean does not mean CNC-millable.
 ---
 
 # PCB milling check (in-house isolation milling)
@@ -16,7 +16,7 @@ KiCad DRC checks the numbers in `rc_power_board.kicad_pro` and `.kicad_dru`. It 
 | Id | Check | Severity |
 | --- | --- | --- |
 | MILL-GAP | Every copper-to-copper gap on one layer (track, pad, via, zone fill; same footprint included) between different nets >= the narrowest isolation bit's cut width at worst-case depth (depth max + depth error): `w = tip + 2 * d * tan(angle / 2)` | error |
-| MILL-GAP-BIT | Gaps that only some bits can cut. Lists the area and the bits that fit, so the CAM step uses the right bit there | warning |
+| MILL-GAP-BIT | Gaps that only some bits can cut (with design rules: gap < widest cut width + 2 x horizontal error). Lists the area and the bits that fit, so the CAM step uses the right bit there (rest pass) | warning |
 | MILL-DEPTH | Min depth (depth min - depth error) >= copper thickness, so each cut goes through the copper | error |
 | MILL-DRILL | Every hole is in the drill set, or is > the largest drill and >= the smallest end mill (milled) | error |
 | MILL-ANNULAR | Annular ring >= the configured minimum on every THT pad and via | error |
@@ -44,6 +44,7 @@ Three groups: **errors** (unwaived), **waived** (with the reason), **owner/lab-t
 ## Rules for agents
 - The last four rows read the design rules of the board (`design_rules.toml`: board directory, else lab directory; `pcb/libraries/rules.py`). Do not change a design rule to make a board pass without a statement of the owner or the lab tech.
 - Run it after every board change and before any review request. Report the counts, every error and the MILL-GAP-BIT areas.
+- The report ends with "TOOLS TO STAGE" (also `tools` in the JSON): each drill size with its hole count, the end mill, each isolation bit with its exact spec. The owner stages the tools between rounds. Give this list with each board for the lab.
 - Never claim "millable" or "ready to mill". The most you can say is "passes the milling check with the assumed limits", until the lab tech confirms the limits and the owner signs off.
 - Fix a finding on the board (move, re-route, change a footprint through the schematic). Do not weaken `milling.toml`.
 - The lab tech's machine and CAM instructions override this file. When they arrive, update `milling.toml` and this skill in the same change.

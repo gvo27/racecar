@@ -28,18 +28,25 @@ pin = 4.0
 centers = [[3.2766, 3.81], [149.1234, 3.81]]
 unit = "mm"
 status = "confirmed"
-source = "rev3 lab CAM file 2026-11-25 (docs/pcb/releases/rev3/cam/README.md): the two setup WCS points are 145.82 mm +-0.03 apart (decoded), no dowel bore in that file; owner 2026-11-19, verified physical finding during the rev3 milling: pins measured 4.0 mm with a caliper; the hole gets 0.003 in more clearance (old value 4.191 mm). Old source: lab .f3z (Bore1 toolpath; hole 0.165 in; centers +-72.9234 / -46.99 from the stock center); Fusion Measure and Sketch10 (owner 2026-11-15, example/fusion_export/): diameter 0.165 in, centers (0.129, 0.15) and (5.871, 0.15) in, distance 5.742 in; owner 2026-11-12 (4.0 mm pins)"
+source = "rev3 lab CAM file 2026-11-25 (docs/pcb/releases/rev3/cam/README.md): the two setup WCS points are 145.8468 mm apart (read); owner 2026-11-25: the lab bores the widened hole; owner 2026-11-19, verified physical finding during the rev3 milling: pins measured 4.0 mm with a caliper; the hole gets 0.003 in more clearance (old value 4.191 mm). Old source: lab .f3z (Bore1 toolpath; hole 0.165 in; centers +-72.9234 / -46.99 from the stock center); Fusion Measure and Sketch10 (owner 2026-11-15, example/fusion_export/): diameter 0.165 in, centers (0.129, 0.15) and (5.871, 0.15) in, distance 5.742 in; owner 2026-11-12 (4.0 mm pins)"
 
-# Isolation bits: cut width at depth d = tip + 2 * d * tan(angle / 2)
-# The lab bit is tool T2 "0.1mm Tip Engraving Metal": tip 0.2 mm, Fusion taper 30. Fusion "taper" is the angle per side
-# (from the tool axis), so the included angle is 60 deg. The 30 deg included reading was removed 2026-11-15.
-# Only bits the lab CAM uses are listed here. The 60deg/0.1 bit of the Makera pack is under [inventory.cam_tools].
+# Isolation bits: cut width at depth d = tip + 2 * d * tan(angle / 2). A flat end mill has angle 0: cut width = diameter.
+# Only bits the lab CAM uses are listed here. The V-bits (T2, the Makera pack) are under [inventory.cam_tools].
 [[isolation_bit]]
-name = "60deg/0.2"
-angle_deg = 60.0
+name = "corn/0.6"
+spec = "corn bit, flat, 0.6 mm, 2 flutes, flute 6 mm, shank 3.175 mm, overall 38 mm (lab CAM T3 '6mm Flute Corn')"
+angle_deg = 0.0
+tip_mm = 0.6
+status = "confirmed"
+source = "rev3 lab CAM file 2026-11-25 (docs/pcb/releases/rev3/cam/README.md): T3 '6mm Flute Corn', flat, 0.6 mm, 2 flutes, the 2D pocket isolation of both faces; owner F-002 2026-11-20 (smallest corn bit on hand)"
+
+[[isolation_bit]]
+name = "endmill/0.2"
+spec = "micro end mill 0.2 mm, cutting length 2.5 mm, shank 3.175 mm, overall 38 mm ([inventory.bits_on_hand] micro_end_mill, S25092400UX5341). The lab CAM T6 (EC-A2, shank 4 mm) does not fit the 1/8 in collet: change T6 to this bit"
+angle_deg = 0.0
 tip_mm = 0.2
 status = "confirmed"
-source = "Fusion tool library export (owner 2026-11-15, example/fusion_export/tool_library.json: TA 30, tip-diameter 0.2, 'Inclusive angle' empty). The tool drawing (tool2_vbit_geometry.png) shows the cone from the 0.2 mm tip to the 3.175 mm shank in about 2.6 mm of length: 30 deg per side (30 deg included would need about 5.6 mm)"
+source = "rev3 lab CAM file 2026-11-25 (docs/pcb/releases/rev3/cam/README.md): T6 'EC-A2 002-003/005C4H45 IC702', flat, 0.2 mm, 2 flutes, rest pocket after the 0.6 mm corn bit. The next run waits for new 0.2 mm bits (owner 2026-11-25). Old [[isolation_bit]] 60deg/0.2 V-bit (T2): not used by the lab CAM (F-004), see [inventory.cam_tools]"
 
 [cut_depth_min]
 value = 0.08
@@ -128,7 +135,7 @@ tool_slots = 6
 cam = "Autodesk Fusion 360, post Carvera.cps, lab template example/ in the lab directory"
 unit = "mm"
 status = "confirmed"
-source = "model: owner, PR #3 2026-11-02 (Makera Carvera Standard) and lab .f3z (Carvera, 3 axes, Carvera.cps); work area, spindle, collet: makera.com/products/carvera and global.makera.com/products/carvera, read 2026-11-15; tool_slots: retailer listing (core-electronics.com.au), not from the Makera table"
+source = "model: owner, PR #3 2026-11-02 (Makera Carvera Standard) and lab .f3z (Carvera, 3 axes, Carvera.cps); work area, spindle, collet: makera.com/products/carvera and global.makera.com/products/carvera, read 2026-11-15; tool_slots: retailer listing (core-electronics.com.au), not from the Makera table; rev3 lab CAM file 2026-11-25: machine definition number_of_tools = 6"
 
 [inventory.rivets]
 kit = "LPKF EasyContac"
@@ -156,6 +163,7 @@ micro_end_mill = "10 pcs, Unique Bargains model S25092400UX5341 (item 7897065): 
 status = "confirmed"
 source = "owner 2026-11-20 (rev3 milling); micro_end_mill: owner 2026-11-20, seller product page"
 [inventory.cam_tools]
+# Lab CAM template (2026-11-15). The rev3 lab CAM (2026-11-25) uses other tools: docs/pcb/releases/rev3/cam/README.md
 isolation = "T2 chamfer mill '0.1mm Tip Engraving Metal': tip 0.2 mm, taper 30 deg per side (60 deg included), shank 3.175 mm, 1 flute, carbide, 12000 rpm, feed 500, plunge 200, ramp 300 mm/min"
 drills_in_cam = [0.9, 1.0, 1.1]
 drill_tool_number = "T4, the same number as the end mill (setup sheets): each drill is a manual tool change"

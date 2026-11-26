@@ -85,7 +85,7 @@ All other copper has a 2.0 mm gap: the pours to the VBAT, 5 V, `/LDO_IN` and `+3
 | `make erc BOARD=src` | 0 errors, 3 warnings (`lib_symbol_mismatch`, as rev1) |
 | `make pcb-rules BOARD=src` | The project files agree with the design rules. 16 values assumed |
 | `make pcb-check BOARD=src` | DRC: 0 errors, 0 unconnected, parity clean. 117 warnings: 26 `lib_footprint_mismatch` (pads changed by the build), 91 `silk_over_copper` (silkscreen of the library footprints; the milled board has no silkscreen). `check_board`: 0 problems |
-| `make pcb-mill-check BOARD=src` | 0 errors, 0 waived, 103 warnings: 85 `MILL-GAP-FIXED`, 9 `MILL-CUT-SPACING`, 9 `MILL-CONN-EDGE`. No `MILL-SLIVER`, no `MILL-ISLAND` |
+| `make pcb-mill-check BOARD=src` | 2026-11-25, lab CAM isolation bits (0.6 mm corn, 0.2 mm end mill, F-006): 0 errors, 0 waived, 103 warnings: 85 `MILL-GAP-FIXED`, 9 `MILL-CUT-SPACING`, 9 `MILL-CONN-EDGE`. 127 `MILL-GAP-BIT` areas (only the 0.2 mm end mill fits). No `MILL-SLIVER`, no `MILL-ISLAND`. Tools to stage: 8 (`milling_check.json`, key `tools`) |
 | `make pcb-fab BOARD=src` | Outputs in `build/fab/src/` (not committed). The target then runs `test_fab.py` on the mill board: 20 tests, OK |
 | `make bom BOARD=src` | `pcb/src/bom.csv`. C2 to C8: part number TBD, no cost. Wire pads: no part. Total 90.73 USD |
 | `make pcb-test` | 108 + 61 = 169 tests, OK (2026-11-18) |

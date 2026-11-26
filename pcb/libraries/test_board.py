@@ -550,8 +550,9 @@ class TestReviewPackage(unittest.TestCase):
     def test_milling_json_has_groups(self):
         with open(os.path.join(self.out, "milling_check.json"), encoding="utf-8") as fh:
             m = json.load(fh)
-        for k in ("errors", "waived", "questions", "bits", "warnings"):
+        for k in ("errors", "waived", "questions", "bits", "warnings", "tools"):
             self.assertIn(k, m)
+        self.assertTrue(m["tools"] and all(isinstance(s, str) for s in m["tools"]))  # one line per tool
         self.assertEqual(m["errors"], [])
         self.assertEqual(m["questions"], [])
 

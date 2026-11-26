@@ -11,7 +11,7 @@ Status of an entry: `verified` (measured or seen on the real board or the machin
 - Change (owner): add 0.003 in (0.0762 mm) to the hole. New hole: 4.2672 mm (0.168 in). The clearance on the 4.0 mm pin changes from 0.191 mm to 0.267 mm (diameter).
 - Changed: `[dowel]` in `milling.toml`. The fab export reads the value from there (`DOWEL_4.267` in the drill map and the Excellon file).
 - Effect: more clearance permits more shift between the two faces after the flip, up to about 0.27 mm (was about 0.19 mm).
-- Open: the lab CAM template (Bore1, `example/` in the lab directory) still bores 4.191 mm. The lab tech must change Bore1 to 4.2672 mm.
+- Closed (owner 2026-11-25): the lab bores the widened 4.2672 mm hole. The first hole was too narrow and was widened.
 
 ## F-002: B.Cu isolation with a 0.6 mm corn bit, about 40 min (2026-11-20, reported)
 
@@ -44,14 +44,18 @@ Status of an entry: `verified` (measured or seen on the real board or the machin
 
 ## F-005: the lab CAM file of the failed rev3 run (2026-11-25, reported)
 
-- Source: the Fusion file of the lab tech, read by the agent. Facts and status of each value: [`cam/README.md`](cam/README.md). The run failed (owner). The next run waits for the 0.2 mm end mills.
-- Dowels (lab standard): the two setup origins are sketch points 145.82 mm +-0.03 apart, on a line along the board long side. This agrees with `[dowel] centers` in `milling.toml` (145.8468 mm). The file does not bore the dowels, so the hole diameter (F-001) is not in the toolpaths.
-- Board placement: the board sits against the far long edge of the blank, turned 180 degrees from the frame of the fab export (`placement.board_to_lab`). The fab export frame is not what the lab uses.
-- Possible causes of the failure (agent analysis of the file, not measured):
-  - Z0 is a sketch point, not the stock top: Setup5 Z0 is 0.065 mm above the top, Setup3 Z0 is 0.075 mm below the top. A Z0 probed on the copper gives 0.14 mm cuts on F.Cu and no cut on B.Cu.
-  - Isolation is a pocket with the 0.6 mm corn bit (F-002). The 0.2 mm rest pass is only on B.Cu. No V-bit pass.
-  - The 0.2 mm end mill runs at 0.1 mm/tooth (1000 mm/min, 5000 rpm, 2 flutes): half the tool diameter for each tooth. Expect a broken bit.
-  - T4 is the number of the 0.8 mm drill, the 1.0 mm drill and the 3.175 mm end mill, with no manual tool change. The machine can keep the wrong tool between Drill1, Drill2 and Bore1.
-  - Drill3 makes the 1.3 mm J6/J7 holes with a 1.1 mm drill and adds 2 holes that are not on the rev3 board.
-  - Flood coolant on T1, T5 and T6. The machine has air only.
-- Open: the questions to the lab tech in PR #22 (2026-11-25 comment).
+- Source: the Fusion file of the lab tech, read by the agent. File (user paths removed) and facts with status: [`cam/`](cam/README.md). The run failed (owner). The next run waits for the 0.2 mm end mills.
+- Dowels (lab standard): the two setup origins are 145.8468 mm apart, equal to `[dowel] centers` in `milling.toml`. The dowel hole is 4.2672 mm (F-001).
+- Model: the board is not flipped. F.Cu is on the top face and B.Cu on the bottom face, both at the true board position. Setup3 flips the frame (`flipZ`) and starts at the second dowel point.
+- Z0 (cause of the failure, agent analysis): the operator probes Z0 on the board surface (owner). The CAM expects Z0 at the sketch points: 0.065 mm above the F.Cu surface (Setup5) and 0.075 mm below the B.Cu surface (Setup3). With a probed Z0, F.Cu is cut 0.14 mm deep and B.Cu is not cut. Fix in the CAM: set the WCS Z origin of each setup to the stock top.
+- Isolation is a pocket with the 0.6 mm corn bit (F-002). The 0.2 mm rest pass is only on B.Cu. No V-bit pass.
+- T6 (0.2 mm end mill in the CAM) has a 4 mm shank and does not fit the 1/8 in collet. Its feed is 0.1 mm/tooth. The lab uses the generally recommended cutting data of the real bit (owner).
+- Holes: the 1.3 mm J6/J7 holes are drilled at 1.1 mm. The rivet via at KiCad (68.1, 42.1) is not drilled. Tools are staged by exact spec between rounds (owner): `make pcb-mill-check` lists them (F-006).
+- Flood coolant on 3 tools, the machine has air only. No outline cut. No NC code in the file.
+
+## F-006: the milling check uses the lab CAM isolation tools (2026-11-25)
+
+- `[[isolation_bit]]` in `milling.toml` is now the 0.6 mm corn bit and the 0.2 mm end mill (flat, cut width = diameter). The V-bit (T2) is not in the lab CAM (F-004).
+- `MILL-GAP-BIT` now uses the horizontal error: the corn bit fits a gap of 1.1 mm or more, the 0.2 mm end mill a gap of 0.7 mm or more. The rev3 board has 127 areas where only the 0.2 mm end mill fits: the lab CAM needs the rest pass on both faces there.
+- `make pcb-mill-check` lists the tools to stage, with exact specs: drills 0.8, 1.0, 1.1, 1.3 and 1.4 mm, the 3.175 mm end mill, the corn bit and the 0.2 mm end mill. 8 tools for 6 slots: more than one round.
+- Board: no change. The rev3 board passes with the lab CAM tools: 0 errors.
