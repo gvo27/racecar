@@ -20,7 +20,7 @@ make setup                              # check prerequisites, dev tools into .v
 - **Move an old clone.** Before ADR 0001 (`docs/adr/0001-monorepo-layout.md`) the clone was at `~/ros2_ws/src/racecar`. Move it one time, in this order:
   1. `cd ~/ros2_ws/src/racecar && make car-down`
   2. `mv ~/ros2_ws/src/racecar ~/racecar && cd ~/racecar` (the untracked `.env` and `logs/` move with it)
-  3. `make dev-setup` (`.venv` has absolute paths, so uv makes it again)
+  3. `uv sync --frozen --reinstall && make dev-setup` (the `.venv` scripts contain the old absolute path. `make dev-setup` alone does not change them, because `uv sync` finds the packages already installed)
   4. `make install-host` (writes the new `WorkingDirectory` into `rccar.service`)
   5. `make car-up`
 - `make install-host` prints each step. It installs `deploy/car/99-rccar.rules` (CH343 `1a86:55d3` -> `/dev/rccar-esp32`, group `dialout`). It renders `deploy/car/rccar.service` with the path of this clone and your user. Afterwards, unplug the USB cable and plug it in again one time. The unit starts the stack at boot with the images that are already built. Deploys stay explicit (`make car-pull && make car-up`).
