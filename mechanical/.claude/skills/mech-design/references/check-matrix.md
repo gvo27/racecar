@@ -11,7 +11,7 @@ The automatic checks run in `make mech-check MODEL=<model>` (`mechanical/src/rcc
 | MECH-INTERFERE | No two parts overlap by more than the contact tolerance (printed and `ref_`) | A part that is too close but does not touch: use MECH-CLEAR |
 | MECH-CLEAR | Each named pair of the acceptance list keeps its minimum gap | A pair that nobody listed |
 | MECH-HEIGHT | The printed parts stay below `printed_top_max` of the design file | The height of the boards and sensors on top (read `top z` and the ref envelopes) |
-| MECH-SNAP | The prong strain of a snap hook (cantilever estimate 1.5 t y / L²) is at most `snap_strain_max` | Fatigue, creep, layer bonds, the real release force: make a test print |
+| MECH-SNAP | The prong strain of a snap hook (cantilever estimate 3 y c / L², c from the section centroid) is at most `snap_strain_max` | Fatigue, creep, layer bonds, the real release force: make a test print |
 | MECH-BED | Each printed part fits the print bed (turned about Z) | Print orientation, overhangs, supports |
 | MECH-MESH | The STL is watertight and its winding is consistent | Tessellation that is too coarse for a small hole |
 | MECH-STEP | The STEP file read back has the model volume, bounding box and labels | Colors in SolidWorks (owner check) |

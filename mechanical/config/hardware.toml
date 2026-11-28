@@ -86,7 +86,7 @@ x = -35.0
 y = -27.0
 top_z = 40.0
 status = "assumed"
-source = "x, y: estimate from the reference part (plate symmetric about the car center line, 2 x 2 mm holes taken as the rear body posts, body-post spacing of [body_posts]); top_z estimated 2026-11-27; owner to measure"
+source = "x, y: estimate from the reference part (plate symmetric about the car center line, 2 x 2 mm holes taken as the rear body posts (a weak guess: the posts are 6 mm), body-post spacing of [body_posts]); top_z estimated 2026-11-27; owner to measure"
 
 # ---- sensors -------------------------------------------------------------------------------------------------------
 [mapper]

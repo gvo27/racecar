@@ -25,8 +25,12 @@ anchor_cbore_d = 7.0
 snap_pin_d = 8.0
 snap_pocket_gap = 2.0
 snap_slot_w = 2.0
-# lip: radial step of the latch (45 degree retention face). lead_h: height of the lead-in cone above the lip
-snap_lip = 0.6
+# keyhole relief at the bottom of the pin slot (diameter, depth into the pocket floor)
+snap_relief_d = 3.0
+snap_relief_depth = 1.0
+# lip: radial step of the latch (45 degree retention face, it touches the slot edge at the deck top). lead_h: height
+# of the lead-in cone above the lip
+snap_lip = 0.5
 snap_lead_h = 1.4
 # clearance: deck slot half-width minus the pin radius (Y). slot_play: free travel of the pin along X in the slot
 snap_clearance = 0.2

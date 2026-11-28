@@ -3,8 +3,10 @@
 import math
 
 import pytest
+from build123d import Box, Compound, Pos
 
 from rccar_mech import checks, cli, kicad, models, params
+from rccar_mech.parts import anchor as anchor_part
 
 MODEL = "frame_rev2"
 
@@ -119,14 +121,28 @@ def test_deck_rests_on_the_stays_and_the_anchor(frame, hw):
     assert top_body and all(f.center().Z == pytest.approx(z0) for f in top_body)
 
 
-def test_snap_pin_goes_through_the_deck_and_latches(frame, hw):
+def _y_reach(shape, z, center_y):
+    """Largest |y - center_y| of the shape in a thin horizontal cut at height z."""
+    cut = shape & (Pos(0, center_y, z) * Box(1000, 100, 0.02))
+    bb = (cut if not isinstance(cut, list) else Compound(cut)).bounding_box()
+    return max(bb.max.Y - center_y, center_y - bb.min.Y)
+
+
+def test_snap_lip_latches_at_the_deck_top(frame, hw, pr):
+    """The lip is inside the deck slot below the deck top and reaches over the slot edge just above it."""
     asm, cfg = frame
-    z_deck_top = hw["body_posts"]["base_z"] + cfg["deck_thickness"]
-    anchor, deck = _part(asm, "anchor"), _part(asm, "deck")
-    assert anchor.bounding_box().max.Z == pytest.approx(z_deck_top + cfg["snap_lip"] + cfg["snap_lead_h"])
-    # no overlap of the pin and the deck slot (checked by MECH-INTERFERE too), and the lip reaches over the slot edge
-    assert anchor.intersect(deck) is None or sum(s.volume for s in anchor.intersect(deck)) < 1e-3
-    assert cfg["snap_lip"] > cfg["snap_clearance"]
+    z_top = hw["body_posts"]["base_z"] + cfg["deck_thickness"]
+    ay = hw["motor_plate_position"]["y"]
+    half_slot = cfg["snap_pin_d"] / 2 + cfg["snap_clearance"] + pr["limits"]["hole_comp"] / 2
+    anchor = _part(asm, "anchor")
+    assert _y_reach(anchor, z_top - 0.05, ay) <= half_slot + 1e-6
+    assert _y_reach(anchor, z_top + 0.2, ay) > half_slot + 0.1
+    assert checks.interference([anchor, _part(asm, "deck")]) == []
+
+
+def test_prong_strain_hand_value():
+    """Circular segment r 4 cut at y 1: centroid 2.249, far fiber 1.751. Bend 0.4 mm over 11 mm."""
+    assert anchor_part.prong_strain(4.0, 1.0, 0.4, 11.0) == pytest.approx(3 * 0.4 * 1.751 / 121, rel=1e-3)
 
 
 def test_snap_strain_limit_is_checked():
