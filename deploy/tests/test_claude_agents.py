@@ -18,7 +18,8 @@ PATH_RE = re.compile(r'`((?:\.claude|docs|docker|deploy|ros2_ws|firmware|pcb|mod
 GENERATED = ('models/cache', 'deploy/car/.env.generated', 'firmware/esp32/.pio',
              '.claude/settings.local.json')  # gitignored, made at run time
 VERSION_RE = re.compile(r'\b\d+\.\d+\.\d+\b')  # same as the project-context check script
-MAKE_TARGETS = {'pcb-build', 'pcb-route', 'pcb-check', 'pcb-mill-check', 'pcb-review', 'pcb-fab', 'pcb-test', 'pcb-gate', 'pcb-all', 'pcb-sch', 'pcb-rules'}
+MAKE_TARGETS = {'pcb-build', 'pcb-route', 'pcb-check', 'pcb-mill-check', 'pcb-review', 'pcb-fab', 'pcb-test', 'pcb-gate', 'pcb-all', 'pcb-sch', 'pcb-rules',
+                'cad-image', 'mech-test', 'mech-build', 'mech-check', 'mech-diff', 'mech-release'}
 
 
 def frontmatter(path) -> dict[str, str]:
@@ -61,14 +62,25 @@ def test_named_paths_exist(path):
     assert not dead, f'{rel(path)}: names paths that do not exist: {dead}'
 
 
-def test_pcb_files_name_existing_skills_and_agents():
+# subproject prefix -> folder: a backticked `<prefix>-name` in its files is a known skill, agent or make target
+PREFIXES = {'pcb': 'pcb', 'mech': 'mechanical'}
+
+
+@pytest.mark.parametrize('prefix', sorted(PREFIXES))
+def test_subproject_files_name_existing_skills_and_agents(prefix):
     known = {p.parent.name for p in SKILLS} | {p.stem for p in AGENTS} | MAKE_TARGETS
     for path in AGENTS + SKILL_FILES:
-        if not (path.stem.startswith('pcb-') or 'pcb' in path.relative_to(ROOT).parts[:1]):
+        if not (path.stem.startswith(f'{prefix}-') or PREFIXES[prefix] in path.relative_to(ROOT).parts[:1]):
             continue
-        unknown = set(re.findall(r'`(pcb-[a-z-]+)`', path.read_text())) - known
+        unknown = set(re.findall(rf'`({prefix}-[a-z-]+)`', path.read_text())) - known
         assert not unknown, f'{rel(path)}: names {sorted(unknown)}, which is not a project skill, agent or make target'
 
+
+def test_mechanical_has_its_skill_and_reviewer():
+    """The mechanical workflow mirrors pcb/: a design skill and a read-only review agent."""
+    assert (ROOT / 'mechanical' / '.claude' / 'skills' / 'mech-design' / 'SKILL.md').exists()
+    assert (ROOT / '.claude' / 'agents' / 'mech-reviewer.md').exists()
+    assert (ROOT / '.claude' / 'rules' / 'mechanical.md').exists()
 
 @pytest.mark.parametrize('path', SKILLS, ids=rel)
 def test_skill_has_verify_section(path):

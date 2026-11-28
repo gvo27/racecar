@@ -87,3 +87,12 @@ def test_cli_diff_exit_code(tmp_path):
 
 def test_cli_bad_input_exits_2(tmp_path):
     assert cli.main(["build", "test_bracket", "--out", str(tmp_path), "--set", "length=abc"]) == 2
+
+
+def test_check_prints_cog_and_top_height(tmp_path, capsys):
+    assert cli.main(["build", "test_bracket", "--out", str(tmp_path), "--no-previews"]) == 0
+    assert cli.main(["check", "test_bracket", "--out", str(tmp_path)]) == 0
+    out = capsys.readouterr().out
+    rep = json.loads((tmp_path / "report.json").read_text())
+    assert rep["top_z_printed"] == pytest.approx(2.5)
+    assert "cog z 0.0 mm" in out and "top z 2.5 mm" in out

@@ -29,6 +29,7 @@
 | Id | Check |
 | --- | --- |
 | MECH-VALID | Each part is a valid solid with a volume |
+| MECH-LABEL | Each leaf part has a label, and no two parts have the same label |
 | MECH-HOLE | The holes are at the expected positions and diameters (no missing hole, no extra hole) |
 | MECH-WALL | The wall from each hole to the other faces is at least `min_wall` (`print.toml`) |
 | MECH-INTERFERE | No two parts (printed or `ref_`) overlap |
