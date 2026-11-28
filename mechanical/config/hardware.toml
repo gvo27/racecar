@@ -73,6 +73,21 @@ pin_x = 75.0
 status = "assumed"
 source = "Tamiya TT-02 manual step 36 (layout); heights estimated 2026-11-28; owner to measure"
 
+[motor_plate]
+# 4 x M3 screw holes on a square pattern in the motor plate above the motor. clearance_d: the hole of the fitted part
+pattern = 24.0
+clearance_d = 3.4
+status = "confirmed"
+source = "owner 2026-11-27: measured reference part Arduino_Mega_holder_Top_v2.stl (4 x 3.4 mm holes, 24 x 24 mm, screwed to the motor plate)"
+
+[motor_plate_position]
+# center of the 4-hole pattern in the car frame, and the top of the motor plate above the ground
+x = -35.0
+y = -27.0
+top_z = 40.0
+status = "assumed"
+source = "x, y: estimate from the reference part (plate symmetric about the car center line, 2 x 2 mm holes taken as the rear body posts, body-post spacing of [body_posts]); top_z estimated 2026-11-27; owner to measure"
+
 # ---- sensors -------------------------------------------------------------------------------------------------------
 [mapper]
 body = 57.0

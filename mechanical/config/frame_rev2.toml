@@ -1,0 +1,63 @@
+# Design parameters of the frame rev2 (mm, degrees). Facts come from hardware.toml and print.toml.
+# Car frame: X forward, Y left, Z up, origin = body-post center at ground level (docs/mechanical/conventions.md).
+# rev2: one-piece deck on the front body posts and a snap anchor on the motor plate (rev1: frame_rev1.toml)
+
+chassis_interface = "front_posts_anchor"
+post_clearance = 0.5
+
+# deck plate, one piece: a wide middle and a narrow front end (between the front tyres). The rear edge stays in
+# front of the rear tyres
+deck_thickness = 4.0
+deck_x_front = 140.0
+deck_x_rear = -92.0
+end_half_width = 42.0
+mid_x_min = -92.0
+mid_x_max = 60.0
+mid_y_min = -68.0
+mid_y_max = 64.0
+corner_r = 6.0
+
+# motor-plate anchor (parts/anchor.py): a block from the motor plate up to the deck bottom, 4 counterbored M3 holes
+# (head 5.7 mm in [fasteners]), and a snap pin through a slot in the deck
+anchor_size = 36.0
+anchor_floor = 3.0
+anchor_cbore_d = 7.0
+snap_pin_d = 8.0
+snap_pocket_gap = 2.0
+snap_slot_w = 2.0
+# lip: radial step of the latch (45 degree retention face). lead_h: height of the lead-in cone above the lip
+snap_lip = 0.6
+snap_lead_h = 1.4
+# clearance: deck slot half-width minus the pin radius (Y). slot_play: free travel of the pin along X in the slot
+snap_clearance = 0.2
+snap_slot_play = 2.0
+
+# rev3 power board: center and turn of the board (board Y = its 140 mm side), standoffs with M3 heat-set inserts
+# ([fasteners] in hardware.toml). Its underside is bare copper with VBAT_RAW: put an insulating sheet (for example
+# polyimide tape or fish paper) on the standoff side of the board. Owner step: docs/mechanical/handoff.md
+pcb_x = -18.0
+pcb_y = -31.5
+pcb_rot = 90.0
+pcb_standoff_h = 8.0
+pcb_standoff_od = 8.0
+
+# Pi 5: center and turn (0 = ports at +X; 180 = ports to the rear), standoffs for M2.5 thread-forming screws ([fasteners])
+pi_x = -15.0
+pi_y = 34.0
+pi_rot = 180.0
+pi_standoff_h = 8.0
+pi_standoff_od = 6.0
+
+# sensor rail blocks: solid material, drilled by hand at the position found by test
+lidar_block_x = 84.0
+lidar_block_y = 0.0
+lidar_block_size = [44.0, 50.0, 8.0]
+camera_block_x = 134.0
+camera_block_y = 0.0
+camera_block_size = [12.0, 44.0, 30.0]
+
+# acceptance
+clearance_min = 3.0
+# room for a hand and a body clip next to each post (estimate, not measured)
+clip_clearance = 5.0
+printed_top_max = 90.0

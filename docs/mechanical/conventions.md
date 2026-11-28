@@ -35,6 +35,7 @@
 | MECH-INTERFERE | No two parts (printed or `ref_`) overlap |
 | MECH-CLEAR | A named pair keeps its minimum gap (model acceptance) |
 | MECH-HEIGHT | The printed parts stay below the top height of the design file (model acceptance) |
+| MECH-SNAP | The bending strain of a snap hook is at most `snap_strain_max` (`print.toml`) (model acceptance) |
 | MECH-BED | Each printed part fits the print bed |
 | MECH-MESH | The STL is watertight and its winding is consistent |
 | MECH-STEP | The STEP file read back has the model volume, bounding box and part labels |

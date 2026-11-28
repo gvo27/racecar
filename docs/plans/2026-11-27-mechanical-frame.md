@@ -1,6 +1,6 @@
 # Plan: mechanical/ subproject, build123d frame for the TT-02 (rev1)
 
-Status: active (2026-11-28; A in main (#26); B (#27) and C (#29) in mech-dev; D open for the owner review (#30); integration PR #28)
+Status: active (2026-11-27; A in main (#26); B (#27) and C (#29) in mech-dev; D rev1 open (#30); D2 rev2 open, stacked on #30; integration PR #28)
 
 ## Context
 `mechanical/` is a scaffold (ADR 0001 reserves it for 3D-printed mounts). We need a printed frame that carries the rev3 power board and the Pi 5 on the TT-02 chassis, with rail blocks for the camera and the lidar. The workflow copies `pcb/`: a design skill, TDD and checks, a read-only review agent, CI. Claude designs and checks on the Linux VM with build123d. The owner imports the STEP file in SolidWorks (Win11) for the final human review. Infrastructure comes first, then the frame. This is an iterative design: placeholder values now, measured values later.
@@ -12,6 +12,8 @@ Status: active (2026-11-28; A in main (#26); B (#27) and C (#29) in mech-dev; D 
 - Battery swap: a quick-release frame. Pull the clips, lift the frame, swap the battery. Cables need slack.
 - Chassis interface: the four body posts plus the stock body clips. Keep it a swappable module: a later change to screw pads on the damper stays must not need a refactor.
 - Printing: not decided. Assume that the lab has all common printers and filaments. Values are `assumed` until confirmed.
+- Printer (owner 2026-11-27): the 3D printer at the workshop (not the mill lab `techctcarvera`) prints 250 x 250 mm. Build height and filament: not known yet.
+- Frame rev2 (owner 2026-11-27): one-piece deck on the front body posts and an anchor on the motor plate (4 x M3, 24 x 24 mm, from a measured reference part). The anchor holds the deck with a printed snap latch (no tool). Keep rev1 as the model `frame_rev1` for a later comparison.
 - STEP handoff: CI artifacts on every PR. A committed copy only for an approved release (`docs/mechanical/releases/<rev>/`).
 - `plugin-dev:skill-reviewer`: one run after phase B.
 - `/setup-shop`: not needed. The image needs only docker, which `make check-host` already requires. No new host package.
@@ -59,7 +61,8 @@ The phases have letters (A to D), so that they are not confused with PR numbers.
 - **B. Claude tooling:** rule, skill `mech-design`, agent `mech-reviewer`, test updates (`mech-*` names), docs (`docs/claude-tooling.md`, `docs/dependencies.md` image pins, root `README.md` row, `docs/README.md`, `mechanical/README.md`). Then `plugin-dev:skill-reviewer` (local enable, removed by `make close`).
 - **C. Hardware facts and references:** commit the Pi 5 PDF + `docs/datasheets/compute_raspberry_pi5.md` digest, `hardware.toml` with placeholders, the KiCad board reader (test: 4 holes at the expected spacing, outline 66 x 140), `refs.py` envelopes.
 - **D. Frame rev1:** deck, body-post interface with clips, PCB and Pi mounts, rail blocks. Checks green. `mech-reviewer`, then `code-review`. Owner SolidWorks review.
-- **E. Iterate (owner):** owner measures the car (list in `handoff.md`). Placeholders become `confirmed`. Print, fit, drill the rail blocks. After approval: `make mech-release REV=rev1`.
+- **D2. Frame rev2:** model `frame_rev2` (one-piece deck, front posts, snap anchor on the motor plate). Rev1 becomes model `frame_rev1`. Shared frame code in `models/_frame.py`. New check MECH-SNAP. `mech-reviewer`, then `code-review`. Owner SolidWorks review.
+- **E. Iterate (owner):** owner measures the car (list in `handoff.md`). Placeholders become `confirmed`. Print, fit, drill the rail blocks. After approval: `make mech-release MODEL=frame_rev2 REV=rev2`.
 
 ## Verification
 - `make mech-test`, `make mech-build MODEL=frame`, `make mech-check` (exit 0), `make checks`, `make context` (no new warning).

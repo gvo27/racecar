@@ -13,14 +13,18 @@ Generated files stay out of git, except an approved release. Git LFS is not used
 ## What the owner measures
 The car values in the models are `assumed` until the owner measures them. Give each value with the date:
 - The four body posts: front to rear and left to right spacing (center to center), post diameter, the height of the stay top where each post starts, the post-top height, and the height of each body-clip hole above the ground. A clip hole must sit just above the deck top, or the deck can lift.
+- The motor plate (frame rev2): the center of its 4-hole M3 pattern from the front body posts (front to rear, and left to right from the car center line), and the height of the plate top above the ground. The anchor height comes from it. Also: is the plate warm after a run?
 - The battery holder bar (D1) top and the top of its two snap pins, above the ground.
 - The top of the tub wall, and the ground clearance setting in use.
 - The battery space: length, width, height, and its position (center offset to the left of the car center line).
 - The wheels: track (hub center to hub center), tyre diameter and width, and the room the front tyres need when they steer.
 - The camera model, when it is chosen.
-- The printer and the filament, when the lab is ready.
+- The build height and the filament of the workshop printer, when the lab is ready.
 
 ## Owner steps at assembly
-- The rev3 board underside is bare copper with `VBAT_RAW`. Put an insulating sheet (for example polyimide tape or fish paper) between the board and the standoffs and splice bolts.
-- Battery swap: pull the four body clips, lift the frame up the posts and off, swap the battery. The frame lifts from the stay top to the post top (`[body_posts]` in `mechanical/config/hardware.toml`). Give each cable from the frame to the chassis (ESC, servo, battery) enough slack for that lift and to put the frame aside.
+- The rev3 board underside is bare copper with `VBAT_RAW`. Put an insulating sheet (for example polyimide tape or fish paper) between the board and the standoffs and the deck.
+- Frame rev2 anchor: screw the anchor to the motor plate with 4 M3 screws before the deck goes on. Each screw goes through the 3 mm floor of the anchor (`anchor_floor` in `mechanical/config/frame_rev2.toml`). Select a screw length that engages the plate threads and does not touch the motor. The anchor stays on the car.
+- Battery swap (frame rev2): pull the two front body clips, lift the deck up the front posts, and pull it up off the snap pin of the anchor. Swap the battery. To install, push the deck down on the snap pin until it latches, and put the front clips back. Give each cable from the frame to the chassis (ESC, servo, battery) enough slack to put the frame aside.
+- Battery swap (frame rev1): pull the four body clips, lift the frame up the posts and off. The frame lifts from the stay top to the post top (`[body_posts]` in `mechanical/config/hardware.toml`).
+- Snap pin: make a test print of the anchor and a deck strip with the slot first. Latch and release it 20 times. Look for cracks at the prong root. If it is too tight or too loose, report it: the lip and the clearance are design values in `frame_rev2.toml`.
 - Heat-set inserts and thread-forming screws: make a test print of one standoff first. The hole sizes in `[fasteners]` are start values.
