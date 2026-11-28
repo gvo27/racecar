@@ -17,18 +17,19 @@ mid_y_min = -68.0
 mid_y_max = 64.0
 corner_r = 6.0
 
-# motor-plate anchor (parts/anchor.py): a block from the motor plate up to the deck bottom, around the motor housing.
-# It has 4 counterbored M3 holes (head 5.7 mm in [fasteners]) and a snap pin in front of the housing (snap_offset_x
-# from the pattern center).
-# The block goes from anchor_x_min to anchor_x_max (from the pattern center) and is anchor_size wide (Y).
-# anchor_housing_gap: radial gap from the block to the housing. The deck has a hole over the housing (clearance_min)
+# motor-plate anchor (parts/anchor.py): a U-shaped block from the motor plate up to the deck bottom. Two side arms
+# hold the 4 counterbored M3 holes (head 5.7 mm in [fasteners]). The cutout between the arms takes the motor barrel
+# and is open to the rear: its width is the most that the arms allow (min_wall at the counterbores). The closed front
+# holds the snap pin (snap_offset_x from the pattern center). The block goes from anchor_x_min to anchor_x_max
+# (from the pattern center) and is anchor_size wide (Y). anchor_barrel_gap: gap from the U front to the barrel.
+# The deck has a rectangular cutout over the barrel (clearance_min)
 anchor_size = 36.0
 anchor_x_min = -18.0
 anchor_x_max = 34.0
-anchor_housing_gap = 0.9
+anchor_barrel_gap = 1.0
 snap_offset_x = 26.0
 anchor_floor = 3.0
-# counterbore 6.4 mm for the 5.7 mm M3 head: it leaves min_wall to the housing bore
+# counterbore 6.4 mm for the 5.7 mm M3 head: a small counterbore makes the barrel cutout wider
 anchor_cbore_d = 6.4
 snap_pin_d = 8.0
 snap_pocket_gap = 2.0
@@ -50,7 +51,7 @@ snap_slot_play = 2.0
 pcb_x = -18.0
 pcb_y = -31.5
 pcb_rot = 90.0
-# 12 mm: room between the board and the top of the motor housing (20 mm above the motor plate)
+# 12 mm: room between the board and the top of the motor barrel (20 mm above the motor plate)
 pcb_standoff_h = 12.0
 pcb_standoff_od = 8.0
 

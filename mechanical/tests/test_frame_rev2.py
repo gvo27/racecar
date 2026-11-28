@@ -203,35 +203,63 @@ def test_bad_slot_width_is_rejected():
         models.build(MODEL, overrides={"snap_slot_w": 8.0})
 
 
-def test_motor_housing_envelope_from_the_facts(frame, hw):
+def _barrel_box(hw, grow=0.0, z_lo=None, z_hi=None):
+    """The motor barrel envelope from the facts, larger by `grow` on each side in X and Y."""
+    b, pos = hw["motor_barrel"], hw["motor_plate_position"]
+    lo = pos["top_z"] if z_lo is None else z_lo
+    hi = pos["top_z"] + b["height"] if z_hi is None else z_hi
+    size = (b["length"] + 2 * grow, b["width"] + 2 * grow, hi - lo)
+    return Pos(pos["x"], pos["y"], (lo + hi) / 2) * Box(*size)
+
+
+def _volume(shape):
+    if shape is None:
+        return 0.0
+    return sum(s.volume for s in shape) if isinstance(shape, list) else shape.volume
+
+
+def test_motor_barrel_envelope_from_the_facts(frame, hw):
     asm, _ = frame
-    h, pos = hw["motor_housing"], hw["motor_plate_position"]
-    bb = _part(asm, "ref_motor_housing").bounding_box()
+    b, pos = hw["motor_barrel"], hw["motor_plate_position"]
+    bb = _part(asm, "ref_motor_barrel").bounding_box()
     assert (bb.center().X, bb.center().Y) == pytest.approx((pos["x"], pos["y"]))
-    assert bb.size.X == pytest.approx(h["diameter"])
-    assert (bb.min.Z, bb.max.Z) == pytest.approx((pos["top_z"], pos["top_z"] + h["height"]))
+    assert (bb.size.X, bb.size.Y) == pytest.approx((b["length"], b["width"]))
+    assert (bb.min.Z, bb.max.Z) == pytest.approx((pos["top_z"], pos["top_z"] + b["height"]))
 
 
-def test_housing_stays_free(frame, hw):
-    """The deck keeps clearance_min, the anchor keeps its own gap, the boards keep room for their bottom parts."""
+def test_barrel_stays_free(frame, hw):
+    """The deck keeps clearance_min, the anchor its own gap, the boards room for their bottom parts."""
     asm, cfg = frame
-    housing = _part(asm, "ref_motor_housing")
-    assert _part(asm, "deck").distance_to(housing) >= cfg["clearance_min"] - 1e-6
-    assert _part(asm, "anchor").distance_to(housing) >= cfg["anchor_housing_gap"] - 1e-6
+    barrel = _part(asm, "ref_motor_barrel")
+    assert _part(asm, "deck").distance_to(barrel) >= cfg["clearance_min"] - 1e-6
+    assert _part(asm, "anchor").distance_to(barrel) >= cfg["anchor_barrel_gap"] - 1e-6
     for label, key in (("ref_pcb_rev3", "pcb_rev3_heights"), ("ref_pi5", "pi5_heights")):
         need = hw[key]["bottom"] + cfg["clearance_min"]
-        assert _part(asm, label).distance_to(housing) >= need - 1e-6, label
+        assert _part(asm, label).distance_to(barrel) >= need - 1e-6, label
 
 
-def test_deck_has_a_hole_over_the_housing(frame, hw, pr):
+def test_anchor_is_a_u_open_to_the_rear(frame, hw):
+    """No anchor material between the barrel and the rear end of the anchor, across the barrel width."""
     asm, cfg = frame
-    pos = hw["motor_plate_position"]
-    d = hw["motor_housing"]["diameter"] + 2 * cfg["clearance_min"] + pr["limits"]["hole_comp"]
-    got = [(round(h.x, 3), round(h.y, 3)) for h in _vertical_holes([_part(asm, "deck")], d)]
-    assert got == [(pos["x"], pos["y"])]
+    b, pos = hw["motor_barrel"], hw["motor_plate_position"]
+    x_rear = pos["x"] + cfg["anchor_x_min"] - 1
+    x_barrel = pos["x"] - b["length"] / 2
+    lane = Pos((x_rear + x_barrel) / 2, pos["y"], 45) * Box(x_barrel - x_rear, b["width"], 20)
+    assert _volume(_part(asm, "anchor") & lane) < 1e-6
+    # closed at the front: material in front of the barrel, across its width
+    x_front = pos["x"] + b["length"] / 2 + cfg["anchor_barrel_gap"]
+    bridge = Pos(x_front + 2, pos["y"], pos["top_z"] + 1) * Box(2, b["width"], 1)
+    assert _volume(_part(asm, "anchor") & bridge) > 0
 
 
-def test_snap_pin_is_beside_the_housing(frame, hw):
+def test_deck_has_a_cutout_over_the_barrel(frame, hw):
+    asm, cfg = frame
+    z0 = hw["body_posts"]["base_z"]
+    zone = _barrel_box(hw, grow=cfg["clearance_min"] - 0.01, z_lo=z0, z_hi=z0 + cfg["deck_thickness"])
+    assert _volume(_part(asm, "deck") & zone) < 1e-6
+
+
+def test_snap_pin_is_in_front_of_the_barrel(frame, hw):
     asm, cfg = frame
     pos = hw["motor_plate_position"]
     pin_d = cfg["snap_pin_d"] + 2 * cfg["snap_pocket_gap"]

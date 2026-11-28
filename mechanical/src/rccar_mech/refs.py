@@ -93,8 +93,8 @@ def wheels(hw: dict) -> list[Shape]:
     return out
 
 
-def motor_housing(hw: dict) -> Shape:
-    """The motor housing above the motor plate: a cylinder on the 4-hole pattern center, from the plate top up."""
-    h, pos = hw["motor_housing"], hw["motor_plate_position"]
-    housing = Pos(pos["x"], pos["y"], pos["top_z"] + h["height"] / 2) * Cylinder(h["diameter"] / 2, h["height"])
-    return _named(housing, "ref_motor_housing", CHASSIS_COLOR)
+def motor_barrel(hw: dict) -> Shape:
+    """The top of the motor barrel above the motor plate: a box on the 4-hole pattern center, from the plate top up."""
+    b, pos = hw["motor_barrel"], hw["motor_plate_position"]
+    barrel = Pos(pos["x"], pos["y"], pos["top_z"] + b["height"] / 2) * Box(b["length"], b["width"], b["height"])
+    return _named(barrel, "ref_motor_barrel", CHASSIS_COLOR)

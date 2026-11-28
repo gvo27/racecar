@@ -1,6 +1,6 @@
 """Frame rev1 (kept for a later comparison): the deck on the four body-post stays, printed in two halves with a
-splice plate. Successor: frame_rev2. Not printable as it is: rev1 does not model the motor housing
-([motor_housing] in hardware.toml), and its deck crosses the housing envelope.
+splice plate. Successor: frame_rev2. Not printable as it is: rev1 does not model the motor barrel
+([motor_barrel] in hardware.toml), and its deck crosses the barrel envelope.
 
 Design parameters: config/frame_rev1.toml. Facts: config/hardware.toml, config/print.toml, the rev3 board file.
 The deck lies on the body-post stays and lifts off for the battery swap (chassis interface: parts/chassis_if.py).

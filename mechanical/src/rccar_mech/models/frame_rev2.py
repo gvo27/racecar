@@ -44,7 +44,7 @@ def build(cfg: dict) -> Compound:
         *(_frame.named(p, label, ANCHOR_COLOR) for label, p in iface.parts.items()),
         *_frame.payload_refs(cfg, hw, board, ztop),
         *refs.chassis(hw),
-        refs.motor_housing(hw),
+        refs.motor_barrel(hw),
         *refs.wheels(hw),
     ]
     return Compound(children=children, label="frame_rev2")
@@ -59,14 +59,14 @@ def acceptance(asm: Compound, cfg: dict) -> list[checks.Finding]:
     # every hole where the sources put it: board and Pi holes, chassis interface (posts, anchor)
     out += checks.expect_holes([copy.copy(p) for p in printed], iface.holes + pcb_pts + pi_pts)
     out += _frame.shared_acceptance(asm, cfg, hw, iface.clip_posts)
-    # motor housing: the deck keeps clearance_min, the anchor its own gap, the boards room for their bottom parts
+    # motor barrel: the deck keeps clearance_min, the anchor its own gap, the boards room for their bottom parts
     by = {p.label: p for p in checks.parts(asm)}
-    housing = by["ref_motor_housing"]
+    barrel = by["ref_motor_barrel"]
     for p in printed:
-        gap = cfg["anchor_housing_gap"] if p.label == "anchor" else cfg["clearance_min"]
-        out += checks.clearance(p, housing, gap)
-    out += checks.clearance(by["ref_pcb_rev3"], housing, hw["pcb_rev3_heights"]["bottom"] + cfg["clearance_min"])
-    out += checks.clearance(by["ref_pi5"], housing, hw["pi5_heights"]["bottom"] + cfg["clearance_min"])
+        gap = cfg["anchor_barrel_gap"] if p.label == "anchor" else cfg["clearance_min"]
+        out += checks.clearance(p, barrel, gap)
+    out += checks.clearance(by["ref_pcb_rev3"], barrel, hw["pcb_rev3_heights"]["bottom"] + cfg["clearance_min"])
+    out += checks.clearance(by["ref_pi5"], barrel, hw["pi5_heights"]["bottom"] + cfg["clearance_min"])
     # snap pin: the prong strain stays in the material limit, and the pin top leaves room under the boards
     if iface.snap is None:
         out.append(checks.Finding("MECH-SNAP", "error", "chassis interface", "rev2 needs the motor-plate snap anchor"))

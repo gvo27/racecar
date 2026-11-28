@@ -8,7 +8,7 @@ make mech-test                      # lint + tests
 make mech-check MODEL=test_bracket  # build + check -> build/mech/<MODEL>/ (STEP, STL, SVG, iso PNG, report.json)
 ```
 
-- `src/rccar_mech/`: the library (params, checks, export, render, diff) and `models/`, one module per model. The current frame is `frame_rev2`. `frame_rev1` (four posts, deck in two halves) stays for a comparison. It does not model the motor housing, so it is not printable as it is.
+- `src/rccar_mech/`: the library (params, checks, export, render, diff) and `models/`, one module per model. The current frame is `frame_rev2`. `frame_rev1` (four posts, deck in two halves) stays for a comparison. It does not model the motor barrel, so it is not printable as it is.
 - `config/`: `print.toml` (print limits, `assumed`), one design file per model.
 - Conventions, units, frame and the SolidWorks handoff: [docs/mechanical/](../docs/mechanical/README.md).
 - `COLCON_IGNORE` keeps this folder out of the ROS 2 build.
