@@ -26,6 +26,8 @@
 
 ## Target layout
 
+Replaced by [ADR 0001](adr/0001-monorepo-layout.md): the ROS packages are now in `ros2_ws/src/`, and the root [README.md](../README.md) has the layout table. The tree below is the phase-1 plan and stays as a record.
+
 ```
 rccar/                            ← repo root; colcon finds packages directly
 ├── rccar_msgs/                   msgs/srvs/actions: DriveCmd, Health, calibration srvs (contract)
@@ -179,21 +181,7 @@ A systemd unit runs `compose up -d` at boot. Deploys are explicit: run `make car
 - **`.claude/layout.yaml`** (archived 2026-11-18, `docs/archive/layout.yaml`): it was a map of path to role, owner package, rules file and invariants. Nothing read it for navigation, and it repeated `ls`, the rule `paths:` and the README.
 - **Rules files**, each created with its feature:
 
-| Rules file | `paths:` |
-|---|---|
-| `firmware.md` (exists; update) | `firmware/esp32/**` |
-| `dependencies.md` | `Makefile`, `docker/**`, `deploy/**`, `repos/**`, `**/package.xml`, `firmware/esp32/platformio.ini` |
-| `deploy.md` | `deploy/**`, `docker/**`, `.env.example` |
-| `tuning.md` | `tuning.toml`, `rccar_bringup/**` |
-| `models.md` | `models/**` |
-| `repos.md` | `repos/**` |
-| `msgs.md` | `rccar_msgs/**` |
-| `mcu_bridge.md` | `rccar_mcu_bridge/**` |
-| `calibration.md` | `rccar_calibration/**` |
-| `rangefinder.md` | firmware rangefinder files, `rccar_calibration/**/rangefinder*`, rangefinder datasheets, `tuning.toml` |
-| `supervisor.md` | `rccar_supervisor/**`, `rccar_teleop/**` |
-| `ros2.md` | `rccar_*/**` (phase 2; see "Sim/real parity + ROS 2 conventions") |
-| `captain.md` | `rccar_captain/**` (later) |
+The `paths:` frontmatter of each `.claude/rules/*.md` file owns its globs. `deploy/tests/test_rules_paths.py` checks that each glob matches a file.
 
 ---
 
@@ -252,7 +240,7 @@ captain / perception / planning / supervisor      ← identical in sim and on th
 
    See docs/setup.md "Lidar". The rangefinder (Garmin LIDAR-Lite v4 LED) on ESP32 I2C also started: driver + `/rccar/rangefinder/range` + `make rangefinder` (PR `rangefinder`, sensor bench checks pass, full vehicle not tested: status in docs/rangefinder/README.md). The e-brake follows after bench data exists. The phase also covers `rccar_drivers`, `rccar_description` TF, sensor calibration, time sync (chrony). `rccar_description` is the single URDF for car and sim. Sensor topics and frames are defined one time, so that the sim adapter can publish the same ones.
 5. **Captain, perception, inference, admin-link failsafe.** Per the notes above.
-6. **Sim adapter (sim repo [racecar-sim](https://github.com/gvo27/racecar-sim)).** The boundary is in `docs/sensor_contract.md`. With `sim:=true`, `mcu_bridge` stays up and pushes the tuning to the virtual ESP32. Gazebo world + `ros_gz_bridge` below the supervisor, and a `sim:=true` arg in `rccar_bringup`. Verify that the captain/perception stack runs unchanged in sim and on the car.
+6. **Sim adapter (sim repo [racecar-sim](https://github.com/gvo27/racecar-sim)).** The boundary is in `docs/interfaces/sensor_contract.md`. With `sim:=true`, `mcu_bridge` stays up and pushes the tuning to the virtual ESP32. Gazebo world + `ros_gz_bridge` below the supervisor, and a `sim:=true` arg in `rccar_bringup`. Verify that the captain/perception stack runs unchanged in sim and on the car.
 
 ---
 

@@ -460,8 +460,10 @@ static void handleLine(char *line, Print &out) {
   } else if (!strcasecmp(tok, "GET")) {
     printConfig(out);
   } else if (!strcasecmp(tok, "SAVE")) {
-    Config c;
-    portENTER_CRITICAL(&g_mux); c = g_cfg; portEXIT_CRITICAL(&g_mux);
+    Config c; bool armed;
+    portENTER_CRITICAL(&g_mux); c = g_cfg; armed = g_armed; portEXIT_CRITICAL(&g_mux);
+    // NVS write stops the flash cache, so controlTask stalls: never while armed
+    if (armed) { out.println("ERR disarm before SAVE"); return; }
     bool between = (c.steerCenterUs > min(c.steerLeftUs, c.steerRightUs)) &&
                    (c.steerCenterUs < max(c.steerLeftUs, c.steerRightUs));
     if (!between) { out.println("ERR center must lie between left and right"); return; }

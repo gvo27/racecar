@@ -4,7 +4,8 @@
 #   builder  rosdep (apt deps from package.xml) + colcon build --merge-install -> /ws/install
 #   test     builder + `colcon test` entrypoint (CI, make ros-test)
 #   runtime  ros-base + runtime deps + /ws/install only (default target; no compilers/sources)
-# Runtime layout: the repo is bind-mounted at /ws/src/racecar (tuning.toml, read-write for
+# Layout: the packages are in ros2_ws/src/ (image: /ws/src/racecar/ros2_ws/src). At runtime the repo is
+# bind-mounted at /ws/src/racecar (tuning.toml, read-write for
 # calibration); /ws/install holds the built packages. Devices come in via compose group_add.
 # rosdep needs raw.githubusercontent.com + packages.ros.org. Offline/sandbox builds only:
 # --build-arg ROSDEP_INSTALL=0 skips rosdep install (every dep must then already be in the
@@ -21,20 +22,20 @@ ENV DEBIAN_FRONTEND=noninteractive
 WORKDIR /ws
 
 # packages first (cache: only changes when package.xml files change)
-COPY rccar_msgs/package.xml src/racecar/rccar_msgs/package.xml
-COPY rccar_mcu_bridge/package.xml src/racecar/rccar_mcu_bridge/package.xml
-COPY rccar_supervisor/package.xml src/racecar/rccar_supervisor/package.xml
-COPY rccar_teleop/package.xml src/racecar/rccar_teleop/package.xml
-COPY rccar_calibration/package.xml src/racecar/rccar_calibration/package.xml
-COPY rccar_bringup/package.xml src/racecar/rccar_bringup/package.xml
-COPY rccar_drivers/package.xml src/racecar/rccar_drivers/package.xml
-COPY rccar_description/package.xml src/racecar/rccar_description/package.xml
-COPY repos/ src/racecar/repos/
+COPY ros2_ws/src/rccar_msgs/package.xml src/racecar/ros2_ws/src/rccar_msgs/package.xml
+COPY ros2_ws/src/rccar_mcu_bridge/package.xml src/racecar/ros2_ws/src/rccar_mcu_bridge/package.xml
+COPY ros2_ws/src/rccar_supervisor/package.xml src/racecar/ros2_ws/src/rccar_supervisor/package.xml
+COPY ros2_ws/src/rccar_teleop/package.xml src/racecar/ros2_ws/src/rccar_teleop/package.xml
+COPY ros2_ws/src/rccar_calibration/package.xml src/racecar/ros2_ws/src/rccar_calibration/package.xml
+COPY ros2_ws/src/rccar_bringup/package.xml src/racecar/ros2_ws/src/rccar_bringup/package.xml
+COPY ros2_ws/src/rccar_drivers/package.xml src/racecar/ros2_ws/src/rccar_drivers/package.xml
+COPY ros2_ws/src/rccar_description/package.xml src/racecar/ros2_ws/src/rccar_description/package.xml
+COPY ros2_ws/repos/ src/racecar/ros2_ws/repos/
 
 # third-party sources (manifest is empty today; vcs import is skipped then)
-RUN if grep -Eq '^\s+type:' src/racecar/repos/rccar.repos; then \
-      vcs import src < src/racecar/repos/rccar.repos; \
-    else echo "repos/rccar.repos is empty: nothing to import"; fi
+RUN if grep -Eq '^\s+type:' src/racecar/ros2_ws/repos/rccar.repos; then \
+      vcs import src < src/racecar/ros2_ws/repos/rccar.repos; \
+    else echo "ros2_ws/repos/rccar.repos is empty: nothing to import"; fi
 
 # apt deps from package.xml via rosdep (exec + build + test deps). apt cache cleaned.
 RUN if [ "${ROSDEP_INSTALL}" = "1" ]; then \
@@ -45,14 +46,14 @@ RUN if [ "${ROSDEP_INSTALL}" = "1" ]; then \
     else echo "WARN: ROSDEP_INSTALL=0, skipping rosdep install (offline build)"; fi
 
 # full sources + what the tests read from the repo root (tuning.toml, firmware setKey names)
-COPY rccar_msgs/ src/racecar/rccar_msgs/
-COPY rccar_mcu_bridge/ src/racecar/rccar_mcu_bridge/
-COPY rccar_supervisor/ src/racecar/rccar_supervisor/
-COPY rccar_teleop/ src/racecar/rccar_teleop/
-COPY rccar_calibration/ src/racecar/rccar_calibration/
-COPY rccar_bringup/ src/racecar/rccar_bringup/
-COPY rccar_drivers/ src/racecar/rccar_drivers/
-COPY rccar_description/ src/racecar/rccar_description/
+COPY ros2_ws/src/rccar_msgs/ src/racecar/ros2_ws/src/rccar_msgs/
+COPY ros2_ws/src/rccar_mcu_bridge/ src/racecar/ros2_ws/src/rccar_mcu_bridge/
+COPY ros2_ws/src/rccar_supervisor/ src/racecar/ros2_ws/src/rccar_supervisor/
+COPY ros2_ws/src/rccar_teleop/ src/racecar/ros2_ws/src/rccar_teleop/
+COPY ros2_ws/src/rccar_calibration/ src/racecar/ros2_ws/src/rccar_calibration/
+COPY ros2_ws/src/rccar_bringup/ src/racecar/ros2_ws/src/rccar_bringup/
+COPY ros2_ws/src/rccar_drivers/ src/racecar/ros2_ws/src/rccar_drivers/
+COPY ros2_ws/src/rccar_description/ src/racecar/ros2_ws/src/rccar_description/
 COPY tuning.toml src/racecar/tuning.toml
 COPY firmware/esp32/src/main.cpp src/racecar/firmware/esp32/src/main.cpp
 
@@ -78,14 +79,14 @@ ENV DEBIAN_FRONTEND=noninteractive \
 WORKDIR /ws
 
 # runtime (exec) deps only: rosdep resolves the package.xml of the built workspace
-COPY --from=builder /ws/src/racecar/rccar_msgs/package.xml /tmp/src/rccar_msgs/package.xml
-COPY --from=builder /ws/src/racecar/rccar_mcu_bridge/package.xml /tmp/src/rccar_mcu_bridge/package.xml
-COPY --from=builder /ws/src/racecar/rccar_supervisor/package.xml /tmp/src/rccar_supervisor/package.xml
-COPY --from=builder /ws/src/racecar/rccar_teleop/package.xml /tmp/src/rccar_teleop/package.xml
-COPY --from=builder /ws/src/racecar/rccar_calibration/package.xml /tmp/src/rccar_calibration/package.xml
-COPY --from=builder /ws/src/racecar/rccar_bringup/package.xml /tmp/src/rccar_bringup/package.xml
-COPY --from=builder /ws/src/racecar/rccar_drivers/package.xml /tmp/src/rccar_drivers/package.xml
-COPY --from=builder /ws/src/racecar/rccar_description/package.xml /tmp/src/rccar_description/package.xml
+COPY --from=builder /ws/src/racecar/ros2_ws/src/rccar_msgs/package.xml /tmp/src/rccar_msgs/package.xml
+COPY --from=builder /ws/src/racecar/ros2_ws/src/rccar_mcu_bridge/package.xml /tmp/src/rccar_mcu_bridge/package.xml
+COPY --from=builder /ws/src/racecar/ros2_ws/src/rccar_supervisor/package.xml /tmp/src/rccar_supervisor/package.xml
+COPY --from=builder /ws/src/racecar/ros2_ws/src/rccar_teleop/package.xml /tmp/src/rccar_teleop/package.xml
+COPY --from=builder /ws/src/racecar/ros2_ws/src/rccar_calibration/package.xml /tmp/src/rccar_calibration/package.xml
+COPY --from=builder /ws/src/racecar/ros2_ws/src/rccar_bringup/package.xml /tmp/src/rccar_bringup/package.xml
+COPY --from=builder /ws/src/racecar/ros2_ws/src/rccar_drivers/package.xml /tmp/src/rccar_drivers/package.xml
+COPY --from=builder /ws/src/racecar/ros2_ws/src/rccar_description/package.xml /tmp/src/rccar_description/package.xml
 RUN if [ "${ROSDEP_INSTALL}" = "1" ]; then \
       rosdep update --rosdistro jazzy \
       && apt-get update \

@@ -139,7 +139,7 @@ The milling check prints positions as (x, -y) in mm from the lower-left corner o
 
 ## kicad-happy analysis (`make pcb-gate BOARD=src`, kicad-happy 2.3.2, 2026-11-18)
 
-Gate: FAIL from the count false positive and WARN for the silkscreen (`.claude/skills/pcb-fab/references/fab-gate.md`). EMC score 71.5/100 with `analyze_pcb --full`. Verdicts from `pcb-reviewer` (2026-11-18), checked in the raw board file. Suppressed findings are in `pcb/src/.kicad-happy.json`, each with its reason.
+Gate: FAIL from the count false positive and WARN for the silkscreen (`pcb/.claude/skills/pcb-fab/references/fab-gate.md`). EMC score 71.5/100 with `analyze_pcb --full`. Verdicts from `pcb-reviewer` (2026-11-18), checked in the raw board file. Suppressed findings are in `pcb/src/.kicad-happy.json`, each with its reason.
 
 | Finding | Verdict | Evidence | Action |
 | --- | --- | --- | --- |

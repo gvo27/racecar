@@ -1,0 +1,37 @@
+name: checks
+
+# Fast repo checks, no docker: deploy/tests with the uv dev tools (layout, interface contract and sources,
+# rule globs, hw_guard hook, agents and skills, README links, close.py, render_env).
+# make unit runs the same tests in the ROS test image (ros.yml). This job gives the result in about 1 min
+# for every change, also for docs and .claude/ changes that do not start ros.yml.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      # setup-uv publishes no major tag: pin the release
+      - uses: astral-sh/setup-uv@v10.4.0
+      - name: uv sync (dev tools from uv.lock)
+        run: uv sync --frozen
+      - name: deploy/tests (pytest)
+        run: uv run pytest -q -p no:cacheprovider deploy/tests
+
+  # firmware/esp32/extra_packages/rccar_msgs is a synced copy of ros2_ws/src/rccar_msgs (micro-ROS builds it).
+  interfaces-sync:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: rccar_msgs == firmware extra_packages copy
+        run: |
+          diff -r ros2_ws/src/rccar_msgs firmware/esp32/extra_packages/rccar_msgs \
+            || { echo "::error::out of sync: cp -r ros2_ws/src/rccar_msgs/. firmware/esp32/extra_packages/rccar_msgs/"; exit 1; }

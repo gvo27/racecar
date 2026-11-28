@@ -3,7 +3,7 @@ paths:
   - "firmware/esp32/include/rangefinder.h"
   - "firmware/esp32/src/rangefinder*.cpp"
   - "firmware/esp32/src/main.cpp"
-  - "rccar_calibration/**/rangefinder*"
+  - "ros2_ws/src/rccar_calibration/**/rangefinder*"
   - "docs/datasheets/*rangefinder*"
   - "docs/datasheets/LIDAR-Lite*"
   - "docs/rangefinder/**"
@@ -12,9 +12,9 @@ paths:
 
 # Rangefinder (ESP32 I2C)
 
-The software name is always "rangefinder". The model name appears only in the datasheet docs and in the README inventory and wiring.
+The software name is always "rangefinder". The model name appears only in the datasheet docs and in `docs/hardware.md` (inventory and wiring) and in the root README pinout.
 
-Docs: status, findings and the swap procedure `docs/rangefinder/README.md`. Datasheet summary, pinout, registers and tuning key map `docs/datasheets/rangefinder_lidar_lite_v4.md`. Wiring and pin map: README "Pin map", "Wiring: Rangefinder". Firmware rules: `.claude/rules/firmware.md`.
+Docs: status, findings and the swap procedure `docs/rangefinder/README.md`. Datasheet summary, pinout, registers and tuning key map `docs/datasheets/rangefinder_lidar_lite_v4.md`. Wiring: `docs/hardware.md`. Pin map: root `README.md`. Firmware rules: `.claude/rules/firmware.md`.
 
 ## Rules
 - The firmware tolerates absence: with no sensor or `driver = 0`, control, failsafe and telemetry do not change. A failed init retries slowly and never blocks.
@@ -25,7 +25,7 @@ Docs: status, findings and the swap procedure `docs/rangefinder/README.md`. Data
 - `SENS rangefinder` is read-only. It does not enable or disable publishing (`SET rf_driver 0` does).
 - Keep pins 5 to 10 of the sensor unconnected (GPIOB low at power-up starts the BLE bootloader).
 - Sensor power comes from the sensor rail, never from the ESP32.
-- E-brake thresholds wait for bench data. They live in the firmware, then in `tuning.toml`, `FIRMWARE_KEYS` and `setKey`.
+- E-brake thresholds wait for bench data. They live in the firmware first, then become tuning keys (`firmware-change`, "Tuning key").
 - An interface or protocol change follows `.claude/rules/msgs.md`.
 - Deploy order: flash the firmware before `make car-up` with a new Pi image.
 

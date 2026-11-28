@@ -1,6 +1,6 @@
 # PCB conventions and facts
 
-Reference for the power distribution board in `pcb/`. The rules for changes are in [.claude/rules/schematics.md](../../.claude/rules/schematics.md). The workflow is skill `pcb-design` (`.claude/skills/pcb-design/`).
+Reference for the power distribution board in `pcb/`. The rules for changes are in [.claude/rules/schematics.md](../../.claude/rules/schematics.md). The workflow is skill `pcb-design` (`pcb/.claude/skills/pcb-design/`).
 
 ## Layout
 - `pcb/<board>/`: one KiCad project for each board (schematic, board, rules, `bom.csv`). A released board is in `pcb/releases/<rev>/`; rev1 is `pcb/releases/rev1/`. Make targets use `BOARD=<path below pcb/>`; the default is `DEFAULT_BOARD` in `pcb/libraries/paths.py` and `BOARD` in the Makefile.
@@ -8,7 +8,7 @@ Reference for the power distribution board in `pcb/`. The rules for changes are 
 - Fab outputs are optional and not committed. `make pcb-fab` writes them to `build/fab/<BOARD>/`.
 - `pcb/lib/`: symbol and footprint libraries, shared by all boards. `pcb/libraries/`: board tools, their Python libraries and tests (`paths.py` holds the layout).
 - `docs/pcb/`: context of the board and the schematic (plan, overview, BOM notes). Read it. The tools write only `releases/<rev>/review/` there (`paths.review_dir()`).
-- The lab directory (`lab:` in `.claude/CLAUDE.md`): lab facts, `milling_waivers.toml` and the mill tools (`tools/milling_check.py`, `tools/fab_export.py`).
+- The lab directory (`dir` in `pcb/config/lab.toml`): lab facts, `milling_waivers.toml` and the mill tools (`tools/milling_check.py`, `tools/fab_export.py`).
 - `pcb/COLCON_IGNORE` keeps the directory out of the ROS 2 build.
 
 ## Design rules and the mill board
@@ -48,7 +48,7 @@ Reference for the power distribution board in `pcb/`. The rules for changes are 
 - J3/J4 XH current: 3 A/pin with 22 AWG only; BEC pin up to 3 A = 100 % of rating. Never claim it "fits" or is "within" rating.
 - Garmin LIDAR-Lite v4 on J8 (4-pin XH, pin order = Garmin 1–4); I2C_SDA GPIO8, I2C_SCL GPIO9 via J5; no external pull-ups (13 kΩ internal to 3.3 V).
 - Power to the Pi 5 and ESP32 leaves through 2-wire USB-C pigtails (J6/J7) so their own USB-C input protection stays in the path.
-- Rev1 prototype is milled in-house. The machine, the copper stock and the rivet kit are in the lab file (`milling.toml` in the lab directory (`lab:` in `.claude/CLAUDE.md`)): no plated holes; vias are rivets (drill and pad from the lab file, `via_drill`, `via_pad`; see `fab_handoff.md`); DRC clearance ≥0.4 mm; route THT connector pins on the bottom; board outline fits the lab stock.
+- Rev1 prototype is milled in-house. The machine, the copper stock and the rivet kit are in the lab file (`milling.toml` in the lab directory (`dir` in `pcb/config/lab.toml`)): no plated holes; vias are rivets (drill and pad from the lab file, `via_drill`, `via_pad`; see `fab_handoff.md`); DRC clearance ≥0.4 mm; route THT connector pins on the bottom; board outline fits the lab stock.
 - Net classes live in `rc_power_board.kicad_pro`; clearance 0.4 mm all classes; HighCurrent 6.0, Power5A (`+5V_CPU`, `+5V_SENS`) 1.6, Power3A (`*+6V_BEC`) 1.0, Default 0.5 mm; DRC rules min clearance 0.4, track 0.5, via 2.0, annular 0.45, min hole 0.8; via 2.1/1.1 mm (rivet: `via_drill`, `via_pad` in the lab file). `fab_handoff.md` matches the plan's net-class table for rev1; fab-house revisions restore the plan values.
 
 ## Tooling (kicad-happy@kicad-happy)
@@ -59,10 +59,10 @@ Reference for the power distribution board in `pcb/`. The rules for changes are 
 
 ## Rev1 PCB (review only; Gerber and CAM wait for the lab tech)
 - Board: `rc_power_board.kicad_pcb` of the board directory, built by `pcb/libraries/build_pcb.py` and routed by `pcb/libraries/route_pcb.py` in the pinned KiCad 10.0.8 image (`docker/kicad.Dockerfile`) and Freerouting 2.5.0 (digest in the Makefile). Make targets: `kicad-image erc pcb-build pcb-route pcb-check pcb-mill-check pcb-review pcb-fab pcb-test bom`. No host Python for the tools. After the first build the `.kicad_pcb` is the owner's file: `pcb-build` refuses to overwrite it without `--force`.
-- Rivet via: drill and pad from the lab file (`via_drill`, `via_pad`), in every net class. A hole larger than the largest drill (`drill_set`) is bored with the end mill and must be at least `milled_hole_min`; the list is `MILLED_HOLES` in `pcb/libraries/placement.py`. Never make a hole between the largest drill and `milled_hole_min`. Limits, their status and the lab facts: the lab directory (`lab:` in `.claude/CLAUDE.md`).
+- Rivet via: drill and pad from the lab file (`via_drill`, `via_pad`), in every net class. A hole larger than the largest drill (`drill_set`) is bored with the end mill and must be at least `milled_hole_min`; the list is `MILLED_HOLES` in `pcb/libraries/placement.py`. Never make a hole between the largest drill and `milled_hole_min`. Limits, their status and the lab facts: the lab directory (`dir` in `pcb/config/lab.toml`).
 - Fab outputs: `make pcb-fab` writes `build/fab/<BOARD>/` (DXF F.Cu, B.Cu, Edge.Cuts; Excellon; drill-map DXF) in the lab frame: origin = dowel 1, board turned 90 degrees counter-clockwise on the lab stock, B.Cu not mirrored. Do not commit them: the KiCad project is the source. Never use KiCad's native DXF for the mill. `build_pcb.py --sync-drills` (`make pcb-build PCB_BUILD_ARGS=--sync-drills`) applies the drill set, bored holes and via drill to an existing board.
 - `make pcb-check` also runs the opening test of `check_board.py` (`PATH_ROWS`): copper width along the GND, `VBAT` and 5 V paths on B.Cu. Power zones and the `U1_PG` jumper are planned in `pcb/libraries/placement.py` (`BUS_ZONES`, `GND_KEEPOUTS`, `JUMPERS`); the router (no vias) handles signals only. `build_pcb.py --sync-fields` copies the symbol fields onto an existing board without other changes. `build_pcb.py --sync-zones` (`make pcb-build PCB_BUILD_ARGS=--sync-zones`) rebuilds and refills the zones of an existing board from `placement.py`; parts and tracks stay.
-- After every board change run `make pcb-check pcb-mill-check` (skill `pcb-milling-check`). DRC clean does not mean millable. MILL-DEPTH uses the lab depth (`cut_depth_*` and `copper_thickness` in the lab file); a failure means a limit changed, not the board.
+- After every board change run `make pcb-check pcb-mill-check` (skill `pcb-mill`). DRC clean does not mean millable. MILL-DEPTH uses the lab depth (`cut_depth_*` and `copper_thickness` in the lab file); a failure means a limit changed, not the board.
 - Never put F.Cu copper on a THT pad. Never put a via inside a part courtyard. No F-side courtyard overlaps another one or crosses the board edge (DRC `courtyards_overlap` and `check_board.py`). Module footprints (`Pololu_D36V50Fx`) carry the real body: a header-only footprint hides collisions. VBAT, VBAT_RAW and GND are B.Cu zones, not tracks.
 - Connector pin order decides if a net can be routed on one layer: do not change a J3/J4/J5/J8 orientation without a new `make pcb-route`. Rule `U3_fine` is in `rc_power_board.kicad_dru`.
 

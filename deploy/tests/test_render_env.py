@@ -11,7 +11,7 @@ TUNING = {'platform': {'pi5': {'esp32_device': '/dev/rccar-esp32', 'arch': 'arm6
 
 
 def _render(env, tuning=TUNING):
-    return r.render(env, tuning, '/home/pi/ros2_ws/src/racecar', 1000, 1001, 20)
+    return r.render(env, tuning, '/home/pi/racecar', 1000, 1001, 20)
 
 
 def test_parse_env_comments_quotes_and_blank():
@@ -33,7 +33,7 @@ def test_render_defaults_and_platform():
     assert v['TZ'] == 'UTC'
     assert v['RCCAR_ROS_IMAGE'] == 'rccar-ros:local'
     assert (v['HOST_UID'], v['HOST_GID'], v['DIALOUT_GID']) == ('1000', '1001', '20')
-    assert v['REPO_DIR'] == '/home/pi/ros2_ws/src/racecar'
+    assert v['REPO_DIR'] == '/home/pi/racecar'
 
 
 def test_render_env_overrides():

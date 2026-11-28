@@ -1,9 +1,9 @@
 # Lab config: milling limits, machine and lab inventory (Makera Carvera, in-house isolation milling).
-# This is the one file for lab facts. Its directory is the lab directory: the pointer is the `lab:` line of
-# .claude/CLAUDE.md. Maintain it with the skill .claude/skills/pcb-lab-config/SKILL.md.
+# This is the one file for lab facts. Its directory is the lab directory: the pointer is key dir of
+# pcb/config/lab.toml. Maintain it with the skill pcb/.claude/skills/pcb-mill/SKILL.md.
 # Every value has status = "confirmed" or "assumed" and a source.
 # Assumed values stay assumed until the lab tech confirms them. Do not change a limit to make a board pass.
-# Checked by tools/milling_check.py (make pcb-mill-check). Skill: .claude/skills/pcb-milling-check/SKILL.md
+# Checked by tools/milling_check.py (make pcb-mill-check). Rule ids: pcb/.claude/skills/pcb-mill/references/mill-rules.md
 
 [copper_thickness]
 value = 0.070
@@ -121,7 +121,7 @@ unit = "mm"
 status = "assumed"
 source = "owner/main session 2026-11-11: each J* courtyard within 1.0 mm of the board edge (wire entry outward)"
 
-# ---- Machine and lab inventory (skill pcb-lab-config). The checks do not read these tables. ----
+# ---- Machine and lab inventory (skill pcb-mill). The checks do not read these tables. ----
 # To move to a different machine or lab: change this file, then run make pcb-test pcb-check pcb-mill-check.
 [machine]
 manufacturer = "Makera"

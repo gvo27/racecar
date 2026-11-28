@@ -1,10 +1,10 @@
 ---
 paths:
-  - "rccar_drivers/**"
-  - "rccar_description/**"
-  - "rccar_bringup/launch/drivers.launch.py"
-  - "rccar_bringup/launch/viz.launch.py"
-  - "rccar_calibration/**/lidar_imu*"
+  - "ros2_ws/src/rccar_drivers/**"
+  - "ros2_ws/src/rccar_description/**"
+  - "ros2_ws/src/rccar_bringup/launch/drivers.launch.py"
+  - "ros2_ws/src/rccar_bringup/launch/viz.launch.py"
+  - "ros2_ws/src/rccar_calibration/**/lidar_imu*"
   - "docs/datasheets/slamtec*"
   - "docs/lidar/**"
 ---
@@ -14,7 +14,7 @@ paths:
 The software name is "lidar" or "mapper". The model name appears only in the datasheet docs. Reference (protocol, viz, bench values, power path): `docs/lidar/driver.md`. Status and open items: `docs/lidar/README.md`. Topics and QoS: `.claude/rules/ros2.md`. Hardware test rules: `.claude/rules/hw-testing.md`.
 
 ## Rules
-- The driver uses only the standard library. Keep the logic in `rccar_drivers/slamtec/*` (no rclpy). The node only wires the lifecycle.
+- The driver uses only the standard library. Keep the logic in `ros2_ws/src/rccar_drivers/rccar_drivers/slamtec/` (no rclpy). The node only wires the lifecycle.
 - All socket IO runs on one thread. Callbacks and timers do not share the socket.
 - A device command error keeps the link up. Only a socket or protocol error causes a reconnect, with backoff.
 - Copy the shape of a real device reply into the fake Mapper and its tests. Do not invent a reply format.

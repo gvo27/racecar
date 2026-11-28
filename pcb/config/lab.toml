@@ -1,0 +1,2 @@
+# Lab directory (mill limits, machine, inventory, mill tools). Readers: pcb/libraries/lab.py, Makefile.
+dir = "docs/techctcarvera"

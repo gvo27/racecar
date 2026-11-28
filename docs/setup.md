@@ -8,7 +8,7 @@ Assumptions have the label **Assume:**. If an assumption is false, fix it before
 
 ```sh
 sudo usermod -aG docker,dialout $USER   # then log out and back in
-mkdir -p ~/ros2_ws/src && cd ~/ros2_ws/src
+cd ~
 curl -LsSf https://astral.sh/uv/install.sh | sh            # uv, if not installed (then open a new shell)
 git clone https://github.com/gvo27/racecar && cd racecar    # one clone per user; collaborators work via GitHub PRs
 make install-host                       # sudo: udev rule -> /dev/rccar-esp32, systemd unit rccar.service (enabled)
@@ -16,7 +16,13 @@ cp .env.example .env                    # set TZ, ROS_DOMAIN_ID (default 0), PLA
 make setup                              # check prerequisites, dev tools into .venv (dev-setup), build both images (fw-image + ros-image); safe to run again
 ```
 
-- The repo is at `~/ros2_ws/src/racecar` on the Pi. The containers mount it at `/ws/src/racecar` (read-only, plus `tuning.toml` and `logs/` read-write), so calibration writes your working copy. Use one clone for each user. Nobody edits the clone of another user.
+- The repo is at `~/racecar` on the Pi. The containers mount it at `/ws/src/racecar` (read-only, plus `tuning.toml` and `logs/` read-write), so calibration writes your working copy. Use one clone for each user. Nobody edits the clone of another user.
+- **Move an old clone.** Before ADR 0001 (`docs/adr/0001-monorepo-layout.md`) the clone was at `~/ros2_ws/src/racecar`. Move it one time, in this order:
+  1. `cd ~/ros2_ws/src/racecar && make car-down`
+  2. `mv ~/ros2_ws/src/racecar ~/racecar && cd ~/racecar` (the untracked `.env` and `logs/` move with it)
+  3. `uv sync --frozen --reinstall && make dev-setup` (the `.venv` scripts contain the old absolute path. `make dev-setup` alone does not change them, because `uv sync` finds the packages already installed)
+  4. `make install-host` (writes the new `WorkingDirectory` into `rccar.service`)
+  5. `make car-up`
 - `make install-host` prints each step. It installs `deploy/car/99-rccar.rules` (CH343 `1a86:55d3` -> `/dev/rccar-esp32`, group `dialout`). It renders `deploy/car/rccar.service` with the path of this clone and your user. Afterwards, unplug the USB cable and plug it in again one time. The unit starts the stack at boot with the images that are already built. Deploys stay explicit (`make car-pull && make car-up`).
 - `make setup` checks the host prerequisites (git, make, docker, uv), runs `make dev-setup` and builds both images (`fw-image`, `ros-image`). It is safe to run again. `uv sync --frozen` changes nothing when `.venv` agrees with `uv.lock`. `direnv allow` only renews the approval of `.envrc`. The image builds use the docker cache. `make dev-setup` = `uv sync --frozen` + `direnv allow`. If direnv is missing or `direnv allow` fails, it prints a warning and continues.
 - `make config` runs automatically in `make car-up` and in the boot service. Run it by hand only to check the rendered file. It runs `deploy/render_env.py` inside the ROS image, so it needs `make ros-image` first. It reads `.env` and `tuning.toml [platform.$PLATFORM]` (today: `esp32_device`, `arch`). It writes the gitignored `deploy/car/.env.generated`. If `.env` is missing, it fails with a hint.
@@ -26,10 +32,8 @@ make setup                              # check prerequisites, dev tools into .v
 
 | Plugin / server | Use |
 | --- | --- |
-| `superpowers` | brainstorm → plan → TDD → review workflow |
 | `pyright-lsp` | Python diagnostics, needs `pyright-langserver` on PATH |
 | `clangd-lsp` | firmware C/C++ diagnostics, needs `clangd` on PATH + `make compiledb` |
-| `embedded-skills` | firmware architecture, RTOS, ISR design |
 | `asd-ste100` | Simplified Technical English rewrites for docs and PR text (`.claude/rules/writing.md`) |
 | `ros2-engineering` | micro-ROS, ros2_control, Nav2, perception, advisory hooks (`ROS2_SKILL_DISABLE_HOOKS=all` turns them off) |
 
@@ -50,7 +54,7 @@ make unit                       # deploy/tests in the ROS test image, no hardwar
 2. Connect the ESC black wire and the servo black wire to P1-22 (G), the common ground.
 3. Connect the ESC red wire (6 V) to the servo red wire only, through a Y-harness. **No red wire touches the ESP32.**
 
-See the pin map in the [README](../README.md#microcontroller-pin-map-left-header-p1-only).
+See the pin map in the [README](../README.md#microcontroller-pinout).
 
 ## 3. Connect
 
@@ -86,7 +90,7 @@ Then switch the ESC **on** while the ESP32 is running. The ESC beeps and learns 
 
 ```sh
 ssh pi              # from the laptop
-cd ~/ros2_ws/src/racecar && make teleop
+cd ~/racecar && make teleop
 ```
 
 Teleop runs in the SSH terminal and talks to the supervisor locally (`/rccar/cmd/admin`). ROS traffic never leaves the Pi.
@@ -128,7 +132,7 @@ Single commands to the ESP32 (stack up): `make mcu CMD="GET"`, `make mcu CMD="IN
 
 ### Rangefinder
 
-Wiring (power off): see [README "Wiring: Rangefinder"](../README.md#wiring-rangefinder-garmin-lidar-lite-v4-led). Datasheet summary: [rangefinder_lidar_lite_v4.md](datasheets/rangefinder_lidar_lite_v4.md). The sensor 5 V comes from the sensor rail, never from the ESP32.
+Wiring (power off): see [hardware.md "Wiring: Rangefinder"](hardware.md#wiring-rangefinder-garmin-lidar-lite-v4-led). Datasheet summary: [rangefinder_lidar_lite_v4.md](datasheets/rangefinder_lidar_lite_v4.md). The sensor 5 V comes from the sensor rail, never from the ESP32.
 
 ```sh
 make mcu CMD="SENS rangefinder"   # read-only status + config line (stack up); publishing is on while driver = 1
@@ -261,7 +265,7 @@ Expect these results: the default route is via wlan0 only, and the ping works.
 
 **Bandwidth.** One scan is ~930 points x 12 B = ~11 KB raw, ~15 KB base64. At 10-20 Hz that is 1.2-2.4 Mbit/s. With pose, IMU at 50 Hz and the map at ~0.5 Hz, the total stays under 5 Mbit/s. This is far below what 802.11n/ac gives. The real cost is jitter (5-50 ms spikes) and dropouts. So the driver stamps messages on receive. Gaps beyond the timeout are stale (diagnostics `mapper_driver: link`). The lidar is **not** in the stop path. The supervisor and the ESP32 failsafe are not affected.
 
-**Step 1: agent-run acceptance (`make lidar-hw-test`).** Do this before the manual steps below. Claude Code on the Pi (or you) runs `make drivers-stop && make lidar-hw-test` with the car stationary and the ESC power off. The test launches its own `mapper_driver` against the physical Mapper (read-only, getters only). It checks these items against `rccar_drivers/hw_criteria.py`: link, scan, IMU, pose drift and pose yaw rate at rest, map and TF. For the IMU, the quaternion is provided. Acc units and gyro at rest are NA when the device does not provide them. The result is a PASS/FAIL/NA table on stdout (NA does not fail the run) and JSON in `logs/hw_test_lidar_<UTC>.json`. The test leaves `drivers` stopped. `make drivers-start` is a hardware restart and needs your approval (the guard hook asks). Rules: `.claude/rules/hw-testing.md`.
+**Step 1: agent-run acceptance (`make lidar-hw-test`).** Do this before the manual steps below. Claude Code on the Pi (or you) runs `make drivers-stop && make lidar-hw-test` with the car stationary and the ESC power off. The test launches its own `mapper_driver` against the physical Mapper (read-only, getters only). It checks these items against `ros2_ws/src/rccar_drivers/rccar_drivers/hw_criteria.py`: link, scan, IMU, pose drift and pose yaw rate at rest, map and TF. For the IMU, the quaternion is provided. Acc units and gyro at rest are NA when the device does not provide them. The result is a PASS/FAIL/NA table on stdout (NA does not fail the run) and JSON in `logs/hw_test_lidar_<UTC>.json`. The test leaves `drivers` stopped. `make drivers-start` is a hardware restart and needs your approval (the guard hook asks). Rules: `.claude/rules/hw-testing.md`.
 
 **Viewing: `make viz`.** This command runs foxglove_bridge (binary, handles LaserScan/OccupancyGrid well; rosbridge is JSON and slow). It binds to `127.0.0.1` only. A websocket has no login, so a bind to the LAN address of the Pi would let anyone on the network read the feed. On localhost, only a program that already runs on the Pi can connect, and SSH carries the rest. In VS Code Remote-SSH, the **Ports** tab forwards 8765 automatically (add it if it does not). On the laptop, open Foxglove (app.foxglove.dev or desktop) or Lichtblick. Choose "Foxglove WebSocket" and `ws://localhost:8765`. Add a 3D panel with fixed frame `map` and enable `/rccar/lidar/scan`, `/rccar/mapper/map` and `/tf`. Served topics: `/rccar/*`, `/tf`, `/tf_static`, `/diagnostics`, `/robot_description`. Override the port with `ros2 launch rccar_bringup viz.launch.py port:=9000`.
 
@@ -269,7 +273,7 @@ Troubleshooting: the bridge (foxglove_bridge 3.6.0, SDK based) accepts the webso
 
 The Foxglove warning "Infinity invalid values" on `/rccar/lidar/scan` is expected (+inf = no return per REP-117). Set the Color mode of the scan to Flat and the Point size to about 4.
 
-**Topics.** See `docs/sensor_contract.md`. Scan, IMU and pose are best effort (~10/50/10 Hz). The map is reliable + transient_local (~0.5 Hz). These parameters of `mapper_driver` are bench-TBD: `scan_angle_sign` and `map_transpose`. (`map_free_is_high` is bench-confirmed `false`: cells 0 unknown, 1..127 free, 128..255 occupied, 2026-11-02.) The IMU `linear_acceleration` is raw and flagged not provided (covariance[0] = -1) unless `imu_trust_acc:=true`. The URDF mount offsets in `rccar_description` are unmeasured until you measure them on the car.
+**Topics.** See `docs/interfaces/sensor_contract.md`. Scan, IMU and pose are best effort (~10/50/10 Hz). The map is reliable + transient_local (~0.5 Hz). These parameters of `mapper_driver` are bench-TBD: `scan_angle_sign` and `map_transpose`. (`map_free_is_high` is bench-confirmed `false`: cells 0 unknown, 1..127 free, 128..255 occupied, 2026-11-02.) The IMU `linear_acceleration` is raw and flagged not provided (covariance[0] = -1) unless `imu_trust_acc:=true`. The URDF mount offsets in `rccar_description` are unmeasured until you measure them on the car.
 
 **IMU feed: `make lidar-imu`.** This command is read-only. It needs the stack up. The Mapper (fw 2.6.0_dev) exports only an orientation and no rates, so most columns come from the SLAM pose. The command prints one line per sample (at most ~10/s) with these columns:
 - Pi time.
@@ -306,6 +310,10 @@ make car-shutdown   # disarm via /supervisor/disarm, compose down, asks, then su
 ```
 
 Then switch the ESC off and unplug the USB cable. Containers stay unprivileged. `poweroff` runs on the host in your shell.
+
+## 10. Command reference
+
+Moved to [commands.md](commands.md). Every-session commands: root [README.md](../README.md#daily-commands).
 
 ## Phase 2 bench checklist (user-run)
 

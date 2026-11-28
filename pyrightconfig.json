@@ -1,5 +1,5 @@
 {
-  "include": ["rccar_supervisor", "rccar_mcu_bridge", "rccar_teleop", "rccar_calibration", "rccar_bringup", "rccar_drivers", "rccar_description", "deploy"],
+  "include": ["ros2_ws/src", "deploy"],
   "exclude": ["**/__pycache__", "firmware/esp32/.pio", ".pio-core", "logs", "models/cache", "build"],
   "pythonVersion": "3.12",
   "typeCheckingMode": "basic",

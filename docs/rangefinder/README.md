@@ -9,9 +9,9 @@ Other facts have their own owners:
 | Wiring, names, invariants, sensor swap | [.claude/rules/rangefinder.md](../../.claude/rules/rangefinder.md) |
 | Datasheet summary, registers, tuning key map | [docs/datasheets/rangefinder_lidar_lite_v4.md](../datasheets/rangefinder_lidar_lite_v4.md) |
 | Tuning values | `tuning.toml` `[rangefinder]` |
-| Topic, frame, QoS, rate | [docs/sensor_contract.md](../sensor_contract.md) |
+| Topic, frame, QoS, rate | [docs/interfaces/sensor_contract.md](../interfaces/sensor_contract.md) |
 | Bring-up commands | [docs/setup.md](../setup.md) "Rangefinder" |
-| Pin map and wire colours | [README.md](../../README.md) "Pin map", "Wiring: Rangefinder" |
+| Pin map and wire colours | [README.md](../../README.md#microcontroller-pinout) "Microcontroller pinout", [hardware.md](../hardware.md#wiring-rangefinder-garmin-lidar-lite-v4-led) "Wiring: Rangefinder" |
 
 ## Status (2026-11-18)
 
@@ -53,12 +53,12 @@ These are the decisions and lessons from the rangefinder work. Each one has a re
 - Record the readings at 0.5 m, 1 m and 2 m against a tape measure. Put them in this file.
 - Run the regression checks `make test` and `make teleop` with the rangefinder firmware.
 - Test on the full vehicle (wheels on the ground). The owner did not test this yet.
-- The frame `rangefinder_link` is not in the URDF yet (`docs/sensor_contract.md`, TF row `gap`).
+- The frame `rangefinder_link` is not in the URDF yet (`docs/interfaces/sensor_contract.md`, TF row `gap`).
 - The forward e-brake is not in the firmware. Its thresholds need confirmed bench readings first. They go in the firmware, then in `tuning.toml`, `FIRMWARE_KEYS` and `setKey`.
 
 ## Swap to another rangefinder
 1. Add `firmware/esp32/src/rangefinder_<model>.cpp` that implements `include/rangefinder.h`.
 2. Register it in the driver table entry (`driver` id).
 3. Add new `[rangefinder]` values from its datasheet (confirmed values only).
-4. Add `docs/datasheets/rangefinder_<model>.md` (summary) + the archived PDF. Update the Docs line of `.claude/rules/rangefinder.md`, the README wiring and the mapping table.
-5. Update the `paths:` of `.claude/rules/rangefinder.md`. If the wiring changes, pins.h must equal the README.
+4. Add `docs/datasheets/rangefinder_<model>.md` (summary) + the archived PDF. Update the Docs line of `.claude/rules/rangefinder.md`, the wiring in `docs/hardware.md` and the mapping table.
+5. Update the `paths:` of `.claude/rules/rangefinder.md`. If the wiring changes, pins.h must equal the root README pin table.

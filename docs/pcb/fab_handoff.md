@@ -4,12 +4,12 @@ For the owner doing layout. Parts: `bom.csv` and `bom_offboard.csv` (made by `ma
 
 # A. Prototype rev1: in-house CNC (Makera Carvera)
 
-V-bit isolation milling in the lab's calibrated Fusion 360 template (`example/` in the lab directory ([`lab:` in `.claude/CLAUDE.md`](../../.claude/CLAUDE.md))), with DXF and Excellon files from `make pcb-fab` (`build/fab/<BOARD>/`, not committed; frame and file list: the docstring of `tools/fab_export.py` in the lab directory). The board is not fabricated by a fab house for this revision.
+Isolation milling (bits: `[[isolation_bit]]` in the lab file) in the lab's calibrated Fusion 360 template (`example/` in the lab directory (key `dir` of [`pcb/config/lab.toml`](../../pcb/config/lab.toml))), with DXF and Excellon files from `make pcb-fab` (`build/fab/<BOARD>/`, not committed; frame and file list: the docstring of `tools/fab_export.py` in the lab directory). The board is not fabricated by a fab house for this revision.
 
 ## Stock and tools
 
 - **Stock:** Kepro P22-465G FR-4, 2 oz Cu, double-sided, 4" x 6" x 0.062" (101.6 x 152.4 x 1.57 mm), lab stock (owner, 2026-11-12). The earlier 3" x 6" blank (P22-365G, 76.2 x 152.4 mm) is also in stock but is too small for the dowel line of the lab template. The blank is even (depth error 0, owner). Scrub oxide off before milling. 2 oz matches the trace-width plan, so the 2 oz columns below apply directly. Other lab stock: generic double-sided 10 x 15 cm, 10 pcs, copper weight TBD (likely 1 oz): not for this board.
-- **Lab tools, cut depth, drill set, end mill and dowels:** the lab file (`milling.toml` in the lab directory ([`lab:` in `.claude/CLAUDE.md`](../../.claude/CLAUDE.md))). The values there have a status and a source. Do not copy them here.
+- **Lab tools, cut depth, drill set, end mill and dowels:** the lab file (`milling.toml` in the lab directory (key `dir` of [`pcb/config/lab.toml`](../../pcb/config/lab.toml))). The values there have a status and a source. Do not copy them here.
   - Isolation bits of the lab CAM: `[[isolation_bit]]` in `milling.toml`. The rev3 lab CAM uses a 0.6 mm corn bit and a 0.2 mm end mill rest pass (`docs/pcb/releases/rev3/cam/README.md`). The milling check lists the areas that need the rest pass (MILL-GAP-BIT) and the tools to stage.
 - **Makera PCB Fabrication Pack:** 2x 1/8" 60° 0.1 mm-tip V-bit, 2x 1/8" 30° 0.2 mm-tip V-bit, 20x milling/drilling bits, dowel pins, UV solder-mask paint. The lab CAM uses only the 0.2 mm tip V-bit.
 - **Fixturing:** rigid flat; double-sided tape on a flat sacrificial board.

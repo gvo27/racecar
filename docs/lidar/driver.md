@@ -5,7 +5,7 @@ Facts about the lidar driver (`rccar_drivers`, `rccar_description`). The rules a
 ## Protocol facts
 - The protocol is JSON over TCP 1445 on the Mapper's Wi-Fi (192.168.11.1, bench-confirmed) or on Ethernet. `mapper_host` may move to tuning.toml [platform.pi5] in a later change. Messages end with `\n\r\n\r\n` and are matched by request_id. There is no USB or serial data.
 - On the bench firmware (2.6.0_dev), result `code == 1` means success. The datasheet envelope does not say this (`protocol.RESULT_OK`). The `getrobothealth` flags are camelCase (`hasError`...). `Health.from_result` parses them (it also accepts snake_case). The device failure code is unobserved.
-- No ROS 2 driver exists (opensw_ros and slamware_ros_sdk are ROS 1). The project has its own driver that uses only the standard library. The logic is in `rccar_drivers/slamtec/*` (no rclpy). The node (`mapper_driver`) only wires the lifecycle.
+- No ROS 2 driver exists (opensw_ros and slamware_ros_sdk are ROS 1). The project has its own driver that uses only the standard library. The logic is in `ros2_ws/src/rccar_drivers/rccar_drivers/slamtec/` (no rclpy). The node (`mapper_driver`) only wires the lifecycle.
 - All socket IO runs on one thread. Callbacks and timers do not share the socket. The driver reconnects with backoff and stamps each message on receive.
 
 ## Viz bridge + TF
@@ -29,9 +29,9 @@ Facts about the lidar driver (`rccar_drivers`, `rccar_description`). The rules a
 - `+5V_SENS` XH header (J11 to J14), XHP-2 housing, USB-A male 2-wire pigtail (red +, black GND), the Mapper USB-A "5V DC" socket (power input only, no data).
 
 ## Hardware test (`make lidar-hw-test`)
-- A launch_testing run: `rccar_drivers/test_hw/test_mapper_hw.py`. Criteria and thresholds: `rccar_drivers/hw_criteria.py` (pytest: `test/test_hw_criteria.py`). Report: `logs/hw_test_lidar_<UTC>.json`, with `status` for each criterion.
+- A launch_testing run: `ros2_ws/src/rccar_drivers/test_hw/test_mapper_hw.py`. Criteria and thresholds: `ros2_ws/src/rccar_drivers/rccar_drivers/hw_criteria.py` (pytest: `test/test_hw_criteria.py`). Report: `logs/hw_test_lidar_<UTC>.json`, with `status` for each criterion.
 - Each criterion is PASS, FAIL or NA ("not provided"). NA never fails. OVERALL is PASS only if no criterion is FAIL.
 - IMU gyro-at-rest is NA when its bit is absent from `imu_avail_bitmap` (read from /diagnostics). acc-units is NA when its bit is absent or the driver marks acceleration as not provided (`imu_trust_acc` false, the default).
-- `rccar_drivers/test_hw/` is not under `test/`. `conftest.py` ignores it unless `RCCAR_HW_TEST=1`, so `colcon test` and CI never collect it. `setup.py` installs it to `share/rccar_drivers/test_hw/` for the runtime image.
+- `ros2_ws/src/rccar_drivers/test_hw/` is not under `test/`. `conftest.py` ignores it unless `RCCAR_HW_TEST=1`, so `colcon test` and CI never collect it. `setup.py` installs it to `share/rccar_drivers/test_hw/` for the runtime image.
 - The test runs its own driver, so `drivers` must be stopped. It leaves `drivers` stopped and says so.
 - Work loop: `make drivers-stop`, edit, `make ros-test` (fake Mapper), `make ros-image`, `make lidar-hw-test`.

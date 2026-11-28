@@ -3,8 +3,7 @@ paths:
   - "pcb/**"
   - "docs/pcb/**"
   - "docs/techctcarvera/**"
-  - "firmware/esp32/**"
-  - "rccar_*/**"
+  - "ros2_ws/src/rccar_*/**"
 ---
 
 # Domain plugins: enable on demand
@@ -14,8 +13,7 @@ paths:
 | Folder | Plugin | Skills |
 | --- | --- | --- |
 | `pcb/**`, `docs/pcb/**`, `docs/techctcarvera/**` | `kicad-happy@kicad-happy` | kicad, spice, emc, datasheets, bom |
-| `firmware/esp32/**` | `embedded-skills@embedded-skills` | embedded firmware skills |
-| `rccar_*/**` | `ros2-engineering@ros2-engineering-skills` | ROS 2 and micro-ROS skills |
+| `ros2_ws/src/rccar_*/**` | `ros2-engineering@ros2-engineering-skills` | ROS 2 and micro-ROS skills |
 
 When you work on a file in a folder of the table:
 1. Look for the skills of the plugin in your skill list. If they are there, do nothing more.

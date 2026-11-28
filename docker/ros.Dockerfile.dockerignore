@@ -17,3 +17,13 @@ deploy/car/.env.generated
 build
 install
 log
+ros2_ws/build
+ros2_ws/install
+ros2_ws/log
+simulation
+mechanical
+.venv
+.claude
+pcb
+scripts
+models

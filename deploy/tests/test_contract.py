@@ -1,26 +1,28 @@
-"""docs/sensor_contract.md "active" rows == the topics, types, frames and QoS in the source code."""
+"""docs/interfaces/sensor_contract.md "active" rows == the topics, types, frames and QoS in the source code."""
 from pathlib import Path
 import re
 
 import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
-CONTRACT = ROOT / 'docs' / 'sensor_contract.md'
-MAPPER = ROOT / 'rccar_drivers' / 'rccar_drivers' / 'mapper_node.py'
+WS = ROOT / 'ros2_ws' / 'src'
+CONTRACT = ROOT / 'docs' / 'interfaces' / 'sensor_contract.md'
+MAPPER = WS / 'rccar_drivers' / 'rccar_drivers' / 'mapper_node.py'
 FIRMWARE = ROOT / 'firmware' / 'esp32' / 'src' / 'main.cpp'
-SUPERVISOR = ROOT / 'rccar_supervisor' / 'rccar_supervisor' / 'supervisor_node.py'
-ARBITER = ROOT / 'rccar_supervisor' / 'rccar_supervisor' / 'arbiter.py'
-URDF = ROOT / 'rccar_description' / 'urdf' / 'rccar.urdf.xacro'
+SUPERVISOR = WS / 'rccar_supervisor' / 'rccar_supervisor' / 'supervisor_node.py'
+ARBITER = WS / 'rccar_supervisor' / 'rccar_supervisor' / 'arbiter.py'
+URDF = WS / 'rccar_description' / 'urdf' / 'rccar.urdf.xacro'
 
 COLUMNS = ['topic', 'type', 'frame', 'publisher', 'qos', 'rate', 'status', 'sim source']
+SOURCE_COLUMNS = ['source', 'contract action', 'sim artifact']
 
 
-def contract_rows():
-    """Rows of the first table whose header is COLUMNS."""
+def contract_rows(columns=COLUMNS):
+    """Rows of the first table whose header is columns."""
     rows, in_table = [], False
     for line in CONTRACT.read_text().splitlines():
         cells = [c.strip() for c in line.strip().strip('|').split('|')]
-        if cells == COLUMNS:
+        if cells == columns:
             in_table = True
             continue
         if in_table:
@@ -28,11 +30,12 @@ def contract_rows():
                 break
             if set(line) <= set('|- '):
                 continue
-            rows.append(dict(zip(COLUMNS, cells)))
+            rows.append(dict(zip(columns, cells)))
     return rows
 
 
 ROWS = contract_rows()
+SOURCES = contract_rows(SOURCE_COLUMNS)
 ACTIVE = [r for r in ROWS if r['status'] == 'active']
 
 
@@ -49,7 +52,7 @@ def mapper_defaults():
 
 
 def test_contract_parses():
-    assert ROWS, 'no topic table in docs/sensor_contract.md'
+    assert ROWS, 'no topic table in docs/interfaces/sensor_contract.md'
     assert {r['status'] for r in ROWS} <= {'active', 'planned'}
     assert len({r['topic'] for r in ROWS}) == len(ROWS), 'duplicate topic rows'
 
@@ -111,3 +114,16 @@ def test_urdf_has_active_sensor_frames():
         if frame in ('-', 'map', 'odom') or frame in gaps:
             continue
         assert '<link name="%s"/>' % frame in urdf, 'frame %s missing in URDF' % frame
+
+
+def test_source_table_parses():
+    assert SOURCES, 'no "source | contract action | sim artifact" table in %s' % CONTRACT.name
+
+
+@pytest.mark.parametrize('row', SOURCES, ids=lambda r: r['source'])
+def test_source_paths_exist(row):
+    """Each backticked path in the source column matches a file (skill interface-change reads this table)."""
+    paths = re.findall(r'`([^`]+)`', row['source'])
+    assert paths, 'source cell without a backticked path: %s' % row['source']
+    for path in paths:
+        assert any(ROOT.glob(path)), 'source path %s matches no file' % path

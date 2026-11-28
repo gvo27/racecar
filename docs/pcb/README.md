@@ -18,7 +18,7 @@ Layout since 2026-11-16: the KiCad projects, the libraries and the tools are in 
 | `pcb/lib/rc_power.kicad_sym` + `pcb/releases/rev1/sym-lib-table` | Project symbol library: `D36V50F5` (all 12 module pins, used by U1 and U2), `REG_MODULE` (generic VIN/GND/VOUT/EN, no longer used on the board) and one power symbol per rail. |
 | `pcb/releases/rev1/rc_power_board.kicad_pcb` / `.kicad_dru` | Rev1 board, routed, for review only (no Gerber or CAM files). The `.kicad_dru` holds rule `U3_fine`. |
 | `pcb/lib/rc_power.pretty/` + `pcb/releases/rev1/fp-lib-table` | Project footprint library: `Pololu_D36V50Fx` (U1 and U2: 12 pads and the full 25.4 x 25.4 mm body, from Pololu's drawing; facts in `docs/datasheets/regulator_pololu_d36v50f5.md`). |
-| `milling_waivers.toml` (lab directory) | The waiver list for the milling check. The milling limits (`milling.toml`), the mill tools (`tools/milling_check.py`, `tools/fab_export.py`) and the lab CAM example are also in the lab directory ([`lab:` in `.claude/CLAUDE.md`](../../.claude/CLAUDE.md)). |
+| `milling_waivers.toml` (lab directory) | The waiver list for the milling check. The milling limits (`milling.toml`), the mill tools (`tools/milling_check.py`, `tools/fab_export.py`) and the lab CAM example are also in the lab directory ([`dir` in `pcb/config/lab.toml`](../../pcb/config/lab.toml)). |
 | `pcb/libraries/` | Python tools and tests that run in the KiCad image: `paths.py` (repo layout), `lab.py` (path of the lab directory), `build_pcb.py`, `placement.py`, `route_pcb.py`, `check_board.py`, `review_plots.py`. |
 | `releases/<rev>/review/` | Review package of each release: DRC report, milling check, layer PDF, 1:1 PDF, `README.md` (the latest state only; older records are in `docs/archive/pcb/review/`). The active board `pcb/src` reviews into `releases/rev3/review/`. |
 | `pcb/releases/rev1/rc_power_board.pdf` | Plot of the sheet, for review without KiCad. |
@@ -73,7 +73,7 @@ The board is built and routed headless in the pinned KiCad 10.0.8 image: `make k
 
 ## CNC-milled prototype (Makera Carvera)
 
-Rev1 is milled in-house on the lab stock in the lab template (lab file and CAM example: the lab directory ([`lab:` in `.claude/CLAUDE.md`](../../.claude/CLAUDE.md))); no fab house, no plated holes, vias are soldered copper rivets.
+Rev1 is milled in-house on the lab stock in the lab template (lab file and CAM example: the lab directory ([`dir` in `pcb/config/lab.toml`](../../pcb/config/lab.toml))); no fab house, no plated holes, vias are soldered copper rivets.
 
 - **Rivets (update):** lab stock is an LPKF EasyContac kit (0.6/0.8/1.0/1.2 mm, with setting tool). Default via = 0.8 mm rivet, drill 1.1 mm, pad 2.0 mm (matches the existing `.kicad_pro` via settings); 1.2 mm optional for high current. Table and source: `fab_handoff.md`. BOM rivets now $0.
 
