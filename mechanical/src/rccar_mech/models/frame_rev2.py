@@ -13,7 +13,7 @@ import copy
 from build123d import Color, Compound
 
 from rccar_mech import checks, refs
-from rccar_mech.models import _frame
+from rccar_mech.models import _frame, is_ref
 from rccar_mech.parts import chassis_if, deck
 
 STL_TOLERANCE = 0.05
@@ -41,7 +41,7 @@ def build(cfg: dict) -> Compound:
 
     children = [
         _frame.named(plate, "deck", _frame.DECK_COLOR),
-        *(_frame.named(p, p.label, ANCHOR_COLOR) for p in iface.parts),
+        *(_frame.named(p, label, ANCHOR_COLOR) for label, p in iface.parts.items()),
         *_frame.payload_refs(cfg, hw, board, ztop),
         *refs.chassis(hw),
         *refs.wheels(hw),
@@ -52,26 +52,18 @@ def build(cfg: dict) -> Compound:
 def acceptance(asm: Compound, cfg: dict) -> list[checks.Finding]:
     hw, pr, board = _frame.facts()
     z0, iface = _interface(cfg, hw, pr)
-    ztop = z0 + cfg["deck_thickness"]
     pcb_pts, pi_pts = _frame.board_points(cfg, hw, board)
-    printed = [p for p in checks.parts(asm) if not p.label.startswith("ref_")]
+    printed = [p for p in checks.parts(asm) if not is_ref(p)]
     out = []
     # every hole where the sources put it: board and Pi holes, chassis interface (posts, anchor)
     out += checks.expect_holes([copy.copy(p) for p in printed], iface.holes + pcb_pts + pi_pts)
-    posts = [f"ref_body_post_{n}" for n in iface.info.get("clip_posts", ["fl", "fr", "rl", "rr"])]
-    out += _frame.shared_acceptance(asm, cfg, hw, posts)
+    out += _frame.shared_acceptance(asm, cfg, hw, iface.clip_posts)
     # snap pin: the prong strain stays in the material limit, and the pin top leaves room under the boards
-    if "snap_strain" in iface.info:
+    if iface.snap is not None:
         limit = pr["material"]["snap_strain_max"]
-        if iface.info["snap_strain"] > limit:
-            msg = f"prong strain {iface.info['snap_strain']:.4f} > {limit}"
+        if iface.snap.strain > limit:
+            msg = f"prong strain {iface.snap.strain:.4f} > {limit}"
             out.append(checks.Finding("MECH-SNAP", "error", "anchor snap pin", msg))
-        above = iface.info["snap_pin_top"] - ztop
-        for name, h, bottom in (
-            ("pcb", cfg["pcb_standoff_h"], hw["pcb_rev3_heights"]["bottom"]),
-            ("pi", cfg["pi_standoff_h"], hw["pi5_heights"]["bottom"]),
-        ):
-            room = h - bottom - above
-            if room < cfg["clearance_min"] - 1e-6:
-                out.append(checks.Finding("MECH-CLEAR", "error", f"snap pin / {name}", f"{room:.2f} mm < clearance"))
+        above = iface.snap.pin_top - (z0 + cfg["deck_thickness"])
+        out += _frame.room_under_boards(cfg, hw, above, "snap pin")
     return out

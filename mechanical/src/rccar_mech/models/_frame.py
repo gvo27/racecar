@@ -4,6 +4,7 @@ and the acceptance criteria that all frame revisions share. The registry skips t
 from build123d import Box, Color, Pos, Shape
 
 from rccar_mech import checks, kicad, params, refs
+from rccar_mech.models import is_ref
 from rccar_mech.parts import mounts, moved, place
 
 DECK_COLOR = Color(0.95, 0.55, 0.1)
@@ -67,7 +68,7 @@ def shared_acceptance(asm, cfg: dict, hw: dict, clip_posts: list[str]) -> list[c
     """Battery and holder clearance, standoff minimums, wheel clearance, clip access at the posts in clip_posts
     (labels), and the printed top height."""
     every = checks.parts(asm)
-    printed = [p for p in every if not p.label.startswith("ref_")]
+    printed = [p for p in every if not is_ref(p)]
     by = {p.label: p for p in every}
     out = []
     # the battery and its holder stay free (clearance), the boards have room under them
@@ -93,4 +94,17 @@ def shared_acceptance(asm, cfg: dict, hw: dict, clip_posts: list[str]) -> list[c
         out.append(
             checks.Finding("MECH-HEIGHT", "error", "printed parts", f"top z {top:.1f} > {cfg['printed_top_max']}")
         )
+    return out
+
+
+def room_under_boards(cfg: dict, hw: dict, protrusion: float, what: str) -> list[checks.Finding]:
+    """A part that stands `protrusion` above the deck top under a board leaves room for the parts under the board."""
+    out = []
+    for name, h, bottom in (
+        ("pcb", cfg["pcb_standoff_h"], hw["pcb_rev3_heights"]["bottom"]),
+        ("pi", cfg["pi_standoff_h"], hw["pi5_heights"]["bottom"]),
+    ):
+        room = h - bottom - protrusion
+        if room < cfg["clearance_min"] - 1e-6:
+            out.append(checks.Finding("MECH-CLEAR", "error", f"{what} / {name}", f"{room:.2f} mm < clearance"))
     return out

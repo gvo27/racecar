@@ -141,22 +141,19 @@ def test_snap_pin_leaves_room_under_the_boards():
     assert any(f.id == "MECH-CLEAR" and "snap pin" in f.where for f in found)
 
 
-def test_anchor_stays_clear_of_the_battery(frame, hw):
-    asm, cfg = frame
-    anchor = _part(asm, "anchor")
-    for label in ("ref_battery", "ref_battery_holder"):
-        assert anchor.distance_to(_part(asm, label)) >= cfg["clearance_min"] - 1e-6
-    # lift-out path: the anchor stays on the car, so it must not be above the battery footprint
-    a, b = anchor.bounding_box(), _part(asm, "ref_battery").bounding_box()
+def test_anchor_is_not_in_the_battery_lift_out_path(frame):
+    """The anchor stays on the car, so it must not be above the battery footprint (clearances: acceptance)."""
+    asm, _ = frame
+    a, b = _part(asm, "anchor").bounding_box(), _part(asm, "ref_battery").bounding_box()
     assert a.max.Y < b.min.Y or a.min.Y > b.max.Y or a.max.X < b.min.X or a.min.X > b.max.X
 
 
-def test_wheels_stay_clear(frame):
+def test_shorter_deck_and_anchor_clear_the_wheels(frame):
     asm, cfg = frame
     wheels = [p for p in checks.parts(asm) if p.label.startswith("ref_wheel_")]
     assert len(wheels) == 4
     for w in wheels:
-        for label in ("deck", "anchor", "ref_pcb_rev3", "ref_pi5"):
+        for label in ("deck", "anchor"):
             assert _part(asm, label).distance_to(w) >= cfg["clearance_min"] - 1e-6, (w.label, label)
 
 

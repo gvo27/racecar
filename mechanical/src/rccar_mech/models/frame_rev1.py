@@ -10,7 +10,7 @@ import copy
 from build123d import Color, Compound, Cylinder, Pos
 
 from rccar_mech import checks, refs
-from rccar_mech.models import _frame
+from rccar_mech.models import _frame, is_ref
 from rccar_mech.parts import chassis_if, deck
 
 STL_TOLERANCE = 0.05
@@ -75,22 +75,14 @@ def acceptance(asm: Compound, cfg: dict) -> list[checks.Finding]:
     lay = layout(cfg, hw, pr, board)
     iface = chassis_if.build(cfg, hw, pr, lay["z0"], cfg["deck_thickness"])
     every = checks.parts(asm)
-    printed = [p for p in every if not p.label.startswith("ref_")]
+    printed = [p for p in every if not is_ref(p)]
     by = {p.label: p for p in every}
     out = []
     # every hole where the sources put it: board and Pi holes, chassis interface, splice bolts (deck and splice)
     expected = iface.holes + lay["pcb"] + lay["pi"] + lay["bolts"] + lay["bolts"]
     out += checks.expect_holes([copy.copy(p) for p in printed], expected)
-    posts = [p.label for p in every if p.label.startswith("ref_body_post_")]
-    out += _frame.shared_acceptance(asm, cfg, hw, posts)
+    out += _frame.shared_acceptance(asm, cfg, hw, iface.clip_posts)
     # splice bolt heads under the boards: room above the heads for the parts under each board
-    f = hw["fasteners"]
-    for name, h, bottom in (
-        ("pcb", cfg["pcb_standoff_h"], hw["pcb_rev3_heights"]["bottom"]),
-        ("pi", cfg["pi_standoff_h"], hw["pi5_heights"]["bottom"]),
-    ):
-        room = h - bottom - f["m3_head_h"]
-        if room < cfg["clearance_min"]:
-            out.append(checks.Finding("MECH-CLEAR", "error", f"{name} / bolt heads", f"{room:.2f} mm < clearance"))
+    out += _frame.room_under_boards(cfg, hw, hw["fasteners"]["m3_head_h"], "bolt heads")
     out += checks.clearance(by["ref_fasteners"], by["ref_battery_holder"], cfg["clearance_min"])
     return out
