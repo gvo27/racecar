@@ -9,7 +9,7 @@ Read the project rules, the plan documents, `docs/datasheets/` and the lab file 
 - Source: battery chemistry, cell count, cutoff voltage, maximum current, connector.
 - Environment: vibration, heat, enclosure, mounting holes, board size limit.
 - Inventory: parts in hand, connector families in stock, wire gauges, crimp tools.
-- Method: mill (machine, bits, stock, rivets: skill `pcb-lab-config`) or fab house (name, layer count, assembly).
+- Method: mill (machine, bits, stock, rivets: skill `pcb-mill`) or fab house (name, layer count, assembly).
 - Review: who approves, and the deadline.
 
 Do not continue until the owner answers. An unknown value stays `TBD`. Never invent a part value.

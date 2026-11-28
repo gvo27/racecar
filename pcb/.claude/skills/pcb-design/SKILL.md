@@ -7,7 +7,7 @@ description: Use when you design or change a KiCad schematic or board in pcb/ - 
 
 The main session implements. The agent `pcb-reviewer` reviews with a fresh context after each phase. The owner approves the plan and the schematic. This follows the user-scope engineering workflow: implement, verify, independent review, fix, report.
 
-Project rules: `.claude/rules/schematics.md`. Board context: `docs/pcb/`. Lab facts: the lab directory (`lab:` in `.claude/CLAUDE.md`).
+Project rules: `.claude/rules/schematics.md`. Board context: `docs/pcb/`. Lab facts: the lab directory (`dir` in `pcb/config/lab.toml`).
 
 ## References (read when the step starts)
 | File | Use |
@@ -25,8 +25,7 @@ Project rules: `.claude/rules/schematics.md`. Board context: `docs/pcb/`. Lab fa
 | kicad-happy `spice` | subcircuit checks, only with `ngspice` |
 | kicad-happy `datasheets`, `lcsc` | through skill `hw-research` |
 | `pcb-parts` | part choice, BOM fields, compatibility of parts, connectors and harnesses |
-| `pcb-lab-config` | read or change a lab fact (machine, bits, stock, rivets, limits) |
-| `pcb-milling-check` | a board for the lab mill |
+| `pcb-mill` | a board for the lab mill: the milling check, and read or change a lab fact (machine, bits, stock, rivets, limits) |
 | `pcb-fab` | "Is this board ready to order or to mill?", fab outputs, supplier files |
 | kicad-happy `jlcpcb`, `pcbway` | method "fab house": the fab rules and limits of that house. No project skill covers fab-house rule compliance: tell the owner about the gap |
 
@@ -38,7 +37,7 @@ Project rules: `.claude/rules/schematics.md`. Board context: `docs/pcb/`. Lab fa
 1. **Intake and plan** (`references/intake.md`). Owner gate 1: the plan.
 2. **Schematic loop** (`references/board-loop.md`). Run the schematic rows of the check matrix after each task.
 3. **Review the schematic.** Dispatch `pcb-reviewer` with the scope "schematic", the plan path and the commit range. Fix each blocker and major finding in this session, run the checks again, and dispatch the reviewer again. Owner gate 2: the schematic.
-4. **Board loop** (`references/board-loop.md`). Run the board rows after each change. Method "mill" adds `pcb-milling-check`.
+4. **Board loop** (`references/board-loop.md`). Run the board rows after each change. Method "mill" adds `pcb-mill`.
 5. **Review the board.** Run `make pcb-gate` first. Dispatch `pcb-reviewer` with the scope "board" and the gate output directory. Repeat until no blocker and no major finding is open.
 6. **Fab outputs** (skill `pcb-fab`).
 7. **Report** (below). Set the plan status to `done`.
@@ -62,3 +61,8 @@ Report to the owner only when no finding is open, in this order:
 3. Findings fixed in the loop, one line each, with the commit.
 4. Open questions and owner steps (GUI checks, bench checks, lab tech questions).
 5. What was not checked, and why.
+
+## Verify
+- Run the rows of `references/check-matrix.md` for the change: `make erc`, `make pcb-check`, `make pcb-test`, and `make pcb-mill-check` for method "mill".
+- Then the independent review: agent `pcb-reviewer`.
+- Claim a result only with the command output from this session. A check that you did not run is "not run".

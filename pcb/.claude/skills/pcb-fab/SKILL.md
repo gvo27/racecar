@@ -48,3 +48,7 @@ A release freezes a board in `pcb/releases/rev<N>/` with its own `design_rules.t
 3. The path of the `.kicad_pcb` file. If the owner asked for export files, also their paths.
 4. Owner decisions (TBD parts, silkscreen, method limits that are `assumed`).
 5. What was not checked (for example, no SPICE without `ngspice`, no supplier stock without API keys).
+
+## Verify
+- `make pcb-gate BOARD=<board>` (with `METHOD=mill` for the lab mill), `make pcb-check BOARD=<board>`, and `make pcb-mill-check BOARD=<board>` for the mill.
+- Claim a result only with the command output from this session. A check that you did not run is "not run".

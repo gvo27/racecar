@@ -30,12 +30,10 @@ Workflow: skill `pcb-design`. Fab outputs and releases: skill `pcb-fab`. Review:
 - Pi 5 and ESP32 power leaves through USB-C pigtails (J6, J7), so their input protection stays in the path.
 
 ## Board
-- After every board change, run `make pcb-check pcb-mill-check`. DRC clean does not mean millable.
 - Never put F.Cu copper on a THT pad. Never put a via inside a part courtyard. No courtyard overlaps another one or crosses the board edge. Module footprints carry the real body.
 - Never make a hole between the largest drill and `milled_hole_min`.
 - Do not route a reviewed board again from zero. Do not change a J3, J4, J5 or J8 orientation without a new `make pcb-route`.
 - Never use the KiCad native DXF for the mill. `make pcb-fab` writes the lab frame.
 
 ## Analyzers
-- kicad-happy findings are claims. Check each one against the raw files and the datasheets. Known false positives: `docs/pcb/releases/rev1/review/README.md` and `pcb/.claude/skills/pcb-fab/references/fab-gate.md`.
-- ERC and DRC results count only with their KiCad 10 output from this session.
+- kicad-happy findings are claims: check each one against the raw files and the datasheets (known false positives: `docs/pcb/releases/rev1/review/README.md`, `pcb/.claude/skills/pcb-fab/references/fab-gate.md`). ERC and DRC results count only with their KiCad 10 output from this session.

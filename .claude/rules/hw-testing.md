@@ -17,4 +17,3 @@ paths:
 4. Hardware tests are read-only. The driver sends getters only. Do not add device reboot or configuration commands. The car is stationary with ESC power off.
 5. The agent may run `make lidar-snapshot` and `make lidar-record SECS=<=60` at any time without approval (read-only subscribers). Do not commit or upload anything from `logs/`.
 6. Fault injection (unplug power or USB, kill core, motor runs) is user-run only.
-7. Starting `drivers` again (`make drivers-start`) is a hardware restart: ask the user.

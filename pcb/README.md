@@ -17,7 +17,7 @@ KiCad 10 projects of the power distribution board: one battery feeds the compute
 - Context of the board and the schematic (plan, overview, BOM notes, review record): [`docs/pcb/`](../docs/pcb/README.md). Stale docs: `docs/archive/pcb/`.
 - Releases are numbered `rev1`, `rev2`, `rev3` and so on (rev1 and rev2 were `rev_A` and `rev_B` until 2026-11-18). A release is frozen: copy the working board to `releases/rev<N>/` with its own `design_rules.toml`.
 - Risks of the mill board, most important first: [review record](../docs/pcb/releases/rev3/review/README.md#risks-most-important-first).
-- Lab facts, mill tools and waivers: the lab directory (`lab:` line in [`.claude/CLAUDE.md`](../.claude/CLAUDE.md)).
+- Lab facts, mill tools and waivers: the lab directory (`dir` in [`config/lab.toml`](config/lab.toml)).
 - Rules: [`.claude/rules/schematics.md`](../.claude/rules/schematics.md).
 - Design rules: `design_rules.toml` in the board directory, or in the lab directory for a board without its own file (`src/`). `make pcb-rules BOARD=<board>` checks the KiCad project files against them.
 - Make targets: `make help`. A target works on one board: `make pcb-check BOARD=<path below pcb/>`. The default is the base board (`BASE_BOARD` in the Makefile, `DEFAULT_BOARD` in `libraries/paths.py`).

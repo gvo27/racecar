@@ -25,7 +25,7 @@ Docs: status, findings and the swap procedure `docs/rangefinder/README.md`. Data
 - `SENS rangefinder` is read-only. It does not enable or disable publishing (`SET rf_driver 0` does).
 - Keep pins 5 to 10 of the sensor unconnected (GPIOB low at power-up starts the BLE bootloader).
 - Sensor power comes from the sensor rail, never from the ESP32.
-- E-brake thresholds wait for bench data. They live in the firmware, then in `tuning.toml`, `FIRMWARE_KEYS` and `setKey`.
+- E-brake thresholds wait for bench data. They live in the firmware first, then become tuning keys (`firmware-change`, "Tuning key").
 - An interface or protocol change follows `.claude/rules/msgs.md`.
 - Deploy order: flash the firmware before `make car-up` with a new Pi image.
 

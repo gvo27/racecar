@@ -44,3 +44,8 @@ The plugin `kicad-happy@kicad-happy` is off by default. Enable it for the sessio
 
 ## Report
 Use the report format of `upstream-research`. Add for each part: the part number with the revision, the datasheet link with the page for each fact, and "not verified on the bench" for each value that the bench has not confirmed.
+
+## Verify
+- Each fact has a primary source: the link, the revision or version, and the page or section.
+- Read each value that the project uses again on the source page before you write it to the repo.
+- A fact without a source is "not found", not a guess.
