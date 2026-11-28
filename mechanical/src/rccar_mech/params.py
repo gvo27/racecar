@@ -7,12 +7,18 @@ Design files (<model>.toml): parameters that the designer sets. They have no sta
 import tomllib
 from pathlib import Path
 
-CONFIG_DIR = Path(__file__).resolve().parents[2] / "config"
+REPO_ROOT = Path(__file__).resolve().parents[3]
+CONFIG_DIR = REPO_ROOT / "mechanical" / "config"
 STATUSES = ("confirmed", "assumed")
 
 
 class ParamError(ValueError):
     """A config file breaks the rules of this module."""
+
+
+def repo_path(rel: str) -> Path:
+    """A path of a fact file, relative to the repo root."""
+    return REPO_ROOT / rel
 
 
 def config_path(name: str) -> Path:

@@ -1,0 +1,82 @@
+# Hardware facts for the mounts (mm). Every table has status and source. Frame: docs/mechanical/conventions.md
+# (X forward, Y left, Z up, origin = center of the four body posts at ground level).
+# Measure list for the owner: docs/mechanical/handoff.md. An assumed value stays assumed until a measurement confirms it.
+
+# ---- boards -----------------------------------------------------------------------------------------------------
+[pcb_rev3]
+# outline and M3 holes are read from this file at run time (rccar_mech.kicad), not copied here
+board = "pcb/src/rc_power_board.kicad_pcb"
+thickness = 1.57
+status = "confirmed"
+source = "board file (Edge.Cuts outline and MountingHole footprints, read at run time); thickness: docs/pcb/fab_handoff.md (1.57 mm stock)"
+
+[pcb_rev3_heights]
+# top: tallest part above the board top (Pololu modules on headers, 10 mm radial C1). bottom: solder joints and wires
+top = 22.0
+bottom = 3.0
+# standoff: B.Cu is bare copper with VBAT_RAW, it faces the chassis (proposal in docs/pcb/fab_handoff.md, not approved)
+standoff_min = 5.0
+status = "assumed"
+source = "estimate 2026-11-28: no 3D model of the Pololu modules; owner to measure the tallest part and the solder side"
+
+[pi5]
+length = 85.0
+width = 56.0
+hole_d = 2.7
+hole_dx = 58.0
+hole_dy = 49.0
+hole_inset = 3.5
+pad_d = 6.0
+port_overhang = 3.0
+status = "confirmed"
+source = "docs/datasheets/compute_raspberry_pi5.md (product brief p.3; the drawing says approximate)"
+
+[pi5_heights]
+thickness = 1.6
+top = 17.0
+bottom = 3.0
+status = "assumed"
+source = "estimate: USB/Ethernet stack about 17 mm, parts under the board about 3 mm; read the official STEP model or measure"
+
+# ---- chassis (Tamiya TT-02, kit 58716) ----------------------------------------------------------------------------
+[tt02]
+wheelbase = 257.0
+status = "confirmed"
+source = "Tamiya kit page 58716 (wheelbase 257 mm, 251 mm in the short setting)"
+
+[body_posts]
+# center to center. base_z: top of the stay that holds the post. top_z: post top
+spacing_x = 240.0
+spacing_y = 66.0
+diameter = 6.0
+base_z = 50.0
+top_z = 110.0
+status = "assumed"
+source = "L-R about 65-67 mm (third-party TT-02 body-mount stiffeners); F-R, heights and diameter estimated 2026-11-28; owner to measure"
+
+[battery]
+# 2S hard-case pack in the left side of the tub, top load, held by holder bar D1 and two snap pins
+length = 139.0
+width = 47.0
+height = 25.0
+center_x = 0.0
+center_y = 22.0
+bottom_z = 8.0
+status = "assumed"
+source = "bay about 138 x 47 x 25 mm (third-party fit reports); position and floor height estimated 2026-11-28; owner to measure"
+
+[battery_holder]
+# holder bar D1 across the pack top, and the tops of its two snap pins (posts at the pack ends)
+bar_top_z = 37.0
+pin_top_z = 45.0
+pin_x = 75.0
+status = "assumed"
+source = "Tamiya TT-02 manual step 36 (layout); heights estimated 2026-11-28; owner to measure"
+
+# ---- sensors -------------------------------------------------------------------------------------------------------
+[mapper]
+body = 57.0
+height = 74.9
+base_hole_spacing = 24.0
+status = "confirmed"
+source = "docs/datasheets/slamtec_mapper_M2M1_datasheet.md (body about 57 x 57 mm, 74.9 mm tall, 2 x M3 under, 24 mm apart)"

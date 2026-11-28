@@ -1,6 +1,6 @@
 # Plan: mechanical/ subproject, build123d frame for the TT-02 (rev1)
 
-Status: active (2026-11-28; phase A merged in main (#26), phase B open)
+Status: active (2026-11-28; phases A in main (#26), B in mech-dev (#27), C open)
 
 ## Context
 `mechanical/` is a scaffold (ADR 0001 reserves it for 3D-printed mounts). We need a printed frame that carries the rev3 power board and the Pi 5 on the TT-02 chassis, with rail blocks for the camera and the lidar. The workflow copies `pcb/`: a design skill, TDD and checks, a read-only review agent, CI. Claude designs and checks on the Linux VM with build123d. The owner imports the STEP file in SolidWorks (Win11) for the final human review. Infrastructure comes first, then the frame. This is an iterative design: placeholder values now, measured values later.
@@ -19,7 +19,7 @@ Status: active (2026-11-28; phase A merged in main (#26), phase B open)
 ## Facts and sources (to owner files, not copied into code)
 | Item | Value | Status, source |
 |---|---|---|
-| rev3 board | 66 x 140 mm outline; M3 holes 3.2 mm, 3.5 mm in from each edge (59 x 133 mm pattern) | confirmed: `pcb/src/rc_power_board.kicad_pcb`. Code reads the board file, no copy |
+| rev3 board | 66 x 140 mm outline; M3 holes (footprint 3.2 mm, drill 3.4 mm in the board file), 3.5 mm in from each edge (59 x 133 mm pattern) | confirmed: `pcb/src/rc_power_board.kicad_pcb`. Code reads the board file, no copy |
 | rev3 underside | bare B.Cu with `VBAT_RAW`, faces the chassis: standoff >= 5 mm + insulation (proposed, not approved) | `docs/pcb/fab_handoff.md` |
 | Pi 5 | 85 x 56 mm; 4 x ø2.7 (M2.5), 58 x 49 mm pattern, 3.5 mm from edges; ø6 keep-out pads; ports +3 mm | official, "approximate": `docs/datasheets/RP-008348-DS-10-raspberry-pi-5-product-brief.pdf` p.3 (owner added, not committed yet) |
 | Pi 5 heights | USB/RJ45 about 17 mm; Active Cooler 13.7 mm | estimate; cooler official drawing |
