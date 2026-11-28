@@ -21,5 +21,6 @@ The automatic checks run in `make mech-check MODEL=<model>` (`mechanical/src/rcc
 - Load path: where do the forces of a crash or a jump go? Is there a thin section between two mounts?
 - Screw and tool access: can a hand reach each screw, each clip and each connector with the parts in place?
 - Cable path: is there a path for each cable, with slack for the frame lift?
+- Battery swap: can the owner pull the clips, lift the frame and lift the battery out, with no tool? Does a part or a `ref_` envelope sit in the battery lift-out path?
 - Heat: is a part near the motor or the ESC above the `heat_limit` of `print.toml`?
 - Each number in a document agrees with the config files and the report.

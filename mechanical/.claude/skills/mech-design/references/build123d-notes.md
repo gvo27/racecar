@@ -2,7 +2,7 @@
 
 The pinned version is in `mechanical/pyproject.toml`. Read the API of that version, not of `latest`:
 - The docs for language models: `https://build123d.readthedocs.io/en/latest/llms.txt`. The `latest` docs can be newer than the pin. If a doc and the pin disagree, read the source at the git tag of the pin (`https://github.com/gumyr/build123d`).
-- In doubt, probe the API in the image: `docker run --rm -v <dir>:/w:ro rccar-cad:local python /w/probe.py`. Put probe scripts in the scratchpad, not in the repo.
+- In doubt, probe the API in the image. Put the probe script below `build/` (git ignores it). Run it with the `MECH_RUN` command of the Makefile, for example `make -n mech-test` shows the docker command.
 
 ## Style used in this project
 - Algebra mode (`Box(...) - Pos(x, y, z) * Cylinder(...)`), not builder mode. It returns plain shapes that tests can inspect.

@@ -1,6 +1,6 @@
 # Plan: mechanical/ subproject, build123d frame for the TT-02 (rev1)
 
-Status: active (2026-11-27; phase 0, plan PR)
+Status: active (2026-11-28; phase A merged in main (#26), phase B open)
 
 ## Context
 `mechanical/` is a scaffold (ADR 0001 reserves it for 3D-printed mounts). We need a printed frame that carries the rev3 power board and the Pi 5 on the TT-02 chassis, with rail blocks for the camera and the lidar. The workflow copies `pcb/`: a design skill, TDD and checks, a read-only review agent, CI. Claude designs and checks on the Linux VM with build123d. The owner imports the STEP file in SolidWorks (Win11) for the final human review. Infrastructure comes first, then the frame. This is an iterative design: placeholder values now, measured values later.
@@ -13,7 +13,7 @@ Status: active (2026-11-27; phase 0, plan PR)
 - Chassis interface: the four body posts plus the stock body clips. Keep it a swappable module: a later change to screw pads on the damper stays must not need a refactor.
 - Printing: not decided. Assume that the lab has all common printers and filaments. Values are `assumed` until confirmed.
 - STEP handoff: CI artifacts on every PR. A committed copy only for an approved release (`docs/mechanical/releases/<rev>/`).
-- `plugin-dev:skill-reviewer`: one run after Phase 2.
+- `plugin-dev:skill-reviewer`: one run after phase B.
 - `/setup-shop`: not needed. The image needs only docker, which `make check-host` already requires. No new host package.
 
 ## Facts and sources (to owner files, not copied into code)
@@ -52,12 +52,14 @@ Status: active (2026-11-27; phase 0, plan PR)
 `.github/workflows/mechanical.yml`: on pull_request with paths `mechanical/**`, `docker/cad.Dockerfile`, `docs/mechanical/**`. Build the image (buildx, GHA cache), `make mech-test mech-build mech-check`, upload `build/mech/` (STEP, STL, SVG, report) as artifact `mech-<model>` (30 days).
 
 ## Rollout phases (one PR per phase, TDD: red test first)
-0. **Plan PR:** branch `mechanical-frame` off `main`. Commit `docs/plans/2026-11-27-mechanical-frame.md` (this plan, `Status: active`). Open the PR (body: 1 Intro, 2 Owner steps to start, 3 Rollout phases).
-1. **Pipeline:** image, uv project, make targets, CI, `params.py`, `export.py`, `checks.py`, `diff.py`, all on a test part (a bracket with 2 holes). Tests: validity, dims, holes, STEP round trip, STL watertight, a parameter-change regression. Owner: import the test STEP in SolidWorks once (units, names, colors).
-2. **Claude tooling:** rule, skill `mech-design`, agent `mech-reviewer`, test updates (`mech-*` names), docs (`docs/claude-tooling.md`, `docs/dependencies.md` image pins, root `README.md` row, `docs/README.md`, `mechanical/README.md`). Then `plugin-dev:skill-reviewer` (local enable, removed by `make close`).
-3. **Hardware facts and references:** commit the Pi 5 PDF + `docs/datasheets/compute_raspberry_pi5.md` digest, `hardware.toml` with placeholders, the KiCad board reader (test: 4 holes at the expected spacing, outline 66 x 140), `refs.py` envelopes.
-4. **Frame rev1:** deck, body-post interface with clips, PCB and Pi mounts, rail blocks. Checks green. `mech-reviewer`, then `code-review`. Owner SolidWorks review.
-5. **Iterate:** owner measures the car (list in `handoff.md`). Placeholders become `confirmed`. Print, fit, drill the rail blocks. After approval: `make mech-release REV=rev1`.
+
+The phases have letters (A to D), so that they are not confused with PR numbers. Owner 2026-11-28: phase A merged in `main` (#26). Phases B and C go into the integration branch `mech-dev` when their CI passes. Phase D targets `mech-dev` and stays open for the owner review. `mech-dev` goes into `main` only when the owner merges it.
+- **Plan PR (#25):** branch `mechanical-frame` off `main`. Commit `docs/plans/2026-11-27-mechanical-frame.md` (this plan, `Status: active`). Open the PR (body: 1 Intro, 2 Owner steps to start, 3 Rollout phases).
+- **A. Pipeline (#26):** image, uv project, make targets, CI, `params.py`, `export.py`, `checks.py`, `diff.py`, all on a test part (a bracket with 2 holes). Tests: validity, dims, holes, STEP round trip, STL watertight, a parameter-change regression. Owner: import the test STEP in SolidWorks once (units, names, colors).
+- **B. Claude tooling:** rule, skill `mech-design`, agent `mech-reviewer`, test updates (`mech-*` names), docs (`docs/claude-tooling.md`, `docs/dependencies.md` image pins, root `README.md` row, `docs/README.md`, `mechanical/README.md`). Then `plugin-dev:skill-reviewer` (local enable, removed by `make close`).
+- **C. Hardware facts and references:** commit the Pi 5 PDF + `docs/datasheets/compute_raspberry_pi5.md` digest, `hardware.toml` with placeholders, the KiCad board reader (test: 4 holes at the expected spacing, outline 66 x 140), `refs.py` envelopes.
+- **D. Frame rev1:** deck, body-post interface with clips, PCB and Pi mounts, rail blocks. Checks green. `mech-reviewer`, then `code-review`. Owner SolidWorks review.
+- **E. Iterate (owner):** owner measures the car (list in `handoff.md`). Placeholders become `confirmed`. Print, fit, drill the rail blocks. After approval: `make mech-release REV=rev1`.
 
 ## Verification
 - `make mech-test`, `make mech-build MODEL=frame`, `make mech-check` (exit 0), `make checks`, `make context` (no new warning).
