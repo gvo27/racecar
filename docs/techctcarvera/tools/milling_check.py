@@ -35,6 +35,7 @@ class Bit:
     name: str
     angle: float
     tip: float
+    spec: str = ""  # exact tool, for staging before a run
 
 
 @dataclass
@@ -59,6 +60,8 @@ class Limits:
     track_min: float
     edge_clear: float
     conn_edge: float
+    tool_slots: int = 0
+    endmill_spec: str = ""
 
     @property
     def depth_worst(self):
@@ -90,7 +93,7 @@ def load_limits(path):
     for b in raw.get("isolation_bit", []):
         if b.get("status") not in ("assumed", "confirmed") or not b.get("source"):
             raise ValueError("isolation_bit %s: needs status and source" % b.get("name"))
-        bits.append(Bit(b["name"], float(b["angle_deg"]), float(b["tip_mm"])))
+        bits.append(Bit(b["name"], float(b["angle_deg"]), float(b["tip_mm"]), b.get("spec", "")))
     if not bits:
         raise ValueError("no isolation_bit")
     return Limits(
@@ -100,7 +103,9 @@ def load_limits(path):
         milled_hole_min=val("milled_hole_min"), stock_w=stock["width"], stock_h=stock["height"], stock_t=stock["thickness"],
         dowel_dia=dowel["diameter"], dowel_pin=dowel["pin"], dowels=[tuple(c) for c in dowel["centers"]],
         via_drill=val("via_drill"), via_pad=val("via_pad"), annular_min=val("annular_min"),
-        track_min=val("track_min"), edge_clear=val("edge_clearance"), conn_edge=val("connector_edge_distance"))
+        track_min=val("track_min"), edge_clear=val("edge_clearance"), conn_edge=val("connector_edge_distance"),
+        tool_slots=int(table("machine")["tool_slots"]),
+        endmill_spec=raw.get("inventory", {}).get("cam_tools", {}).get("end_mill", ""))
 
 
 def load_waivers(path):
@@ -211,7 +216,10 @@ def check_gaps(ctx, out):
     need = rules.gap_min(wmin) if rules else wmin
     # a part with an [[exception]] that has zones = true: planned zone fill can be close to its pads
     exc_zone = {e.ref for e in rules.exceptions if e.zones} if rules else set()
-    reach = FromMM(max(wmax, need)) + 1000
+    # a bit fits a gap when the gap is at least its cut width + 2 x horizontal error (design rules), else its cut width
+    fit = (lambda w: rules.gap_min(w)) if rules else (lambda w: w)
+    wide = fit(wmax)
+    reach = FromMM(max(wide, need)) + 1000
     for layer in copper_layers(ctx.b):
         items = collect(ctx, layer)
         for i in range(len(items)):
@@ -237,10 +245,11 @@ def check_gaps(ctx, out):
                     out.append(("MILL-GAP-FIXED" if fixed else "MILL-GAP", "warning" if fixed else "error", where, d, need,
                                 "gap %.3f mm is below cut width %.3f mm + 2 x horizontal error %.2f mm = %.3f mm%s" % (
                                     d, wmin, rules.horizontal_error, need, " (gap fixed by the footprint or an exception)" if fixed else "")))
-                elif d < wmax - 1e-6:
-                    fits = [bt.name for bt, w in widths if w <= d + 1e-6]
-                    out.append(("MILL-GAP-BIT", "warning", where, d, wmax,
-                                "gap %.3f mm: only %s fit (cut width at worst-case depth)" % (d, ", ".join(fits))))
+                elif d < wide - 1e-6:
+                    fits = [bt.name for bt, w in widths if fit(w) <= d + 1e-6]
+                    out.append(("MILL-GAP-BIT", "warning", where, d, wide,
+                                "gap %.3f mm: only %s fit (cut width at worst-case depth%s)" % (
+                                    d, ", ".join(fits), " + 2 x horizontal error" if rules else "")))
 
 
 def check_depth(ctx, out):
@@ -294,6 +303,30 @@ def check_holes(ctx, out):
         if ring < lim.annular_min - 1e-6:
             out.append(("MILL-ANNULAR", "error", where, ring, lim.annular_min,
                         "annular ring %.3f mm is below %.2f mm" % (ring, lim.annular_min)))
+
+
+def tool_list(board, lim):
+    """The tools that the board needs, with exact specs, to stage them before a run: one drill for each drill size,
+    the end mill (dowels and bored holes) and each isolation bit. The tools change between rounds (owner 2026-11-25)."""
+    ctx = Ctx(board, lim)
+    drilled, bored, slots = {}, {}, {}
+    for _, _, _, dmin, dmax, _ in hole_list(ctx):
+        d = round(dmax, 2)
+        if dmax - dmin > 0.005:  # oval hole: a slot, not a drill
+            k = (round(dmin, 2), d)
+            slots[k] = slots.get(k, 0) + 1
+            continue
+        group = bored if d >= lim.milled_hole_min - 0.005 else drilled
+        group[d] = group.get(d, 0) + 1
+    out = ["drill %.2f mm: %d holes" % (d, n) for d, n in sorted(drilled.items())]
+    out += ["slot %.2f x %.2f mm: %d (end mill, not a drill)" % (a, b, n) for (a, b), n in sorted(slots.items())]
+    out.append("end mill %.3f mm: %d dowels %.4f mm, %s. %s" % (
+        lim.endmill_min, len(lim.dowels), lim.dowel_dia,
+        ", ".join("%d bored %.2f mm" % (n, d) for d, n in sorted(bored.items())) or "no bored hole", lim.endmill_spec))
+    out += ["isolation %s: %s" % (b.name, b.spec or "%.2f mm" % b.tip) for b in lim.bits]
+    if len(out) > lim.tool_slots:
+        out.append("%d tools for %d slots: stage them in more than one round" % (len(out), lim.tool_slots))
+    return out
 
 
 def check_vias(ctx, out):
@@ -552,6 +585,9 @@ def report(groups):
             lines.append(title)
             for f in groups[key]:
                 lines.append("  %s %s: %s" % (f[0], f[2], f[5]))
+    if groups.get("tools"):
+        lines.append("TOOLS TO STAGE")
+        lines += ["  " + s for s in groups["tools"]]
     if groups["waived"]:
         lines.append("WAIVED")
         for f, w in groups["waived"]:
@@ -559,11 +595,22 @@ def report(groups):
     return "\n".join(lines)
 
 
+def serialize(groups):
+    """The groups as JSON data: findings as lists, waived findings with their waiver, tools as strings."""
+    ser = {k: [list(f) for f in v] for k, v in groups.items() if k not in ("waived", "tools")}
+    ser["waived"] = [{"finding": list(f), "waiver": w} for f, w in groups["waived"]]
+    ser["tools"] = list(groups.get("tools", []))
+    return ser
+
+
 def run(board_path, limits_path, waivers_path=None, rules=None):
     board = pcbnew.LoadBoard(board_path)
-    findings = check(board, load_limits(limits_path), rules)
+    lim = load_limits(limits_path)
+    findings = check(board, lim, rules)
     waivers = load_waivers(waivers_path) if waivers_path else []
-    return findings, triage(findings, waivers)
+    groups = triage(findings, waivers)
+    groups["tools"] = tool_list(board, lim)
+    return findings, groups
 
 
 def main(argv=None):
@@ -582,10 +629,8 @@ def main(argv=None):
         return 2
     print(report(groups))
     if args.json:
-        ser = {k: [list(f) for f in v] for k, v in groups.items() if k != "waived"}
-        ser["waived"] = [{"finding": list(f), "waiver": w} for f, w in groups["waived"]]
         with open(args.json, "w", encoding="utf-8") as fh:
-            json.dump(ser, fh, indent=1)
+            json.dump(serialize(groups), fh, indent=1)
     return 1 if groups["errors"] or any(f[1] == "error" for f in groups["questions"]) else 0
 
 

@@ -43,6 +43,7 @@ KiCad DRC checks the numbers in the KiCad project. It does not know the cutter. 
 1. **Owner or lab-tech questions:** each `assumed` table that changes a check result, its key, and who can confirm it.
 2. Lab values changed in this session: key, old value, new value, source.
 3. Milling check: **errors** (unwaived), **waived** (with the reason), the MILL-GAP-BIT areas.
+4. Tools to stage: the "TOOLS TO STAGE" list of the check output (`tools` in the JSON). It gives each drill size with its hole count, the end mill and each isolation bit with its exact spec. The owner stages the tools between rounds. Give this list with each board for the lab.
 
 ## Verify
 - `make pcb-test`: lab tools and `pcb/libraries` tests, including `load_limits`.

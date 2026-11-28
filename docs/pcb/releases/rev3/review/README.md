@@ -4,6 +4,8 @@ Latest state, 2026-11-18. Board: `pcb/src/rc_power_board.kicad_pcb` (title-block
 
 Release: rev2 (`pcb/releases/rev2`) is a frozen copy of this board with the JST XH headers and its own copy of the design rules (2026-11-17). After that copy, `pcb/src` got the temporary solder-wire pads (next section). The checks of rev2 give the results of the second layout: 96 milling warnings, BOM 91.83 USD.
 
+Findings of the rev3 milling: [`../milling_findings.md`](../milling_findings.md).
+
 ## Temporary exception: wires soldered to the board (first print round only)
 
 The owner (2026-11-17): for the first print round, solder the wires to the board directly. Do not fit the JST XH headers. The exception and its status are in `[parts.wire]` of the mill tuning file. Remove that table for the next round.
@@ -83,7 +85,7 @@ All other copper has a 2.0 mm gap: the pours to the VBAT, 5 V, `/LDO_IN` and `+3
 | `make erc BOARD=src` | 0 errors, 3 warnings (`lib_symbol_mismatch`, as rev1) |
 | `make pcb-rules BOARD=src` | The project files agree with the design rules. 16 values assumed |
 | `make pcb-check BOARD=src` | DRC: 0 errors, 0 unconnected, parity clean. 117 warnings: 26 `lib_footprint_mismatch` (pads changed by the build), 91 `silk_over_copper` (silkscreen of the library footprints; the milled board has no silkscreen). `check_board`: 0 problems |
-| `make pcb-mill-check BOARD=src` | 0 errors, 0 waived, 103 warnings: 85 `MILL-GAP-FIXED`, 9 `MILL-CUT-SPACING`, 9 `MILL-CONN-EDGE`. No `MILL-SLIVER`, no `MILL-ISLAND` |
+| `make pcb-mill-check BOARD=src` | 2026-11-25, lab CAM isolation bits (0.6 mm corn, 0.2 mm end mill, F-006): 0 errors, 0 waived, 103 warnings: 85 `MILL-GAP-FIXED`, 9 `MILL-CUT-SPACING`, 9 `MILL-CONN-EDGE`. 127 `MILL-GAP-BIT` areas (only the 0.2 mm end mill fits). No `MILL-SLIVER`, no `MILL-ISLAND`. Tools to stage: 8 (`milling_check.json`, key `tools`) |
 | `make pcb-fab BOARD=src` | Outputs in `build/fab/src/` (not committed). The target then runs `test_fab.py` on the mill board: 20 tests, OK |
 | `make bom BOARD=src` | `pcb/src/bom.csv`. C2 to C8: part number TBD, no cost. Wire pads: no part. Total 90.73 USD |
 | `make pcb-test` | 108 + 61 = 169 tests, OK (2026-11-18) |
@@ -137,7 +139,7 @@ The milling check prints positions as (x, -y) in mm from the lower-left corner o
 
 ## kicad-happy analysis (`make pcb-gate BOARD=src`, kicad-happy 2.3.2, 2026-11-18)
 
-Gate: FAIL from the count false positive and WARN for the silkscreen (`.claude/skills/pcb-fab/references/fab-gate.md`). EMC score 71.5/100 with `analyze_pcb --full`. Verdicts from `pcb-reviewer` (2026-11-18), checked in the raw board file. Suppressed findings are in `pcb/src/.kicad-happy.json`, each with its reason.
+Gate: FAIL from the count false positive and WARN for the silkscreen (`pcb/.claude/skills/pcb-fab/references/fab-gate.md`). EMC score 71.5/100 with `analyze_pcb --full`. Verdicts from `pcb-reviewer` (2026-11-18), checked in the raw board file. Suppressed findings are in `pcb/src/.kicad-happy.json`, each with its reason.
 
 | Finding | Verdict | Evidence | Action |
 | --- | --- | --- | --- |

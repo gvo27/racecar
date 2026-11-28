@@ -193,7 +193,8 @@ def holes(board, frame):
 
 def tool_use(d):
     """Dowel: own tool. Drill: in the drill set (<= largest drill). Bore: larger, cut with the end mill."""
-    if abs(d - placement.DOWEL_DIA) < 1e-6:
+    # Compare at the 0.001 mm precision of the tool list (tools() rounds each diameter).
+    if abs(round(d, 3) - round(placement.DOWEL_DIA, 3)) < 1e-6:
         return "DOWEL"
     return "DRILL" if d <= drill_max() + 0.005 else "BORE"
 

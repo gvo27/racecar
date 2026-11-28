@@ -5,7 +5,7 @@ The rules of `tools/milling_check.py` in the lab directory. Limits come from `mi
 | Id | Check | Severity |
 | --- | --- | --- |
 | MILL-GAP | Every copper-to-copper gap on one layer (track, pad, via, zone fill; same footprint included) between different nets >= the narrowest isolation bit's cut width at worst-case depth (depth max + depth error): `w = tip + 2 * d * tan(angle / 2)` | error |
-| MILL-GAP-BIT | Gaps that only some bits can cut. Lists the area and the bits that fit, so the CAM step uses the right bit there | warning |
+| MILL-GAP-BIT | Gaps that only some bits can cut (with design rules: gap < widest cut width + 2 x horizontal error). Lists the area and the bits that fit, so the CAM step uses the right bit there (rest pass) | warning |
 | MILL-DEPTH | Min depth (depth min - depth error) >= copper thickness, so each cut goes through the copper | error |
 | MILL-DRILL | Every hole is in the drill set, or is > the largest drill and >= the smallest end mill (milled) | error |
 | MILL-ANNULAR | Annular ring >= the configured minimum on every THT pad and via | error |
