@@ -88,6 +88,13 @@ top_z = 40.0
 status = "assumed"
 source = "x, y: estimate from the reference part (its plate outline is symmetric about a line taken as the car center line, the pattern is 27 mm right of it; 2 x 2 mm holes taken as the rear body posts, a weak guess: the posts are 6 mm; body-post spacing of [body_posts]); top_z estimated 2026-11-27; owner to measure x, y and top_z before the anchor is printed"
 
+[motor_housing]
+# the cylindrical motor housing that comes up from the motor plate, centered on the 4-hole pattern, inside the holes
+diameter = 22.0
+height = 20.0
+status = "assumed"
+source = "owner 2026-11-28: cylinder inside the 4 mount holes, keep 20 mm clear above the mount points until measured; diameter: the ø10 legs of the reference part at the holes leave at most 24 mm"
+
 # ---- sensors -------------------------------------------------------------------------------------------------------
 [mapper]
 body = 57.0

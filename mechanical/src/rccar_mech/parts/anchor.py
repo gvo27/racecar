@@ -1,4 +1,5 @@
-"""Motor-plate anchor: a block screwed to the motor plate (4 x M3, counterbored from the top) with a snap pin.
+"""Motor-plate anchor: a block around the motor housing, screwed to the motor plate (4 x M3, counterbored from the
+top), with a snap pin in front of the housing. The deck has a clearance hole over the housing.
 
 The snap pin goes up through a slot in the deck. A slot in the pin splits it into two prongs that bend in Y. Each
 prong has a lip with a 45 degree retention face: the deck latches when it is pushed down and releases when it is
@@ -41,10 +42,10 @@ def prong_strain(radius: float, half_slot: float, bend: float, length: float) ->
 
 
 def build(cfg: dict, hw: dict, pr: dict, z0: float, thickness: float) -> Anchor:
-    pos, mp = hw["motor_plate_position"], hw["motor_plate"]
+    pos, mp, hs = hw["motor_plate_position"], hw["motor_plate"], hw["motor_housing"]
     comp = pr["limits"]["hole_comp"]
     ax, ay, zb = pos["x"], pos["y"], pos["top_z"]
-    s = cfg["anchor_size"]
+    px, py = ax + cfg["snap_offset_x"], ay  # snap pin, in front of the motor housing
     zf = zb + cfg["anchor_floor"]
     ztop = z0 + thickness
     pin_d, slot_w = cfg["snap_pin_d"], cfg["snap_slot_w"]
@@ -53,46 +54,53 @@ def build(cfg: dict, hw: dict, pr: dict, z0: float, thickness: float) -> Anchor:
         raise ParamError(f"snap_slot_w {slot_w}: must be more than 0 and less than snap_pin_d {pin_d}")
     lip, lead = cfg["snap_lip"], cfg["snap_lead_h"]
 
-    block = Pos(ax, ay, (zb + z0) / 2) * Box(s, s, z0 - zb)
+    x0, x1 = ax + cfg["anchor_x_min"], ax + cfg["anchor_x_max"]
+    block = Pos((x0 + x1) / 2, ay, (zb + z0) / 2) * Box(x1 - x0, cfg["anchor_size"], z0 - zb)
     screw_d = mp["clearance_d"] + comp
     cbore_d = cfg["anchor_cbore_d"] + comp
     pocket_d = pin_d + 2 * cfg["snap_pocket_gap"] + comp
+    housing_d = hs["diameter"] + 2 * cfg["anchor_housing_gap"] + comp
     half = mp["pattern"] / 2
     screws = [(ax + sx * half, ay + sy * half) for sx in (-1, 1) for sy in (-1, 1)]
     for x, y in screws:
         block -= _cyl(x, y, zb, z0, screw_d)
         block -= _cyl(x, y, zf, z0, cbore_d)
-    block -= _cyl(ax, ay, zf, z0, pocket_d)
+    block -= _cyl(ax, ay, zb, z0, housing_d)
+    block -= _cyl(px, py, zf, z0, pocket_d)
 
-    # deck slot: long in X (play for the front-post position), tight in Y (the lips latch on its long edges)
+    # deck: a hole over the housing (clearance_min), and the snap slot: long in X (play for the front-post
+    # position), tight in Y (the lips latch on its long edges)
+    deck_hole_d = hs["diameter"] + 2 * cfg["clearance_min"] + comp
     w = pin_d + 2 * cfg["snap_clearance"] + comp
     play = cfg["snap_slot_play"]
-    cut = Pos(ax, ay, z0 + thickness / 2) * Box(2 * play, w, thickness)
+    cut = _cyl(ax, ay, z0, ztop, deck_hole_d)
+    cut += Pos(px, py, z0 + thickness / 2) * Box(2 * play, w, thickness)
     for sx in (-1, 1):
-        cut += _cyl(ax + sx * play, ay, z0, ztop, w)
+        cut += _cyl(px + sx * play, py, z0, ztop, w)
 
     # pin from the pocket floor, then the lip (retention cone up) and the lead-in cone. The retention face touches
     # the slot edge at the deck top: no free play in Z at the nominal heights
     z_lip = ztop - (w / 2 - r)
-    pin = _cyl(ax, ay, zf, z_lip, pin_d)
-    pin += Pos(ax, ay, z_lip + lip / 2) * Cone(r, r + lip, lip)
-    pin += Pos(ax, ay, z_lip + lip + lead / 2) * Cone(r + lip, r - lip, lead)
+    pin = _cyl(px, py, zf, z_lip, pin_d)
+    pin += Pos(px, py, z_lip + lip / 2) * Cone(r, r + lip, lip)
+    pin += Pos(px, py, z_lip + lip + lead / 2) * Cone(r + lip, r - lip, lead)
     pin_top = z_lip + lip + lead
     # the prongs bend only in Y: trim the lips to the pin width in X, so they pass the round slot ends at any X play
-    pin &= Pos(ax, ay, (zf + pin_top) / 2) * Box(pin_d, pin_d + 2 * lip + 1, pin_top - zf)
+    pin &= Pos(px, py, (zf + pin_top) / 2) * Box(pin_d, pin_d + 2 * lip + 1, pin_top - zf)
     # keyhole relief at the slot bottom: wider than the slot, 1 mm deep in the pocket floor (no sharp prong root)
     relief_d = cfg["snap_relief_d"]
     z_root = zf - cfg["snap_relief_depth"] + relief_d / 2
     slot_len = 2 * (r + lip) + 1
-    pin -= Pos(ax, ay, (z_root + pin_top) / 2) * Box(slot_len, slot_w, pin_top - z_root)
+    pin -= Pos(px, py, (z_root + pin_top) / 2) * Box(slot_len, slot_w, pin_top - z_root)
     # relief length: halfway between the prong ends and the min_wall limit to the pocket wall
     x_pin = math.sqrt(r**2 - (slot_w / 2) ** 2)
     x_wall = math.sqrt((pocket_d / 2 - pr["limits"]["min_wall"]) ** 2 - (relief_d / 2) ** 2)
-    groove = Pos(ax, ay, z_root) * Rot(0, 90, 0) * Cylinder(relief_d / 2, x_pin + x_wall)
+    groove = Pos(px, py, z_root) * Rot(0, 90, 0) * Cylinder(relief_d / 2, x_pin + x_wall)
 
     # each prong bends from the pocket floor to the lip contact, by the printed lip overlap past the slot edge
     # (lip - clearance: hole_comp makes the printed slot the design size)
     strain = prong_strain(r, slot_w / 2, lip - cfg["snap_clearance"], ztop - z_root)
 
-    holes = [(x, y, d) for x, y in screws for d in (screw_d, cbore_d)] + [(ax, ay, pocket_d)]
+    holes = [(x, y, d) for x, y in screws for d in (screw_d, cbore_d)]
+    holes += [(ax, ay, housing_d), (px, py, pocket_d), (ax, ay, deck_hole_d)]
     return Anchor(block + pin - groove, cut, holes, pin_top, strain)

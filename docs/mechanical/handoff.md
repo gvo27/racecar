@@ -13,7 +13,7 @@ Generated files stay out of git, except an approved release. Git LFS is not used
 ## What the owner measures
 The car values in the models are `assumed` until the owner measures them. Give each value with the date:
 - The four body posts: front to rear and left to right spacing (center to center), post diameter, the height of the stay top where each post starts, the post-top height, and the height of each body-clip hole above the ground. A clip hole must sit just above the deck top, or the deck can lift.
-- The motor plate (frame rev2): the center of its 4-hole M3 pattern from the front body posts (front to rear, and left to right from the car center line), and the height of the plate top above the ground. The anchor height comes from it. Measure the temperature of the motor plate (degC) after a hard run: the anchor material must stay below its `heat_limit` (`print.toml`).
+- The motor plate (frame rev2): the center of its 4-hole M3 pattern from the front body posts (front to rear, and left to right from the car center line), and the height of the plate top above the ground. The anchor height comes from it. The motor housing above the plate: its diameter, its height above the mount points, and its center relative to the 4 holes (`[motor_housing]`: now 22 mm diameter, 20 mm high, assumed). Measure the temperature of the motor plate (degC) after a hard run: the anchor material must stay below its `heat_limit` (`print.toml`).
 - The battery holder bar (D1) top and the top of its two snap pins, above the ground.
 - The top of the tub wall, and the ground clearance setting in use.
 - The battery space: length, width, height, and its position (center offset to the left of the car center line).

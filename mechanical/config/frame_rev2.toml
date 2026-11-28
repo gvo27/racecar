@@ -17,9 +17,16 @@ mid_y_min = -68.0
 mid_y_max = 64.0
 corner_r = 6.0
 
-# motor-plate anchor (parts/anchor.py): a block from the motor plate up to the deck bottom, 4 counterbored M3 holes
-# (head 5.7 mm in [fasteners]), and a snap pin through a slot in the deck
+# motor-plate anchor (parts/anchor.py): a block from the motor plate up to the deck bottom, around the motor housing.
+# It has 4 counterbored M3 holes (head 5.7 mm in [fasteners]) and a snap pin in front of the housing (snap_offset_x
+# from the pattern center).
+# The block goes from anchor_x_min to anchor_x_max (from the pattern center) and is anchor_size wide (Y).
+# anchor_housing_gap: radial gap from the block to the housing. The deck has a hole over the housing (clearance_min)
 anchor_size = 36.0
+anchor_x_min = -18.0
+anchor_x_max = 32.0
+anchor_housing_gap = 0.5
+snap_offset_x = 24.0
 anchor_floor = 3.0
 anchor_cbore_d = 7.0
 snap_pin_d = 8.0
@@ -42,7 +49,8 @@ snap_slot_play = 2.0
 pcb_x = -18.0
 pcb_y = -31.5
 pcb_rot = 90.0
-pcb_standoff_h = 8.0
+# 12 mm: room for the parts under the board above the motor housing (top 20 mm above the motor plate)
+pcb_standoff_h = 12.0
 pcb_standoff_od = 8.0
 
 # Pi 5: center and turn (0 = ports at +X; 180 = ports to the rear), standoffs for M2.5 thread-forming screws ([fasteners])

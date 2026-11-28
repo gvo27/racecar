@@ -91,3 +91,10 @@ def wheels(hw: dict) -> list[Shape]:
         tyre = Pos(sx * wb / 2, sy * w["track"] / 2, w["tyre_d"] / 2) * Rot(90, 0, 0) * Cylinder(r, width)
         out.append(_named(tyre, f"ref_wheel_{name}", CHASSIS_COLOR))
     return out
+
+
+def motor_housing(hw: dict) -> Shape:
+    """The motor housing above the motor plate: a cylinder on the 4-hole pattern center, from the plate top up."""
+    h, pos = hw["motor_housing"], hw["motor_plate_position"]
+    housing = Pos(pos["x"], pos["y"], pos["top_z"] + h["height"] / 2) * Cylinder(h["diameter"] / 2, h["height"])
+    return _named(housing, "ref_motor_housing", CHASSIS_COLOR)

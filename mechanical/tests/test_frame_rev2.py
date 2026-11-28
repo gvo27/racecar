@@ -187,7 +187,7 @@ def test_lip_passes_the_round_slot_ends(frame, hw, pr):
     """The prongs bend only in Y. In X the lip must stay inside the pin width, so it passes the slot end circles."""
     asm, cfg = frame
     z_top = hw["body_posts"]["base_z"] + cfg["deck_thickness"]
-    ax = hw["motor_plate_position"]["x"]
+    ax = hw["motor_plate_position"]["x"] + cfg["snap_offset_x"]
     cut = _part(asm, "anchor") & (Pos(ax, 0, z_top + 0.3) * Box(100, 1000, 0.02))
     bb = (cut if not isinstance(cut, list) else Compound(cut)).bounding_box()
     assert max(bb.max.X - ax, ax - bb.min.X) <= cfg["snap_pin_d"] / 2 + 1e-6
@@ -201,3 +201,39 @@ def test_rev2_without_the_anchor_is_an_error():
 def test_bad_slot_width_is_rejected():
     with pytest.raises(params.ParamError):
         models.build(MODEL, overrides={"snap_slot_w": 8.0})
+
+
+def test_motor_housing_envelope_from_the_facts(frame, hw):
+    asm, _ = frame
+    h, pos = hw["motor_housing"], hw["motor_plate_position"]
+    bb = _part(asm, "ref_motor_housing").bounding_box()
+    assert (bb.center().X, bb.center().Y) == pytest.approx((pos["x"], pos["y"]))
+    assert bb.size.X == pytest.approx(h["diameter"])
+    assert (bb.min.Z, bb.max.Z) == pytest.approx((pos["top_z"], pos["top_z"] + h["height"]))
+
+
+def test_housing_stays_free(frame, hw):
+    """The deck keeps clearance_min, the anchor keeps its own gap, the boards keep room for their bottom parts."""
+    asm, cfg = frame
+    housing = _part(asm, "ref_motor_housing")
+    assert _part(asm, "deck").distance_to(housing) >= cfg["clearance_min"] - 1e-6
+    assert _part(asm, "anchor").distance_to(housing) >= cfg["anchor_housing_gap"] - 1e-6
+    for label, key in (("ref_pcb_rev3", "pcb_rev3_heights"), ("ref_pi5", "pi5_heights")):
+        need = hw[key]["bottom"] + cfg["clearance_min"]
+        assert _part(asm, label).distance_to(housing) >= need - 1e-6, label
+
+
+def test_deck_has_a_hole_over_the_housing(frame, hw, pr):
+    asm, cfg = frame
+    pos = hw["motor_plate_position"]
+    d = hw["motor_housing"]["diameter"] + 2 * cfg["clearance_min"] + pr["limits"]["hole_comp"]
+    got = [(round(h.x, 3), round(h.y, 3)) for h in _vertical_holes([_part(asm, "deck")], d)]
+    assert got == [(pos["x"], pos["y"])]
+
+
+def test_snap_pin_is_beside_the_housing(frame, hw):
+    asm, cfg = frame
+    pos = hw["motor_plate_position"]
+    pin_d = cfg["snap_pin_d"] + 2 * cfg["snap_pocket_gap"]
+    pocket = [h for h in checks.holes(_part(asm, "anchor")) if abs(h.diameter - pin_d) < 0.5]
+    assert [(round(h.x, 3), round(h.y, 3)) for h in pocket] == [(pos["x"] + cfg["snap_offset_x"], pos["y"])]
