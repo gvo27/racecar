@@ -86,6 +86,7 @@ def report(name: str, asm: Compound, cfg: dict, found, out_dir: Path) -> dict:
         "volume_printed_mm3": pr.volume,
         "mass_g": pr.volume * density * DENSITY_UNIT,
         "cog_printed": [cog.X, cog.Y, cog.Z] if cog is not None else None,
+        "top_z_printed": bb.max.Z if pr.children else None,
         "parts": [{"label": p.label, "ref": models.is_ref(p), "volume_mm3": p.volume} for p in checks.parts(asm)],
         "holes": [h.__dict__ for h in checks.holes(pr)],
         "assumed": [f"{f}: [{t}]" for f, data in facts.items() for t in params.assumed(data)],
@@ -115,7 +116,12 @@ def cmd_check(a) -> int:
     rep = report(a.model, asm, cfg, found, out_dir)
     for f in found:
         print(f"  {f.id:<15} {f.severity:<7} {f.where}: {f.message}")
-    print(f"mech-check: {a.model}: {rep['errors']} errors, {rep['warnings']} warnings, mass {rep['mass_g']:.1f} g")
+    heights = ""
+    if rep["cog_printed"] is not None:
+        heights = f", cog z {rep['cog_printed'][2]:.1f} mm, top z {rep['top_z_printed']:.1f} mm"
+    print(
+        f"mech-check: {a.model}: {rep['errors']} errors, {rep['warnings']} warnings, mass {rep['mass_g']:.1f} g{heights}"
+    )
     for item in rep["assumed"]:
         print(f"  assumed: {item}")
     return 1 if rep["errors"] else 0
