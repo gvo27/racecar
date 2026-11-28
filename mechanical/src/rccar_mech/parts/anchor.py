@@ -13,6 +13,8 @@ from dataclasses import dataclass
 
 from build123d import Box, Cone, Cylinder, Pos, Rot, Shape
 
+from rccar_mech.params import ParamError
+
 
 @dataclass
 class Anchor:
@@ -47,6 +49,8 @@ def build(cfg: dict, hw: dict, pr: dict, z0: float, thickness: float) -> Anchor:
     ztop = z0 + thickness
     pin_d, slot_w = cfg["snap_pin_d"], cfg["snap_slot_w"]
     r = pin_d / 2
+    if not 0 < slot_w < pin_d:
+        raise ParamError(f"snap_slot_w {slot_w}: must be more than 0 and less than snap_pin_d {pin_d}")
     lip, lead = cfg["snap_lip"], cfg["snap_lead_h"]
 
     block = Pos(ax, ay, (zb + z0) / 2) * Box(s, s, z0 - zb)
@@ -74,6 +78,8 @@ def build(cfg: dict, hw: dict, pr: dict, z0: float, thickness: float) -> Anchor:
     pin += Pos(ax, ay, z_lip + lip / 2) * Cone(r, r + lip, lip)
     pin += Pos(ax, ay, z_lip + lip + lead / 2) * Cone(r + lip, r - lip, lead)
     pin_top = z_lip + lip + lead
+    # the prongs bend only in Y: trim the lips to the pin width in X, so they pass the round slot ends at any X play
+    pin &= Pos(ax, ay, (zf + pin_top) / 2) * Box(pin_d, pin_d + 2 * lip + 1, pin_top - zf)
     # keyhole relief at the slot bottom: wider than the slot, 1 mm deep in the pocket floor (no sharp prong root)
     relief_d = cfg["snap_relief_d"]
     z_root = zf - cfg["snap_relief_depth"] + relief_d / 2

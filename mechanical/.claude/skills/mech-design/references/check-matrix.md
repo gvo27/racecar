@@ -19,7 +19,7 @@ The automatic checks run in `make mech-check MODEL=<model>` (`mechanical/src/rcc
 
 ## Manual review (the checks cannot do this)
 - Look at the iso PNG and the SVG views. Is the shape the intent? Are the ref envelopes at the correct places?
-- Print orientation: which face is on the bed? Are there overhangs above 45 degrees or bridges longer than about 10 mm (estimate, not measured on the lab printer)?
+- Print orientation: which face is on the bed? Are there overhangs above 45 degrees or bridges longer than about 10 mm (estimate, not measured on the workshop printer)?
 - Load path: where do the forces of a crash or a jump go? Is there a thin section between two mounts?
 - Screw and tool access: can a hand reach each screw, each clip and each connector with the parts in place?
 - Cable path: is there a path for each cable, with slack for the frame lift?

@@ -181,3 +181,23 @@ def test_unknown_interface_is_rejected():
 def test_cli_check(tmp_path):
     assert cli.main(["build", MODEL, "--out", str(tmp_path), "--no-previews"]) == 0
     assert cli.main(["check", MODEL, "--out", str(tmp_path)]) == 0
+
+
+def test_lip_passes_the_round_slot_ends(frame, hw, pr):
+    """The prongs bend only in Y. In X the lip must stay inside the pin width, so it passes the slot end circles."""
+    asm, cfg = frame
+    z_top = hw["body_posts"]["base_z"] + cfg["deck_thickness"]
+    ax = hw["motor_plate_position"]["x"]
+    cut = _part(asm, "anchor") & (Pos(ax, 0, z_top + 0.3) * Box(100, 1000, 0.02))
+    bb = (cut if not isinstance(cut, list) else Compound(cut)).bounding_box()
+    assert max(bb.max.X - ax, ax - bb.min.X) <= cfg["snap_pin_d"] / 2 + 1e-6
+
+
+def test_rev2_without_the_anchor_is_an_error():
+    asm, cfg = models.build(MODEL, overrides={"chassis_interface": "body_posts"})
+    assert "MECH-SNAP" in {f.id for f in models.acceptance(MODEL, asm, cfg)}
+
+
+def test_bad_slot_width_is_rejected():
+    with pytest.raises(params.ParamError):
+        models.build(MODEL, overrides={"snap_slot_w": 8.0})

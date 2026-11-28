@@ -59,7 +59,9 @@ def acceptance(asm: Compound, cfg: dict) -> list[checks.Finding]:
     out += checks.expect_holes([copy.copy(p) for p in printed], iface.holes + pcb_pts + pi_pts)
     out += _frame.shared_acceptance(asm, cfg, hw, iface.clip_posts)
     # snap pin: the prong strain stays in the material limit, and the pin top leaves room under the boards
-    if iface.snap is not None:
+    if iface.snap is None:
+        out.append(checks.Finding("MECH-SNAP", "error", "chassis interface", "rev2 needs the motor-plate snap anchor"))
+    else:
         limit = pr["material"]["snap_strain_max"]
         if iface.snap.strain > limit:
             msg = f"prong strain {iface.snap.strain:.4f} > {limit}"
