@@ -81,7 +81,7 @@ def test_mesh_and_step_round_trip(tmp_path):
     part = plate_with_hole()
     part.label = "plate"
     out = export.write_all(Compound(children=[part], label="t"), tmp_path, "t", stl_tolerance=0.01)
-    assert checks.mesh(out["stl"]) == []
+    assert checks.mesh(out["stl"][0]) == []
     assert checks.step_round_trip(Compound(children=[part], label="t"), out["step"]) == []
 
 
@@ -148,3 +148,13 @@ def test_tiny_overlap_within_tolerance_is_contact():
     a, b = Box(10, 10, 10), Pos(10 - 1e-5, 0, 0) * Box(10, 10, 10)
     a.label, b.label = "a", "b"
     assert checks.interference([a, b]) == []
+
+
+def test_one_stl_per_printed_part_of_touching_parts(tmp_path):
+    from rccar_mech import export
+
+    a, b = Box(10, 10, 10), Pos(10, 0, 0) * Box(10, 10, 10)
+    a.label, b.label = "a", "b"
+    out = export.write_all(Compound(children=[a, b], label="t"), tmp_path, "t", 0.01, stl_parts=[a, b])
+    assert [p.name for p in out["stl"]] == ["t_a.stl", "t_b.stl"]
+    assert all(checks.mesh(p) == [] for p in out["stl"])

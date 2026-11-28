@@ -4,7 +4,7 @@ Board envelopes are in their own frame: board center at the origin, board bottom
 Chassis envelopes are in the car frame (docs/mechanical/conventions.md). All values come from hardware.toml.
 """
 
-from build123d import Box, Color, Cylinder, Pos, Shape
+from build123d import Box, Color, Cylinder, Pos, Rot, Shape
 
 from rccar_mech.kicad import Board
 
@@ -78,4 +78,16 @@ def chassis(hw: dict) -> list[Shape]:
     for sx in (1, -1):
         holder += Pos(cx + sx * hold["pin_x"], cy, bat["bottom_z"] + pin_h / 2) * Cylinder(HOLDER_PIN_D / 2, pin_h)
     out.append(_named(holder, "ref_battery_holder", CHASSIS_COLOR))
+    return out
+
+
+def wheels(hw: dict) -> list[Shape]:
+    """Tyre envelopes in the car frame. The front envelopes add the steer margin (radius and width)."""
+    w, wb = hw["wheels"], hw["tt02"]["wheelbase"]
+    out = []
+    for name, sx, sy in (("fl", 1, 1), ("fr", 1, -1), ("rl", -1, 1), ("rr", -1, -1)):
+        m = w["steer_margin"] if sx > 0 else 0.0
+        r, width = w["tyre_d"] / 2 + m, w["tyre_w"] + 2 * m
+        tyre = Pos(sx * wb / 2, sy * w["track"] / 2, w["tyre_d"] / 2) * Rot(90, 0, 0) * Cylinder(r, width)
+        out.append(_named(tyre, f"ref_wheel_{name}", CHASSIS_COLOR))
     return out

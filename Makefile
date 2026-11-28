@@ -234,7 +234,7 @@ mech-diff:       ## compare two STEP files: make mech-diff A=<old.step> B=<new.s
 mech-release: mech-check  ## copy the checked outputs of MODEL to docs/mechanical/releases/$(REV)/ (REV=rev1; refuses to overwrite)
 	@test -n "$(REV)" || { echo "mech-release: set REV=<rev>"; exit 2; }
 	@d=docs/mechanical/releases/$(REV); test ! -e $$d/$(MODEL).step || { echo "mech-release: $$d/$(MODEL).step exists. A release is frozen"; exit 1; }; \
-	  mkdir -p $$d && cp $(MECH_OUT)/$(MODEL)/$(MODEL).step $(MECH_OUT)/$(MODEL)/$(MODEL).stl $(MECH_OUT)/$(MODEL)/*.svg \
+	  mkdir -p $$d && cp $(MECH_OUT)/$(MODEL)/$(MODEL).step $(MECH_OUT)/$(MODEL)/$(MODEL)_*.stl $(MECH_OUT)/$(MODEL)/*.svg \
 	  $(MECH_OUT)/$(MODEL)/$(MODEL)_iso.png $(MECH_OUT)/$(MODEL)/report.json $$d/ && echo "mech-release: $$d"
 
 # ---- power board (KiCad 10 in docker, pcb/<BOARD>, default releases/rev1; no hardware) ------------------------

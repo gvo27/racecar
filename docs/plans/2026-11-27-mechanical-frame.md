@@ -40,7 +40,7 @@ Status: active (2026-11-28; phases A in main (#26), B in mech-dev (#27), C open)
 ## Library design (modular, parameterized)
 - `params.py`: load and check the TOML files (status, source, units).
 - `refs.py`: reference envelopes (not printed): Pi 5 with port and cooler keep-outs, rev3 board with tallest-part height, battery and its lift-out path, body posts, holder bar.
-- `parts/`: `deck.py`, `chassis_if.py` (one function per interface type, same return contract: solids + clip/pin features; select through `frame.toml`), `pcb_mount.py` (M3 bosses, standoff), `pi_mount.py` (M2.5 bosses <= ø6), `rail_block.py` (plain solid blocks for drilling by hand), `frame.py` (assembly).
+- `parts/`: `deck.py` (plate, halves, splice), `chassis_if.py` (one function per interface type, same return contract; select through `frame.toml`), `mounts.py` (standoffs, blind holes, rail blocks). The assembly is `models/frame.py`.
 - `export.py`: STEP (labels, colors; read the file back), binary STL (set tolerance), SVG views (ExportSVG + `project_to_viewport`), `report.json` (bbox, volume, mass estimate, center-of-gravity height, holes inventory, check results).
 - `checks.py`: solid valid, solid count, bbox, volume, min wall, hole diameters and centers vs the source, interference = 0 between parts and refs, clearances (battery lift path, frame bottom above holder bar, Pi ports), max component height, print bed fit, STL watertight and winding (trimesh), STEP round-trip (volume and bbox within tolerance).
 - `diff.py`: compare two STEP files (bbox, volume, hole inventory). Used for a release and a PR summary.

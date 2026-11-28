@@ -12,9 +12,15 @@ Generated files stay out of git, except an approved release. Git LFS is not used
 
 ## What the owner measures
 The car values in the models are `assumed` until the owner measures them. Give each value with the date:
-- The four body posts: front to rear and left to right spacing (center to center), post diameter, and post-top height above the ground.
+- The four body posts: front to rear and left to right spacing (center to center), post diameter, the height of the stay top where each post starts, the post-top height, and the height of each body-clip hole above the ground. A clip hole must sit just above the deck top, or the deck can lift.
 - The battery holder bar (D1) top and the top of its two snap pins, above the ground.
 - The top of the tub wall, and the ground clearance setting in use.
-- The battery space: length, width, height.
+- The battery space: length, width, height, and its position (center offset to the left of the car center line).
+- The wheels: track (hub center to hub center), tyre diameter and width, and the room the front tyres need when they steer.
 - The camera model, when it is chosen.
 - The printer and the filament, when the lab is ready.
+
+## Owner steps at assembly
+- The rev3 board underside is bare copper with `VBAT_RAW`. Put an insulating sheet (for example polyimide tape or fish paper) between the board and the standoffs and splice bolts.
+- Battery swap: pull the four body clips, lift the frame up the posts and off, swap the battery. The frame lifts from the stay top to the post top (`[body_posts]` in `mechanical/config/hardware.toml`). Give each cable from the frame to the chassis (ESC, servo, battery) enough slack for that lift and to put the frame aside.
+- Heat-set inserts and thread-forming screws: make a test print of one standoff first. The hole sizes in `[fasteners]` are start values.

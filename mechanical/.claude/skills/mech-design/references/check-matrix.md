@@ -6,10 +6,11 @@ The automatic checks run in `make mech-check MODEL=<model>` (`mechanical/src/rcc
 | --- | --- | --- |
 | MECH-VALID | Each part is a valid solid with a volume | A valid solid with the wrong shape |
 | MECH-LABEL | Each leaf part has a label. No two parts have the same label | A wrong label |
-| MECH-HOLE | The holes of the acceptance list are there, with the expected diameter and position. No extra hole | Holes that are not full cylinders (slots, half holes). Holes on a tilted axis need their own criterion |
+| MECH-HOLE | The holes of the acceptance list are there, with the expected diameter and position. No extra hole | Holes that are not full cylinders (slots, half holes). Holes on a tilted axis need their own criterion. The acceptance list comes from the same layout code as the geometry: a wrong layout passes. A model test must calculate the critical holes again from the source (example: `mechanical/tests/test_frame.py`) |
 | MECH-WALL | The wall from a hole to the faces that do not touch it is at least `min_wall` | Thin walls without a hole: ribs, tabs, a thin floor |
 | MECH-INTERFERE | No two parts overlap by more than the contact tolerance (printed and `ref_`) | A part that is too close but does not touch: use MECH-CLEAR |
 | MECH-CLEAR | Each named pair of the acceptance list keeps its minimum gap | A pair that nobody listed |
+| MECH-HEIGHT | The printed parts stay below `printed_top_max` of the design file | The height of the boards and sensors on top (read `top z` and the ref envelopes) |
 | MECH-BED | Each printed part fits the print bed (turned about Z) | Print orientation, overhangs, supports |
 | MECH-MESH | The STL is watertight and its winding is consistent | Tessellation that is too coarse for a small hole |
 | MECH-STEP | The STEP file read back has the model volume, bounding box and labels | Colors in SolidWorks (owner check) |

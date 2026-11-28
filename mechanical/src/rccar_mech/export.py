@@ -43,15 +43,17 @@ def write_svg(shape: Compound, path: Path, view: str) -> Path:
 
 
 def write_all(
-    shape: Compound, out_dir, name: str, stl_tolerance: float, previews: bool = False, stl_shape: Compound | None = None
-) -> dict[str, Path]:
-    """STEP of the whole assembly (with the ref_ envelopes). STL of stl_shape (the printed parts), else of shape."""
+    shape: Compound, out_dir, name: str, stl_tolerance: float, previews: bool = False, stl_parts: list | None = None
+) -> dict:
+    """STEP of the whole assembly (with the ref_ envelopes). One STL per part of stl_parts (`<name>_<label>.stl`:
+    each part prints alone, and touching parts in one mesh are not watertight). Without stl_parts: `<name>.stl`."""
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
-    out = {
-        "step": write_step(shape, out_dir / f"{name}.step"),
-        "stl": write_stl(stl_shape if stl_shape is not None else shape, out_dir / f"{name}.stl", stl_tolerance),
-    }
+    if stl_parts is None:
+        stls = [write_stl(shape, out_dir / f"{name}.stl", stl_tolerance)]
+    else:
+        stls = [write_stl(p, out_dir / f"{name}_{p.label}.stl", stl_tolerance) for p in stl_parts]
+    out = {"step": write_step(shape, out_dir / f"{name}.step"), "stl": stls}
     if previews:
         from rccar_mech import render
 

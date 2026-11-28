@@ -20,7 +20,7 @@
 | File | Use |
 | --- | --- |
 | `<model>.step` | SolidWorks review (primary deliverable) |
-| `<model>.stl` | Slicer only (binary) |
+| `<model>_<part>.stl` | Slicer only (binary), one file per printed part |
 | `<model>_{top,front,side,iso}.svg` | Line views with hidden lines |
 | `<model>_iso.png` | Shaded iso view for the PR |
 | `report.json` | Bounding box, volume, mass estimate, center of gravity, holes, findings, assumed tables, file hashes |
@@ -34,6 +34,7 @@
 | MECH-WALL | The wall from each hole to the other faces is at least `min_wall` (`print.toml`) |
 | MECH-INTERFERE | No two parts (printed or `ref_`) overlap |
 | MECH-CLEAR | A named pair keeps its minimum gap (model acceptance) |
+| MECH-HEIGHT | The printed parts stay below the top height of the design file (model acceptance) |
 | MECH-BED | Each printed part fits the print bed |
 | MECH-MESH | The STL is watertight and its winding is consistent |
 | MECH-STEP | The STEP file read back has the model volume, bounding box and part labels |
