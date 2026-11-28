@@ -1,26 +1,31 @@
 # Print process limits for the checks (mm, g/cm3, degC). Every table has status and source.
-# The printer and the material are not chosen yet (owner 2026-11-27: the lab has all common printers and filaments).
+# The printer is at the workshop (owner 2026-11-27). The process and the material are not chosen yet.
 
 [process]
 kind = "FDM"
 nozzle = 0.4
 layer_height = 0.2
 status = "assumed"
-source = "owner 2026-11-27: printer not chosen; start value for a common FDM printer"
+source = "owner 2026-11-27: printer model not known; start value for a common FDM printer"
 
 [limits]
 # min_wall: 4 perimeters of a 0.4 mm nozzle. hole_comp: add to a printed hole diameter (FDM holes print small)
 min_wall = 1.6
 hole_comp = 0.2
 status = "assumed"
-source = "generic FDM start values, not measured on the lab printer"
+source = "generic FDM start values, not measured on the workshop printer"
 
 [bed]
-x = 220.0
-y = 220.0
+# printable area of the workshop printer (not the techctcarvera mill lab in pcb/config/lab.toml)
+x = 250.0
+y = 250.0
+status = "confirmed"
+source = "owner 2026-11-27: the 3D printer at the workshop prints 250 x 250 mm"
+
+[bed_height]
 z = 250.0
 status = "assumed"
-source = "common 220 x 220 mm bed class; owner to confirm the lab printer"
+source = "start value; owner to give the build height of the workshop printer"
 
 [material]
 name = "PETG"

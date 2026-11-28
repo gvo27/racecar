@@ -7,7 +7,8 @@ from rccar_mech import checks
 
 PRINT = {
     "limits": {"min_wall": 1.6, "hole_comp": 0.2},
-    "bed": {"x": 220.0, "y": 220.0, "z": 250.0},
+    "bed": {"x": 220.0, "y": 220.0},
+    "bed_height": {"z": 250.0},
 }
 
 
