@@ -43,3 +43,15 @@ def test_repo_print_file_is_valid():
 def test_assumed_lists_the_unconfirmed_tables(tmp_path):
     p = write(tmp_path, '[a]\nstatus = "assumed"\nsource = "t"\n[b]\nstatus = "confirmed"\nsource = "t"\n')
     assert params.assumed(params.load_facts(p)) == ["a"]
+
+
+def test_bool_override(tmp_path):
+    p = write(tmp_path, "flag = true\n")
+    assert params.load_design(p, {"flag": "false"})["flag"] is False
+    with pytest.raises(params.ParamError):
+        params.load_design(p, {"flag": "maybe"})
+
+
+def test_bad_number_override_is_a_param_error(tmp_path):
+    with pytest.raises(params.ParamError):
+        params.load_design(write(tmp_path, "x = 2.0\n"), {"x": "abc"})

@@ -75,3 +75,15 @@ def test_printed_copy_keeps_the_model_tree(bracket):
     pr = cli.printed(asm)
     assert [p.label for p in checks.parts(asm)] == before
     assert [p.label for p in checks.parts(pr)] == before
+
+
+def test_cli_diff_exit_code(tmp_path):
+    a, b = tmp_path / "a", tmp_path / "b"
+    cli.main(["build", "test_bracket", "--out", str(a), "--no-previews"])
+    cli.main(["build", "test_bracket", "--out", str(b), "--no-previews", "--set", "length=50"])
+    assert cli.main(["diff", str(a / "test_bracket.step"), str(a / "test_bracket.step")]) == 0
+    assert cli.main(["diff", str(a / "test_bracket.step"), str(b / "test_bracket.step")]) == 1
+
+
+def test_cli_bad_input_exits_2(tmp_path):
+    assert cli.main(["build", "test_bracket", "--out", str(tmp_path), "--set", "length=abc"]) == 2

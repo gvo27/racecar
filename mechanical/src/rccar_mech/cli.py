@@ -1,6 +1,6 @@
 """Command line: build, check and diff one model. Make targets: mech-build, mech-check, mech-diff.
 
-Exit codes: 0 = no errors, 1 = check errors, 2 = the command could not run.
+Exit codes: 0 = no errors (diff: same), 1 = check errors (diff: different), 2 = the command could not run.
 """
 
 import argparse
@@ -46,6 +46,9 @@ def run_checks(name: str, asm: Compound, cfg: dict, out_dir: Path) -> list[check
     print_cfg = params.load_facts(params.config_path("print.toml"))
     found = []
     every = checks.parts(asm)
+    found += checks.labels(asm)
+    if all(models.is_ref(p) for p in every):
+        found.append(checks.Finding("MECH-EXPORT", "warning", name, "no printed part (all parts are ref_)"))
     for part in every:
         found += checks.validity(part)
     for part in every:
@@ -121,7 +124,7 @@ def cmd_check(a) -> int:
 def cmd_diff(a) -> int:
     d = diff.diff(Path(a.a), Path(a.b))
     print(json.dumps(d, indent=2))
-    return 0
+    return 0 if d["same"] else 1
 
 
 def main(argv=None) -> int:
@@ -144,6 +147,9 @@ def main(argv=None) -> int:
         return a.fn(a)
     except (KeyError, params.ParamError, FileNotFoundError) as e:
         print(f"rccar_mech: {e}", file=sys.stderr)
+        return 2
+    except (ValueError, TypeError, RuntimeError, OSError, AttributeError) as e:  # a crash is not a check result
+        print(f"rccar_mech: {type(e).__name__}: {e}", file=sys.stderr)
         return 2
 
 

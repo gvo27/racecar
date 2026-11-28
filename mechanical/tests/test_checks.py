@@ -94,3 +94,57 @@ def test_round_trip_detects_a_different_file(tmp_path):
     b = Box(41, 20, 5)
     b.label = "plate"
     assert "MECH-STEP" in ids(checks.step_round_trip(Compound(children=[b], label="t"), out["step"]))
+
+
+def test_round_trip_of_a_nested_assembly(tmp_path):
+    from rccar_mech import export
+
+    boxes = [Pos(20 * i, 0, 0) * Box(5, 5, 5) for i in range(4)]
+    for i, b in enumerate(boxes):
+        b.label = f"p{i}"
+    sub = Compound(children=boxes[:2], label="sub")
+    top = Compound(children=[sub, boxes[2], boxes[3]], label="top")
+    out = export.write_all(top, tmp_path, "top", stl_tolerance=0.01)
+    assert checks.step_round_trip(top, out["step"]) == []
+
+
+def test_overlapping_holes_do_not_crash():
+    part = Box(20, 20, 10) - Pos(-1, 0, 0) * Cylinder(2, 10) - Pos(1, 0, 0) * Cylinder(2, 10)
+    checks.holes(part)
+    checks.walls(part, PRINT)
+
+
+def test_tilted_hole_is_found():
+    from build123d import Rot
+
+    part = Box(30, 30, 30) - Rot(30, 0, 0) * Cylinder(2, 60)
+    hs = checks.holes(part)
+    assert len(hs) == 1 and hs[0].diameter == pytest.approx(4.0, abs=1e-6)
+
+
+def test_partial_cylinders_are_not_holes():
+    from build123d import Axis, fillet
+
+    b = Box(20, 20, 5)
+    b = fillet(b.edges().filter_by(Axis.Z), radius=2)
+    half = Box(20, 20, 5) - Pos(10, 0, 0) * Cylinder(2, 5)
+    assert checks.holes(b) == []
+    assert checks.holes(half) == []
+
+
+def test_counterbore_is_not_a_thin_wall():
+    part = Box(20, 20, 10) - Cylinder(2, 10) - Pos(0, 0, 3) * Cylinder(2.5, 4)
+    assert len(checks.holes(part)) == 2
+    assert checks.walls(part, PRINT) == []
+
+
+def test_labels_must_be_unique_and_set():
+    a, b, c = Box(1, 1, 1), Pos(5, 0, 0) * Box(1, 1, 1), Pos(10, 0, 0) * Box(1, 1, 1)
+    a.label, b.label = "a", "a"
+    assert ids(checks.labels(Compound(children=[a, b, c], label="t"))) == ["MECH-LABEL", "MECH-LABEL"]
+
+
+def test_tiny_overlap_within_tolerance_is_contact():
+    a, b = Box(10, 10, 10), Pos(10 - 1e-5, 0, 0) * Box(10, 10, 10)
+    a.label, b.label = "a", "b"
+    assert checks.interference([a, b]) == []

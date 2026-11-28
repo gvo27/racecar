@@ -36,12 +36,24 @@ def load_facts(path) -> dict:
     return data
 
 
+def _convert(path, key, old, value):
+    if isinstance(old, bool):
+        v = str(value).strip().lower()
+        if v not in ("true", "false"):
+            raise ParamError(f"{path}: {key} needs true or false, not {value}")
+        return v == "true"
+    try:
+        return type(old)(value)
+    except ValueError as e:
+        raise ParamError(f"{path}: {key} = {value}: {e}") from e
+
+
 def load_design(path, overrides: dict | None = None) -> dict:
     data = _read(path)
     for key, value in (overrides or {}).items():
         if key not in data:
             raise ParamError(f"{path}: unknown parameter {key}")
-        data[key] = type(data[key])(value)
+        data[key] = _convert(path, key, data[key], value)
     return data
 
 

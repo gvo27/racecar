@@ -10,6 +10,7 @@ on:
       - "mechanical/**"
       - "docker/cad.Dockerfile"
       - "docker/cad.Dockerfile.dockerignore"
+      - "pcb/src/rc_power_board.kicad_pcb"
       - "Makefile"
       - ".github/workflows/mechanical.yml"
   pull_request:

@@ -227,7 +227,7 @@ mech-build:      ## build MODEL (default test_bracket) -> build/mech/<MODEL>/: S
 mech-check: mech-build  ## build MODEL, then check it (geometry, holes, walls, interference, print bed, STL mesh, STEP round trip); exit 1 = errors
 	$(MECH_RUN) python -m rccar_mech check $(MODEL) --out $(MECH_OUT)/$(MODEL)
 
-mech-diff:       ## compare two STEP files: make mech-diff A=<old.step> B=<new.step> (bbox, volume, holes)
+mech-diff:       ## compare two STEP files: make mech-diff A=<old.step> B=<new.step> (bbox, volume, parts, holes); exit 1 = different
 	@test -n "$(A)" -a -n "$(B)" || { echo "mech-diff: set A=<old.step> B=<new.step>"; exit 2; }
 	$(MECH_RUN) python -m rccar_mech diff "$(abspath $(A))" "$(abspath $(B))"
 
