@@ -24,11 +24,12 @@ corner_r = 6.0
 # anchor_housing_gap: radial gap from the block to the housing. The deck has a hole over the housing (clearance_min)
 anchor_size = 36.0
 anchor_x_min = -18.0
-anchor_x_max = 32.0
-anchor_housing_gap = 0.5
-snap_offset_x = 24.0
+anchor_x_max = 34.0
+anchor_housing_gap = 0.9
+snap_offset_x = 26.0
 anchor_floor = 3.0
-anchor_cbore_d = 7.0
+# counterbore 6.4 mm for the 5.7 mm M3 head: it leaves min_wall to the housing bore
+anchor_cbore_d = 6.4
 snap_pin_d = 8.0
 snap_pocket_gap = 2.0
 snap_slot_w = 2.0
@@ -49,7 +50,7 @@ snap_slot_play = 2.0
 pcb_x = -18.0
 pcb_y = -31.5
 pcb_rot = 90.0
-# 12 mm: room for the parts under the board above the motor housing (top 20 mm above the motor plate)
+# 12 mm: room between the board and the top of the motor housing (20 mm above the motor plate)
 pcb_standoff_h = 12.0
 pcb_standoff_od = 8.0
 

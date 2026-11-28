@@ -93,7 +93,7 @@ source = "x, y: estimate from the reference part (its plate outline is symmetric
 diameter = 22.0
 height = 20.0
 status = "assumed"
-source = "owner 2026-11-28: cylinder inside the 4 mount holes, keep 20 mm clear above the mount points until measured; diameter: the ø10 legs of the reference part at the holes leave at most 24 mm"
+source = "owner 2026-11-28: cylinder inside the 4 mount holes, keep 20 mm clear above the mount points until measured; diameter: the ø10 legs of the reference part at the holes leave at most 24 mm; the frame_rev2 anchor takes at most about 22.1 mm (MECH-WALL between its housing bore and the counterbores)"
 
 # ---- sensors -------------------------------------------------------------------------------------------------------
 [mapper]
