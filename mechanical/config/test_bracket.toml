@@ -1,0 +1,6 @@
+# Design parameters of the pipeline test part (mm). It proves the build, check and export chain. It is not printed.
+length = 40.0
+width = 20.0
+thickness = 5.0
+hole_d = 3.2
+hole_spacing = 24.0

@@ -19,6 +19,12 @@ ROS_IMAGE      ?= rccar-ros:local
 ROS_TEST_IMAGE ?= rccar-ros-test:local
 ROS_TEST_OUT   ?= build/ros-test
 ROS_BUILD_ARGS ?=
+# build123d CAD for mechanical/ (docker/cad.Dockerfile). MODEL = a model name of mechanical/src/rccar_mech/models
+MECH_IMAGE ?= rccar-cad:local
+MODEL      ?= test_bracket
+MECH_OUT   := $(CURDIR)/build/mech
+MECH_RUN    = docker run --rm --user $(shell id -u):$(shell id -g) -e HOME=/tmp -e PYTHONPATH=$(CURDIR)/mechanical/src \
+              -v "$(CURDIR)":"$(CURDIR)" -w "$(CURDIR)/mechanical" $(MECH_IMAGE)
 # KiCad 10 + Freerouting for the power board (pcb/); images pinned by digest
 KICAD_IMAGE      ?= rccar-kicad:local
 FREEROUTING_IMAGE := ghcr.io/freerouting/freerouting:2.5.0@sha256:6c195891c9b1d62620c140784ab91285b9350d12d905693defe0162eb128cf8e
@@ -57,7 +63,7 @@ COMPOSE  := docker compose -f deploy/car/compose.yaml --env-file deploy/car/.env
 .PHONY: help open close context checks msgs-sync config-check plugins-reset check-host setup clean build pcb-rules pcb-sch pcb-all flash monitor fw-image config models compiledb unit check-dev dev-setup \
         ros-image ros-test ros-test-image ros-test-run ros-shell car-up car-down car-ps car-logs car-pull \
         car-shutdown install-host teleop calibrate tune test rangefinder viz lidar-imu lidar-snapshot lidar-record mcu unit-run \
-        drivers-stop drivers-start lidar-hw-test kicad-image erc pcb-build pcb-route pcb-check pcb-mill-check pcb-review pcb-fab pcb-test pcb-gate bom \
+        drivers-stop drivers-start lidar-hw-test kicad-image cad-image mech-test mech-build mech-check mech-diff mech-release erc pcb-build pcb-route pcb-check pcb-mill-check pcb-review pcb-fab pcb-test pcb-gate bom \
         _kicad-cfg _clean-build _need-config _need-stack _need-stack-down _need-drivers-down
 
 help:            ## list targets (grouped in README.md)
@@ -207,6 +213,29 @@ lidar-hw-test: _need-config _need-drivers-down  ## automated launch_testing agai
 	@rc=0; $(COMPOSE) run --rm -e MAPPER_HOST=$${MAPPER_HOST:-192.168.11.1} -e RCCAR_GIT_SHA=$(shell git rev-parse --short HEAD 2>/dev/null) \
 	  -e RCCAR_HW_TEST=1 tools launch_test /ws/install/share/rccar_drivers/test_hw/test_mapper_hw.py || rc=$$?; \
 	  echo "drivers left stopped; restarting it is a hardware restart: ask the user (make drivers-start)"; exit $$rc
+
+# ---- mechanical parts (build123d in docker, mechanical/; no hardware) ------------------------------------------
+cad-image:       ## build the CAD image (docker/cad.Dockerfile -> rccar-cad:local): build123d, trimesh, pytest, ruff
+	docker build -f docker/cad.Dockerfile -t $(MECH_IMAGE) .
+
+mech-test:       ## mechanical/ lint (ruff) + tests (pytest) in the CAD image
+	$(MECH_RUN) sh -c 'ruff check . && ruff format --check . && pytest'
+
+mech-build:      ## build MODEL (default test_bracket) -> build/mech/<MODEL>/: STEP, STL, SVG views, iso PNG, report.json
+	$(MECH_RUN) python -m rccar_mech build $(MODEL) --out $(MECH_OUT)/$(MODEL)
+
+mech-check: mech-build  ## build MODEL, then check it (geometry, holes, walls, interference, print bed, STL mesh, STEP round trip); exit 1 = errors
+	$(MECH_RUN) python -m rccar_mech check $(MODEL) --out $(MECH_OUT)/$(MODEL)
+
+mech-diff:       ## compare two STEP files: make mech-diff A=<old.step> B=<new.step> (bbox, volume, holes)
+	@test -n "$(A)" -a -n "$(B)" || { echo "mech-diff: set A=<old.step> B=<new.step>"; exit 2; }
+	$(MECH_RUN) python -m rccar_mech diff "$(abspath $(A))" "$(abspath $(B))"
+
+mech-release: mech-check  ## copy the checked outputs of MODEL to docs/mechanical/releases/$(REV)/ (REV=rev1; refuses to overwrite)
+	@test -n "$(REV)" || { echo "mech-release: set REV=<rev>"; exit 2; }
+	@d=docs/mechanical/releases/$(REV); test ! -e $$d/$(MODEL).step || { echo "mech-release: $$d/$(MODEL).step exists. A release is frozen"; exit 1; }; \
+	  mkdir -p $$d && cp $(MECH_OUT)/$(MODEL)/$(MODEL).step $(MECH_OUT)/$(MODEL)/$(MODEL).stl $(MECH_OUT)/$(MODEL)/*.svg \
+	  $(MECH_OUT)/$(MODEL)/$(MODEL)_iso.png $(MECH_OUT)/$(MODEL)/report.json $$d/ && echo "mech-release: $$d"
 
 # ---- power board (KiCad 10 in docker, pcb/<BOARD>, default releases/rev1; no hardware) ------------------------
 kicad-image:     ## build the KiCad 10 image (docker/kicad.Dockerfile -> rccar-kicad:local)

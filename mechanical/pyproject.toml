@@ -1,0 +1,27 @@
+# CAD tools for mechanical/ (build123d). They run in the CAD image (docker/cad.Dockerfile), not on the host.
+# The image installs this lock: make cad-image. Pins: docs/dependencies.md
+[project]
+name = "rccar-mech"
+version = "0.1.0"
+requires-python = ">=3.13,<3.14"
+dependencies = [
+    "build123d==0.13.0",
+    "bd_warehouse==0.4.0",
+    "trimesh==5.2.2",
+    "matplotlib==3.11.2",
+    "pytest==9.2.0",
+    "ruff==0.17.5",
+]
+
+[tool.uv]
+# Not an installed package: the image puts src/ on PYTHONPATH.
+package = false
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+addopts = "-q -p no:cacheprovider"
+
+[tool.ruff]
+line-length = 120
+target-version = "py313"
