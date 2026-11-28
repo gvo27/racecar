@@ -95,7 +95,7 @@ length = 24.0
 width = 12.0
 height = 20.0
 status = "assumed"
-source = "owner 2026-11-28: the barrel top rises about 20 mm above the mount points (not measured); footprint inside the 4 holes, 0 clearance to the hole lines front and rear; width not known: 12 mm is the widest barrel the frame_rev2 U anchor takes with a 1 mm gap"
+source = "owner 2026-11-28: the barrel top rises about 20 mm above the mount points (not measured); the footprint fits within the mounting holes with at least 1 cm clearance on the longitudinal sides (from the hole centers: width 4 mm or less) and may have 0 clearance front and rear (length = the 24 mm hole pitch); width not measured: 12 mm is a conservative value, the widest barrel the frame_rev2 U anchor takes with 1.1 mm each side"
 
 # ---- sensors -------------------------------------------------------------------------------------------------------
 [mapper]

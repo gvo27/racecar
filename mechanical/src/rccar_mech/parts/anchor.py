@@ -80,6 +80,14 @@ def build(cfg: dict, hw: dict, pr: dict, z0: float, thickness: float) -> Anchor:
     cut = Pos(ax, ay, z0 + thickness / 2) * Box(bar["length"] + 2 * gap, bar["width"] + 2 * gap, thickness)
     w = pin_d + 2 * cfg["snap_clearance"] + comp
     play = cfg["snap_slot_play"]
+    # a longer barrel moves the U front and the deck cutout toward the snap: keep min_wall in both webs
+    u_web = (px - pocket_d / 2) - u_front
+    deck_web = (px - play - w / 2) - (ax + bar["length"] / 2 + gap)
+    if min(u_web, deck_web) < min_wall:
+        msg = (
+            f"motor barrel length {bar['length']} mm: web to the snap pin {min(u_web, deck_web):.1f} mm < {min_wall} mm"
+        )
+        raise ParamError(msg + " (move the pin: snap_offset_x, anchor_x_max)")
     cut += Pos(px, py, z0 + thickness / 2) * Box(2 * play, w, thickness)
     for sx in (-1, 1):
         cut += _cyl(px + sx * play, py, z0, ztop, w)

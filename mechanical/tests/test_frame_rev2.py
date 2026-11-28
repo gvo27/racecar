@@ -265,3 +265,15 @@ def test_snap_pin_is_in_front_of_the_barrel(frame, hw):
     pin_d = cfg["snap_pin_d"] + 2 * cfg["snap_pocket_gap"]
     pocket = [h for h in checks.holes(_part(asm, "anchor")) if abs(h.diameter - pin_d) < 0.5]
     assert [(round(h.x, 3), round(h.y, 3)) for h in pocket] == [(pos["x"] + cfg["snap_offset_x"], pos["y"])]
+
+
+def test_barrel_wider_than_the_u_is_rejected():
+    """The U cutout is 14.2 mm: a 12 mm barrel with 1.2 mm gaps each side does not fit."""
+    with pytest.raises(params.ParamError):
+        models.build(MODEL, overrides={"anchor_barrel_gap": 1.2})
+
+
+def test_web_to_the_snap_pin_is_guarded():
+    """Moving the pin back toward the barrel leaves less than min_wall between the deck cutout and the snap slot."""
+    with pytest.raises(params.ParamError):
+        models.build(MODEL, overrides={"snap_offset_x": 22.0})
