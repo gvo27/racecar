@@ -1,6 +1,6 @@
 # Plan: mechanical/ subproject, build123d frame for the TT-02 (rev1)
 
-Status: active (2026-11-28; phases A in main (#26), B in mech-dev (#27), C open)
+Status: active (2026-11-28; A in main (#26); B (#27) and C (#29) in mech-dev; D open for the owner review (#30); integration PR #28)
 
 ## Context
 `mechanical/` is a scaffold (ADR 0001 reserves it for 3D-printed mounts). We need a printed frame that carries the rev3 power board and the Pi 5 on the TT-02 chassis, with rail blocks for the camera and the lidar. The workflow copies `pcb/`: a design skill, TDD and checks, a read-only review agent, CI. Claude designs and checks on the Linux VM with build123d. The owner imports the STEP file in SolidWorks (Win11) for the final human review. Infrastructure comes first, then the frame. This is an iterative design: placeholder values now, measured values later.
