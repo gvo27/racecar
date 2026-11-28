@@ -80,3 +80,27 @@ height = 74.9
 base_hole_spacing = 24.0
 status = "confirmed"
 source = "docs/datasheets/slamtec_mapper_M2M1_datasheet.md (body about 57 x 57 mm, 74.9 mm tall, 2 x M3 under, 24 mm apart)"
+
+[wheels]
+# hub centers on the wheelbase ([tt02]), centered between the body posts. steer_margin: room for the front wheel sweep
+track = 160.0
+tyre_d = 66.0
+tyre_w = 26.0
+steer_margin = 10.0
+status = "assumed"
+source = "tyre 26/66 mm (Tamiya kit page 58716); track at the hub centers estimated from the 182-187 mm width over the tyres; axle positions assume the posts are centered on the wheelbase; owner to measure"
+
+# ---- fasteners -------------------------------------------------------------------------------------------------------
+[fasteners]
+# m3_insert_hole: hole for an M3 heat-set insert. m25_pilot: hole for an M2.5 thread-forming screw into plastic
+m3_insert_hole = 4.0
+m3_insert_depth = 5.0
+m25_pilot = 2.2
+m25_pilot_depth = 5.0
+# splice bolts: M3 button head on the deck top, M3 nut under the splice
+m3_head_d = 5.7
+m3_head_h = 1.65
+m3_nut_w = 5.5
+m3_nut_h = 2.4
+status = "assumed"
+source = "generic start values (ISO 7380 button head, ISO 4032 nut, common M3 insert hole); owner to choose the insert and confirm the hole with a test print"

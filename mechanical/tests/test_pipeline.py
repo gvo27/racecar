@@ -36,7 +36,8 @@ def test_parameter_change_moves_the_holes():
 def test_export_writes_every_file(tmp_path, bracket):
     asm, _ = bracket
     out = export.write_all(asm, tmp_path, "test_bracket", stl_tolerance=0.01, previews=True)
-    for key in ("step", "stl", "svg_top", "svg_front", "svg_side", "svg_iso", "png_iso"):
+    assert out["stl"][0].stat().st_size > 0
+    for key in ("step", "svg_top", "svg_front", "svg_side", "svg_iso", "png_iso"):
         assert out[key].exists() and out[key].stat().st_size > 0, key
 
 
@@ -95,4 +96,4 @@ def test_check_prints_cog_and_top_height(tmp_path, capsys):
     out = capsys.readouterr().out
     rep = json.loads((tmp_path / "report.json").read_text())
     assert rep["top_z_printed"] == pytest.approx(2.5)
-    assert "cog z 0.0 mm" in out and "top z 2.5 mm" in out
+    assert "cog z 0.0 mm" in out and "top z 2.5 mm" in out and "with refs 2.5 mm" in out

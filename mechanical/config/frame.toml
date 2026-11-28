@@ -1,0 +1,59 @@
+# Design parameters of the frame rev1 (mm, degrees). Facts come from hardware.toml and print.toml.
+# Car frame: X forward, Y left, Z up, origin = body-post center at ground level (docs/mechanical/conventions.md).
+
+# chassis interface: "body_posts" (deck on the post stays, stock body clips) or "screw_pads" (M3 into the damper stays)
+chassis_interface = "body_posts"
+post_clearance = 0.5
+# screw_pads only: pad size and the M3 clearance hole at each post position. A screwed deck needs a tool for the
+# battery swap (rule: the frame releases without tools): owner decision before it is used
+pad_size = 14.0
+pad_screw_d = 3.4
+
+# deck plate: a wide middle and narrow ends (the ends sit between the front and rear tyres)
+deck_thickness = 4.0
+deck_x_front = 140.0
+deck_x_rear = -140.0
+end_half_width = 42.0
+mid_x_min = -90.0
+mid_x_max = 60.0
+mid_y_min = -68.0
+mid_y_max = 64.0
+corner_r = 6.0
+
+# the deck prints in two halves (bed fit): a split at split_x and a splice plate under the joint with M3 bolts
+split_x = -5.0
+splice_length = 30.0
+splice_thickness = 3.0
+splice_bolt_d = 3.4
+splice_bolt_dx = 10.0
+splice_bolt_y = [-50.0, -15.0, 25.0, 50.0]
+
+# rev3 power board: center and turn of the board (board Y = its 140 mm side), standoffs with M3 heat-set inserts
+# ([fasteners] in hardware.toml). Its underside is bare copper with VBAT_RAW: put an insulating sheet (for example
+# polyimide tape or fish paper) on the standoff side of the board. Owner step: docs/mechanical/handoff.md
+pcb_x = -18.0
+pcb_y = -31.5
+pcb_rot = 90.0
+pcb_standoff_h = 8.0
+pcb_standoff_od = 8.0
+
+# Pi 5: center and turn (0 = ports at +X; 180 = ports to the rear), standoffs for M2.5 thread-forming screws ([fasteners])
+pi_x = -15.0
+pi_y = 34.0
+pi_rot = 180.0
+pi_standoff_h = 8.0
+pi_standoff_od = 6.0
+
+# sensor rail blocks: solid material, drilled by hand at the position found by test
+lidar_block_x = 84.0
+lidar_block_y = 0.0
+lidar_block_size = [44.0, 50.0, 8.0]
+camera_block_x = 134.0
+camera_block_y = 0.0
+camera_block_size = [12.0, 44.0, 30.0]
+
+# acceptance
+clearance_min = 3.0
+# room for a hand and a body clip next to each post (estimate, not measured)
+clip_clearance = 5.0
+printed_top_max = 90.0

@@ -57,14 +57,16 @@ def run_checks(name: str, asm: Compound, cfg: dict, out_dir: Path) -> list[check
             found += checks.bed_fit(part, print_cfg)
     found += checks.interference(every)
     found += models.acceptance(name, asm, cfg)
-    step, stl = out_dir / f"{name}.step", out_dir / f"{name}.stl"
-    for path in (step, stl):
+    step = out_dir / f"{name}.step"
+    stls = [out_dir / f"{name}_{p.label}.stl" for p in every if not models.is_ref(p)]
+    for path in [step, *stls]:
         if not path.exists():
             found.append(checks.Finding("MECH-EXPORT", "error", path.name, "missing: run make mech-build"))
     if step.exists():
         found += checks.step_round_trip(asm, step)
-    if stl.exists():
-        found += checks.mesh(stl)
+    for path in stls:
+        if path.exists():
+            found += checks.mesh(path)
     return found
 
 
@@ -87,6 +89,7 @@ def report(name: str, asm: Compound, cfg: dict, found, out_dir: Path) -> dict:
         "mass_g": pr.volume * density * DENSITY_UNIT,
         "cog_printed": [cog.X, cog.Y, cog.Z] if cog is not None else None,
         "top_z_printed": bb.max.Z if pr.children else None,
+        "top_z_all": asm.bounding_box().max.Z,
         "parts": [{"label": p.label, "ref": models.is_ref(p), "volume_mm3": p.volume} for p in checks.parts(asm)],
         "holes": [h.__dict__ for h in checks.holes(pr)],
         "assumed": [f"{f}: [{t}]" for f, data in facts.items() for t in params.assumed(data)],
@@ -103,7 +106,8 @@ def cmd_build(a) -> int:
     asm, _ = models.build(a.model, _overrides(a.set))
     mod = models.module(a.model)
     out_dir = Path(a.out)
-    export.write_all(asm, out_dir, a.model, mod.STL_TOLERANCE, previews=not a.no_previews, stl_shape=printed(asm))
+    parts = checks.parts(printed(asm))
+    export.write_all(asm, out_dir, a.model, mod.STL_TOLERANCE, previews=not a.no_previews, stl_parts=parts)
     print(f"mech-build: {a.model} -> {out_dir}")
     return 0
 
@@ -118,7 +122,10 @@ def cmd_check(a) -> int:
         print(f"  {f.id:<15} {f.severity:<7} {f.where}: {f.message}")
     heights = ""
     if rep["cog_printed"] is not None:
-        heights = f", cog z {rep['cog_printed'][2]:.1f} mm, top z {rep['top_z_printed']:.1f} mm"
+        heights = (
+            f", cog z {rep['cog_printed'][2]:.1f} mm, top z {rep['top_z_printed']:.1f} mm"
+            f" (with refs {rep['top_z_all']:.1f} mm)"
+        )
     print(
         f"mech-check: {a.model}: {rep['errors']} errors, {rep['warnings']} warnings, mass {rep['mass_g']:.1f} g{heights}"
     )

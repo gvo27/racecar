@@ -152,9 +152,10 @@ def holes(shape: Shape) -> list[Hole]:
     return sorted(out, key=lambda h: (round(h.x, 3), round(h.y, 3), round(h.z, 3), h.diameter))
 
 
-def expect_holes(shape: Shape, expected, tol: float = 0.01) -> list[Finding]:
-    """expected: (x, y, d) of vertical holes. Report each missing hole and each extra hole."""
-    have = holes(shape)
+def expect_holes(shape, expected, tol: float = 0.01) -> list[Finding]:
+    """shape: a shape or a list of shapes. expected: (x, y, d) of the holes, one entry per hole (a bolt through two
+    parts is two entries). Report each missing hole and each extra hole."""
+    have = [h for s in (shape if isinstance(shape, list) else [shape]) for h in holes(s)]
     out, used = [], set()
     for x, y, d in expected:
         hit = next(
