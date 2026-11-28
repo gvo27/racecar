@@ -10,7 +10,7 @@ A 1:10 Tamiya TT-02 made into a self-driving research platform. A Raspberry Pi 5
 | [`firmware/`](firmware/README.md) | ESP32-S3 firmware: PWM, failsafe, rangefinder, micro-ROS link | [`firmware/esp32/`](firmware/esp32/) |
 | [`pcb/`](pcb/README.md) | KiCad 10 projects of the power distribution board | [`pcb/src/`](pcb/src/) (active mill board) |
 | [`simulation/`](simulation/README.md) | Gazebo simulation (scaffold; today in [racecar-sim](https://github.com/gvo27/racecar-sim)) | [`docs/interfaces/`](docs/interfaces/sensor_contract.md) |
-| [`mechanical/`](mechanical/README.md) | 3D-printed mounts (scaffold) | - |
+| [`mechanical/`](mechanical/README.md) | build123d models of the 3D-printed mounts: STEP for SolidWorks, STL for printing | [`mechanical/src/rccar_mech/models/`](mechanical/src/rccar_mech/models/) |
 | [`models/`](models/README.md) | ML model manifest (weights are not in git) | [`models/manifest.yaml`](models/manifest.yaml) |
 | [`docs/`](docs/README.md) | Setup, hardware, interfaces, decisions, plans, status | [`docs/setup.md`](docs/setup.md) |
 | `deploy/`, `docker/`, `scripts/` | Car stack (compose, udev, systemd), docker images, session scripts | [`deploy/car/compose.yaml`](deploy/car/compose.yaml) |

@@ -1,0 +1,66 @@
+name: mechanical
+
+# build123d parts in mechanical/: lint + tests, then build and check each model in the CAD image.
+# The STEP, STL, SVG, iso PNG and report.json of each model go to the run artifacts (30 days).
+# Owner review: download the STEP file of the PR run and import it in SolidWorks (docs/mechanical/handoff.md).
+on:
+  push:
+    branches: [main]
+    paths:
+      - "mechanical/**"
+      - "docker/cad.Dockerfile"
+      - "docker/cad.Dockerfile.dockerignore"
+      - "pcb/src/rc_power_board.kicad_pcb"
+      - "Makefile"
+      - ".github/workflows/mechanical.yml"
+  pull_request:
+    paths:
+      - "mechanical/**"
+      - "docker/cad.Dockerfile"
+      - "docker/cad.Dockerfile.dockerignore"
+      - "pcb/src/rc_power_board.kicad_pcb"
+      - "Makefile"
+      - ".github/workflows/mechanical.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  models:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: docker/setup-buildx-action@v3
+
+      # the image changes only with docker/cad.Dockerfile and mechanical/uv.lock: keep its layers in the GHA cache
+      - name: Build CAD image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/cad.Dockerfile
+          tags: rccar-cad:local
+          load: true
+          cache-from: type=gha,scope=cad
+          cache-to: type=gha,scope=cad,mode=max
+
+      - name: Lint + tests
+        run: make mech-test
+
+      - name: Build + check each model
+        run: |
+          rc=0
+          for m in $(ls mechanical/src/rccar_mech/models/*.py | xargs -n1 basename | sed 's/\.py$//' | grep -v '^_'); do
+            make mech-check MODEL=$m || rc=1
+          done
+          exit $rc
+
+      - name: Upload outputs
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: mech-outputs
+          path: build/mech/
+          retention-days: 30
+          if-no-files-found: error

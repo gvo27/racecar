@@ -1,0 +1,4 @@
+# Build context of docker/cad.Dockerfile: only the lock of mechanical/
+*
+!mechanical/pyproject.toml
+!mechanical/uv.lock

@@ -21,6 +21,7 @@ One line for each entry. Folders have their own README.
 | [lidar/](lidar/README.md) | Lidar status, driver reference, roadmap |
 | [sim/](sim/README.md) | Car-side sim findings |
 | [pcb/](pcb/README.md) | Power board context: plan, conventions, BOM, review records |
+| [mechanical/](mechanical/README.md) | 3D-printed parts: conventions, SolidWorks handoff, releases |
 | [techctcarvera/](techctcarvera/README.md) | The lab directory: mill limits, tools, CAM template |
 | [datasheets/](datasheets/) | Part datasheets and digests |
 | [plans/](plans/) | Plans in progress (done plans go to `archive/plans/`) |
