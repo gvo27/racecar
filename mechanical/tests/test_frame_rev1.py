@@ -9,7 +9,7 @@ from rccar_mech import checks, cli, kicad, models, params
 
 @pytest.fixture(scope="module")
 def frame():
-    return models.build("frame")
+    return models.build("frame_rev1")
 
 
 @pytest.fixture(scope="module")
@@ -40,7 +40,7 @@ def test_parts_and_labels(frame):
 
 def test_acceptance_passes(frame):
     asm, cfg = frame
-    assert models.acceptance("frame", asm, cfg) == []
+    assert models.acceptance("frame_rev1", asm, cfg) == []
 
 
 def test_pcb_inserts_line_up_with_the_board_holes(frame, hw):
@@ -101,8 +101,8 @@ def test_halves_fit_the_bed(frame):
 
 
 def test_screw_pad_interface_is_a_drop_in(hw):
-    asm, cfg = models.build("frame", overrides={"chassis_interface": "screw_pads"})
-    assert models.acceptance("frame", asm, cfg) == []
+    asm, cfg = models.build("frame_rev1", overrides={"chassis_interface": "screw_pads"})
+    assert models.acceptance("frame_rev1", asm, cfg) == []
     printed = [p for p in checks.parts(asm) if not models.is_ref(p)]
     bp = hw["body_posts"]
     pr = params.load_facts(params.config_path("print.toml"))
@@ -117,17 +117,17 @@ def test_screw_pad_interface_is_a_drop_in(hw):
 
 def test_unknown_interface_is_rejected():
     with pytest.raises(params.ParamError):
-        models.build("frame", overrides={"chassis_interface": "glue"})
+        models.build("frame_rev1", overrides={"chassis_interface": "glue"})
 
 
 def test_moving_the_pcb_moves_its_inserts():
-    asm, cfg = models.build("frame", overrides={"pcb_x": -10.0})
-    assert models.acceptance("frame", asm, cfg) == []
+    asm, cfg = models.build("frame_rev1", overrides={"pcb_x": -10.0})
+    assert models.acceptance("frame_rev1", asm, cfg) == []
 
 
 def test_cli_check_frame(tmp_path):
-    assert cli.main(["build", "frame", "--out", str(tmp_path), "--no-previews"]) == 0
-    assert cli.main(["check", "frame", "--out", str(tmp_path)]) == 0
+    assert cli.main(["build", "frame_rev1", "--out", str(tmp_path), "--no-previews"]) == 0
+    assert cli.main(["check", "frame_rev1", "--out", str(tmp_path)]) == 0
 
 
 def test_split_keeps_the_features_above_the_plate(frame, hw):

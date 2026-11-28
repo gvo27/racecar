@@ -73,6 +73,30 @@ pin_x = 75.0
 status = "assumed"
 source = "Tamiya TT-02 manual step 36 (layout); heights estimated 2026-11-28; owner to measure"
 
+[motor_plate]
+# 4 x M3 screw holes on a square pattern in the motor plate above the motor. clearance_d: the hole of the fitted part
+pattern = 24.0
+clearance_d = 3.4
+status = "confirmed"
+source = "owner 2026-11-27: measured reference part Arduino_Mega_holder_Top_v2.stl (4 x 3.4 mm holes, 24 x 24 mm, screwed to the motor plate)"
+
+[motor_plate_position]
+# center of the 4-hole pattern in the car frame, and the top of the motor plate above the ground
+x = -35.0
+y = -27.0
+top_z = 40.0
+status = "assumed"
+source = "x, y: estimate from the reference part (its plate outline is symmetric about a line taken as the car center line, the pattern is 27 mm right of it; 2 x 2 mm holes taken as the rear body posts, a weak guess: the posts are 6 mm; body-post spacing of [body_posts]); top_z estimated 2026-11-27; owner to measure x, y and top_z before the anchor is printed"
+
+[motor_barrel]
+# the top of the DC motor barrel (a cylinder along X beside the drive shaft) above the motor plate, as a box envelope
+# on the 4-hole pattern center: length along X, width along Y, height above the plate top
+length = 24.0
+width = 12.0
+height = 20.0
+status = "assumed"
+source = "owner 2026-11-28: the barrel top rises about 20 mm above the mount points (not measured); the footprint fits within the mounting holes with at least 1 cm clearance on the longitudinal sides (from the hole centers: width 4 mm or less) and may have 0 clearance front and rear (length = the 24 mm hole pitch); width not measured: 12 mm is a conservative value, the widest barrel the frame_rev2 U anchor takes with 1.1 mm each side"
+
 # ---- sensors -------------------------------------------------------------------------------------------------------
 [mapper]
 body = 57.0

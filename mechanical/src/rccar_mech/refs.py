@@ -91,3 +91,10 @@ def wheels(hw: dict) -> list[Shape]:
         tyre = Pos(sx * wb / 2, sy * w["track"] / 2, w["tyre_d"] / 2) * Rot(90, 0, 0) * Cylinder(r, width)
         out.append(_named(tyre, f"ref_wheel_{name}", CHASSIS_COLOR))
     return out
+
+
+def motor_barrel(hw: dict) -> Shape:
+    """The top of the motor barrel above the motor plate: a box on the 4-hole pattern center, from the plate top up."""
+    b, pos = hw["motor_barrel"], hw["motor_plate_position"]
+    barrel = Pos(pos["x"], pos["y"], pos["top_z"] + b["height"] / 2) * Box(b["length"], b["width"], b["height"])
+    return _named(barrel, "ref_motor_barrel", CHASSIS_COLOR)

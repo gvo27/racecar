@@ -251,8 +251,9 @@ def bed_fit(shape: Shape, print_cfg: dict) -> list[Finding]:
     size = sorted((bb.X, bb.Y))
     bed = print_cfg["bed"]
     bx = sorted((bed["x"], bed["y"]))
-    if size[0] > bx[0] or size[1] > bx[1] or bb.Z > bed["z"]:
-        msg = f"{size[1]:.1f} x {size[0]:.1f} x {bb.Z:.1f} mm > bed {bx[1]} x {bx[0]} x {bed['z']} mm"
+    bz = print_cfg["bed_height"]["z"]
+    if size[0] > bx[0] or size[1] > bx[1] or bb.Z > bz:
+        msg = f"{size[1]:.1f} x {size[0]:.1f} x {bb.Z:.1f} mm > bed {bx[1]} x {bx[0]} x {bz} mm"
         return [_err("MECH-BED", shape.label or "shape", msg)]
     return []
 
